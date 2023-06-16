@@ -1,0 +1,127 @@
+{
+  "newPost": "New Post",
+  "newCommunity": "New Community",
+  "createPost": "Create Post",
+  "createCommunity": "Create Community",
+  "editPost": "Edit Post",
+  "banner": "Banner",
+  "logo": "Logo",
+  "placeholder": {
+    "enterPostTitle": "Enter Post Title *",
+    "enterPostContent": "Enter Post Content *",
+
+    "explore": "Explore",
+    "communityName": "Community Name",
+    "minAmount": "Min Amount *",
+    "tokenAddress": "Token Address *"
+  },
+  "formErrors": {
+    "required": "{{fieldName}} is required",
+    "minAmount": "Min Amount must be greater than 0",
+    "tokenAddress": "Token Address is invalid",
+    "maxAmount": "Max Amount must be greater than Min Amount",
+    "maxAmountError": "Max Amount must be greater than 0",
+    "minAmountError": "Min Amount must be greater than 0",
+    "enterValidAddress": "Please enter a valid address"
+  },
+  "home": "Home",
+  "button": {
+    "edit": "Edit",
+    "delete": "Delete",
+    "add": "Add",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "create": "Create",
+    "post": "Post",
+    "upload": "Upload",
+    "comment": "Comment",
+    "join_one": "Join",
+    "join_other": "Joined",
+    "addComment": "Add Comment"
+  },
+  "members": "Members",
+  "alert": {
+    "connectWallet": "Please connect your wallet",
+    "pleaseJoin": "Please join the community",
+    "deleteSuccess": "Deleted successfully",
+    "deleteFailed": "Delete Failed, Try Again!",
+    "addCommentFailed": "Add Comment Failed, Try Again!",
+    "postEditSuccess": "Post edited successfully",
+    "editFailed": "Edit Failed, Try Again!",
+    "commentEditSuccess": "Comment edited successfully",
+    "voteSuccess": "Voted successfully",
+    "voteFailed": "Vote Failed, Try Again!",
+    "noChange": "No change detected",
+    "fillAllFields": "Please fill all the fields"
+  },
+  "noResultsFound": "No results found",
+  "noPostsFound": "No posts found",
+  "pageNotFound": "Page not found",
+  "redirecting": "Redirecting",
+  "redirectingIn_one": "Redirecting to home page in {{remainingSeconds}} second",
+  "redirectingIn_other": "Redirecting to home page in {{remainingSeconds}} seconds",
+  "pageTitle": {
+    "communities": "Communities",
+    "communityPosts": "Community Posts"
+  },
+  "filter": {
+    "sortBy": "Sort by",
+    "highestUpVotes": "Highest Up Votes",
+    "lowestUpVotes": "Lowest Up Votes",
+    "newest": "Newest",
+    "oldest": "Oldest",
+    "highestDownVotes": "Highest Down Votes",
+    "controversial": "Controversial"
+  },
+  "toolTip": {
+    "switchToLightMode": "Switch to light mode",
+    "switchToDarkMode": "Switch to dark mode",
+    "externalHelpLink": "External Help Link",
+    "connectWallet_one": "Connect your wallet",
+    "connectWallet_other": "Disconnect your wallet",
+    "createCommunity": "Create Community",
+    "homePage": "Home Page",
+    "delete": "Delete",
+    "editCommunity": {
+      "title": "Edit Community",
+      "message": "Only community owners have permission to edit. Please ensure that any changes made align with the community's values and guidelines."
+    },
+    "tokenGating": {
+      "title": "Token Gating",
+      "message": "Enable this option to require community members to hold a specific ERC20 token and quantity for entry. Add the token's contract address and the required amount to set up exclusive access, fostering a tailored and engaged community experience."
+    },
+    "uploadImage": {
+      "title": "{{displayName}}",
+      "message": "Upload a {{displayName}} to help members identify your community"
+    }
+  },
+  "termsOfService": {
+    "header": "Terms of Service Agreement",
+    "description": "To join this community, you need to agree to our Terms of Service.",
+    "viewTermsOfService": "View Terms of Service",
+    "agreeCheckBox": "I have read and agree to the Terms of Service",
+    "agreeAndProceed": "Agree and Proceed"
+  },
+  "display": "Display {{displayName}}",
+  "upload": "Upload {{displayName}}",
+
+  "footer": {
+    "followUs": "Follow Us",
+    "termsAndConditions": "Terms and Conditions",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "legal": "Legal",
+    "cookiePolicy": "Cookie Policy",
+    "discord": "Discord",
+    "telegram": "Telegram",
+    "twitter": "Twitter",
+    "instagram": "Instagram",
+    "facebook": "Facebook",
+    "linkedin": "LinkedIn",
+    "snapchat": "Snapchat",
+    "tiktok": "TikTok",
+    "youtube": "YouTube",
+    "medium": "Medium"
+  }
+}

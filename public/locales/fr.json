@@ -1,0 +1,9 @@
+{
+  "alert": {
+    "connectWallet": "Please connect your wallet"
+  },
+  "noResultsFound": "No results found",
+  "pageTitle": {
+    "communities": "Communities"
+  }
+}

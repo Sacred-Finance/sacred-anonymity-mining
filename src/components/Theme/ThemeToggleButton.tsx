@@ -2,6 +2,9 @@ import React from 'react'
 import { useState, useEffect } from 'react'
 import { MoonIcon, SunIcon } from '@heroicons/react/24/solid'
 import { useTheme } from 'next-themes'
+import clsx from 'clsx'
+
+import { primaryButtonStyle } from '../../styles/classes'
 
 export const ThemeToggleButton = ({ noTabIndex = false }) => {
   const [mounted, setMounted] = useState(false)
@@ -12,7 +15,7 @@ export const ThemeToggleButton = ({ noTabIndex = false }) => {
 
   return (
     <button
-      className="group relative rounded-full p-1 text-slate-500 hover:bg-blue-800 dark:hover:bg-blue-200"
+      className={clsx('group relative  !text-purple-500', primaryButtonStyle)}
       tabIndex={noTabIndex ? -1 : 0}
       onClick={e => {
         e.preventDefault()
@@ -20,7 +23,7 @@ export const ThemeToggleButton = ({ noTabIndex = false }) => {
       }}
     >
       {resolvedTheme === 'light' ? (
-        <MoonIcon className="inline-block h-6 w-6 group-hover:text-yellow-500" />
+        <MoonIcon className="inline-block h-8 group-hover:text-yellow-500" />
       ) : (
         <SunIcon className="inline-block h-6 w-6 group-hover:text-red-400" />
       )}

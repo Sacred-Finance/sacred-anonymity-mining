@@ -1,0 +1,72 @@
+.community-card-container {
+  border-radius: 5px;
+  /*aspect-ratio: 1/1.25;*/
+  flex-direction: column;
+  align-content: center;
+  min-width: 300px;
+}
+
+.community-card-body {
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  /* body should be centered */
+  z-index: 1; /* Place the body above the container border */
+  align-items: center;
+  flex-direction: column;
+  border: 1px solid;
+  display: flex;
+  height: 150px;
+}
+
+.chakra-card__header.community-card-header {
+  position: relative;
+  padding: 0px;
+}
+
+.community-card-logo {
+  border-radius: 100% !important;
+  width: 75px !important;
+  height: 75px !important;
+  outline-offset: -1px;
+  outline-style: solid;
+  outline-color: inherit;
+  outline-width: 1px;
+  z-index: 1;
+  background-color: inherit;
+}
+
+.community-card-header > .community-card-logo {
+  position: absolute;
+  bottom: 0%;
+  left: 50%;
+  transform: translate(-50%, 50%) !important;
+}
+
+.motion-flex-banner > .community-card-logo {
+  position: absolute;
+  bottom: 0%;
+  outline-width: 12px;
+  transform: translate(-50%, 50%) !important;
+  left: 50%;
+}
+@media (max-width: 480px) {
+  .motion-flex-banner > .community-card-logo {
+    outline-width: 8px;
+    right:0;
+    left: unset;
+    transform: translate(-50%, 60%) !important;
+
+  }
+}
+@media (max-width: 769px) {
+  .motion-flex-banner > .community-card-logo {
+    scale: 0.8;
+    transform: translate(-50%, 70%) !important;
+
+  }
+}
+
+.community-card-banner {
+  aspect-ratio: 2;
+  z-index: 5; /* Place the logo above the container border */
+}
