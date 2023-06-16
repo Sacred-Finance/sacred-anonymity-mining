@@ -77,3 +77,4 @@ Learn about components of this kit is using:
 ## License
 
 This app is open-source and licensed under the MIT license. For more details, check the [License file](LICENSE).
+# sacred-community-client-nextjs
