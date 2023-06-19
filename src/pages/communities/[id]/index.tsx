@@ -29,6 +29,8 @@ import Footer from '../../../components/Footer'
 import { toast } from 'react-toastify'
 import dynamic from 'next/dynamic'
 import { useUnirepSignUp } from '../../../hooks/useUnirepSignup'
+import EditorJsRenderer from '../../../components/editor-js/EditorJSRenderer'
+import { EyeIcon, PencilIcon } from '@heroicons/react/20/solid'
 
 const Editor = dynamic(() => import('../../../components/editor-js/Editor'), {
   ssr: false,
@@ -73,6 +75,7 @@ export function Main() {
     ;(async () => {
       postInstance = new Post(null, id, forumContract, provider)
       setGroupCacheId(postInstance.groupCacheId())
+      setIsLoading(false)
       // preload(postInstance.groupCacheId(), fetchPosts);//start fetching before render
     })()
   }, [forumContract])
@@ -196,20 +199,19 @@ export function Main() {
   const clearInput = () => {
     setPostDescription(null)
     setPostTitle('')
-    postEditorRef?.current?.clear()
+    postEditorRef?.current?.clear?.()
   }
 
   if (isLoading) return null
 
   return (
-    <div className="mx-auto w-full max-w-screen-xl space-y-12 p-24  md:px-0">
+    <div className="mx-auto w-full max-w-screen-xl space-y-12 p-24 md:px-2">
       <div className="flex items-center justify-between">
         <img
-          className="h-20 w-20 rounded-full border-2 border-indigo-500 object-cover"
+          className="border-indigo-500 h-20 w-20 rounded-full border-2 object-cover"
           src={`https://ipfs.io/ipfs/${community?.logo}`}
           alt="community logo"
         />
-        <SortBy onSortChange={handleSortChange} targetType="posts" />
         {!hasUserJoined?.identityCommitment && community && <JoinCommunityButton community={community} />}
       </div>
 
@@ -226,11 +228,29 @@ export function Main() {
       />
 
       {sortedData?.length > 0 ? (
-        <PostList posts={sortedData} isLoading={isLoading} data={data} voteForPost={voteForPost} />
+        <PostList
+          posts={sortedData}
+          isLoading={isLoading}
+          data={data}
+          voteForPost={voteForPost}
+          handleSortChange={handleSortChange}
+        />
       ) : (
         <NoPosts />
       )}
     </div>
+  )
+}
+
+function PreviewButton(props: { onClick: () => void; previewVisible: boolean }) {
+  return (
+    <button
+      onClick={props.onClick}
+      className="flex items-center rounded-lg px-2.5 py-1 text-indigo-500 outline outline-indigo-500"
+    >
+      {props.previewVisible ? 'Show Editor' : 'Show Preview'}
+      {props.previewVisible ? <PencilIcon className="ml-2 h-5 w-5" /> : <EyeIcon className="ml-2 h-5 w-5" />}
+    </button>
   )
 }
 
@@ -247,55 +267,96 @@ const NewPostForm = ({
 }) => {
   const { t } = useTranslation()
 
-  const [open, setOpen] = React.useState(false)
+  const [isPreviewVisible, setIsPreviewVisible] = React.useState(false)
+  const [isNewPostVisible, setIsNewPostVisible] = React.useState(false)
 
   return (
-    <div className="mt-6">
-      <button onClick={() => setOpen(true)} className="rounded-lg bg-indigo-500 px-6 py-2 text-white">
-        {t('newPost')}
-      </button>
-      <CancelButton
-        onClick={() => {
-          setOpen(false)
-          clearInput()
-        }}
-        className="ml-4 rounded-lg bg-red-500 px-6 py-2 text-white"
-      >
-        {t('button.cancel')}
-      </CancelButton>
-      &nbsp;
-      <PrimaryButton
-        onClick={addPost}
-        // disabled={!postTitle && !postDescription?.blocks?.length}
-        className="ml-4 rounded-lg bg-green-500 px-6 py-2 text-white"
-      >
-        {isLoading ? <>loading</> : t('button.post')}
-      </PrimaryButton>
-      <div className="mt-4 text-xl font-bold">{t('newPost')}</div>
-      <>
-        <input
-          className="mt-2 w-full rounded border-2 border-gray-200 p-3"
-          placeholder={t('placeholder.enterPostTitle')}
-          value={postTitle}
-          onChange={e => setPostTitle(e.target.value)}
-        />
+    <div className="mt-6 border bg-white/10 px-6 py-6 ">
+      {!isNewPostVisible && (
+        <button onClick={() => setIsNewPostVisible(true)} className="rounded-lg bg-indigo-500 px-6 py-2 text-white">
+          {t('newPost')}
+        </button>
+      )}
 
-        <Editor
-          holder={id}
-          //@ts-ignore
-          ref={postEditorRef}
-          data={postDescription}
-          onChange={val => setPostDescription(val)}
-          placeholder={t('placeholder.enterPostContent')}
-          // className="w-full border-2 border-gray-200 p-3 rounded mt-2"
-        />
-      </>
+      {isNewPostVisible && (
+        <>
+          <div className="my-4 text-xl font-bold">{t('newPost')}</div>
+          <>
+            <input
+              className="mt-2  w-[50%] rounded border-2 border-gray-200 p-3"
+              placeholder={t('placeholder.enterPostTitle')}
+              value={postTitle}
+              onChange={e => setPostTitle(e.target.value)}
+            />
+            <div className="h-100 mt-2 ">
+              {isPreviewVisible ? (
+                <div>
+                  <div className="my-4 flex items-center justify-between gap-8 text-lg ">
+                    <div className="my-4 text-xl font-bold"> Preview</div>
+                    <PreviewButton
+                      onClick={() => setIsPreviewVisible(!isPreviewVisible)}
+                      previewVisible={isPreviewVisible}
+                    />
+                  </div>
+                  <div className="h-96 cursor-not-allowed rounded-md">
+                    <div className="prose mt-2 h-full w-full max-w-full rounded border-2 border-gray-200 px-6 py-0 text-white">
+                      {postDescription && <EditorJsRenderer data={postDescription} />}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <div className="my-4 flex items-center justify-between gap-8 text-lg">
+                    <div className="my-4 text-xl font-bold"> Editor</div>
+                    <PreviewButton
+                      onClick={() => setIsPreviewVisible(!isPreviewVisible)}
+                      previewVisible={isPreviewVisible}
+                    />
+                  </div>
+
+                  <div className="h-96  rounded-md">
+                    <Editor
+                      data={postDescription}
+                      postEditorRef={postEditorRef}
+                      onChange={setPostDescription}
+                      placeholder={t('placeholder.enterPostContent')}
+                      holder={id}
+                      className="prose mt-2 h-full w-full max-w-full rounded border-2 border-gray-200 p-0 text-white"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className={'mt-4 flex justify-between px-0'}>
+                <CancelButton
+                  onClick={() => {
+                    setIsNewPostVisible(false)
+                    clearInput()
+                  }}
+                  className="rounded-lg bg-red-500 px-6 py-2 text-white"
+                >
+                  {t('button.cancel')}
+                </CancelButton>
+                &nbsp;
+                <PrimaryButton
+                  onClick={addPost}
+                  // disabled={!postTitle && !postDescription?.blocks?.length}
+                  className="ml-4 rounded-lg bg-green-500 px-6 py-2 text-white"
+                >
+                  {isLoading ? <>loading</> : t('button.post')}
+                </PrimaryButton>
+              </div>
+            </div>
+          </>
+        </>
+      )}
     </div>
   )
 }
 
-const PostList = ({ posts, isLoading, data, voteForPost }) => (
-  <div className="mt-6 space-y-4">
+const PostList = ({ posts, isLoading, data, voteForPost, handleSortChange }) => (
+  <div className="mt-6 flex flex-col space-y-4 ">
+    <SortBy onSortChange={handleSortChange} targetType="posts" />
     {posts.map((p, i) => (
       <PostItem post={p} index={i} key={i} voteForPost={voteForPost} isLoading={isLoading} data={data} />
     ))}
@@ -333,12 +394,13 @@ export default function Home() {
 
   return (
     <>
-      <CustomModal isOpen={createCommunityModalOpen}>
+      <CustomModal isOpen={createCommunityModalOpen} setIsOpen={setCreateCommunityModalOpen}>
         <CreateGroupFormUI onCreate={createCommunity} onCreateGroupClose={() => setCreateCommunityModalOpen(false)} />
       </CustomModal>
-      <div className={'flex flex-col justify-between overflow-y-auto'}>
+      <div className={'flex h-full flex-col justify-between overflow-y-auto'}>
         <Header createCommunity={() => setCreateCommunityModalOpen(true)} />
         <Main />
+        <div className="flex-1" />
         <Footer />
       </div>
     </>

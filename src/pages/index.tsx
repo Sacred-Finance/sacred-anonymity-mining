@@ -14,12 +14,16 @@ export default function Home() {
 
   return (
     <>
-      <CustomModal isOpen={createCommunityModalOpen}>
+      <CustomModal isOpen={createCommunityModalOpen} setIsOpen={setCreateCommunityModalOpen}>
         <CreateGroupFormUI onCreate={createCommunity} onCreateGroupClose={() => setCreateCommunityModalOpen(false)} />
       </CustomModal>
-      <div className={'flex h-full  flex-col justify-between overflow-y-auto'}>
+      <div className={'flex h-screen flex-col '}>
         <Header createCommunity={() => setCreateCommunityModalOpen(true)} />
-        <Main />
+        <div>
+          {' '}
+          <Main />
+        </div>
+        <div className={'flex-1'} />
         <Footer />
       </div>
     </>

@@ -255,91 +255,6 @@
       "type": "function"
     },
     {
-      "inputs": [
-        {
-          "components": [
-            {
-              "internalType": "uint256",
-              "name": "post",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "comment",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "upvote",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "downvote",
-              "type": "uint256"
-            }
-          ],
-          "internalType": "struct ReputationRequirement",
-          "name": "repRequirement",
-          "type": "tuple"
-        }
-      ],
-      "name": "setReputationRequirement",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "components": [
-            {
-              "internalType": "uint256",
-              "name": "post",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "comment",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "upvote",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "downvote",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "reply",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "upvoted",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "downvoted",
-              "type": "uint256"
-            }
-          ],
-          "internalType": "struct ReputationWeight",
-          "name": "repWeight",
-          "type": "tuple"
-        }
-      ],
-      "name": "setReputationWeight",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
       "anonymous": false,
       "inputs": [
         {
@@ -388,24 +303,6 @@
       ],
       "name": "NewUser",
       "type": "event"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "attester",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "epochLength",
-          "type": "uint256"
-        }
-      ],
-      "name": "attesterSignUp",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
     },
     {
       "inputs": [
@@ -602,29 +499,6 @@
       "type": "function"
     },
     {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "attester",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256[]",
-          "name": "publicSignals",
-          "type": "uint256[]"
-        },
-        {
-          "internalType": "uint256[8]",
-          "name": "proof",
-          "type": "uint256[8]"
-        }
-      ],
-      "name": "userUnirepSignUp",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
       "anonymous": false,
       "inputs": [
         {
@@ -769,45 +643,8 @@
         },
         {
           "internalType": "uint256[8]",
-          "name": "semaphoreProof",
+          "name": "proof",
           "type": "uint256[8]"
-        },
-        {
-          "components": [
-            {
-              "internalType": "uint256[]",
-              "name": "publicSignals",
-              "type": "uint256[]"
-            },
-            {
-              "internalType": "uint256[8]",
-              "name": "proof",
-              "type": "uint256[8]"
-            },
-            {
-              "internalType": "uint256[]",
-              "name": "publicSignalsQ",
-              "type": "uint256[]"
-            },
-            {
-              "internalType": "uint256[8]",
-              "name": "proofQ",
-              "type": "uint256[8]"
-            },
-            {
-              "internalType": "uint256",
-              "name": "ownerEpoch",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "ownerEpochKey",
-              "type": "uint256"
-            }
-          ],
-          "internalType": "struct ReputationProof",
-          "name": "unirepProof",
-          "type": "tuple"
         }
       ],
       "name": "addComment",
@@ -844,45 +681,8 @@
         },
         {
           "internalType": "uint256[8]",
-          "name": "semaphoreProof",
+          "name": "proof",
           "type": "uint256[8]"
-        },
-        {
-          "components": [
-            {
-              "internalType": "uint256[]",
-              "name": "publicSignals",
-              "type": "uint256[]"
-            },
-            {
-              "internalType": "uint256[8]",
-              "name": "proof",
-              "type": "uint256[8]"
-            },
-            {
-              "internalType": "uint256[]",
-              "name": "publicSignalsQ",
-              "type": "uint256[]"
-            },
-            {
-              "internalType": "uint256[8]",
-              "name": "proofQ",
-              "type": "uint256[8]"
-            },
-            {
-              "internalType": "uint256",
-              "name": "ownerEpoch",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "ownerEpochKey",
-              "type": "uint256"
-            }
-          ],
-          "internalType": "struct ReputationProof",
-          "name": "unirepProof",
-          "type": "tuple"
         }
       ],
       "name": "addPost",
@@ -1024,16 +824,6 @@
               "type": "uint256"
             },
             {
-              "internalType": "uint256",
-              "name": "ownerEpoch",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "ownerEpochKey",
-              "type": "uint256"
-            },
-            {
               "internalType": "bytes32",
               "name": "contentCID",
               "type": "bytes32"
@@ -1094,45 +884,8 @@
         },
         {
           "internalType": "uint256[8]",
-          "name": "semaphoreProof",
+          "name": "proof",
           "type": "uint256[8]"
-        },
-        {
-          "components": [
-            {
-              "internalType": "uint256[]",
-              "name": "publicSignals",
-              "type": "uint256[]"
-            },
-            {
-              "internalType": "uint256[8]",
-              "name": "proof",
-              "type": "uint256[8]"
-            },
-            {
-              "internalType": "uint256[]",
-              "name": "publicSignalsQ",
-              "type": "uint256[]"
-            },
-            {
-              "internalType": "uint256[8]",
-              "name": "proofQ",
-              "type": "uint256[8]"
-            },
-            {
-              "internalType": "uint256",
-              "name": "ownerEpoch",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "ownerEpochKey",
-              "type": "uint256"
-            }
-          ],
-          "internalType": "struct ReputationProof",
-          "name": "unirepProof",
-          "type": "tuple"
         }
       ],
       "name": "vote",

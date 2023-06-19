@@ -18,7 +18,13 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "incremental": true
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "strictNullChecks": true
   },
   "paths": {
     "@/*": [
@@ -30,7 +36,8 @@
     "**/*.ts",
     "**/*.tsx",
     "**/*.jsx",
-    "**/*.js"
+    "**/*.js",
+    ".next/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

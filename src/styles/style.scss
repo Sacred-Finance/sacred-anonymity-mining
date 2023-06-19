@@ -1,21 +1,15 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@tailwind variants;
 
 @import 'base';
-@import 'utils';
 @import '@rainbow-me/rainbowkit/styles.css';
-
-
-
 
 html,body, #__next {
   height: 100vh;
   min-height: 100vh;
-  > div {
-    height: 100%;
-    min-height: 100%;
-  }
+  overflow: auto;
 }
 img {
   height: unset;
@@ -23,5 +17,11 @@ img {
 body {
   position: fixed;
   width: 100%;
+  height: 100%;
+}
+#rainbowkit{
+  height: 100%;
+}
+#__next > div[data-rk="rainbowkit"] {
   height: 100%;
 }

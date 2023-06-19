@@ -11,7 +11,6 @@ export const useIdentity = ({ groupId, postId }: Created = { groupId: undefined,
 
   try {
     if (!address || !isConnected) {
-      console.error('no address or not connected')
       return
     }
 

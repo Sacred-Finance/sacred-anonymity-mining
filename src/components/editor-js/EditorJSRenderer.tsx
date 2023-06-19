@@ -1,31 +1,31 @@
-import { OutputBlockData, OutputData } from '@editorjs/editorjs'
-import editorJsHtml, { EditorJsHtmlOptions } from 'editorjs-html'
-import CodeRenderer from '../CodeRenderer'
+//components/EditorJsRenderer.tsx
 
-const options: EditorJsHtmlOptions = {
-  code: (block: OutputBlockData<string>) => {
-    console.log(block)
-    return <CodeRenderer code={block.data.code} />
-  },
-}
+import { OutputData } from '@editorjs/editorjs'
+import React from 'react'
 
-const EditorJsToHtml = editorJsHtml(options)
+//use require since editorjs-html doesn't have types
+const editorJsHtml = require('editorjs-html')
+const EditorJsToHtml = editorJsHtml()
 
 type Props = {
   data: OutputData
 }
-
 type ParsedContent = string | JSX.Element
 
 const EditorJsRenderer = ({ data }: Props) => {
   const html = EditorJsToHtml.parse(data) as ParsedContent[]
   return (
-    <div>
+    //✔️ It's important to add key={data.time} here to re-render based on the latest data.
+    <div className="prose max-w-full" key={data.time}>
       {html.map((item, index) => {
         if (typeof item === 'string') {
           return <div dangerouslySetInnerHTML={{ __html: item }} key={index}></div>
         }
-        return item
+        if (item.type === 'object') {
+          return <div key={index}>{Object.keys(item)}</div>
+        }
+
+        // return item
       })}
     </div>
   )

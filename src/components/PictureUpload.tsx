@@ -3,7 +3,8 @@ import { useTranslation } from 'next-i18next'
 import { ToolTip } from './HOC/ToolTip'
 import { useHandleFileImageUpload } from '../utils/communityUtils'
 import clsx from 'clsx'
-
+import { primaryButtonStyle } from '../styles/classes'
+import { motion } from 'framer-motion'
 export const PictureUpload = (props: {
   uploadedImageUrl?: string
   displayName: string
@@ -43,7 +44,7 @@ export const PictureUpload = (props: {
 
   return (
     <>
-      <div ref={imageRef} className="relative">
+      <div ref={imageRef} className="relative flex w-full justify-center">
         {props.uploadedImageUrl ? (
           <>
             <img
@@ -54,8 +55,9 @@ export const PictureUpload = (props: {
               width={props.name === 'banner' ? '100%' : 200}
               height={props.name === 'banner' ? '100%' : 200}
               onClick={() => {
-                inputRef.current!.value = ''
                 props.setImageFileState(null)
+                if (!inputRef.current) return
+                inputRef.current.value = ''
               }}
               src={props.uploadedImageUrl}
               alt=""
@@ -74,8 +76,9 @@ export const PictureUpload = (props: {
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                   onClick={() => {
-                    inputRef.current!.value = ''
                     props.setImageFileState(null)
+                    if (!inputRef.current) return
+                    inputRef.current.value = ''
                   }}
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -86,14 +89,17 @@ export const PictureUpload = (props: {
         ) : (
           <div
             className={clsx(
-              'group pointer-events-auto h-[200px] rounded border-2 border-dashed border-border-on-dark',
-              props.name === 'banner' ? 'w-[624px]' : ' w-[200px]'
+              'group pointer-events-auto flex h-[200px] flex-col items-center justify-center rounded border-2 border-dashed border-border-on-dark',
+              props.name === 'banner' ? 'sm:w-screen md:w-[624px]' : ' w-[200px]'
             )}
           >
             <button
-              className={`h-full w-full cursor-pointer select-none rounded-lg bg-brand px-4 py-2 text-center text-on-dark-high-emphasis hover:bg-primary-light dark:text-on-light-high-emphasis ${
-                props.uploadedImageUrl ? 'brightness-80 filter' : ''
-              }`}
+              className={clsx(
+                `h-100 bg-primary-500py-2 cursor-pointer select-none items-center rounded-lg text-center transition-colors duration-200 ease-in-out group-hover:bg-primary-light`,
+                props.uploadedImageUrl ? 'brightness-80 filter' : '',
+                primaryButtonStyle,
+                'border-none'
+              )}
               onClick={openFileUpload}
             >
               <span className="flex items-center justify-center">
@@ -108,14 +114,22 @@ export const PictureUpload = (props: {
                 ) : (
                   <>
                     {t('upload', { displayName: props.displayName })}
-                    <svg className="ml-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <motion.svg
+                      key="spinner"
+                      animate={{ rotate: 360 }}
+                      transition={{ loop: Infinity, duration: 2 }}
+                      className="group-hover:spin-reverse ml-2 h-5 w-5 cursor-pointer rounded-full border text-inherit transition-colors duration-200 ease-in-out"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
                         d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                       />
-                    </svg>
+                    </motion.svg>
                   </>
                 )}
               </span>

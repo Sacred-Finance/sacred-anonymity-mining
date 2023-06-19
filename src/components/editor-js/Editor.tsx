@@ -8,14 +8,19 @@ type Props = {
   data?: OutputData
   onChange(val: OutputData): void
   holder: string
+  className?: string
+  postEditorRef?: React.MutableRefObject<EditorJS>
 }
 
-const EditorBlock = ({ data, onChange, holder }: Props) => {
+const EditorBlock = ({ data, onChange, holder, className, postEditorRef }: Props) => {
   //add a reference to editor
   const ref = useRef<EditorJS>()
 
   //initialize editorjs
   useEffect(() => {
+    if (!postEditorRef) return
+    // make postEditorRef.current point to the editor instance
+    postEditorRef.current = ref.current
     //initialize editor if we don't have a reference
     if (!ref.current) {
       const editor = new EditorJS({
@@ -36,7 +41,7 @@ const EditorBlock = ({ data, onChange, holder }: Props) => {
         ref.current.destroy()
       }
     }
-  }, [])
+  }, [ref, postEditorRef, onChange])
 
   return <div id={holder} />
 }

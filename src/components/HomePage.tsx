@@ -133,7 +133,7 @@ function HomePage({ createCommunity, isAdmin = false }: HomeProps) {
   }
 
   return (
-    <main className="mx-auto w-full max-w-screen-xl space-y-12 p-24  md:px-0">
+    <main className="mx-auto w-full max-w-screen-xl space-y-12 p-24  md:px-0 h-full">
       <div className="flex flex-col items-center py-16 text-purple-500 dark:text-purple-500">
         <h1 className="mb-8 text-6xl font-bold">{t('pageTitle.communities')}</h1>
         <div className="mb-8 flex w-full flex-col justify-between md:max-w-lg md:flex-row">

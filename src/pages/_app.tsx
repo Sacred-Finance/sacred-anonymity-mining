@@ -143,6 +143,7 @@ export function Web3Wrapper({ children }) {
         initialChain={polygonMumbai.id} // Optional, initialChain={1}, initialChain={chain.mainnet}, initialChain={gnosisChain}
         showRecentTransactions={true}
         theme={resolvedTheme === 'dark' ? darkTheme() : lightTheme()}
+        id={'rainbowkit'}
       >
         <CommunityProvider>
           {/*<ErrorBoundary>*/}

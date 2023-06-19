@@ -22,7 +22,10 @@
     "maxAmount": "Max Amount must be greater than Min Amount",
     "maxAmountError": "Max Amount must be greater than 0",
     "minAmountError": "Min Amount must be greater than 0",
-    "enterValidAddress": "Please enter a valid address"
+    "enterValidAddress": "Please enter a valid address",
+    "tokenGating": {
+      "min": "Need at least 1 to use token gating"
+    }
   },
   "home": "Home",
   "button": {

@@ -20,7 +20,7 @@ const SortBy: React.FC<SortByProps> = ({ onSortChange, targetType }) => {
   }
 
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center space-x-2 self-end">
       <CogIcon width={12} className="text-gray-500 dark:text-gray-200" />
       <select
         value={selectedOption}

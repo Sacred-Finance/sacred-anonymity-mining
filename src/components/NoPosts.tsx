@@ -1,13 +1,11 @@
-import { useTranslation } from 'next-i18next';
+import { useTranslation } from 'next-i18next'
 
 export const NoPosts = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation()
 
   return (
-    <div className={'py-2 rounded border'}>
-      <span className={'text-xl bold'} >
-        {t("noPostsFound")}
-      </span>
+    <div className={'rounded border p-2 text-center'}>
+      <span className={'bold text-xl'}>{t('noPostsFound')}</span>
     </div>
-  );
-};
+  )
+}

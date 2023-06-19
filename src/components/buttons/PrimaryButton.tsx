@@ -9,7 +9,7 @@ export function PrimaryButton({
   children?: React.ReactNode
 } & ButtonHTMLAttributes<HTMLButtonElement>): JSX.Element {
   return (
-    <button className={clsx(primaryButtonStyle)} {...rest}>
+    <button {...rest} className={clsx(primaryButtonStyle, rest.className)}>
       {children}
     </button>
   )
