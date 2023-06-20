@@ -9,6 +9,7 @@
   "placeholder": {
     "enterPostTitle": "Enter Post Title *",
     "enterPostContent": "Enter Post Content *",
+    "noTokenRequirements": "No Token Requirements",
 
     "explore": "Explore",
     "communityName": "Community Name",

@@ -4,7 +4,7 @@ import { Community as CommunityInterface } from '../lib/model'
 
 import { BigNumber, ethers } from 'ethers'
 import { erc20dummyABI, supportedChains } from '../constant/const'
-import { getCache, setCache } from '../lib/redis'
+import { getCache, getMCache, setCache } from '../lib/redis'
 import { uploadImageToIPFS } from '../lib/utils'
 import { fetchTokenInfo } from './tokenUtils'
 import pica from 'pica'
@@ -16,6 +16,93 @@ interface FetchCommunityDataParams {
   forumContract: any
   provider: any
 }
+export const fetchCommunitiesData = async ({
+  groups,
+  forumContract,
+  provider,
+}: FetchCommunitiesDataParams): Promise<CommunityInterface[] | null> => {
+  try {
+    const groupIds = groups.map(group => group?.args?.['groupId']?.toNumber())
+    console.log('groupIds communitiesData', groupIds)
+
+    const cachedDataArray = await fetchCommunitiesDataFromCache(groupIds)
+
+    console.log('communitiesData - utils', cachedDataArray)
+
+    const updatedDataPromises = groupIds.map(async (groupId, index) => {
+      const cachedData = cachedDataArray[index]
+      console.log('cachedData ', cachedData)
+
+      if (cachedData?.removed) {
+        console.log('cachedData removed ', cachedData)
+        return null
+      }
+
+      const shouldReturnCachedData =
+        !cachedData?.refresh &&
+        cachedData &&
+        cachedData.ownerIdentity &&
+        !!cachedData.requirements &&
+        cachedData.name &&
+        !isNaN(cachedData.userCount)
+
+      console.log('shouldReturnCachedData - communitiesData', shouldReturnCachedData)
+
+      if (shouldReturnCachedData) {
+        return cachedData
+      } else {
+
+        console.log('cachedData - communitiesData', cachedData.userCount, cachedData.groupId)
+      }
+
+      let groupData
+      try {
+        groupData = await forumContract.groupInfo(groupId.toString())
+        if (groupData[5]) {
+          console.log('groupData removed', groupData)
+          // if community is removed
+          return null
+        }
+        console.log('groupData', groupData)
+      } catch (error) {
+        console.log('error', error)
+        return null
+      }
+
+      const fulfilledRequirements = await fetchGroupRequirements(
+        forumContract,
+        groupId.toString(),
+        groupData?.[4]?.toNumber(),
+        provider
+      )
+
+      const group = groups[index]
+      const identity = group.args['creatorIdentityCommitment'].toString()
+
+      const newData = {
+        groupId: groupId,
+        name: group.args['name'],
+        id: group.args['groupId'],
+        userCount: groupData?.[3]?.toNumber() || 0,
+        requirements: fulfilledRequirements,
+        ownerIdentity: identity,
+        chainId: groupData?.[4]?.toNumber(),
+        removed: groupData?.[5],
+      }
+
+      const mergedData = cachedData ? { ...cachedData, ...newData } : newData
+
+      // await setCache(`group_${groupId}`, mergedData)
+
+      return mergedData
+    })
+
+    return await Promise.all(updatedDataPromises)
+  } catch (error) {
+    console.log('error', error)
+    return null
+  }
+}
 
 export const fetchCommunityData = async ({
   group,
@@ -26,6 +113,8 @@ export const fetchCommunityData = async ({
     const groupId = group?.args?.['groupId']?.toNumber()
     console.log('groupId', groupId)
     const cachedData = await fetchCommunityDataFromCache(groupId)
+
+    console.log('cachedData', cachedData)
     if (cachedData?.removed) {
       return null
     }
@@ -123,6 +212,34 @@ const fetchCommunityDataFromCache = async (
   }
 
   return null
+}
+
+const fetchCommunitiesDataFromCache = async (
+  groupIds: number[]
+): Promise<((CommunityInterface & { refresh: boolean }) | null)[]> => {
+  const cacheKeys = groupIds.map(groupId => `group_${groupId}`)
+  const { cache: cachedDataArray } = await getMCache(cacheKeys, true)
+
+  console.log('cachedDataArray - communitiesData' , cachedDataArray)
+
+  return groupIds.map((groupId, index) => {
+    const cachedData = cachedDataArray[index]
+
+    console.log('cachedData - communitiesData' , cachedData)
+    if (cachedData?.data) {
+      const cacheData = cachedData.data
+
+      return {
+        ...cacheData,
+        groupId,
+        id: BigNumber.from(groupId),
+        ownerIdentity: BigNumber.from(cacheData.ownerIdentity).toString(),
+        refresh: false, // assuming refresh should be false as per the provided getMCache implementation
+      }
+    }
+
+    return null
+  })
 }
 
 export const uploadThenCacheGroupData = async ({

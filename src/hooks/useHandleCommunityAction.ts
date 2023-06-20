@@ -31,6 +31,7 @@ export const useHandleCommunityAction = () => {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
+            toastId: 'handleCommunity',
           })
           if (successCallback) successCallback()
         } else {

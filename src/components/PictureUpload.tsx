@@ -44,7 +44,7 @@ export const PictureUpload = (props: {
 
   return (
     <>
-      <div ref={imageRef} className="relative flex w-full justify-center">
+      <div ref={imageRef} className="relative flex w-full max-w-[650px] justify-center sm:w-full">
         {props.uploadedImageUrl ? (
           <>
             <img

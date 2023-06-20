@@ -7,6 +7,8 @@ import { app } from 'appConfig'
 import { useState, useEffect } from 'react'
 import HeadGlobal from 'components/HeadGlobal'
 import '../../i18n'
+import { alchemyProvider } from 'wagmi/providers/alchemy'
+
 
 // Web3Wrapper deps:
 import { connectorsForWallets, RainbowKitProvider, lightTheme, darkTheme } from '@rainbow-me/rainbowkit'
@@ -44,13 +46,12 @@ import { useFetchCommunities } from '../hooks/useFetchCommunities'
 import { useFetchUsers } from '../hooks/useFetchUsers'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import ErrorBoundary from '../components/ErrorBoundary'
 
 function App({ Component, pageProps }: AppProps) {
   return (
     <ThemeProvider defaultTheme="system" attribute="class">
-      <HeadGlobal />
       <Web3Wrapper>
+        <HeadGlobal />
         <LoaderProvider>
           <Component {...pageProps} />
           <ToastContainer />
@@ -62,12 +63,18 @@ function App({ Component, pageProps }: AppProps) {
 export default App
 
 // Web3 Configs
+const stallTimeout = 1_0000
 const { chains, provider, webSocketProvider } = configureChains(
   [polygonMumbai, sepolia, avalancheFuji, goerli],
   [
-    infuraProvider({
-      apiKey: process.env.NEXT_PUBLIC_INFURA_API_KEY as string,
-    }),
+      alchemyProvider({
+        apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY as string,
+        stallTimeout,
+      }),
+    // infuraProvider({
+    //   apiKey: process.env.NEXT_PUBLIC_INFURA_API_KEY as string,
+    //   stallTimeout: stallTimeout,
+    // }),
 
     jsonRpcProvider({
       rpc: chain => {
@@ -90,12 +97,14 @@ const { chains, provider, webSocketProvider } = configureChains(
         }
         return null
       },
+      stallTimeout: stallTimeout,
     }),
 
-    publicProvider(),
-  ]
+    publicProvider({ stallTimeout: stallTimeout }),
+  ],
+
+  { stallTimeout: stallTimeout }
 )
-console.log('chains', chains)
 
 const otherWallets = [
   braveWallet({ chains }),
@@ -119,6 +128,7 @@ const client = createClient({
   autoConnect: true,
   provider: provider({ chainId: polygonMumbai.id }),
   // webSocketProvider: webSocketProvider({ chainId: polygonMumbai.id }),
+
   connectors: connectors,
 })
 // Web3Wrapper
@@ -141,7 +151,7 @@ export function Web3Wrapper({ children }) {
         }}
         chains={chains}
         initialChain={polygonMumbai.id} // Optional, initialChain={1}, initialChain={chain.mainnet}, initialChain={gnosisChain}
-        showRecentTransactions={true}
+        showRecentTransactions={false}
         theme={resolvedTheme === 'dark' ? darkTheme() : lightTheme()}
         id={'rainbowkit'}
       >

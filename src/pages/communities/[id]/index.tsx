@@ -48,6 +48,7 @@ export function Main() {
   const activeUser = useActiveUser()
   const { address } = useAccount()
   const users = useUsers()
+  const { t } = useTranslation()
 
   const [postDescription, setPostDescription] = useState<OutputData>(null)
   const [postTitle, setPostTitle] = useState('')
@@ -62,48 +63,63 @@ export function Main() {
     signerOrProvider: provider,
   })
   const router = useRouter()
-  const id = router.query.id
+  const { id } = router.query
   const hasUserJoined = useHasUserJoined(id as string)
   const community = useCommunityById(id as string)
   useCommunityUpdates({ hasUserJoined, id, groupCacheId, postInstance })
-  useUnirepSignUp({ groupId: id, name: hasUserJoined?.name })
-  const { checkUserBalance } = useValidateUserBalance(community, address, provider)
+  // useUnirepSignUp({ groupId: id, name: hasUserJoined?.name })
+  const { checkUserBalance } = useValidateUserBalance(community, address)
   const { setIsLoading, isLoading: isContextLoading } = useLoaderContext()
   const postEditorRef = useRef<any>()
-
+  const [initialized, setInitialized] = useState(false)
   useEffect(() => {
     ;(async () => {
+      if (!forumContract || isNaN(id) || !provider || initialized) return
+      setInitialized(true)
+
+      console.log('forumContract changed, initializing post instance', forumContract)
       postInstance = new Post(null, id, forumContract, provider)
+      console.log('postInstance', postInstance)
       setGroupCacheId(postInstance.groupCacheId())
       setIsLoading(false)
       // preload(postInstance.groupCacheId(), fetchPosts);//start fetching before render
     })()
-  }, [forumContract])
+  }, [forumContract, id, provider])
 
   const { data, isLoading } = useSWR(groupCacheId, fetchPosts, {
     revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    errorRetryInterval: 10000,
+    onErrorRetry: (error, key, config, revalidate, { retryCount }) => {
+      if (retryCount >= 10) return
+      setTimeout(() => revalidate({ retryCount }), 10000)
+      console.log('error retry', error)
+    },
   })
 
+  console.log('data', data)
+
   async function fetchPosts() {
+    console.log('fetching posts')
     return await postInstance.getAll()
   }
 
   const addPost = async () => {
     if (!address) {
       console.log('Please connect your wallet')
-      toast.error('Please connect your wallet')
+      toast.error(t('error.connectWallet'), { toastId: 'connectWallet' })
       return
     }
     if (!postTitle || !postDescription) {
       console.log('Please enter a title and description')
-      toast.error('Please enter a title and description')
+      toast.error('Please enter a title and description', { toastId: 'missingTitleOrDesc' })
       // toast({
       return
     }
 
     if (!hasUserJoined) {
       console.log('Please join the community first')
-      toast.error('Please join the community first')
+      toast.error('Please join the community first', { toastId: 'joinCommunityFirst' })
       return
     }
     let ipfsHash
@@ -333,7 +349,6 @@ const NewPostForm = ({
                     setIsNewPostVisible(false)
                     clearInput()
                   }}
-                  className="rounded-lg bg-red-500 px-6 py-2 text-white"
                 >
                   {t('button.cancel')}
                 </CancelButton>

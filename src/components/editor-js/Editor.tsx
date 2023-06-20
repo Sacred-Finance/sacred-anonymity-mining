@@ -8,6 +8,7 @@ type Props = {
   data?: OutputData
   onChange(val: OutputData): void
   holder: string
+  placeholder?: string
   className?: string
   postEditorRef?: React.MutableRefObject<EditorJS>
 }
@@ -26,6 +27,7 @@ const EditorBlock = ({ data, onChange, holder, className, postEditorRef }: Props
       const editor = new EditorJS({
         holder: holder,
         tools: EDITOR_TOOLS,
+        placeholder: 'Start writing your post...',
         data,
         async onChange(api, event) {
           const data = await api.saver.save()
