@@ -142,7 +142,7 @@ function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
   }, [logoFile, bannerFile])
 
   return (
-    <div className="flex max-h-[80vh] flex-col justify-between space-y-4 overflow-y-auto rounded-lg border bg-background-dark p-2 text-white md:p-4">
+    <div className="flex max-h-[80vh] flex-col justify-between space-y-4 overflow-y-scroll rounded-lg border bg-background-dark p-2 text-white md:p-4">
       <div className="flex items-center justify-between py-2 md:py-4">
         <h1 className="text-xl font-semibold md:text-2xl">{t('createCommunity')}</h1>
       </div>
@@ -186,14 +186,7 @@ function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
         </div>
         <div className=" w-100 relative inline-flex gap-2">
           <div className={'w-100 group'}>
-            <button
-              disabled={!reqMandatory}
-              className={clsx(
-                primaryButtonStyle,
-                buttonVariants.primarySolid,
-                'flex w-full min-w-[175px] justify-between disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 '
-              )}
-            >
+            <button disabled={!reqMandatory} className={clsx(primaryButtonStyle, buttonVariants.primarySolid, ' ')}>
               <span className="flex w-full items-center justify-between">
                 {selectedChain.name}
                 <ChevronRightIcon
@@ -203,7 +196,7 @@ function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
               </span>
             </button>
 
-            <div className="w-100 disabled:group-hover:none absolute left-0 z-50 hidden  rounded-md shadow-lg ring-1 ring-background-dark ring-opacity-5 group-hover:hidden">
+            <div className="w-100 disabled:group-hover:none absolute left-0 z-50 hidden  rounded-md bg-black/50 shadow-lg ring-1 ring-background-dark ring-opacity-5 group-hover:block">
               <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
                 {supportedChainsArray.map((k, i) => (
                   <button
@@ -236,13 +229,10 @@ function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
         </div>
       </div>
       <FormikProvider value={formik}>
-        <motion.form
-          onSubmit={submit}
-          className={'max-height-[250px] h-44 overflow-y-auto overflow-x-hidden rounded-lg bg-gray-950 p-2'}
-        >
+        <motion.form onSubmit={submit}>
           {formik.values.tokenRequirements.length === 0 && (
             <div className="-m-2 flex h-full flex-col content-center items-center justify-center space-y-4 p-0">
-              <p className="text-lg font-semibold">{t('placeholder.noTokenRequirements')}</p>
+              <p className="text-sm font-semibold text-white/50">{t('placeholder.noTokenRequirements')}</p>
             </div>
           )}
           <FieldArray
@@ -301,12 +291,13 @@ function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
                           if (arr.length > 1) {
                             remove(i)
                           } else {
-                            toast.error(t('formErrors.tokenGating.min'), { type: 'error' })
+                            toast.error(t('formErrors.tokenGating.min'), { type: 'error', toastId: 'min' })
                           }
                         }}
                         className={clsx(
                           primaryButtonStyle,
                           buttonVariants.primarySolid,
+                          'hover:scale-[100%]',
                           'h-11 w-12 border focus:ring-0'
                         )}
                       >

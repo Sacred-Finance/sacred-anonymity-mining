@@ -20,15 +20,13 @@ export const JoinCommunityButton = memo(({ community }: JoinButtonProps) => {
   const { address } = useAccount()
   const hasUserJoined: User | undefined | false = useHasUserJoined(groupId as string | number)
 
-  const provider = useProvider({ chainId: community?.chainId || polygonMumbai.id })
-
-  const { checkUserBalance } = useValidateUserBalance(community, address, provider)
+  const { checkUserBalance } = useValidateUserBalance(community, address)
 
   const joinCommunity = useJoinCommunity()
 
   const validateBeforeOpen = async (): Promise<boolean> => {
     if (!address) {
-      toast.error(t('error.connectWallet'))
+      toast.error(t('error.connectWallet'), { toastId: 'connectWallet' })
 
       return false
     }

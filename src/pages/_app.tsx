@@ -49,8 +49,8 @@ import ErrorBoundary from '../components/ErrorBoundary'
 function App({ Component, pageProps }: AppProps) {
   return (
     <ThemeProvider defaultTheme="system" attribute="class">
-      <HeadGlobal />
       <Web3Wrapper>
+        <HeadGlobal />
         <LoaderProvider>
           <Component {...pageProps} />
           <ToastContainer />
@@ -62,11 +62,13 @@ function App({ Component, pageProps }: AppProps) {
 export default App
 
 // Web3 Configs
+const stallTimeout = 1_0000
 const { chains, provider, webSocketProvider } = configureChains(
   [polygonMumbai, sepolia, avalancheFuji, goerli],
   [
     infuraProvider({
       apiKey: process.env.NEXT_PUBLIC_INFURA_API_KEY as string,
+      stallTimeout: stallTimeout,
     }),
 
     jsonRpcProvider({
@@ -90,10 +92,13 @@ const { chains, provider, webSocketProvider } = configureChains(
         }
         return null
       },
+      stallTimeout: stallTimeout,
     }),
 
-    publicProvider(),
-  ]
+    publicProvider({ stallTimeout: stallTimeout }),
+  ],
+
+  { stallTimeout: stallTimeout }
 )
 console.log('chains', chains)
 
@@ -119,6 +124,7 @@ const client = createClient({
   autoConnect: true,
   provider: provider({ chainId: polygonMumbai.id }),
   // webSocketProvider: webSocketProvider({ chainId: polygonMumbai.id }),
+
   connectors: connectors,
 })
 // Web3Wrapper
@@ -141,7 +147,7 @@ export function Web3Wrapper({ children }) {
         }}
         chains={chains}
         initialChain={polygonMumbai.id} // Optional, initialChain={1}, initialChain={chain.mainnet}, initialChain={gnosisChain}
-        showRecentTransactions={true}
+        showRecentTransactions={false}
         theme={resolvedTheme === 'dark' ? darkTheme() : lightTheme()}
         id={'rainbowkit'}
       >

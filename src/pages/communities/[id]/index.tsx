@@ -67,12 +67,13 @@ export function Main() {
   const community = useCommunityById(id as string)
   useCommunityUpdates({ hasUserJoined, id, groupCacheId, postInstance })
   useUnirepSignUp({ groupId: id, name: hasUserJoined?.name })
-  const { checkUserBalance } = useValidateUserBalance(community, address, provider)
+  const { checkUserBalance } = useValidateUserBalance(community, address)
   const { setIsLoading, isLoading: isContextLoading } = useLoaderContext()
   const postEditorRef = useRef<any>()
 
   useEffect(() => {
     ;(async () => {
+      console.log('forumContract changed, initializing post instance', forumContract)
       postInstance = new Post(null, id, forumContract, provider)
       setGroupCacheId(postInstance.groupCacheId())
       setIsLoading(false)
@@ -82,28 +83,36 @@ export function Main() {
 
   const { data, isLoading } = useSWR(groupCacheId, fetchPosts, {
     revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    errorRetryInterval: 10000,
+    onErrorRetry: (error, key, config, revalidate, { retryCount }) => {
+      if (retryCount >= 10) return
+      setTimeout(() => revalidate({ retryCount }), 10000)
+      console.log('error retry', error)
+    },
   })
 
   async function fetchPosts() {
+    console.log('fetching posts')
     return await postInstance.getAll()
   }
 
   const addPost = async () => {
     if (!address) {
       console.log('Please connect your wallet')
-      toast.error('Please connect your wallet')
+      toast.error(t('error.connectWallet'), { toastId: 'connectWallet' })
       return
     }
     if (!postTitle || !postDescription) {
       console.log('Please enter a title and description')
-      toast.error('Please enter a title and description')
+      toast.error('Please enter a title and description', { toastId: 'missingTitleOrDesc' })
       // toast({
       return
     }
 
     if (!hasUserJoined) {
       console.log('Please join the community first')
-      toast.error('Please join the community first')
+      toast.error('Please join the community first', { toastId: 'joinCommunityFirst' })
       return
     }
     let ipfsHash
@@ -333,7 +342,6 @@ const NewPostForm = ({
                     setIsNewPostVisible(false)
                     clearInput()
                   }}
-                  className="rounded-lg bg-red-500 px-6 py-2 text-white"
                 >
                   {t('button.cancel')}
                 </CancelButton>

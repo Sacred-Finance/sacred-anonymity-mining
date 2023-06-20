@@ -24,6 +24,7 @@ export const useRemoveGroup = (groupId: CommunityId) => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
+        toastId: 'removalFailed',
       })
       setIsLoading(false)
     },
