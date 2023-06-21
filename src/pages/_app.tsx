@@ -76,6 +76,7 @@ const { chains, provider, webSocketProvider } = configureChains(
     //   stallTimeout: stallTimeout,
     // }),
 
+
     jsonRpcProvider({
       rpc: chain => {
         if (chain.id === localhost.id) {

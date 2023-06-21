@@ -68,6 +68,7 @@ export function Main() {
   const community = useCommunityById(id as string)
   useCommunityUpdates({ hasUserJoined, id, groupCacheId, postInstance })
   // useUnirepSignUp({ groupId: id, name: hasUserJoined?.name })
+
   const { checkUserBalance } = useValidateUserBalance(community, address)
   const { setIsLoading, isLoading: isContextLoading } = useLoaderContext()
   const postEditorRef = useRef<any>()
@@ -76,7 +77,6 @@ export function Main() {
     ;(async () => {
       if (!forumContract || isNaN(id) || !provider || initialized) return
       setInitialized(true)
-
       console.log('forumContract changed, initializing post instance', forumContract)
       postInstance = new Post(null, id, forumContract, provider)
       console.log('postInstance', postInstance)

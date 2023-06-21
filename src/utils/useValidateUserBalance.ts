@@ -48,7 +48,9 @@ export const useValidateUserBalance = (community: Community | undefined, address
         minAmount: Number(r.minAmount),
         decimals: r.decimals,
       })
+
     }
+  }, [data, isError, isLoading])
 
     const hasSufficientBalance = requirementsMet.every(e => e.balance >= e.minAmount / 10 ** e.decimals)
 
@@ -61,12 +63,31 @@ export const useValidateUserBalance = (community: Community | undefined, address
         draggable: true,
         progress: undefined,
         toastId: 'insufficient-balance',
+
       })
+
+      const hasSufficientBalance = requirementsMet.every(e => e.balance >= e.minAmount / 10 ** e.decimals)
+
+      if (!hasSufficientBalance) {
+        toast.warning(`Insufficient Balance`, {
+          containerId: 'toast',
+          autoClose: 7000,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          toastId: 'insufficient-balance',
+        })
+      }
+
+      setValidationResult({ hasSufficientBalance, toastMessage })
+      return hasSufficientBalance
     }
 
     setValidationResult({ hasSufficientBalance, toastMessage })
     return hasSufficientBalance
   }, [community, address, wagmiProvider])
+
 
 
 
