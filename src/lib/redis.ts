@@ -1,6 +1,7 @@
 'use client'
 
 import { Redis } from '@upstash/redis'
+import _ from 'lodash'
 
 const TTLmaxAgeMinutes = 3 //TTL of the cache. How long to hold a cache before refreshing it without interruption to the user
 let redisClient: Redis
@@ -170,7 +171,7 @@ const cacheCommunityCleanUp = async (key, cache) => {
   }
 }
 
-export const getMCache = async (key: string[]): Promise<{ cache; refresh: boolean }> => {
+export const getMCache = async (key: string[], flatten = false): Promise<{ cache; refresh: boolean }> => {
   if (!redisClient) {
     redisClient = await getRedisClient()
   }
@@ -180,11 +181,11 @@ export const getMCache = async (key: string[]): Promise<{ cache; refresh: boolea
   let cachedDate: string | null = ''
   try {
     const cachedResult = await redisClient.json.mget(key, '$')
-    console.log(key, cachedResult)
     cache = cachedResult
+    if (flatten) cache = _.flatten(cachedResult)
 
     cachedDate = null
-    console.log(data, cachedDate)
+    console.log(data, cachedDate, cache)
   } catch (error) {
     console.error(key, error)
     cache = []

@@ -2,32 +2,86 @@ import { Group } from '@semaphore-protocol/group'
 import { Identity } from '@semaphore-protocol/identity'
 import { generateProof } from '@semaphore-protocol/proof'
 import { BigNumber, Contract, ethers, providers, utils } from 'ethers'
-import { createPost, vote, edit } from './api'
+import { createPost, edit, vote } from './api'
 import { PostContent, ReputationProofStruct, User } from './model'
 import {
+  createNote,
+  generateGroth16Proof,
   getBytes32FromIpfsHash,
   getContent,
   getIpfsHashFromBytes32,
   hashBytes,
   hashBytes2,
   parsePost,
-  removeDuplicates,
-  sortArray,
   uploadIPFS,
-  createNote,
-  generateGroth16Proof,
 } from './utils'
-import { getCache, getMCache, removeAt, setCache, setCacheAtSpecificPath, updateAt } from '../lib/redis'
+import { getCache, getMCache, removeAt, setCache, setCacheAtSpecificPath } from '../lib/redis'
 import { mutate } from 'swr'
-import { orderBy, reverse, sortBy } from 'lodash'
+import { reverse } from 'lodash'
 import { UnirepUser } from './unirep'
+import { AxiosResponse } from 'axios'
 
 const minRepsPost = 0
 
 const minRepsVote = 1
 const minRepsDownvote = 1
 
-export class Post {
+export interface PostInterface {
+  id: string
+  groupId: string
+  forumContract: Contract
+  provider: providers.BaseProvider
+  cacheNewPost: (post, postId, groupId, note: BigInt, contentCID, setWaiting) => Promise<void>
+  cacheUpdatedPost: (post, postId, groupId, contentCID, note, setWaiting) => Promise<void>
+  removeFromCache: (postId) => Promise<void>
+
+  postCacheId(): string
+
+  groupCacheId(): string
+
+  specificPostId(postId?): string
+
+  getAll(): Promise<any>
+
+  get(): Promise<any>
+
+  create(
+    postContent: PostContent,
+    address: string,
+    users: User[],
+    postedByUser: User,
+    groupId: string,
+    setWaiting: Function,
+    onIPFSUploadSuccess: (post, cid) => void
+  ): Promise<AxiosResponse<any>>
+
+  edit(
+    postContent: PostContent,
+    address: string,
+    itemId,
+    users: User[],
+    postedByUser: User,
+    groupId: string,
+    setWaiting: Function
+  ): Promise<AxiosResponse<any>>
+
+  delete(
+    address: string,
+    itemId,
+    users: User[],
+    postedByUser: User,
+    groupId: string,
+    setWaiting: Function
+  ): Promise<AxiosResponse<any>>
+
+  updatePostsVote(postInstance, itemId, voteType, confirmed: boolean, revert?): Promise<void>
+
+  updatePostVote(voteType, confirmed: boolean, revert): Promise<void>
+
+  vote(voteType, address: string, users: User[], postedByUser: User, itemId, groupId): Promise<AxiosResponse<any>>
+}
+
+export class Post implements PostInterface {
   id: string
   groupId: string
   forumContract: Contract
@@ -116,6 +170,7 @@ export class Post {
 
   async get() {
     const getData = async () => {
+      console.log('get data')
       const p = await this.forumContract.itemAt(this.id)
       const block = await this.provider.getBlock(p.createdAtBlock.toNumber())
       const postText = await getContent(getIpfsHashFromBytes32(p?.contentCID))
@@ -320,7 +375,6 @@ export class Post {
   }
 
   async updatePostsVote(postInstance, itemId, voteType, confirmed: boolean, revert = false) {
-    //from the community level (multple posts)
     const modifier = revert ? -1 : 1
     try {
       itemId = itemId.toNumber()
@@ -331,6 +385,10 @@ export class Post {
     mutate(
       postInstance.groupCacheId(),
       postList => {
+        if (!postList) {
+          console.log('postList is undefined')
+          return // or return an empty array or a default value if it makes sense
+        }
         const postIndex = postList.findIndex(p => +p.id === itemId)
         if (postIndex > -1) {
           const postToUpdate = { ...postList[postIndex] }
@@ -349,14 +407,17 @@ export class Post {
           }
 
           postList[postIndex] = postToUpdate
+
+          console.log('postList', postList, postIndex, itemId, voteType, confirmed, revert)
+          if (confirmed && postList[postIndex]) {
+            setCacheAtSpecificPath(
+              this.specificPostId(itemId),
+              voteType === 0 ? postList[postIndex].upvote : postList[postIndex].downvote,
+              voteType === 0 ? '$.data.upvote' : '$.data.downvote'
+            )
+          }
         }
-        if (confirmed) {
-          setCacheAtSpecificPath(
-            this.specificPostId(itemId),
-            voteType === 0 ? postList[postIndex].upvote : postList[postIndex].downvote,
-            voteType === 0 ? '$.data.upvote' : '$.data.downvote'
-          )
-        }
+
         return [...postList]
       },
       { revalidate: false }

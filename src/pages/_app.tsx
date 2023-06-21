@@ -7,6 +7,8 @@ import { app } from 'appConfig'
 import { useState, useEffect } from 'react'
 import HeadGlobal from 'components/HeadGlobal'
 import '../../i18n'
+import { alchemyProvider } from 'wagmi/providers/alchemy'
+
 
 // Web3Wrapper deps:
 import { connectorsForWallets, RainbowKitProvider, lightTheme, darkTheme } from '@rainbow-me/rainbowkit'
@@ -44,7 +46,6 @@ import { useFetchCommunities } from '../hooks/useFetchCommunities'
 import { useFetchUsers } from '../hooks/useFetchUsers'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import ErrorBoundary from '../components/ErrorBoundary'
 
 function App({ Component, pageProps }: AppProps) {
   return (
@@ -66,10 +67,15 @@ const stallTimeout = 1_0000
 const { chains, provider, webSocketProvider } = configureChains(
   [polygonMumbai, sepolia, avalancheFuji, goerli],
   [
-    infuraProvider({
-      apiKey: process.env.NEXT_PUBLIC_INFURA_API_KEY as string,
-      stallTimeout: stallTimeout,
-    }),
+      alchemyProvider({
+        apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY as string,
+        stallTimeout,
+      }),
+    // infuraProvider({
+    //   apiKey: process.env.NEXT_PUBLIC_INFURA_API_KEY as string,
+    //   stallTimeout: stallTimeout,
+    // }),
+
 
     jsonRpcProvider({
       rpc: chain => {
@@ -100,7 +106,6 @@ const { chains, provider, webSocketProvider } = configureChains(
 
   { stallTimeout: stallTimeout }
 )
-console.log('chains', chains)
 
 const otherWallets = [
   braveWallet({ chains }),

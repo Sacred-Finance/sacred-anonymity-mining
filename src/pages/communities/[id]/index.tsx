@@ -48,6 +48,7 @@ export function Main() {
   const activeUser = useActiveUser()
   const { address } = useAccount()
   const users = useUsers()
+  const { t } = useTranslation()
 
   const [postDescription, setPostDescription] = useState<OutputData>(null)
   const [postTitle, setPostTitle] = useState('')
@@ -62,24 +63,28 @@ export function Main() {
     signerOrProvider: provider,
   })
   const router = useRouter()
-  const id = router.query.id
+  const { id } = router.query
   const hasUserJoined = useHasUserJoined(id as string)
   const community = useCommunityById(id as string)
   useCommunityUpdates({ hasUserJoined, id, groupCacheId, postInstance })
-  useUnirepSignUp({ groupId: id, name: hasUserJoined?.name })
+  // useUnirepSignUp({ groupId: id, name: hasUserJoined?.name })
+
   const { checkUserBalance } = useValidateUserBalance(community, address)
   const { setIsLoading, isLoading: isContextLoading } = useLoaderContext()
   const postEditorRef = useRef<any>()
-
+  const [initialized, setInitialized] = useState(false)
   useEffect(() => {
     ;(async () => {
+      if (!forumContract || isNaN(id) || !provider || initialized) return
+      setInitialized(true)
       console.log('forumContract changed, initializing post instance', forumContract)
       postInstance = new Post(null, id, forumContract, provider)
+      console.log('postInstance', postInstance)
       setGroupCacheId(postInstance.groupCacheId())
       setIsLoading(false)
       // preload(postInstance.groupCacheId(), fetchPosts);//start fetching before render
     })()
-  }, [forumContract])
+  }, [forumContract, id, provider])
 
   const { data, isLoading } = useSWR(groupCacheId, fetchPosts, {
     revalidateOnFocus: false,
@@ -91,6 +96,8 @@ export function Main() {
       console.log('error retry', error)
     },
   })
+
+  console.log('data', data)
 
   async function fetchPosts() {
     console.log('fetching posts')
