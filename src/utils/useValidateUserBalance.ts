@@ -1,10 +1,8 @@
+import { useContractReads } from 'wagmi'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
-import {erc20dummyABI, supportedChains} from '../constant/const'
-import { ethers } from 'ethers'
+import { erc20dummyABI } from '../constant/const'
 import { Community } from '../lib/model'
-import { useProvider } from 'wagmi'
-import { polygonMumbai } from 'wagmi/chains'
 
 interface RequirementCheck {
   symbol: string | undefined
@@ -18,52 +16,67 @@ export interface ValidationResult {
 }
 
 export const useValidateUserBalance = (community: Community | undefined, address: `0x${string}` | undefined) => {
-  const wagmiProvider = useProvider({ chainId: polygonMumbai.id })
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
+  const [fetchEnabled, setFetchEnabled] = useState(false)
 
-  const checkUserBalance = useCallback(async () => {
-    if (!community || !address || !wagmiProvider) return
+  const requirements =
+    community?.requirements?.length && address && community?.chainId
+      ? community.requirements.map(r => ({
+          address: r.tokenAddress,
+          abi: erc20dummyABI,
+          functionName: 'balanceOf',
+          args: [address],
+          chainId: community.chainId,
+        }))
+      : []
 
-    console.log( 'community', community,address )
-    let toastMessage = ''
-    let requirementsMet: RequirementCheck[] = []
+  const { data, isError, isLoading } = useContractReads({
+    contracts: requirements,
+    cacheOnBlock: true,
+    cacheTime: 10_000,
+    allowFailure: true,
+    autoReload: true,
+    enabled:
+      fetchEnabled && !!community?.requirements?.length && !!address && !!community?.chainId && requirements.length > 0,
+    onError(error) {
+      console.log('error validate balance check', error)
+    },
+    onSuccess(data) {
+      console.log(
+        'success validate balance check',
+        data,
+        community?.requirements?.length,
+        address,
+        community?.chainId,
+        community?.groupId
+      )
+    },
+  })
 
-    // environment variable
-    const provider = new ethers.providers.JsonRpcProvider(supportedChains[community.chainId].rpcUrls.public.http[0])
-
-    const requirements = community.requirements || []
-
-    for (let i = 0; i < requirements.length; i++) {
-      const r = requirements[i]
-      const contract = new ethers.Contract(r.tokenAddress, erc20dummyABI, provider)
-      const bal = await contract.balanceOf(address)
-
-      if (Number(bal) < Number(r.minAmount)) {
-        toastMessage += `Insufficient ${r?.symbol} \n`
-      }
-
-      requirementsMet.push({
-        balance: Number(bal),
-        symbol: r.symbol,
-        minAmount: Number(r.minAmount),
-        decimals: r.decimals,
-      })
-
+  useEffect(() => {
+    if (!isLoading && (isError || data)) {
+      setFetchEnabled(false)
     }
   }, [data, isError, isLoading])
 
-    const hasSufficientBalance = requirementsMet.every(e => e.balance >= e.minAmount / 10 ** e.decimals)
+  const checkUserBalance = useCallback(() => {
+    setFetchEnabled(true)
+    console.log('checking balance')
+    let toastMessage = ''
+    let requirementsMet: RequirementCheck[] = []
 
-    if (!hasSufficientBalance) {
-      toast.warning(`Insufficient Balance`, {
-        containerId: 'toast',
-        autoClose: 7000,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        toastId: 'insufficient-balance',
-
+    if (data && !isError && !isLoading) {
+      requirementsMet = data.map((bal, i) => {
+        const r = community.requirements[i]
+        if (Number(bal) < Number(r.minAmount)) {
+          toastMessage += `Insufficient ${r?.symbol} \n`
+        }
+        return {
+          balance: Number(bal),
+          symbol: r.symbol,
+          minAmount: Number(r.minAmount),
+          decimals: r.decimals,
+        }
       })
 
       const hasSufficientBalance = requirementsMet.every(e => e.balance >= e.minAmount / 10 ** e.decimals)
@@ -84,12 +97,14 @@ export const useValidateUserBalance = (community: Community | undefined, address
       return hasSufficientBalance
     }
 
-    setValidationResult({ hasSufficientBalance, toastMessage })
-    return hasSufficientBalance
-  }, [community, address, wagmiProvider])
+    return false
+  }, [community, data, isError, isLoading])
 
-
-
+  useEffect(() => {
+    if (data && !isError && !isLoading) {
+      checkUserBalance()
+    }
+  }, [data, isError, isLoading, checkUserBalance])
 
   return { validationResult, checkUserBalance }
 }
