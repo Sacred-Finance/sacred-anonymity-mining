@@ -78,7 +78,7 @@ export function Main() {
       if (!forumContract || isNaN(id) || !provider || initialized) return
       setInitialized(true)
       console.log('forumContract changed, initializing post instance', forumContract)
-      postInstance = new Post(null, id, forumContract, provider)
+      postInstance = new Post(null, id)
       console.log('postInstance', postInstance)
       setGroupCacheId(postInstance.groupCacheId())
       setIsLoading(false)

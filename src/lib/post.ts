@@ -20,6 +20,7 @@ import { mutate } from 'swr'
 import { reverse } from 'lodash'
 import { UnirepUser } from './unirep'
 import { AxiosResponse } from 'axios'
+import { forumContract, jsonRPCProvider } from 'constant/const'
 
 const minRepsPost = 0
 
@@ -29,8 +30,6 @@ const minRepsDownvote = 1
 export interface PostInterface {
   id: string
   groupId: string
-  forumContract: Contract
-  provider: providers.BaseProvider
   cacheNewPost: (post, postId, groupId, note: BigInt, contentCID, setWaiting) => Promise<void>
   cacheUpdatedPost: (post, postId, groupId, contentCID, note, setWaiting) => Promise<void>
   removeFromCache: (postId) => Promise<void>
@@ -84,14 +83,11 @@ export interface PostInterface {
 export class Post implements PostInterface {
   id: string
   groupId: string
-  forumContract: Contract
-  provider: providers.BaseProvider
+  provider = jsonRPCProvider
 
-  constructor(id: string, groupId, forumContract, provider) {
+  constructor(id: string, groupId) {
     this.id = id
     this.groupId = groupId
-    this.forumContract = forumContract
-    this.provider = provider
   }
 
   postCacheId() {
@@ -108,8 +104,8 @@ export class Post implements PostInterface {
 
   async getAll() {
     const getData = async () => {
-      const itemIds = await this.forumContract.getPostIdList(+this.groupId)
-      const rawPosts = await Promise.all(itemIds.map(i => this.forumContract.itemAt(i.toNumber())))
+      const itemIds = await forumContract.getPostIdList(+this.groupId)
+      const rawPosts = await Promise.all(itemIds.map(i => forumContract.itemAt(i.toNumber())))
       let p = []
       for (const c of rawPosts) {
         if (!c?.removed && ethers.constants.HashZero !== c?.contentCID) {
@@ -145,7 +141,7 @@ export class Post implements PostInterface {
     }
 
     try {
-      const itemIds = await this.forumContract.getPostIdList(+this.groupId)
+      const itemIds = await forumContract.getPostIdList(+this.groupId)
 
       if (!itemIds?.length) {
         return []
@@ -171,7 +167,7 @@ export class Post implements PostInterface {
   async get() {
     const getData = async () => {
       console.log('get data')
-      const p = await this.forumContract.itemAt(this.id)
+      const p = await forumContract.itemAt(this.id)
       const block = await this.provider.getBlock(p.createdAtBlock.toNumber())
       const postText = await getContent(getIpfsHashFromBytes32(p?.contentCID))
       let parsedPost
@@ -321,7 +317,7 @@ export class Post implements PostInterface {
       const identityCommitment = BigInt(userPosting.getCommitment().toString())
       const note = await createNote(hashBytes(signal), identityCommitment)
 
-      const item = await this.forumContract.itemAt(itemId)
+      const item = await forumContract.itemAt(itemId)
       let input = {
         cid: hashBytes(item.contentCID),
         note: BigInt(item.note.toHexString()),
@@ -354,7 +350,7 @@ export class Post implements PostInterface {
       const identityCommitment = BigInt(userPosting.getCommitment().toString())
       const note = await createNote(signalInt, identityCommitment)
 
-      const item = await this.forumContract.itemAt(itemId)
+      const item = await forumContract.itemAt(itemId)
       let input = {
         cid: hashBytes(item.contentCID),
         note: BigInt(item.note.toHexString()),

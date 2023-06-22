@@ -17,21 +17,18 @@ import {
   uploadIPFS,
 } from './utils'
 import { UnirepUser } from './unirep'
+import { forumContract, jsonRPCProvider } from 'constant/const'
 
 const minRepsComment = 1
 export class CommentClass {
   postId: string
   id: string
   groupId: string
-  forumContract: Contract
-  provider: providers.BaseProvider
 
-  constructor(groupId, postId, id: string, forumContract, provider) {
+  constructor(groupId, postId, id: string) {
     this.id = id
     this.postId = postId
     this.groupId = groupId
-    this.forumContract = forumContract
-    this.provider = provider
   }
 
   commentsCacheId() {
@@ -158,14 +155,14 @@ export class CommentClass {
 
   async getComments() {
     const getData = async () => {
-      const itemIds = await this.forumContract.getCommentIdList(this.postId)
-      const rawComments = await Promise.all(itemIds.map(i => this.forumContract.itemAt(i.toNumber())))
+      const itemIds = await forumContract.getCommentIdList(this.postId)
+      const rawComments = await Promise.all(itemIds.map(i => forumContract.itemAt(i.toNumber())))
       let p = []
       for (const c of rawComments) {
         if (!c?.removed && ethers.constants.HashZero !== c?.contentCID) {
           try {
             const content = await getContent(getIpfsHashFromBytes32(c?.contentCID))
-            const block = await this.provider.getBlock(c.createdAtBlock.toNumber())
+            const block = await jsonRPCProvider.getBlock(c.createdAtBlock.toNumber())
             let parsedContent
             try {
               parsedContent = JSON.parse(content)
@@ -194,7 +191,7 @@ export class CommentClass {
     }
 
     try {
-      const itemIds = await this.forumContract.getCommentIdList(this.postId)
+      const itemIds = await forumContract.getCommentIdList(this.postId)
       if (!itemIds?.length) {
         return []
       }
@@ -279,7 +276,7 @@ export class CommentClass {
       const identityCommitment = BigInt(userPosting.getCommitment().toString())
       const note = await createNote(hashBytes(signal), identityCommitment)
 
-      const item = await this.forumContract.itemAt(itemId)
+      const item = await forumContract.itemAt(itemId)
       let input = {
         cid: hashBytes(item.contentCID),
         note: BigInt(item.note.toHexString()),
@@ -309,7 +306,7 @@ export class CommentClass {
       const identityCommitment = BigInt(userPosting.getCommitment().toString())
       const note = await createNote(signalInt, identityCommitment)
 
-      const item = await this.forumContract.itemAt(itemId)
+      const item = await forumContract.itemAt(itemId)
       let input = {
         cid: hashBytes(item.contentCID),
         note: BigInt(item.note.toHexString()),
