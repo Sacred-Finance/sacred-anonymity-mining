@@ -23,7 +23,7 @@ export const useFetchCommunities = (loadOnInit = true) => {
     }
     try {
       const groups = await forumContract.queryFilter(forumContract.filters.NewGroupCreated())
-      const communitiesData = await fetchCommunitiesData({ groups, forumContract, provider })
+      const communitiesData = await fetchCommunitiesData({ groups, provider })
       const fulfilledCommunities = communitiesData?.filter(community => community)
       dispatch({
         type: 'SET_COMMUNITIES',
@@ -36,7 +36,7 @@ export const useFetchCommunities = (loadOnInit = true) => {
   }
 
   useEffect(() => {
-    if (loadOnInit) fetchCommunities()
+    if (loadOnInit && forumContract && provider) fetchCommunities()
   }, [forumContract, provider])
 
   return fetchCommunities
