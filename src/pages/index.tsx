@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useAccount, useBalance, useNetwork, useSwitchNetwork } from 'wagmi'
 import Header from '../components/Header'
 import HomePage from '../components/HomePage'
 import Footer from '../components/Footer'
@@ -17,14 +16,16 @@ export default function Home() {
       <CustomModal isOpen={createCommunityModalOpen} setIsOpen={setCreateCommunityModalOpen}>
         <CreateGroupFormUI onCreate={createCommunity} onCreateGroupClose={() => setCreateCommunityModalOpen(false)} />
       </CustomModal>
-      <div className={'flex h-screen flex-col '}>
+      <div className={' flex h-screen flex-col'}>
         <Header createCommunity={() => setCreateCommunityModalOpen(true)} />
         <div>
           {' '}
           <Main />
         </div>
-        <div className={'flex-1'} />
-        <Footer />
+        <div className={'flex-1  '} />
+        <div className={'relative'}>
+          <Footer />
+        </div>
       </div>
     </>
   )
