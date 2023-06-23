@@ -25,6 +25,7 @@ export const useCreateCommunity = (onCreateGroupClose: () => void) => {
           bannerCID: bannerCID || '0x0000000000000000000000000000000000000000000000000000000000000000',
           logoCID: logoCID || '0x0000000000000000000000000000000000000000000000000000000000000000',
         }
+        //todo: tags, bannerCID, logoCID need to be converted to Bytes32
 
         const response = await createGroup(user.getCommitment().toString(), requirements, name, chainId, details, note)
 
