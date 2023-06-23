@@ -12,7 +12,7 @@ export default function Footer(): JSX.Element {
   if (!ready) return <> </>
 
   return (
-    <footer className="absolute bottom-0 w-full border-t border-gray-700 bg-gray-800 py-4 dark:bg-gray-900">
+    <footer className="w-full border-t border-gray-700 bg-gray-800 py-4 dark:bg-gray-900">
       <div className="container mx-auto grid grid-cols-1 gap-8 px-4 sm:px-6 md:grid-cols-2 lg:px-8">
         <div className="flex flex-col items-center space-y-3">
           <ListHeader>{t('footer.followUs')}</ListHeader>
