@@ -26,7 +26,7 @@ export const JoinCommunityButton = memo(({ community }: JoinButtonProps) => {
 
   const validateBeforeOpen = async (): Promise<boolean> => {
     if (!address) {
-      toast.error(t('error.connectWallet'), { toastId: 'connectWallet' })
+      toast.error(t('alert.connectWallet'), { toastId: 'connectWallet' })
 
       return false
     }
