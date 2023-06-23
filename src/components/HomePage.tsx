@@ -6,7 +6,7 @@ import { debounce } from 'lodash'
 import { CommunityCard } from '../components/CommunityCard/CommunityCard'
 import { useLoaderContext } from '../contexts/LoaderContext'
 import { useTranslation } from 'next-i18next'
-import { getGroupIdOrUserId, useCommunityContext } from '../contexts/CommunityProvider'
+import { getGroupIdOrUserId, useCommunities, useCommunityContext } from '../contexts/CommunityProvider'
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -17,7 +17,9 @@ import {
   UserGroupIcon,
   UserMinusIcon,
 } from '@heroicons/react/20/solid'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
+import clsx from 'clsx'
+import { DynamicLogo } from './Logo'
 
 interface HomeProps {
   createCommunity: Function
@@ -133,103 +135,151 @@ function HomePage({ createCommunity, isAdmin = false }: HomeProps) {
   }
 
   return (
-    <main className="mx-auto w-full max-w-screen-xl space-y-12 p-24  md:px-0 h-full">
-      <div className="flex flex-col items-center py-16 text-purple-500 dark:text-purple-500">
-        <h1 className="mb-8 text-6xl font-bold">{t('pageTitle.communities')}</h1>
-        <div className="mb-8 flex w-full flex-col justify-between md:max-w-lg md:flex-row">
-          <div className="relative mb-4 w-full md:mr-2 md:mb-0">
-            <MagnifyingGlassIcon className="absolute top-0 left-0 ml-3 mt-3 h-5 w-5 fill-current text-gray-500 dark:text-gray-400" />
-            <input
-              id="search"
-              name="search"
-              className="w-full rounded-lg bg-white py-2 pl-10 pr-4 shadow-md focus:outline-none dark:bg-gray-700 dark:text-white"
-              onChange={debouncedResults}
-              type="text"
-              placeholder="Explore"
-            />
-          </div>
-          <div className="flex space-x-2">
-            <button className="rounded-md bg-white p-2 transition-colors duration-200 ease-in-out hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600">
-              <div className="flex items-center">
-                <p className="mr-1 dark:text-white">A</p>
-                {currentFilter === '-Alphabetical' ? (
-                  <ArrowUpIcon className="h-5 w-5 fill-current text-gray-500 dark:text-gray-400" />
-                ) : (
-                  <ArrowDownIcon className="h-5 w-5 fill-current text-gray-500 dark:text-gray-400" />
-                )}
+    <main className="sm:item mx-auto mb-[400px] h-full w-full max-w-screen-xl  space-y-12 sm:px-0 md:p-24">
+      <AnimatePresence mode={'sync'}>
+        <>
+          {!communities?.length ? (
+            <DynamicLogo className={'w-[45%]'} />
+          ) : (
+            <motion.div>
+              <div className="flex flex-col py-16 text-purple-500 dark:text-purple-500">
+                <motion.h1
+                  layout
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                  className="mb-8 text-8xl font-bold"
+                >
+                  {t('pageTitle.communities')}
+                </motion.h1>
               </div>
-            </button>
-            <button className="rounded-md bg-white p-2 transition-colors duration-200 ease-in-out hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600">
-              {currentFilter === '-User Count' ? (
-                <UserGroupIcon className="h-5 w-5 fill-current text-gray-500 dark:text-gray-400" />
-              ) : (
-                <UserMinusIcon className="h-5 w-5 fill-current text-gray-500 dark:text-gray-400" />
+              <motion.div
+                layout
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="mb-8 flex w-full flex-col justify-between md:max-w-lg md:flex-row"
+              >
+                <div className="relative mb-4 w-full md:mb-0 md:mr-2">
+                  <MagnifyingGlassIcon className="absolute left-0 top-0 ml-3 mt-3 h-5 w-5 fill-current text-gray-500 dark:text-gray-400" />
+                  <input
+                    id="search"
+                    name="search"
+                    className="w-full rounded-lg bg-white py-2 pl-10 pr-4 shadow-md focus:outline-none dark:bg-gray-700 dark:text-white"
+                    onChange={debouncedResults}
+                    type="text"
+                    placeholder="Explore"
+                  />
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    className={clsx(
+                      'rounded-md bg-white p-2 transition-colors duration-200 ease-in-out hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600',
+                      currentFilter === 'Alphabetical' || currentFilter === '-Alphabetical'
+                        ? 'text-purple-500 dark:text-purple-500'
+                        : 'text-gray-500 dark:text-gray-400'
+                    )}
+                    onClick={() => applyFilter('Alphabetical')}
+                  >
+                    <div className="flex items-center">
+                      <p className="mr-1">A</p>
+                      {currentFilter === '-Alphabetical' ? (
+                        <ArrowUpIcon className="h-5 w-5 fill-current " />
+                      ) : (
+                        <ArrowDownIcon className="h-5 w-5 fill-current" />
+                      )}
+                    </div>
+                  </button>
+                  <button
+                    className={clsx(
+                      'rounded-md bg-white p-2 transition-colors duration-200 ease-in-out hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600',
+                      currentFilter === 'User Count' || currentFilter === '-User Count'
+                        ? 'text-purple-500 dark:text-purple-500'
+                        : 'text-gray-500 dark:text-gray-400'
+                    )}
+                    onClick={() => applyFilter('User Count')}
+                  >
+                    {currentFilter === '-User Count' ? (
+                      <UserGroupIcon className="h-5 w-5 fill-current " />
+                    ) : (
+                      <UserMinusIcon className="h-5 w-5 fill-current" />
+                    )}
+                  </button>
+                  <button
+                    className={clsx(
+                      'rounded-md bg-white p-2 transition-colors duration-200 ease-in-out hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600',
+                      currentFilter === 'Age' || currentFilter === '-Age'
+                        ? 'text-purple-500 dark:text-purple-500'
+                        : 'text-gray-500 dark:text-gray-400'
+                    )}
+                    onClick={() => applyFilter('Age')}
+                  >
+                    {currentFilter === '-Age' ? (
+                      <ClockIcon className="h-5 w-5 fill-current" />
+                    ) : (
+                      <MinusCircleIcon className="h-5 w-5 fill-current" />
+                    )}
+                  </button>
+                </div>
+              </motion.div>
+
+              <div className="row-gap-8 mb-8 grid h-full flex-1 grid-cols-1 justify-items-center gap-4  md:grid-cols-2 lg:grid-cols-3">
+                {localCommunities.map((community, index) => (
+                  <CommunityCard key={index} community={community} index={index} isAdmin={isAdmin} />
+                ))}
+              </div>
+
+              {localCommunities.length === 0 && (
+                <div className="my-12 flex flex-col items-center justify-center space-y-4">
+                  <motion.h2
+                    initial={{ opacity: 0, y: -50 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="text-3xl font-semibold dark:text-gray-200"
+                  >
+                    Oops, No Results Found
+                  </motion.h2>
+                  <motion.p
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                    className="px-4 text-center text-lg dark:text-gray-300"
+                  >
+                    <>
+                      {' '}
+                      {searchTerm
+                        ? 'We could not find any communities that match your search. Try adjusting your filters or search again with a different term'
+                        : 'We could not find any communities at this time. Please try again later'}
+                      .
+                    </>
+                  </motion.p>
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.4 }}
+                    className="rounded bg-purple-500 px-4 py-2 font-bold text-white shadow dark:bg-purple-700 dark:text-gray-200"
+                    onClick={() => createCommunity()}
+                  >
+                    Create a new community
+                  </motion.button>
+                </div>
               )}
-            </button>
-            <button className="rounded-md bg-white p-2 transition-colors duration-200 ease-in-out hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600">
-              {currentFilter === '-Age' ? (
-                <ClockIcon className="h-5 w-5 fill-current text-gray-500 dark:text-gray-400" />
-              ) : (
-                <MinusCircleIcon className="h-5 w-5 fill-current text-gray-500 dark:text-gray-400" />
+
+              {communities.length === 0 && !isLoading && (
+                <div className="my-12 flex flex-col items-center justify-center">
+                  <p className="mb-4 text-xl dark:text-gray-200">0 Communities :(</p>
+                  <button
+                    className="rounded bg-purple-500 px-4 py-2 font-bold text-white shadow dark:bg-purple-700 dark:text-gray-200"
+                    onClick={() => createCommunity()}
+                  >
+                    Create
+                  </button>
+                </div>
               )}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div className="row-gap-8 mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {localCommunities.map((community, index) => (
-          <CommunityCard key={index} community={community} index={index} isAdmin={isAdmin} />
-        ))}
-      </div>
-
-      {localCommunities.length === 0 && (
-        <div className="my-12 flex flex-col items-center justify-center space-y-4">
-          <motion.h2
-            initial={{ opacity: 0, y: -50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-3xl font-semibold dark:text-gray-200"
-          >
-            Oops, No Results Found
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="px-4 text-center text-lg dark:text-gray-300"
-          >
-            <>
-              {' '}
-              {searchTerm
-                ? 'We could not find any communities that match your search. Try adjusting your filters or search again with a different term'
-                : 'We could not find any communities at this time. Please try again later'}
-              .
-            </>
-          </motion.p>
-          <motion.button
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="rounded bg-purple-500 py-2 px-4 font-bold text-white shadow dark:bg-purple-700 dark:text-gray-200"
-            onClick={() => createCommunity()}
-          >
-            Create a new community
-          </motion.button>
-        </div>
-      )}
-
-      {communities.length === 0 && !isLoading && (
-        <div className="my-12 flex flex-col items-center justify-center">
-          <p className="mb-4 text-xl dark:text-gray-200">0 Communities :(</p>
-          <button
-            className="rounded bg-purple-500 py-2 px-4 font-bold text-white shadow dark:bg-purple-700 dark:text-gray-200"
-            onClick={() => createCommunity()}
-          >
-            Create
-          </button>
-        </div>
-      )}
+            </motion.div>
+          )}
+        </>
+      </AnimatePresence>
     </main>
   )
 }
