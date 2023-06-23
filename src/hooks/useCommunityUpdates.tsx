@@ -10,8 +10,9 @@ import {
   sortArray,
 } from '../lib/utils'
 import { useSWRConfig } from 'swr'
-import { PostInterface } from '../lib/post'
 import { User } from '../lib/model'
+import { forumContract, jsonRPCProvider } from '../constant/const'
+import { useRouter } from 'next/router'
 
 const POST_ITEM_TYPE = 0
 const POLLING_INTERVAL = 60000 // Set to one minute, adjust as necessary
@@ -34,12 +35,12 @@ const updatePosts = (groupCacheId, mutate) => async (p, parsedPost) => {
     { revalidate: false }
   )
 }
-const gatherContent = (postInstance, updatePostsCallback) => async (contentCID, postId) => {
-  const p = await postInstance.forumContract.itemAt(postId.toNumber())
+const gatherContent = updatePostsCallback => async (contentCID, postId) => {
+  const p = await forumContract.itemAt(postId.toNumber())
   const postIPFShash = getIpfsHashFromBytes32(p?.contentCID)
   const [content, block] = await Promise.all([
     getContent(postIPFShash),
-    postInstance.provider.getBlock(p.createdAtBlock.toNumber()),
+    jsonRPCProvider.getBlock(p.createdAtBlock.toNumber()),
   ])
 
   const parsedPost = parsePost(content)
@@ -47,10 +48,10 @@ const gatherContent = (postInstance, updatePostsCallback) => async (contentCID, 
 }
 
 const handleNewItem =
-  (gatherContentCallback, id, hasUserJoined) => async (itemType, groupId, postId, parentId, contentCID, note) => {
+  (gatherContentCallback, id, user) => async (itemType, groupId, postId, parentId, contentCID, note) => {
     if (isNaN(id)) return
     const signal = contentCID
-    const identityCommitment = BigInt(hasUserJoined.identityCommitment.toString())
+    const identityCommitment = BigInt(user.identityCommitment.toString())
     const generatedNote = await createNote(hashBytes(signal), identityCommitment)
 
     if (itemType === POST_ITEM_TYPE && groupId.toString() === id && note.toString() !== generatedNote.toString()) {
@@ -69,14 +70,14 @@ const handleVoteItem = postInstance => async (voteType, itemType, itemId, upvote
   }
 }
 
-const fetchEvents = (hasUserJoined, postInstance, handleNewItemCallback, handleVoteItemCallback) => async () => {
-  if (hasUserJoined && postInstance?.provider && postInstance?.forumContract) {
+const fetchEvents = (user, postInstance, handleNewItemCallback, handleVoteItemCallback) => async () => {
+  if (user && jsonRPCProvider && forumContract) {
     console.log('fetching community events')
 
     try {
       const [newItemEvents, voteItemEvents] = await Promise.all([
-        postInstance?.forumContract.queryFilter(postInstance?.forumContract.filters.NewItem()),
-        postInstance?.forumContract.queryFilter(postInstance?.forumContract.filters.VoteItem()),
+        forumContract.queryFilter(forumContract.filters.NewItem()),
+        forumContract.queryFilter(forumContract.filters.VoteItem()),
       ])
 
       await Promise.all([
@@ -90,44 +91,40 @@ const fetchEvents = (hasUserJoined, postInstance, handleNewItemCallback, handleV
 }
 
 export const useCommunityUpdates = ({
-  hasUserJoined,
-  id,
-  groupCacheId,
+  user,
   postInstance,
 }: {
-  hasUserJoined: User
-  id: PostInterface['groupId']
-  groupCacheId: string
-  postInstance: PostInterface
+  user: User | false
+  postInstance
 }) => {
-  const { mutate } = useSWRConfig()
+  const router = useRouter()
+  const { id } = router.query
+  const groupCacheId = `${id}_group`
 
+  const { mutate } = useSWRConfig()
   const updatePostsCallback = useCallback(updatePosts(groupCacheId, mutate), [groupCacheId, mutate])
-  const gatherContentCallback = useCallback(gatherContent(postInstance, updatePostsCallback), [
-    postInstance,
-    updatePostsCallback,
-  ])
-  const handleNewItemCallback = useCallback(handleNewItem(gatherContentCallback, id, hasUserJoined), [
+  const gatherContentCallback = useCallback(gatherContent(updatePostsCallback), [updatePostsCallback])
+  const handleNewItemCallback = useCallback(handleNewItem(gatherContentCallback, id, user), [
     gatherContentCallback,
     id,
-    hasUserJoined,
+    user,
   ])
   const handleVoteItemCallback = useCallback(handleVoteItem(postInstance), [postInstance])
   const fetchEventsCallback = useCallback(
-    fetchEvents(hasUserJoined, postInstance, handleNewItemCallback, handleVoteItemCallback),
-    [hasUserJoined, postInstance, handleNewItemCallback, handleVoteItemCallback]
+    fetchEvents(user, postInstance, handleNewItemCallback, handleVoteItemCallback),
+    [user, postInstance, handleNewItemCallback, handleVoteItemCallback]
   )
 
   useEffect(() => {
-    if (!postInstance?.provider || !postInstance?.forumContract) return
+    if (!jsonRPCProvider) return
     console.log('listening to events')
     fetchEventsCallback()
     const intervalId = setInterval(fetchEventsCallback, POLLING_INTERVAL)
 
     return () => {
       clearInterval(intervalId)
-      if (postInstance?.forumContract) postInstance?.forumContract.removeAllListeners()
-      if (postInstance?.provider) postInstance?.provider.removeAllListeners()
+      if (forumContract) forumContract.removeAllListeners()
+      if (jsonRPCProvider) jsonRPCProvider.removeAllListeners()
     }
-  }, [fetchEventsCallback, postInstance?.forumContract, postInstance?.provider])
+  }, [fetchEventsCallback, forumContract, jsonRPCProvider])
 }

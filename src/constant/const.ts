@@ -787,7 +787,7 @@ export const supportedChains: { [key: string]: Chain } = {
 
 export const supportedChainsArray = Object.keys(supportedChains).map(k => supportedChains[k])
 
-export const jsonRPCProvider =  new ethers.providers.JsonRpcProvider(process.env.NEXT_APP_POLYGON_MUMBAI_URL, {
+export const jsonRPCProvider =  new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL, {
   name: polygonMumbai.name,
   chainId: polygonMumbai.id
 });

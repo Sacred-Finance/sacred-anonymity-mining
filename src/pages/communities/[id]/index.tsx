@@ -15,7 +15,7 @@ import { useSortedVotes } from '../../../hooks/useSortedVotes'
 import { JoinCommunityButton } from '../../../components/JoinCommunityButton'
 import { formatDistanceToNow } from '../../../lib/utils'
 import { useRouter } from 'next/router'
-import { useActiveUser, useCommunityById, useHasUserJoined, useUsers } from '../../../contexts/CommunityProvider'
+import { useActiveUser, useCommunityById, useUserIfJoined, useUsers } from '../../../contexts/CommunityProvider'
 import { polygonMumbai } from 'wagmi/chains'
 import { ForumContractAddress } from '../../../constant/const'
 import ForumABI from '../../../constant/abi/Forum.json'
@@ -42,7 +42,7 @@ interface CommunityProps {
   provider: ethers.providers.BaseProvider
 }
 
-let postInstance: Post = null
+let postInstance: Post
 
 export function Main() {
   const activeUser = useActiveUser()
@@ -53,7 +53,6 @@ export function Main() {
   const [postDescription, setPostDescription] = useState<OutputData>(null)
   const [postTitle, setPostTitle] = useState('')
   const [sortBy, setSortBy] = useState<SortByOption>('highest')
-  const [groupCacheId, setGroupCacheId] = useState<string | null>(null)
   const [tempPosts, setTempPosts] = useState([])
 
   const provider = useProvider({ chainId: polygonMumbai.id })
@@ -64,10 +63,12 @@ export function Main() {
   })
   const router = useRouter()
   const { id } = router.query
-  const hasUserJoined = useHasUserJoined(id as string)
+  const user = useUserIfJoined(id as string)
+
+  postInstance = new Post(null, id)
   const community = useCommunityById(id as string)
-  useCommunityUpdates({ hasUserJoined, id, groupCacheId, postInstance })
-  // useUnirepSignUp({ groupId: id, name: hasUserJoined?.name })
+  useCommunityUpdates({ user, postInstance })
+  // useUnirepSignUp({ groupId: id, name: user?.name })
 
   const { checkUserBalance } = useValidateUserBalance(community, address)
   const { setIsLoading, isLoading: isContextLoading } = useLoaderContext()
@@ -75,29 +76,14 @@ export function Main() {
   const [initialized, setInitialized] = useState(false)
   useEffect(() => {
     ;(async () => {
-      if (!forumContract || isNaN(id) || !provider || initialized) return
+      if (!forumContract || !provider || initialized) return
       setInitialized(true)
-      console.log('forumContract changed, initializing post instance', forumContract)
-      postInstance = new Post(null, id)
-      console.log('postInstance', postInstance)
-      setGroupCacheId(postInstance.groupCacheId())
       setIsLoading(false)
       // preload(postInstance.groupCacheId(), fetchPosts);//start fetching before render
     })()
   }, [forumContract, id, provider])
 
-  const { data, isLoading } = useSWR(groupCacheId, fetchPosts, {
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-    errorRetryInterval: 10000,
-    onErrorRetry: (error, key, config, revalidate, { retryCount }) => {
-      if (retryCount >= 10) return
-      setTimeout(() => revalidate({ retryCount }), 10000)
-      console.log('error retry', error)
-    },
-  })
-
-  console.log('data', data)
+  const { data, isLoading } = useSWR(`${id}_group`, fetchPosts)
 
   async function fetchPosts() {
     console.log('fetching posts')
@@ -107,17 +93,16 @@ export function Main() {
   const addPost = async () => {
     if (!address) {
       console.log('Please connect your wallet')
-      toast.error(t('error.connectWallet'), { toastId: 'connectWallet' })
+      toast.error(t('alert.connectWallet'), { toastId: 'connectWallet' })
       return
     }
     if (!postTitle || !postDescription) {
       console.log('Please enter a title and description')
       toast.error('Please enter a title and description', { toastId: 'missingTitleOrDesc' })
-      // toast({
       return
     }
 
-    if (!hasUserJoined) {
+    if (!user) {
       console.log('Please join the community first')
       toast.error('Please join the community first', { toastId: 'joinCommunityFirst' })
       return
@@ -188,7 +173,7 @@ export function Main() {
   console.log('sortedData', sortedData)
 
   const voteForPost = async (postId, voteType: 0 | 1) => {
-    if (!hasUserJoined) return
+    if (!user) return
     const hasSufficientBalance = await checkUserBalance()
     if (!hasSufficientBalance) return
     setIsLoading(true)
@@ -228,7 +213,7 @@ export function Main() {
           src={`https://ipfs.io/ipfs/${community?.logo}`}
           alt="community logo"
         />
-        {!hasUserJoined?.identityCommitment && community && <JoinCommunityButton community={community} />}
+        {!user?.identityCommitment && community && <JoinCommunityButton community={community} />}
       </div>
 
       <NewPostForm
