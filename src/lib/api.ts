@@ -16,13 +16,22 @@ export async function createGroup(
   identityCommitment: string,
   requirements: Requirement[],
   groupName: string,
-  chainId: number
+  chainId: number,
+  details: {
+    description: string
+    tags: string[]
+    bannerCID: string
+    logoCID: string
+  },
+  note: BigInt
 ) {
   return axios.post(`${RELAYER_URL}/create-group`, {
     identityCommitment,
     groupName,
     requirements,
     chainId,
+    details,
+    note
   })
 }
 

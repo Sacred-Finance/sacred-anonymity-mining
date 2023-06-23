@@ -1,12 +1,12 @@
-import {Community as CommunityInterface} from '../lib/model'
+import { Community as CommunityInterface } from '../lib/model'
 
-import {BigNumber, ethers} from 'ethers'
-import {erc20dummyABI, forumContract, jsonRPCProvider} from '../constant/const'
-import {getCache, getMCache, setCache} from '../lib/redis'
-import {uploadImageToIPFS} from '../lib/utils'
-import {fetchTokenInfo} from './tokenUtils'
+import { BigNumber, ethers } from 'ethers'
+import { erc20dummyABI, forumContract, jsonRPCProvider } from '../constant/const'
+import { getCache, getMCache, setCache } from '../lib/redis'
+import { uploadImageToIPFS } from '../lib/utils'
+import { fetchTokenInfo } from './tokenUtils'
 import pica from 'pica'
-import {useCallback} from 'react'
+import { useCallback } from 'react'
 
 interface FetchCommunityDataParams {
   group: any
@@ -227,22 +227,24 @@ const fetchCommunitiesDataFromCache = async (
 
 export const uploadThenCacheGroupData = async ({
   groupId,
-  bannerFile,
-  logoFile,
   groupData,
   chainId,
   requirements,
+  details,
 }: {
   groupId: any
-  bannerFile: any
-  logoFile: any
   groupData: any
   chainId: number
   requirements: []
+  details: {
+    description: string
+    tags: string[]
+    bannerCID: string
+    logoCID: string
+  }
 }) => {
   const { blockHash, args, event, transactionIndex, blockNumber, ...otherData } = groupData
   const [groupIdArg, nameArg, creatorIdentityCommitmentArg] = args
-
   const groupIdInt = parseInt(groupIdArg.hex, 16)
 
   const cacheData: {
@@ -274,15 +276,8 @@ export const uploadThenCacheGroupData = async ({
 
   await setCache(`group_${groupId}`, cacheData)
 
-  const updatedCacheData = await uploadAndCacheImages({
-    groupId: groupId,
-    bannerFile: bannerFile,
-    logoFile: logoFile,
-  })
-
   return {
     ...cacheData,
-    ...updatedCacheData,
   }
 }
 
@@ -297,6 +292,105 @@ interface ImageCacheData {
   logo?: string
 }
 
+type UploadImagesParams = {
+  bannerFile?: File | null
+  logoFile?: File | null
+}
+
+export const uploadImages = async ({
+  bannerFile,
+  logoFile,
+}: UploadImagesParams): Promise<[string | null, string | null]> => {
+  const [bannerResult, logoResult] = await Promise.allSettled([
+    bannerFile ? uploadImageToIPFS(bannerFile) : Promise.resolve(null),
+    logoFile ? uploadImageToIPFS(logoFile) : Promise.resolve(null),
+  ])
+
+  let bannerUrl: string | null = null
+  let logoUrl: string | null = null
+
+  if (bannerResult.status === 'fulfilled' && bannerResult.value) {
+    bannerUrl = bannerResult.value
+  } else if (bannerResult.status === 'rejected' && bannerFile) {
+    console.error('Error uploading banner image:', bannerResult.reason)
+  }
+
+  if (logoResult.status === 'fulfilled' && logoResult.value) {
+    logoUrl = logoResult.value
+  } else if (logoResult.status === 'rejected' && logoFile) {
+    console.error('Error uploading logo image:', logoResult.reason)
+  }
+
+  console.log('bannerUrl', bannerUrl)
+    console.log('logoUrl', logoUrl)
+
+  return [bannerUrl, logoUrl]
+}
+
+export const cacheGroupData = async ({
+  groupId,
+  groupData,
+  chainId,
+  requirements,
+  details,
+}: {
+  groupId: any
+  groupData: any
+  chainId: number
+  requirements: []
+  details: {
+    description: string
+    tags: string[]
+    bannerCID: string
+    logoCID: string
+  }
+}): Promise<any> => {
+  const { blockHash, args, event, transactionIndex, blockNumber, ...otherData } = groupData
+  const [groupIdArg, nameArg, creatorIdentityCommitmentArg] = args
+  const groupIdInt = parseInt(groupIdArg.hex, 16)
+
+  const cacheData: {
+    name?: string
+    groupId?: number
+    id?: any
+    ownerIdentity?: string
+    groupData: any
+    chainId: number
+    requirements: []
+    removed: boolean
+    details: {
+      description: string
+      tags: string[]
+      bannerCID: string
+      logoCID: string
+    }
+    banner: string
+    logo: string
+  } = {
+    name: nameArg,
+    groupId: groupIdInt,
+    id: groupIdArg,
+    ownerIdentity: BigNumber.from(creatorIdentityCommitmentArg).toString(),
+    groupData: {
+      blockHash,
+      args,
+      event,
+      transactionIndex,
+      blockNumber,
+      ...otherData,
+    },
+    chainId,
+    requirements,
+    removed: false,
+    details,
+    banner: details.bannerCID,
+    logo: details.logoCID,
+  }
+
+  await setCache(`group_${groupId}`, cacheData)
+
+  return cacheData
+}
 export const uploadAndCacheImages = async ({
   groupId,
   bannerFile,

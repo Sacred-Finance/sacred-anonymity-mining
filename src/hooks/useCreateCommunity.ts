@@ -3,7 +3,7 @@ import { Identity } from '@semaphore-protocol/identity'
 
 import { createGroup } from '../lib/api'
 import { useHandleCommunityAction } from './useHandleCommunityAction'
-import { uploadThenCacheGroupData } from '../utils/communityUtils'
+import { cacheGroupData, uploadImages } from '../utils/communityUtils'
 import { useAccount } from 'wagmi'
 import { useCommunityContext } from '../contexts/CommunityProvider'
 
@@ -11,11 +11,22 @@ export const useCreateCommunity = (onCreateGroupClose: () => void) => {
   const handleCommunityAction = useHandleCommunityAction()
   const { address, isConnected } = useAccount()
   const { dispatch } = useCommunityContext()
+
   return useCallback(
-    async ({ name, requirements, bannerFile, logoFile, chainId }) => {
+    async ({ name, requirements, bannerFile, logoFile, chainId, groupDescription, note }) => {
       const actionFn = async () => {
         const user = new Identity(address as string)
-        const response = await createGroup(user.getCommitment().toString(), requirements, name, chainId)
+
+        const [bannerCID, logoCID] = await uploadImages({ bannerFile, logoFile })
+
+        const details = {
+          description: groupDescription,
+          tags: ['0x0000000000000000000000000000000000000000000000000000000000000000'],
+          bannerCID: bannerCID || '0x0000000000000000000000000000000000000000000000000000000000000000',
+          logoCID: logoCID || '0x0000000000000000000000000000000000000000000000000000000000000000',
+        }
+
+        const response = await createGroup(user.getCommitment().toString(), requirements, name, chainId, details, note)
 
         const { status, data } = response
 
@@ -27,11 +38,15 @@ export const useCreateCommunity = (onCreateGroupClose: () => void) => {
             const groupIdInt = parseInt(groupIdHex, 16)
 
             if (groupIdInt) {
-              await uploadThenCacheGroupData({
+              const groupData = {
+                event: data.event,
+                args: data.args,
+              }
+
+              await cacheGroupData({
                 groupId: groupIdInt,
-                bannerFile: bannerFile,
-                logoFile: logoFile,
-                groupData: data,
+                details,
+                groupData,
                 chainId,
                 requirements,
               })
@@ -56,6 +71,7 @@ export const useCreateCommunity = (onCreateGroupClose: () => void) => {
         } else {
           console.error('Unexpected response:', response)
         }
+
         return response
       }
 
