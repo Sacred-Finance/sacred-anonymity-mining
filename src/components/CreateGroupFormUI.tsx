@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { ethers, utils } from 'ethers'
-import { erc20dummyABI, supportedChains, supportedChainsArray } from '../constant/const'
+import { erc20dummyABI, jsonRPCProvider, supportedChains, supportedChainsArray } from '../constant/const'
 import { FieldArray, FormikProvider, useFormik } from 'formik'
 import { Chain, useChainId, useProvider } from 'wagmi'
 import { ToolTip } from './HOC/ToolTip'
@@ -48,7 +48,7 @@ function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
     await formik.setFieldValue(`tokenRequirements.${i}.tokenAddress`, val, false)
     if (val) {
       if (utils.isAddress(val)) {
-        const p = new ethers.providers.JsonRpcProvider(selectedChain.rpcUrls.public.http[0])
+        const p = jsonRPCProvider
 
         const contract = new ethers.Contract(val, erc20dummyABI, p)
         const setNameNotFoundError = async () => {

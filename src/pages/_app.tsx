@@ -9,7 +9,6 @@ import HeadGlobal from 'components/HeadGlobal'
 import '../../i18n'
 import { alchemyProvider } from 'wagmi/providers/alchemy'
 
-
 // Web3Wrapper deps:
 import { connectorsForWallets, RainbowKitProvider, lightTheme, darkTheme } from '@rainbow-me/rainbowkit'
 import {
@@ -46,6 +45,8 @@ import { useFetchCommunities } from '../hooks/useFetchCommunities'
 import { useFetchUsers } from '../hooks/useFetchUsers'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import LoadingPage from '../components/LoadingComponent'
+import ErrorBoundary from '../components/ErrorBoundary'
 
 function App({ Component, pageProps }: AppProps) {
   return (
@@ -67,10 +68,10 @@ const stallTimeout = 1_0000
 const { chains, provider, webSocketProvider } = configureChains(
   [polygonMumbai, sepolia, avalancheFuji, goerli],
   [
-      alchemyProvider({
-        apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY as string,
-        stallTimeout,
-      }),
+    alchemyProvider({
+      apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY as string,
+      stallTimeout,
+    }),
     // infuraProvider({
     //   apiKey: process.env.NEXT_PUBLIC_INFURA_API_KEY as string,
     //   stallTimeout: stallTimeout,
@@ -157,9 +158,9 @@ export function Web3Wrapper({ children }) {
         id={'rainbowkit'}
       >
         <CommunityProvider>
-          {/*<ErrorBoundary>*/}
-          <InitialLoad>{children}</InitialLoad>
-          {/*</ErrorBoundary>*/}
+          <ErrorBoundary>
+            <InitialLoad>{children}</InitialLoad>
+          </ErrorBoundary>
         </CommunityProvider>
       </RainbowKitProvider>
     </WagmiConfig>
@@ -169,11 +170,15 @@ export function Web3Wrapper({ children }) {
 const InitialLoad = ({ children }) => {
   useFetchCommunities()
   useFetchUsers()
-
   const communities = useCommunities()
 
-  if (communities === null || communities.length === 0) {
-    return <div className={'w-full bg-pink-400 text-xl text-white'}>Loading...</div>
+  const [isMounted, setIsMounted] = useState(false)
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  if (communities === null || communities?.length === 0 || !isMounted) {
+    return <LoadingPage />
   }
 
   return <>{children}</>

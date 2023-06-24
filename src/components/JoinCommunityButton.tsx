@@ -6,7 +6,7 @@ import React, { memo } from 'react'
 import { TosConfirmationWrapper } from './TermsOfService/TosConfirmationWrapper'
 import { useValidateUserBalance } from '../utils/useValidateUserBalance'
 import { useTranslation } from 'next-i18next'
-import { useHasUserJoined } from '../contexts/CommunityProvider'
+import { useUserIfJoined } from '../contexts/CommunityProvider'
 import { polygonMumbai } from 'wagmi/chains'
 import { toast } from 'react-toastify'
 
@@ -18,7 +18,7 @@ export const JoinCommunityButton = memo(({ community }: JoinButtonProps) => {
   const { groupId, name: groupName } = community
   const { t } = useTranslation()
   const { address } = useAccount()
-  const hasUserJoined: User | undefined | false = useHasUserJoined(groupId as string | number)
+  const hasUserJoined: User | undefined | false = useUserIfJoined(groupId as string | number)
 
   const { checkUserBalance } = useValidateUserBalance(community, address)
 
