@@ -34,11 +34,13 @@ function EditGroupModal({ community, hidden = false }) {
     }
   }, [isEditGroupOpen])
 
-  const identity = useIdentity()
+  const identity = useIdentity({groupId: community.groupId})
 
   const isOwner = useMemo(() => {
-    return community.ownerIdentity === identity
-  }, [community?.ownerIdentity, identity])
+    if (!community?.ownerIdentity || identity === undefined) return false
+    return community.ownerIdentity === identity;
+
+  }, [community?.ownerIdentity, identity, hidden])
 
   const handleImageUpload = e => {
     const file = e.target.files[0]
@@ -78,13 +80,15 @@ function EditGroupModal({ community, hidden = false }) {
       >
         <button
           id="edit-community-button"
-          className={`absolute right-0 mt-2 mr-2 rounded-full bg-gray-100 p-2 transition duration-300 hover:bg-purple-600 hover:text-white ${
-            !isOwner || hidden ? 'hidden' : ''
+          className={`z-10 absolute right-0 mt-2 mr-2 rounded-full bg-gray-100 p-2 transition duration-300 hover:bg-purple-600 hover:text-white ${
+            !isOwner || hidden ? 'hidden' : 'visible'
           }`}
           onClick={() => setIsEditGroupOpen(true)}
           aria-label="edit community"
         >
-          edit{' '}
+         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+         </svg>
         </button>
       </ToolTip>
 

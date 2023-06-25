@@ -29,7 +29,7 @@ export const fetchCommunitiesData = async ({
     const updatedDataPromises = groupIds.map(async (groupId, index) => {
       const cachedData = cachedDataArray[index]
 
-      if (cachedData?.removed && cachedData) {
+      if (cachedData?.removed) {
         return null
       }
 
@@ -199,6 +199,7 @@ const fetchCommunityDataFromCache = async (
   return null
 }
 
+const maxCacheAge = 1000 * 60 * 60 * 24 // 24 hours
 const fetchCommunitiesDataFromCache = async (
   groupIds: number[]
 ): Promise<((CommunityInterface & { refresh: boolean }) | null)[]> => {
@@ -207,17 +208,26 @@ const fetchCommunitiesDataFromCache = async (
 
   return groupIds.map((groupId, index) => {
     const cachedData = cachedDataArray[index]
+    let refresh = false
+    // example of lastCachedAt value 1687468176683
 
     if (cachedData?.data && !isNaN(groupId)) {
       const cacheData = cachedData.data
-
-      if (!cacheData?.ownerIdentity) return null
+      const lastCachedAt = cachedData?.lastCachedAt
+      if (maxCacheAge < Date.now() - lastCachedAt) {
+        refresh = true
+        console.log('refreshing cache for group', groupId)
+        console.log('last cache in hours', (Date.now() - lastCachedAt) / 1000 / 60 / 60)
+      }
+      if (!cacheData?.ownerIdentity) {
+        return null
+      }
       return {
         ...cacheData,
         groupId,
         id: BigNumber.from(groupId),
         ownerIdentity: BigNumber.from(cacheData.ownerIdentity).toString(),
-        refresh: false, // assuming refresh should be false as per the provided getMCache implementation
+        refresh, // assuming refresh should be false as per the provided getMCache implementation
       }
     }
 
@@ -322,7 +332,7 @@ export const uploadImages = async ({
   }
 
   console.log('bannerUrl', bannerUrl)
-    console.log('logoUrl', logoUrl)
+  console.log('logoUrl', logoUrl)
 
   return [bannerUrl, logoUrl]
 }
