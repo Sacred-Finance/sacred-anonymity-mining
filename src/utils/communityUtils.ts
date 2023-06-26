@@ -1,64 +1,54 @@
-'use client'
-
+import { BigNumber, ethers } from 'ethers'
+import {erc20dummyABI, forumContract, jsonRPCProvider, supportedChains} from '../constant/const'
+import {getCache, getMCache, setCache} from '../lib/redis'
+import {uploadImageToIPFS} from '../lib/utils'
+import {fetchTokenInfo} from './tokenUtils'
 import { Community as CommunityInterface } from '../lib/model'
 
-import { BigNumber, ethers } from 'ethers'
-import { erc20dummyABI, supportedChains } from '../constant/const'
-import { getCache, getMCache, setCache } from '../lib/redis'
-import { uploadImageToIPFS } from '../lib/utils'
-import { fetchTokenInfo } from './tokenUtils'
 import pica from 'pica'
 import { useCallback } from 'react'
-import _ from 'lodash'
 
 interface FetchCommunityDataParams {
   group: any
-  forumContract: any
-  provider: any
 }
+
+interface FetchCommunitiesDataParams {
+  groups: any[]
+}
+
 export const fetchCommunitiesData = async ({
   groups,
-  forumContract,
-  provider,
 }: FetchCommunitiesDataParams): Promise<CommunityInterface[] | null> => {
   try {
     const groupIds = groups.map(group => group?.args?.['groupId']?.toNumber())
-    console.log('groupIds communitiesData', groupIds)
 
     const cachedDataArray = await fetchCommunitiesDataFromCache(groupIds)
 
-    console.log('communitiesData - utils', cachedDataArray)
-
     const updatedDataPromises = groupIds.map(async (groupId, index) => {
       const cachedData = cachedDataArray[index]
-      console.log('cachedData ', cachedData)
 
       if (cachedData?.removed) {
-        console.log('cachedData removed ', cachedData)
         return null
       }
 
       const shouldReturnCachedData =
         !cachedData?.refresh &&
         cachedData &&
-        cachedData.ownerIdentity &&
+        cachedData.note &&
         !!cachedData.requirements &&
         cachedData.name &&
-        !isNaN(cachedData.userCount)
-
-      console.log('shouldReturnCachedData - communitiesData', shouldReturnCachedData)
+        !isNaN(cachedData?.userCount)
 
       if (shouldReturnCachedData) {
         return cachedData
       } else {
-
-        console.log('cachedData - communitiesData', cachedData.userCount, cachedData.groupId)
+        console.log('cachedData - communitiesData', { groupId }, cachedData?.userCount, cachedData?.groupId)
       }
 
       let groupData
       try {
-        groupData = await forumContract.groupInfo(groupId.toString())
-        if (groupData[5]) {
+        groupData = await forumContract.groupAt(groupId.toString())
+        if (groupData?.removed) {
           console.log('groupData removed', groupData)
           // if community is removed
           return null
@@ -70,44 +60,47 @@ export const fetchCommunitiesData = async ({
       }
 
       const fulfilledRequirements = await fetchGroupRequirements(
-        forumContract,
         groupId.toString(),
-        groupData?.[4]?.toNumber(),
-        provider
+        groupData?.chainId?.toNumber(),
       )
 
       const group = groups[index]
-      const identity = group.args['creatorIdentityCommitment'].toString()
+      const note = group.args['note'].toString()
 
       const newData = {
         groupId: groupId,
         name: group.args['name'],
         id: group.args['groupId'],
-        userCount: groupData?.[3]?.toNumber() || 0,
+        userCount: groupData?.userCount?.toNumber() || 0,
         requirements: fulfilledRequirements,
-        ownerIdentity: identity,
-        chainId: groupData?.[4]?.toNumber(),
-        removed: groupData?.[5],
+        note,
+        chainId: groupData?.chainId?.toNumber(),
+        removed: groupData?.removed,
+      }
+      // remove groupData from newData if it exists
+      if (newData?.['groupData']) {
+        delete newData?.['groupData']
+      }
+      if (cachedData?.['groupData']) {
+        delete cachedData?.['groupData']
       }
 
       const mergedData = cachedData ? { ...cachedData, ...newData } : newData
 
-      // await setCache(`group_${groupId}`, mergedData)
+      await setCache(`group_${groupId}`, mergedData)
 
       return mergedData
     })
 
     return await Promise.all(updatedDataPromises)
   } catch (error) {
-    console.log('error', error)
+    console.trace('error', error)
     return null
   }
 }
 
 export const fetchCommunityData = async ({
   group,
-  forumContract,
-  provider,
 }: FetchCommunityDataParams): Promise<CommunityInterface | null> => {
   try {
     const groupId = group?.args?.['groupId']?.toNumber()
@@ -122,7 +115,7 @@ export const fetchCommunityData = async ({
     const shouldReturnCachedData =
       !cachedData?.refresh &&
       cachedData &&
-      cachedData.ownerIdentity &&
+      cachedData.note &&
       !!cachedData.requirements &&
       cachedData.name &&
       !isNaN(cachedData.userCount)
@@ -147,22 +140,20 @@ export const fetchCommunityData = async ({
     }
 
     const fulfilledRequirements = await fetchGroupRequirements(
-      forumContract,
       groupId.toString(),
-      groupData?.[4]?.toNumber(),
-      provider
+      groupData?.chainId?.toNumber(),
     )
-    const identity = group.args['creatorIdentityCommitment'].toString()
+    const note = group.args['note'].toString()
 
     const newData = {
       groupId: groupId,
       name: group.args['name'],
       id: group.args['groupId'],
-      userCount: groupData?.[3]?.toNumber() || 0,
+      userCount: groupData?.userCount?.toNumber() || 0,
       requirements: fulfilledRequirements,
-      ownerIdentity: identity,
-      chainId: groupData?.[4]?.toNumber(),
-      removed: groupData?.[5],
+      note,
+      chainId: groupData?.chainId?.toNumber(),
+      removed: groupData?.removed,
     }
 
     // Merge new data with existing cached data, if available
@@ -178,8 +169,9 @@ export const fetchCommunityData = async ({
   }
 }
 
-export async function fetchGroupRequirements(forumContract, groupId, chainId, provider) {
-  const groupRequirements = await forumContract.getGroupRequirements(groupId)
+export async function fetchGroupRequirements(groupId, chainId) {
+  const groupRequirements = await forumContract.groupRequirements(groupId)
+  const provider = new ethers.providers.JsonRpcProvider(supportedChains[chainId].rpcUrls.public.http[0])
   const requirementsPromises = groupRequirements.map(async requirement => {
     const contract = new ethers.Contract(requirement.tokenAddress, erc20dummyABI, provider)
     const { symbol, name, decimals } = await fetchTokenInfo(contract)
@@ -207,33 +199,41 @@ const fetchCommunityDataFromCache = async (
       ...cacheData,
       groupId,
       id: BigNumber.from(groupId),
-      ownerIdentity: BigNumber.from(cacheData.ownerIdentity).toString(),
+      note: cacheData?.note,
     }
   }
 
   return null
 }
 
+const maxCacheAge = 1000 * 60 * 60 * 24 // 24 hours
 const fetchCommunitiesDataFromCache = async (
   groupIds: number[]
 ): Promise<((CommunityInterface & { refresh: boolean }) | null)[]> => {
   const cacheKeys = groupIds.map(groupId => `group_${groupId}`)
   const { cache: cachedDataArray } = await getMCache(cacheKeys, true)
 
-  console.log('cachedDataArray - communitiesData' , cachedDataArray)
-
   return groupIds.map((groupId, index) => {
     const cachedData = cachedDataArray[index]
+    let refresh = false
+    // example of lastCachedAt value 1687468176683
 
-    console.log('cachedData - communitiesData' , cachedData)
-    if (cachedData?.data) {
+    if (cachedData?.data && !isNaN(groupId)) {
       const cacheData = cachedData.data
-
+      const lastCachedAt = cachedData?.lastCachedAt
+      if (maxCacheAge < Date.now() - lastCachedAt) {
+        refresh = true
+        console.log('refreshing cache for group', groupId)
+        console.log('last cache in hours', (Date.now() - lastCachedAt) / 1000 / 60 / 60)
+      }
+      if (!cacheData?.note) {
+        return null
+      }
       return {
         ...cacheData,
         groupId,
         id: BigNumber.from(groupId),
-        ownerIdentity: BigNumber.from(cacheData.ownerIdentity).toString(),
+        note: cacheData?.note,
         refresh: false, // assuming refresh should be false as per the provided getMCache implementation
       }
     }
@@ -244,21 +244,24 @@ const fetchCommunitiesDataFromCache = async (
 
 export const uploadThenCacheGroupData = async ({
   groupId,
-  bannerFile,
-  logoFile,
   groupData,
   chainId,
   requirements,
+  details,
 }: {
   groupId: any
-  bannerFile: any
-  logoFile: any
   groupData: any
   chainId: number
   requirements: []
+  details: {
+    description: string
+    tags: string[]
+    bannerCID: string
+    logoCID: string
+  }
 }) => {
   const { blockHash, args, event, transactionIndex, blockNumber, ...otherData } = groupData
-  const [groupIdArg, nameArg, creatorIdentityCommitmentArg] = args
+  const [groupIdArg, nameArg, note] = args
 
   const groupIdInt = parseInt(groupIdArg.hex, 16)
 
@@ -266,7 +269,7 @@ export const uploadThenCacheGroupData = async ({
     name?: string
     groupId?: number
     id?: any
-    ownerIdentity?: string
+    note?: string
     groupData: any
     chainId: number
     requirements: []
@@ -275,7 +278,7 @@ export const uploadThenCacheGroupData = async ({
     name: nameArg,
     groupId: groupIdInt,
     id: groupIdArg,
-    ownerIdentity: BigNumber.from(creatorIdentityCommitmentArg).toString(),
+    note: BigNumber.from(note).toString(),
     groupData: {
       blockHash,
       args,
@@ -291,15 +294,8 @@ export const uploadThenCacheGroupData = async ({
 
   await setCache(`group_${groupId}`, cacheData)
 
-  const updatedCacheData = await uploadAndCacheImages({
-    groupId: groupId,
-    bannerFile: bannerFile,
-    logoFile: logoFile,
-  })
-
   return {
     ...cacheData,
-    ...updatedCacheData,
   }
 }
 
@@ -314,6 +310,105 @@ interface ImageCacheData {
   logo?: string
 }
 
+type UploadImagesParams = {
+  bannerFile?: File | null
+  logoFile?: File | null
+}
+
+export const uploadImages = async ({
+  bannerFile,
+  logoFile,
+}: UploadImagesParams): Promise<[string | null, string | null]> => {
+  const [bannerResult, logoResult] = await Promise.allSettled([
+    bannerFile ? uploadImageToIPFS(bannerFile) : Promise.resolve(null),
+    logoFile ? uploadImageToIPFS(logoFile) : Promise.resolve(null),
+  ])
+
+  let bannerUrl: string | null = null
+  let logoUrl: string | null = null
+
+  if (bannerResult.status === 'fulfilled' && bannerResult.value) {
+    bannerUrl = bannerResult.value
+  } else if (bannerResult.status === 'rejected' && bannerFile) {
+    console.error('Error uploading banner image:', bannerResult.reason)
+  }
+
+  if (logoResult.status === 'fulfilled' && logoResult.value) {
+    logoUrl = logoResult.value
+  } else if (logoResult.status === 'rejected' && logoFile) {
+    console.error('Error uploading logo image:', logoResult.reason)
+  }
+
+  console.log('bannerUrl', bannerUrl)
+  console.log('logoUrl', logoUrl)
+
+  return [bannerUrl, logoUrl]
+}
+
+export const cacheGroupData = async ({
+  groupId,
+  groupData,
+  chainId,
+  requirements,
+  details,
+}: {
+  groupId: any
+  groupData: any
+  chainId: number
+  requirements: []
+  details: {
+    description: string
+    tags: string[]
+    bannerCID: string
+    logoCID: string
+  }
+}): Promise<any> => {
+  const { blockHash, args, event, transactionIndex, blockNumber, ...otherData } = groupData
+  const [groupIdArg, nameArg, note] = args
+  const groupIdInt = parseInt(groupIdArg.hex, 16)
+
+  const cacheData: {
+    name?: string
+    groupId?: number
+    id?: any
+    note?: string
+    groupData: any
+    chainId: number
+    requirements: []
+    removed: boolean
+    details: {
+      description: string
+      tags: string[]
+      bannerCID: string
+      logoCID: string
+    }
+    banner: string
+    logo: string
+  } = {
+    name: nameArg,
+    groupId: groupIdInt,
+    id: groupIdArg,
+    note: note.toString(),
+    groupData: {
+      blockHash,
+      args,
+      event,
+      transactionIndex,
+      blockNumber,
+      ...otherData,
+    },
+    chainId,
+    requirements,
+    removed: false,
+    details,
+    banner: details.bannerCID,
+    logo: details.logoCID,
+  }
+
+  await setCache(`group_${groupId}`, cacheData)
+
+  return cacheData
+}
 export const uploadAndCacheImages = async ({
   groupId,
   bannerFile,

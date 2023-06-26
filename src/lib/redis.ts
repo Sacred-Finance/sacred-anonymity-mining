@@ -43,6 +43,7 @@ export const setCache = async (key: string, value: any, path = '$') => {
   const datedValue = dateStamp(value)
 
   if (!redisClient) {
+    console.log('redisClient not found - initializing')
     redisClient = await getRedisClient()
   }
 
@@ -59,6 +60,9 @@ export const setCache = async (key: string, value: any, path = '$') => {
         console.error({ fail, key, value })
       }
     )
+    .catch(error => {
+      console.error('redisClient error ', error)
+    })
 }
 
 export const setCacheAtSpecificPath = async (key: string, value: any, path = '$') => {
@@ -66,15 +70,20 @@ export const setCacheAtSpecificPath = async (key: string, value: any, path = '$'
     redisClient = await getRedisClient()
   }
 
-  return redisClient.json.set(key, path, value).then(
-    async success => {
-      console.log('caching successful', key, path, value)
-      await updateLastCachedAt(key)
-    },
-    fail => {
-      console.error({ fail, key, value })
-    }
-  )
+  return redisClient.json
+    .set(key, path, value)
+    .then(
+      async success => {
+        console.log('redisClient caching successful', key, path, value)
+        await updateLastCachedAt(key)
+      },
+      fail => {
+        console.error('redisClient', { fail, key, value })
+      }
+    )
+    .catch(error => {
+      console.error('redisClient error ', error)
+    })
 }
 
 export const getMCache2 = async (keys: string[], withCleanUp = false): Promise<{ cache; refresh: boolean }[]> => {
@@ -162,7 +171,7 @@ export const getCache = async (key: string, withCleanUp = false): Promise<{ cach
 const cacheCommunityCleanUp = async (key, cache) => {
   if (
     key.startsWith('group_') &&
-    (!cache.hasOwnProperty('ownerIdentity') || !cache.hasOwnProperty('id') || !cache.hasOwnProperty('groupId'))
+    (!cache.hasOwnProperty('note') || !cache.hasOwnProperty('id') || !cache.hasOwnProperty('groupId'))
   ) {
     console.log('cache missing required properties - deleting', key, cache)
     // Remove the cache if it doesn't have the required properties

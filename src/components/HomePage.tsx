@@ -39,7 +39,7 @@ function HomePage({ createCommunity, isAdmin = false }: HomeProps) {
   const { t, i18n, ready } = useTranslation()
   /** To prepare a map of the group already joined by the user connected */
   useEffect(() => {
-    if (communities.length) {
+    if (communities?.length) {
       const gMap = {}
       // Filter out duplicate communities based on their groupId and name
       const uniqueCommunities = Array.from(
@@ -183,7 +183,7 @@ function HomePage({ createCommunity, isAdmin = false }: HomeProps) {
         ))}
       </div>
 
-      {localCommunities.length === 0 && (
+      {localCommunities?.length === 0 && (
         <div className="my-12 flex flex-col items-center justify-center space-y-4">
           <motion.h2
             initial={{ opacity: 0, y: -50 }}
@@ -219,7 +219,7 @@ function HomePage({ createCommunity, isAdmin = false }: HomeProps) {
         </div>
       )}
 
-      {communities.length === 0 && !isLoading && (
+      {communities?.length === 0 && !isLoading && (
         <div className="my-12 flex flex-col items-center justify-center">
           <p className="mb-4 text-xl dark:text-gray-200">0 Communities :(</p>
           <button

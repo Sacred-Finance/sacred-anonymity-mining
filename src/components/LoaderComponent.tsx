@@ -2,6 +2,7 @@ import { Fragment, useRef } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import WaitingAnimation from "../../public/waiting.json";
 import { useLoaderContext } from "../contexts/LoaderContext";
+import { motion } from "framer-motion";
 
 export function LoaderComponent() {
   const { isLoading, setIsLoading } = useLoaderContext();
@@ -15,7 +16,11 @@ export function LoaderComponent() {
       preserveAspectRatio: "xMidYMid slice",
     },
   };
-
+  const LoadingIcon = () => (
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+      </svg>
+  );
   return (
       <Transition.Root show={isLoading} as={Fragment}>
         <Dialog
@@ -50,8 +55,19 @@ export function LoaderComponent() {
               leaveTo="scale-95"
           >
             <div className="relative bg-white rounded-lg w-64 h-64 p-4">
-              {/* Replace the commented line with your Lottie animation */}
-              {/* <Lottie options={defaultOptions} height={500} width={500} /> */}
+              <div className="w-full h-screen flex items-center justify-center bg-pink-400">
+                <motion.div
+                    className="text-white"
+                    initial={{ scale: 1 }}
+                    animate={{ scale: [1, 1.5, 1] }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                    }}
+                >
+                  <LoadingIcon />
+                </motion.div>
+              </div>
             </div>
           </Transition.Child>
         </Dialog>

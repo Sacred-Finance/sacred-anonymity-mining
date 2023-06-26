@@ -148,7 +148,7 @@ function useCommunityAndPost(communityId, postId) {
     signerOrProvider: provider,
   })
 
-  const postClassInstance = new PostClass(postId, communityId, forumContract, provider)
+  const postClassInstance = new PostClass(postId, communityId)
 
   async function fetchPost() {
     return await postClassInstance.get()

@@ -2,7 +2,7 @@ import { Proof } from '@semaphore-protocol/proof'
 import axios from 'axios'
 import { BigNumberish } from 'ethers'
 import { RELAYER_URL } from '../constant/const'
-import { ReputationProofStruct, Requirement } from './model'
+import { CommunityDetails, ReputationProofStruct, Requirement } from './model'
 
 export async function joinGroup(groupId: string, identityCommitment: string, username: string) {
   return axios.post(`${RELAYER_URL}/join-group`, {
@@ -13,16 +13,18 @@ export async function joinGroup(groupId: string, identityCommitment: string, use
 }
 
 export async function createGroup(
-  identityCommitment: string,
   requirements: Requirement[],
   groupName: string,
-  chainId: number
+  chainId: number,
+  details: CommunityDetails,
+  note: string
 ) {
   return axios.post(`${RELAYER_URL}/create-group`, {
-    identityCommitment,
     groupName,
     requirements,
     chainId,
+    details,
+    note
   })
 }
 
@@ -30,8 +32,8 @@ export async function createPost(
   contentCID: string,
   note: BigInt,
   groupId: string,
-  merkleRoot: BigNumberish,
-  nullifierHash: BigNumberish,
+  merkleRoot: string,
+  nullifierHash: string,
   solidityProof: Proof,
   unirepProof: ReputationProofStruct
 ) {
@@ -51,8 +53,8 @@ export async function createComment(
   note: BigInt,
   groupId: string,
   parentId: string,
-  merkleRoot: BigNumberish,
-  nullifierHash: BigNumberish,
+  merkleRoot: string,
+  nullifierHash: string,
   solidityProof: Proof,
   unirepProof: ReputationProofStruct
 ) {
@@ -75,7 +77,6 @@ export async function edit(itemId: string, contentCID: string, note: BigInt, a, 
     c,
     itemId,
     contentCID,
-    note: note.toString(),
   })
 }
 
@@ -83,8 +84,8 @@ export async function vote(
   itemId: string,
   groupId: string,
   type: number,
-  merkleRoot: BigNumberish,
-  nullifierHash: BigNumberish,
+  merkleRoot: string,
+  nullifierHash: string,
   solidityProof: Proof,
   voteRepProof: ReputationProofStruct
 ) {

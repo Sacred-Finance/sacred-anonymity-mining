@@ -57,7 +57,7 @@ export const useJoinCommunity = () => {
         }
       }
 
-      await handleCommunityAction(actionFn, [], `Successfully joined ${groupName}`, successCallback)
+      return await handleCommunityAction(actionFn, [], `Successfully joined ${groupName}`, successCallback)
     },
     [isConnected, address, handleCommunityAction, dispatch] // Update the dependencies array
   )

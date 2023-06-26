@@ -61,13 +61,10 @@ export class UnirepUser {
       },
       this.identity
     )
-    console.log('userState', userState)
     await userState.sync.start()
     UnirepUser.user.userState = userState
-    console.log('userState', userState)
     await userState.waitForSync()
-    // todo: fix this
-    // this.latestTransitionedEpoch = await UnirepUser.user.userState.latestTransitionedEpoch()
+    this.latestTransitionedEpoch = await UnirepUser.user.userState.latestTransitionedEpoch()
 
     UnirepUser.user = {
       ...UnirepUser.user,
@@ -80,6 +77,9 @@ export class UnirepUser {
     } else {
       await this.updateUserEpochKey()
     }
+
+    const reputation = await this.fetchReputation()
+    console.log(`Reputaion`, reputation)
   }
 
   getUserState() {
@@ -130,7 +130,6 @@ export class UnirepUser {
       },
       this.identity
     )
-
     await userState.sync.start()
     await userState.waitForSync()
     UnirepUser.user.userState = { ...userState }
@@ -155,6 +154,7 @@ export class UnirepUser {
 
       await (await this.unirep.userStateTransition(publicSignals, proof)).wait()
       await userState.waitForSync()
+      console.log('User transition Completed:', attesterAddress)
       await this.updateUserEpochKey()
     } catch (error) {
       if (error instanceof Error) message = error.message
@@ -170,18 +170,11 @@ export class UnirepUser {
       userState = await this.genUserState()
     }
     const { publicSignals, proof } = await userState.genUserSignUpProof()
-    const response = await userUnirepSignUp(publicSignals, proof)
-      .then(res => {
-        return res
-      })
-      .catch(err => {
-        console.log('Error:', err)
-        return err
-      })
-    if (response?.status === 200) {
+    const { status } = await userUnirepSignUp(publicSignals, proof)
+    if (status === 200) {
       return await this.updateUserEpochKey()
     } else {
-      console.log('Error:', response?.data)
+      throw new Error('User signup to Urnirep failed!')
     }
   }
 
@@ -193,5 +186,9 @@ export class UnirepUser {
     if (this.latestTransitionedEpoch < currentEpoch) {
       await this.userTransition()
     }
+  }
+
+  async fetchReputation() {
+    return await UnirepUser.user.userState.getData()
   }
 }

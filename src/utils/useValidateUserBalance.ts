@@ -1,5 +1,5 @@
 import { useContractReads } from 'wagmi'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'react-toastify'
 import { erc20dummyABI } from '../constant/const'
 import { Community } from '../lib/model'
@@ -30,14 +30,20 @@ export const useValidateUserBalance = (community: Community | undefined, address
         }))
       : []
 
+  const isEnabled = useMemo(() => {
+    return (
+      fetchEnabled && !!community?.requirements?.length && !!address && !!community?.chainId && requirements.length > 0
+    )
+  }, [fetchEnabled, community, address, requirements])
+
   const { data, isError, isLoading } = useContractReads({
     contracts: requirements,
     cacheOnBlock: true,
     cacheTime: 10_000,
     allowFailure: true,
     autoReload: true,
-    enabled:
-      fetchEnabled && !!community?.requirements?.length && !!address && !!community?.chainId && requirements.length > 0,
+    enabled: isEnabled,
+
     onError(error) {
       console.log('error validate balance check', error)
     },
@@ -54,16 +60,19 @@ export const useValidateUserBalance = (community: Community | undefined, address
   })
 
   useEffect(() => {
+    console.log('useEffect', { data, isError, isLoading })
     if (!isLoading && (isError || data)) {
       setFetchEnabled(false)
     }
   }, [data, isError, isLoading])
 
   const checkUserBalance = useCallback(() => {
-    setFetchEnabled(true)
-    console.log('checking balance')
     let toastMessage = ''
     let requirementsMet: RequirementCheck[] = []
+
+    if (!community?.requirements.length) {
+      return true
+    }
 
     if (data && !isError && !isLoading) {
       requirementsMet = data.map((bal, i) => {
@@ -79,7 +88,9 @@ export const useValidateUserBalance = (community: Community | undefined, address
         }
       })
 
+      console.log('requirementsMet', requirementsMet)
       const hasSufficientBalance = requirementsMet.every(e => e.balance >= e.minAmount / 10 ** e.decimals)
+      console.log('hasSufficientBalance', hasSufficientBalance)
 
       if (!hasSufficientBalance) {
         toast.warning(`Insufficient Balance`, {
@@ -96,12 +107,14 @@ export const useValidateUserBalance = (community: Community | undefined, address
       setValidationResult({ hasSufficientBalance, toastMessage })
       return hasSufficientBalance
     }
+    setFetchEnabled(true)
 
-    return false
+    console.log('checking balance', data, isError, isLoading)
   }, [community, data, isError, isLoading])
 
   useEffect(() => {
-    if (data && !isError && !isLoading) {
+    if (data === undefined && !isError && !isLoading) {
+      console.log('checking balance - in effect', data, isError, isLoading)
       checkUserBalance()
     }
   }, [data, isError, isLoading, checkUserBalance])

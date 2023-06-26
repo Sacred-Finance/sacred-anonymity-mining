@@ -154,7 +154,7 @@ export function useActiveUser(): User | undefined {
 
   const identity = useIdentity(id ? { groupId: id as string } : undefined)
 
-  return useMemo(() => state.users.find(c => c.identityCommitment === identity), [state.users, identity])
+  return useMemo(() => state.users.find(c => c.identityCommitment === identity.getCommitment().toString()), [state.users, identity])
 }
 
 export function useUserById(id: string): User | undefined {
@@ -177,15 +177,15 @@ export function useGroupedUserLength(id: string): number | undefined {
   return useMemo(() => state.usersGrouped[id]?.length, [state.usersGrouped, id])
 }
 
-export function useHasUserJoined(communityId: string | number): User | undefined {
+export function useUserIfJoined(communityId: string | number): User | false {
   const { state } = useCommunityContext()
   const { address: userAddress } = useAccount()
 
   // return useMemo(() => {
-  if (!userAddress) return undefined
-  if (!state.usersGrouped[0]) throw new Error('hasUserJoined - usersGrouped is undefined')
+  if (!userAddress) return false
+  if (!state.usersGrouped) throw new Error('hasUserJoined - usersGrouped is undefined')
   if (!state.usersGrouped[communityId]) {
-    return undefined
+    return false
   }
 
   return state.usersGrouped[communityId]?.find(u => {
@@ -193,6 +193,5 @@ export function useHasUserJoined(communityId: string | number): User | undefined
     const userCommitment = generatedIdentity.getCommitment().toString()
 
     return _.toNumber(+u?.groupId) === _.toNumber(communityId) && u?.identityCommitment === userCommitment
-  })
-  // }, [state.usersGrouped, userAddress, communityId])
+  }) as User || false
 }
