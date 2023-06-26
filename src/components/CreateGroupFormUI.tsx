@@ -32,13 +32,17 @@ function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
     },
   })
   const [groupName, setGroupName] = useState('')
+  const [groupDescription, setGroupDescription] = useState('')
   const [reqMandatory, setReqMandatory] = useState(true)
   const [er, setEr] = useState({})
 
   const [bannerFile, setBannerFile] = useState<File | null>(null)
   const [logoFile, setLogoFile] = useState<File | null>(null)
-  const handleInputChange = e => {
+  const handleNameChange = e => {
     setGroupName(e.target.value)
+  }
+  const handleDescriptionChange = e => {
+    setGroupDescription(e.target.value)
   }
 
   const [selectedChain, setSelectedChain] = useState<Chain>(supportedChains[polygonMumbai.id])
@@ -115,6 +119,8 @@ function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
       bannerFile: bannerFile,
       logoFile: logoFile,
       chainId: reqMandatory ? selectedChain.id : polygonMumbai.id,
+      groupDescription,
+      note: BigInt(0).toString(),
     })
   }
 
@@ -153,7 +159,16 @@ function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
           placeholder={'An awesome name'}
           type="text"
           value={groupName}
-          onChange={handleInputChange}
+          onChange={handleNameChange}
+        />
+      </div>
+      <div className="flex flex-col space-y-2">
+        <label className="pointer-events-none text-base md:text-lg">{t('placeholder.communityDescription')}</label>
+        <textarea
+          className={clsx(classes.input)}
+          placeholder={'Description'}
+          value={groupDescription}
+          onChange={handleDescriptionChange}
         />
       </div>
       <hr className="my-4 border-border-on-dark" />

@@ -15,8 +15,7 @@ import { forumContract, jsonRPCProvider } from '../constant/const'
 import { useRouter } from 'next/router'
 
 const POST_ITEM_TYPE = 0
-const POLLING_INTERVAL = 60000 // Set to one minute, adjust as necessary
-
+const POLLING_INTERVAL = 60000
 const updatePosts = (groupCacheId, mutate) => async (p, parsedPost) => {
   mutate(
     groupCacheId,
@@ -95,31 +94,33 @@ export const useCommunityUpdates = ({
   postInstance,
 }: {
   user: User | false
-  postInstance
+  postInstance: any // replace any with the appropriate type if possible
 }) => {
   const router = useRouter()
-  const { id } = router.query
+  const id = Number(router.query.id)
   const groupCacheId = `${id}_group`
 
   const { mutate } = useSWRConfig()
   const updatePostsCallback = useCallback(updatePosts(groupCacheId, mutate), [groupCacheId, mutate])
   const gatherContentCallback = useCallback(gatherContent(updatePostsCallback), [updatePostsCallback])
-  const handleNewItemCallback = useCallback(handleNewItem(gatherContentCallback, id, user), [
-    gatherContentCallback,
-    id,
-    user,
-  ])
+  const handleNewItemCallback = useCallback(
+    handleNewItem(gatherContentCallback, id, user !== false ? user : undefined),
+    [gatherContentCallback, id, user]
+  )
   const handleVoteItemCallback = useCallback(handleVoteItem(postInstance), [postInstance])
+
   const fetchEventsCallback = useCallback(
-    fetchEvents(user, postInstance, handleNewItemCallback, handleVoteItemCallback),
+    fetchEvents(user !== false ? user : undefined, postInstance, handleNewItemCallback, handleVoteItemCallback),
     [user, postInstance, handleNewItemCallback, handleVoteItemCallback]
   )
 
   useEffect(() => {
-    if (!jsonRPCProvider) return
+    if (!jsonRPCProvider || !forumContract) return
     console.log('listening to events')
     fetchEventsCallback()
-    const intervalId = setInterval(fetchEventsCallback, POLLING_INTERVAL)
+    const intervalId = setInterval(() => {
+      fetchEventsCallback()
+    }, POLLING_INTERVAL)
 
     return () => {
       clearInterval(intervalId)
