@@ -3,6 +3,7 @@ import { utils } from 'ethers'
 import { create, IPFSHTTPClient } from 'ipfs-http-client'
 import { toBufferLE, toBufferBE } from 'bigint-buffer'
 import { buildBabyjub, buildPedersenHash } from 'circomlibjs'
+import { Identity } from '@semaphore-protocol/identity'
 
 const groth16 = require('snarkjs').groth16
 
@@ -164,13 +165,15 @@ export const numToBuffer = (number, size, endianess): Buffer => {
   }
 }
 
-export const createNote = async (cid: BigInt, identity: BigInt) => {
-  const cidBuffer = numToBuffer(cid, 32, 'le')
-  const image = Buffer.concat([cidBuffer, numToBuffer(identity, 32, 'le')])
-  if (!babyJub) {
+export const createNote = async (identity: Identity) => {
+  const trapdoor = identity.getTrapdoor()
+  const nullifier = identity.getNullifier()
+  const trapdoorBuffer = numToBuffer(trapdoor, 32, 'le')
+  const image = Buffer.concat([trapdoorBuffer, numToBuffer(nullifier, 32, 'le')])
+  if(!babyJub)
     babyJub = await buildBabyjub()
-  }
-  if (!pedersen) pedersen = await buildPedersenHash()
+  if(!pedersen)
+    pedersen = await buildPedersenHash();
   return pedersenHash(image)
 }
 

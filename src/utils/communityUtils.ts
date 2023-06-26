@@ -1,10 +1,10 @@
+import { BigNumber, ethers } from 'ethers'
+import {erc20dummyABI, forumContract, jsonRPCProvider, supportedChains} from '../constant/const'
+import {getCache, getMCache, setCache} from '../lib/redis'
+import {uploadImageToIPFS} from '../lib/utils'
+import {fetchTokenInfo} from './tokenUtils'
 import { Community as CommunityInterface } from '../lib/model'
 
-import { BigNumber, ethers } from 'ethers'
-import { erc20dummyABI, forumContract, jsonRPCProvider } from '../constant/const'
-import { getCache, getMCache, setCache } from '../lib/redis'
-import { uploadImageToIPFS } from '../lib/utils'
-import { fetchTokenInfo } from './tokenUtils'
 import pica from 'pica'
 import { useCallback } from 'react'
 
@@ -14,14 +14,12 @@ interface FetchCommunityDataParams {
 
 interface FetchCommunitiesDataParams {
   groups: any[]
-  provider
 }
+
 export const fetchCommunitiesData = async ({
   groups,
-  provider,
 }: FetchCommunitiesDataParams): Promise<CommunityInterface[] | null> => {
   try {
-    if (!provider) throw new Error('Provider not found')
     const groupIds = groups.map(group => group?.args?.['groupId']?.toNumber())
 
     const cachedDataArray = await fetchCommunitiesDataFromCache(groupIds)
@@ -36,7 +34,7 @@ export const fetchCommunitiesData = async ({
       const shouldReturnCachedData =
         !cachedData?.refresh &&
         cachedData &&
-        cachedData.ownerIdentity &&
+        cachedData.note &&
         !!cachedData.requirements &&
         cachedData.name &&
         !isNaN(cachedData?.userCount)
@@ -49,8 +47,8 @@ export const fetchCommunitiesData = async ({
 
       let groupData
       try {
-        groupData = await forumContract.groupInfo(groupId.toString())
-        if (groupData[5]) {
+        groupData = await forumContract.groupAt(groupId.toString())
+        if (groupData?.removed) {
           console.log('groupData removed', groupData)
           // if community is removed
           return null
@@ -61,20 +59,23 @@ export const fetchCommunitiesData = async ({
         return null
       }
 
-      const fulfilledRequirements = await fetchGroupRequirements(groupId.toString(), groupData?.[4]?.toNumber())
+      const fulfilledRequirements = await fetchGroupRequirements(
+        groupId.toString(),
+        groupData?.chainId?.toNumber(),
+      )
 
       const group = groups[index]
-      const identity = group.args['creatorIdentityCommitment'].toString()
+      const note = group.args['note'].toString()
 
       const newData = {
         groupId: groupId,
         name: group.args['name'],
         id: group.args['groupId'],
-        userCount: groupData?.[3]?.toNumber?.() || 0,
+        userCount: groupData?.userCount?.toNumber() || 0,
         requirements: fulfilledRequirements,
-        ownerIdentity: identity,
-        chainId: groupData?.[4]?.toNumber(),
-        removed: groupData?.[5],
+        note,
+        chainId: groupData?.chainId?.toNumber(),
+        removed: groupData?.removed,
       }
       // remove groupData from newData if it exists
       if (newData?.['groupData']) {
@@ -98,7 +99,9 @@ export const fetchCommunitiesData = async ({
   }
 }
 
-export const fetchCommunityData = async ({ group }: FetchCommunityDataParams): Promise<CommunityInterface | null> => {
+export const fetchCommunityData = async ({
+  group,
+}: FetchCommunityDataParams): Promise<CommunityInterface | null> => {
   try {
     const groupId = group?.args?.['groupId']?.toNumber()
     console.log('groupId', groupId)
@@ -112,7 +115,7 @@ export const fetchCommunityData = async ({ group }: FetchCommunityDataParams): P
     const shouldReturnCachedData =
       !cachedData?.refresh &&
       cachedData &&
-      cachedData.ownerIdentity &&
+      cachedData.note &&
       !!cachedData.requirements &&
       cachedData.name &&
       !isNaN(cachedData.userCount)
@@ -136,18 +139,21 @@ export const fetchCommunityData = async ({ group }: FetchCommunityDataParams): P
       return null
     }
 
-    const fulfilledRequirements = await fetchGroupRequirements(groupId, groupData?.[4]?.toNumber())
-    const identity = group.args['creatorIdentityCommitment'].toString()
+    const fulfilledRequirements = await fetchGroupRequirements(
+      groupId.toString(),
+      groupData?.chainId?.toNumber(),
+    )
+    const note = group.args['note'].toString()
 
     const newData = {
       groupId: groupId,
       name: group.args['name'],
       id: group.args['groupId'],
-      userCount: groupData?.[3]?.toNumber() || 0,
+      userCount: groupData?.userCount?.toNumber() || 0,
       requirements: fulfilledRequirements,
-      ownerIdentity: identity,
-      chainId: groupData?.[4]?.toNumber(),
-      removed: groupData?.[5],
+      note,
+      chainId: groupData?.chainId?.toNumber(),
+      removed: groupData?.removed,
     }
 
     // Merge new data with existing cached data, if available
@@ -164,9 +170,10 @@ export const fetchCommunityData = async ({ group }: FetchCommunityDataParams): P
 }
 
 export async function fetchGroupRequirements(groupId, chainId) {
-  const groupRequirements = await forumContract.getGroupRequirements(groupId)
+  const groupRequirements = await forumContract.groupRequirements(groupId)
+  const provider = new ethers.providers.JsonRpcProvider(supportedChains[chainId].rpcUrls.public.http[0])
   const requirementsPromises = groupRequirements.map(async requirement => {
-    const contract = new ethers.Contract(requirement.tokenAddress, erc20dummyABI, jsonRPCProvider)
+    const contract = new ethers.Contract(requirement.tokenAddress, erc20dummyABI, provider)
     const { symbol, name, decimals } = await fetchTokenInfo(contract)
     return {
       minAmount: Number(requirement.minAmount),
@@ -192,7 +199,7 @@ const fetchCommunityDataFromCache = async (
       ...cacheData,
       groupId,
       id: BigNumber.from(groupId),
-      ownerIdentity: BigNumber.from(cacheData.ownerIdentity).toString(),
+      note: cacheData?.note,
     }
   }
 
@@ -219,15 +226,15 @@ const fetchCommunitiesDataFromCache = async (
         console.log('refreshing cache for group', groupId)
         console.log('last cache in hours', (Date.now() - lastCachedAt) / 1000 / 60 / 60)
       }
-      if (!cacheData?.ownerIdentity) {
+      if (!cacheData?.note) {
         return null
       }
       return {
         ...cacheData,
         groupId,
         id: BigNumber.from(groupId),
-        ownerIdentity: BigNumber.from(cacheData.ownerIdentity).toString(),
-        refresh, // assuming refresh should be false as per the provided getMCache implementation
+        note: cacheData?.note,
+        refresh: false, // assuming refresh should be false as per the provided getMCache implementation
       }
     }
 
@@ -254,14 +261,15 @@ export const uploadThenCacheGroupData = async ({
   }
 }) => {
   const { blockHash, args, event, transactionIndex, blockNumber, ...otherData } = groupData
-  const [groupIdArg, nameArg, creatorIdentityCommitmentArg] = args
+  const [groupIdArg, nameArg, note] = args
+
   const groupIdInt = parseInt(groupIdArg.hex, 16)
 
   const cacheData: {
     name?: string
     groupId?: number
     id?: any
-    ownerIdentity?: string
+    note?: string
     groupData: any
     chainId: number
     requirements: []
@@ -270,7 +278,7 @@ export const uploadThenCacheGroupData = async ({
     name: nameArg,
     groupId: groupIdInt,
     id: groupIdArg,
-    ownerIdentity: BigNumber.from(creatorIdentityCommitmentArg).toString(),
+    note: BigNumber.from(note).toString(),
     groupData: {
       blockHash,
       args,
@@ -356,14 +364,14 @@ export const cacheGroupData = async ({
   }
 }): Promise<any> => {
   const { blockHash, args, event, transactionIndex, blockNumber, ...otherData } = groupData
-  const [groupIdArg, nameArg, creatorIdentityCommitmentArg] = args
+  const [groupIdArg, nameArg, note] = args
   const groupIdInt = parseInt(groupIdArg.hex, 16)
 
   const cacheData: {
     name?: string
     groupId?: number
     id?: any
-    ownerIdentity?: string
+    note?: string
     groupData: any
     chainId: number
     requirements: []
@@ -380,7 +388,7 @@ export const cacheGroupData = async ({
     name: nameArg,
     groupId: groupIdInt,
     id: groupIdArg,
-    ownerIdentity: BigNumber.from(creatorIdentityCommitmentArg).toString(),
+    note: note.toString(),
     groupData: {
       blockHash,
       args,

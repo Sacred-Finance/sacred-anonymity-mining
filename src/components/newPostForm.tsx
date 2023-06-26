@@ -3,6 +3,10 @@ import React from 'react'
 import EditorJsRenderer from './editor-js/EditorJSRenderer'
 import { CancelButton, PrimaryButton } from './buttons'
 import { EyeIcon, PencilIcon } from '@heroicons/react/20/solid'
+import dynamic from 'next/dynamic'
+let Editor = dynamic(() => import('./editor-js/Editor'), {
+  ssr: false
+});
 
 function PreviewButton(props: { onClick: () => void; previewVisible: boolean }) {
   return (

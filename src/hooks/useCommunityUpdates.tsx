@@ -1,18 +1,10 @@
 import { useEffect, useCallback } from 'react'
-import { BigNumber } from 'ethers'
-import {
-  createNote,
-  getContent,
-  getIpfsHashFromBytes32,
-  hashBytes,
-  parsePost,
-  removeDuplicates,
-  sortArray,
-} from '../lib/utils'
+import { createNote, getContent, getIpfsHashFromBytes32, parsePost, removeDuplicates, sortArray } from '../lib/utils'
 import { useSWRConfig } from 'swr'
 import { User } from '../lib/model'
 import { forumContract, jsonRPCProvider } from '../constant/const'
 import { useRouter } from 'next/router'
+import { useAccount } from 'wagmi'
 
 const POST_ITEM_TYPE = 0
 const POLLING_INTERVAL = 60000
@@ -49,11 +41,8 @@ const gatherContent = updatePostsCallback => async (contentCID, postId) => {
 const handleNewItem =
   (gatherContentCallback, id, user) => async (itemType, groupId, postId, parentId, contentCID, note) => {
     if (isNaN(id)) return
-    const signal = contentCID
-    const identityCommitment = BigInt(user.identityCommitment.toString())
-    const generatedNote = await createNote(hashBytes(signal), identityCommitment)
 
-    if (itemType === POST_ITEM_TYPE && groupId.toString() === id && note.toString() !== generatedNote.toString()) {
+    if (itemType === POST_ITEM_TYPE && groupId.toString() === id) {
       await gatherContentCallback(contentCID, postId)
     }
   }
@@ -99,7 +88,6 @@ export const useCommunityUpdates = ({
   const router = useRouter()
   const id = Number(router.query.id)
   const groupCacheId = `${id}_group`
-
   const { mutate } = useSWRConfig()
   const updatePostsCallback = useCallback(updatePosts(groupCacheId, mutate), [groupCacheId, mutate])
   const gatherContentCallback = useCallback(gatherContent(updatePostsCallback), [updatePostsCallback])

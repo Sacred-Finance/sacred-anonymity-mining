@@ -19,19 +19,12 @@ export const useIdentity = ({ groupId, postId }: Created = { groupId: undefined,
     let identityString = address
     if (groupId) {
       // const generatedIdentity = new Identity(`${address}_${c.groupId}_${u.name}`)
-      identityString = `${identityString}_${groupId}`
+      identityString = `${identityString}_${groupId}_anon`
     }
-
-    const user = new Identity(address as string)
-    const user2 = new Identity(identityString as string)
-    const user3 = new Identity(`${identityString}_anon`)
-
-    console.log('user', user.getCommitment().toString())
-    console.log('user2', user2.getCommitment().toString())
-    console.log('user3', user3.getCommitment().toString())
-    return user.getCommitment().toString()
+    const user = new Identity(identityString)
+    return user
   } catch (e) {
     console.error('error in useIdentity', e)
-    return ''
+    return new Identity();
   }
 }

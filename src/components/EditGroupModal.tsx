@@ -5,6 +5,8 @@ import { uploadAndCacheImages } from '../utils/communityUtils'
 import { useIdentity } from '../hooks/useIdentity'
 import { useFetchCommunities } from '../hooks/useFetchCommunities'
 import { PictureUpload } from './PictureUpload'
+import { createNote } from 'lib/utils'
+import { Identity } from '@semaphore-protocol/identity'
 
 function EditGroupModal({ community, hidden = false }) {
   const [bannerFile, setBannerFile] = useState<File | null>(null)
@@ -37,10 +39,11 @@ function EditGroupModal({ community, hidden = false }) {
   const identity = useIdentity({groupId: community.groupId})
 
   const isOwner = useMemo(() => {
-    if (!community?.ownerIdentity || identity === undefined) return false
-    return community.ownerIdentity === identity;
+    if (!community?.note || identity === undefined) return false
+    const note = createNote(identity);
+    return community.note === note?.toString();
 
-  }, [community?.ownerIdentity, identity, hidden])
+  }, [community?.note, identity, hidden])
 
   const handleImageUpload = e => {
     const file = e.target.files[0]
@@ -80,8 +83,8 @@ function EditGroupModal({ community, hidden = false }) {
       >
         <button
           id="edit-community-button"
-          className={`z-10 absolute right-0 mt-2 mr-2 rounded-full bg-gray-100 p-2 transition duration-300 hover:bg-purple-600 hover:text-white ${
-            !isOwner || hidden ? 'hidden' : 'visible'
+          className={`absolute right-0 mr-2 mt-2 rounded-full bg-gray-100 p-2 transition duration-300 hover:bg-purple-600 hover:text-white ${
+            !isOwner || hidden ? 'hidden' : ''
           }`}
           onClick={() => setIsEditGroupOpen(true)}
           aria-label="edit community"

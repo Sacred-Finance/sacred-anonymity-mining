@@ -25,7 +25,6 @@ import { forumContract, jsonRPCProvider } from 'constant/const'
 const minRepsPost = 0
 
 const minRepsVote = 1
-const minRepsDownvote = 1
 
 export interface PostInterface {
   id: string
@@ -112,7 +111,7 @@ export class Post implements PostInterface {
           try {
             const ipfsHash = getIpfsHashFromBytes32(c?.contentCID)
             const content = await getContent(ipfsHash)
-            const block = await this.provider.getBlock(c.createdAtBlock.toNumber())
+            const block = await jsonRPCProvider.getBlock(c.createdAtBlock.toNumber())
             let parsedContent
             try {
               parsedContent = JSON.parse(content)
@@ -166,9 +165,8 @@ export class Post implements PostInterface {
 
   async get() {
     const getData = async () => {
-      console.log('get data')
       const p = await forumContract.itemAt(this.id)
-      const block = await this.provider.getBlock(p.createdAtBlock.toNumber())
+      const block = await jsonRPCProvider.getBlock(p.createdAtBlock.toNumber())
       const postText = await getContent(getIpfsHashFromBytes32(p?.contentCID))
       let parsedPost
       try {
@@ -252,7 +250,7 @@ export class Post implements PostInterface {
 
       const extraNullifier = hashBytes(signal).toString()
       const identityCommitment = BigInt(userPosting.getCommitment().toString())
-      const note = await createNote(hashBytes(signal), identityCommitment)
+      const note = await createNote(userPosting)
       const u = users.filter(u => u?.groupId === +this.groupId)
       const g = new Group(groupId)
       g.addMembers(u.map(u => u?.identityCommitment))
@@ -273,15 +271,21 @@ export class Post implements PostInterface {
         ownerEpochKey: epochData.epochKey,
       }
 
-      return await createPost(signal, note, this.groupId, merkleTreeRoot, nullifierHash, proof, epoch).then(
-        async res => {
-          const { data } = res
-          const postIdHex = data.args[2].hex
-          const postId = parseInt(postIdHex, 16)
-          await this.cacheNewPost(p, postId, groupId, note, cid, setWaiting)
-          return res
-        }
-      )
+      return await createPost(
+        signal,
+        note,
+        this.groupId,
+        merkleTreeRoot.toString(),
+        nullifierHash.toString(),
+        proof,
+        epoch
+      ).then(async res => {
+        const { data } = res
+        const postIdHex = data.args[2].hex
+        const postId = parseInt(postIdHex, 16)
+        await this.cacheNewPost(p, postId, groupId, note, cid, setWaiting)
+        return res
+      })
     } catch (error) {
       // this.undoNewPost(groupId, cid);
       throw error
@@ -314,22 +318,21 @@ export class Post implements PostInterface {
       //const extraNullifier = hashBytes(signal).toString();
       //const g = new Group();
       const userPosting = new Identity(`${address}_${this.groupId}_${postedByUser?.name}`)
-      const identityCommitment = BigInt(userPosting.getCommitment().toString())
-      const note = await createNote(hashBytes(signal), identityCommitment)
+      const note = await createNote(userPosting)
 
       const item = await forumContract.itemAt(itemId)
       let input = {
-        cid: hashBytes(item.contentCID),
         note: BigInt(item.note.toHexString()),
-        identity: identityCommitment,
+        trapdoor: userPosting.getTrapdoor(),
+        nullifier: userPosting.getNullifier(),
       }
 
       //const u = users.filter(u => u?.groupId === +this.groupId);
       //g.addMembers(u.map(u => u?.identityCommitment))
       const { a, b, c } = await generateGroth16Proof(
         input,
-        '/circuits/VerifyOwner_86-3_prod.wasm',
-        '/circuits/VerifyOwner_86-3_prod.0.zkey'
+        '/circuits/VerifyOwner__prod.wasm',
+        '/circuits/VerifyOwner__prod.0.zkey'
       )
       return edit(itemId, signal, note, a, b, c).then(async data => {
         await this.cacheUpdatedPost(postContent, itemId, groupId, cid, note, setWaiting) //we update redis with a new 'temp' comment here
@@ -345,21 +348,20 @@ export class Post implements PostInterface {
     console.log(`Removing your anonymous post...`)
     try {
       let signal = ethers.constants.HashZero
-      const signalInt = BigInt(0)
       const userPosting = new Identity(`${address}_${this.groupId}_${postedByUser?.name}`)
-      const identityCommitment = BigInt(userPosting.getCommitment().toString())
-      const note = await createNote(signalInt, identityCommitment)
+      const note = await createNote(userPosting)
 
       const item = await forumContract.itemAt(itemId)
       let input = {
-        cid: hashBytes(item.contentCID),
         note: BigInt(item.note.toHexString()),
-        identity: identityCommitment,
+        trapdoor: userPosting.getTrapdoor(),
+        nullifier: userPosting.getNullifier(),
       }
+
       const { a, b, c } = await generateGroth16Proof(
         input,
-        '/circuits/VerifyOwner_86-3_prod.wasm',
-        '/circuits/VerifyOwner_86-3_prod.0.zkey'
+        '/circuits/VerifyOwner__prod.wasm',
+        '/circuits/VerifyOwner__prod.0.zkey'
       )
       return edit(itemId, signal, note, a, b, c).then(async data => {
         await this.removeFromCache(itemId) //we update redis with a new 'temp' comment here
@@ -371,6 +373,7 @@ export class Post implements PostInterface {
   }
 
   async updatePostsVote(postInstance, itemId, voteType, confirmed: boolean, revert = false) {
+    //from the community level (multple posts)
     const modifier = revert ? -1 : 1
     try {
       itemId = itemId.toNumber()
@@ -381,10 +384,6 @@ export class Post implements PostInterface {
     mutate(
       postInstance.groupCacheId(),
       postList => {
-        if (!postList) {
-          console.log('postList is undefined')
-          return // or return an empty array or a default value if it makes sense
-        }
         const postIndex = postList.findIndex(p => +p.id === itemId)
         if (postIndex > -1) {
           const postToUpdate = { ...postList[postIndex] }
@@ -403,17 +402,14 @@ export class Post implements PostInterface {
           }
 
           postList[postIndex] = postToUpdate
-
-          console.log('postList', postList, postIndex, itemId, voteType, confirmed, revert)
-          if (confirmed && postList[postIndex]) {
-            setCacheAtSpecificPath(
-              this.specificPostId(itemId),
-              voteType === 0 ? postList[postIndex].upvote : postList[postIndex].downvote,
-              voteType === 0 ? '$.data.upvote' : '$.data.downvote'
-            )
-          }
         }
-
+        if (confirmed) {
+          setCacheAtSpecificPath(
+            this.specificPostId(itemId),
+            voteType === 0 ? postList[postIndex].upvote : postList[postIndex].downvote,
+            voteType === 0 ? '$.data.upvote' : '$.data.downvote'
+          )
+        }
         return [...postList]
       },
       { revalidate: false }
@@ -486,7 +482,15 @@ export class Post implements PostInterface {
 
     const { proof, nullifierHash, merkleTreeRoot } = await generateProof(userPosting, g, extraNullifier, signal)
 
-    return vote(itemId, this.groupId?.toString(), voteType, merkleTreeRoot, nullifierHash, proof, voteProofData)
+    return vote(
+      itemId,
+      this.groupId?.toString(),
+      voteType,
+      merkleTreeRoot.toString(),
+      nullifierHash.toString(),
+      proof,
+      voteProofData
+    )
   }
 
   cacheNewPost = async (post, postId, groupId, note: BigInt, contentCID, setWaiting) => {

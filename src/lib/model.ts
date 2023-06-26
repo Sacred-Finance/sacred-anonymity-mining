@@ -17,9 +17,16 @@ export interface Community {
   requirements: Requirement[]
   banner?: string
   logo?: string
-  ownerIdentity?: string
+  note?: string
   chainId?: number
   removed?: boolean
+}
+
+export interface CommunityDetails {
+  description: string;
+  tags: string[];
+  bannerCID: string;
+  logoCID: string;
 }
 export interface User {
   name: string

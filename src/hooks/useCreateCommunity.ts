@@ -27,13 +27,13 @@ export const useCreateCommunity = (onCreateGroupClose: () => void) => {
         }
         //todo: tags, bannerCID, logoCID need to be converted to Bytes32
 
-        const response = await createGroup(user.getCommitment().toString(), requirements, name, chainId, details, note)
+        const response = await createGroup(requirements, name, chainId, details, note.toString())
 
         const { status, data } = response
 
         if (status === 200) {
           if (data.event === 'NewGroupCreated' && data.args) {
-            const [groupIdArg, nameArg, creatorIdentityCommitmentArg] = data.args
+            const [groupIdArg, nameArg, note] = data.args
 
             const groupIdHex = groupIdArg.hex
             const groupIdInt = parseInt(groupIdHex, 16)

@@ -171,7 +171,7 @@ export const getCache = async (key: string, withCleanUp = false): Promise<{ cach
 const cacheCommunityCleanUp = async (key, cache) => {
   if (
     key.startsWith('group_') &&
-    (!cache.hasOwnProperty('ownerIdentity') || !cache.hasOwnProperty('id') || !cache.hasOwnProperty('groupId'))
+    (!cache.hasOwnProperty('note') || !cache.hasOwnProperty('id') || !cache.hasOwnProperty('groupId'))
   ) {
     console.log('cache missing required properties - deleting', key, cache)
     // Remove the cache if it doesn't have the required properties

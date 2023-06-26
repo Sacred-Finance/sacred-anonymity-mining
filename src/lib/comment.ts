@@ -1,7 +1,7 @@
 import { Group } from '@semaphore-protocol/group'
 import { Identity } from '@semaphore-protocol/identity'
 import { generateProof } from '@semaphore-protocol/proof'
-import { BigNumber, Contract, ethers, providers } from 'ethers'
+import { BigNumber, ethers } from 'ethers'
 import { mutate } from 'swr'
 import { createComment, edit } from './api'
 import { ReputationProofStruct, User } from './model'
@@ -17,7 +17,7 @@ import {
   uploadIPFS,
 } from './utils'
 import { UnirepUser } from './unirep'
-import { forumContract, jsonRPCProvider } from 'constant/const'
+import { forumContract, jsonRPCProvider } from '../constant/const'
 
 const minRepsComment = 1
 export class CommentClass {
@@ -64,7 +64,6 @@ export class CommentClass {
       const signal = getBytes32FromIpfsHash(cid)
 
       const userPosting = new Identity(`${address}_${this.groupId}_${postedByUser?.name}`)
-
       const unirepUser = new UnirepUser(userPosting)
       await unirepUser.updateUserState()
       const userState = await unirepUser.getUserState()
@@ -76,8 +75,7 @@ export class CommentClass {
       })
 
       const extraNullifier = hashBytes(signal.toString()).toString()
-      const identityCommitment = BigInt(userPosting.getCommitment().toString())
-      const note = await createNote(hashBytes(signal), identityCommitment)
+      const note = await createNote(userPosting)
       const u = users.filter(u => u?.groupId === +this.groupId)
       const g = new Group(groupId)
       g.addMembers(u.map(u => u?.identityCommitment))
@@ -104,8 +102,8 @@ export class CommentClass {
         note,
         this.groupId,
         this.postId,
-        merkleTreeRoot,
-        nullifierHash,
+        merkleTreeRoot.toString(),
+        nullifierHash.toString(),
         proof,
         epoch
       ).then(async res => {
@@ -273,19 +271,18 @@ export class CommentClass {
       //const extraNullifier = hashBytes(signal).toString();
       //const g = new Group();
       const userPosting = new Identity(`${address}_${this.groupId}_${postedByUser?.name}`)
-      const identityCommitment = BigInt(userPosting.getCommitment().toString())
-      const note = await createNote(hashBytes(signal), identityCommitment)
+      const note = await createNote(userPosting)
 
       const item = await forumContract.itemAt(itemId)
       let input = {
-        cid: hashBytes(item.contentCID),
         note: BigInt(item.note.toHexString()),
-        identity: identityCommitment,
+        trapdoor: userPosting.getTrapdoor(),
+        nullifier: userPosting.getNullifier(),
       }
       const { a, b, c } = await generateGroth16Proof(
         input,
-        '/circuits/VerifyOwner_86-3_prod.wasm',
-        '/circuits/VerifyOwner_86-3_prod.0.zkey'
+        '/circuits/VerifyOwner__prod.wasm',
+        '/circuits/VerifyOwner__prod.0.zkey'
       )
       return await edit(itemId, signal, note, a, b, c).then(async data => {
         await this.cacheUpdatedComment(commentContent, itemId, groupId, note, cid, setWaiting) //we update redis with a new 'temp' comment here
@@ -301,21 +298,19 @@ export class CommentClass {
     console.log(`Removing your anonymous comment...`)
     try {
       let signal = ethers.constants.HashZero
-      const signalInt = BigInt(0)
       const userPosting = new Identity(`${address}_${this.groupId}_${postedByUser?.name}`)
-      const identityCommitment = BigInt(userPosting.getCommitment().toString())
-      const note = await createNote(signalInt, identityCommitment)
+      const note = await createNote(userPosting)
 
       const item = await forumContract.itemAt(itemId)
       let input = {
-        cid: hashBytes(item.contentCID),
         note: BigInt(item.note.toHexString()),
-        identity: identityCommitment,
+        trapdoor: userPosting.getTrapdoor(),
+        nullifier: userPosting.getNullifier(),
       }
       const { a, b, c } = await generateGroth16Proof(
         input,
-        '/circuits/VerifyOwner_86-3_prod.wasm',
-        '/circuits/VerifyOwner_86-3_prod.0.zkey'
+        '/circuits/VerifyOwner__prod.wasm',
+        '/circuits/VerifyOwner__prod.0.zkey'
       )
       return edit(itemId, signal, note, a, b, c).then(async data => {
         await this.removeFromCache(itemId) //we update redis with a new 'temp' comment here

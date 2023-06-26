@@ -27,6 +27,9 @@ import Footer from '../../../components/Footer'
 import { toast } from 'react-toastify'
 import { PostList } from '../../../components/postList'
 import { NewPostForm } from '../../../components/newPostForm'
+import dynamic from 'next/dynamic'
+import { User } from 'lib/model'
+import { useUnirepSignUp } from '../../../hooks/useUnirepSignup'
 
 export function Main() {
   const activeUser = useActiveUser()
@@ -56,7 +59,7 @@ export function Main() {
   }, [id])
   const community = useCommunityById(id as string)
   useCommunityUpdates({ user, postInstance })
-  // useUnirepSignUp({ groupId: id, name: user?.name })
+  useUnirepSignUp({ groupId: id, name: (user as User)?.name })
 
   const { checkUserBalance } = useValidateUserBalance(community, address)
   const { setIsLoading, isLoading: isContextLoading } = useLoaderContext()
@@ -75,7 +78,7 @@ export function Main() {
 
   async function fetchPosts() {
     console.log('fetching posts')
-    return await postInstance.getAll()
+    return await postInstance.current.getAll()
   }
 
   const addPost = async () => {
@@ -103,7 +106,7 @@ export function Main() {
     setIsLoading(true)
 
     try {
-      const { status } = await postInstance.create(
+      const { status } = await postInstance.current.create(
         {
           title: postTitle,
           description: postDescription,
@@ -164,14 +167,14 @@ export function Main() {
     setIsLoading(true)
 
     try {
-      postInstance?.updatePostsVote(postInstance, postId, voteType, false).then(() => setIsLoading(false))
-      const { status } = await postInstance.vote(voteType, address, users, activeUser, postId, id)
+      postInstance?.current?.updatePostsVote(postInstance, postId, voteType, false).then(() => setIsLoading(false))
+      const { status } = await postInstance?.current?.vote(voteType, address, users, activeUser, postId, id)
 
       if (status === 200) {
         setIsLoading(false)
       }
     } catch (error) {
-      postInstance?.updatePostsVote(postInstance, postId, voteType, true, true)
+      postInstance?.current?.updatePostsVote(postInstance, postId, voteType, true, true)
       setIsLoading(false)
     }
   }
@@ -192,7 +195,7 @@ export function Main() {
           src={`https://ipfs.io/ipfs/${community?.logo}`}
           alt="community logo"
         />
-        {!user?.identityCommitment && community && <JoinCommunityButton community={community} />}
+        {!(user as User)?.identityCommitment && community && <JoinCommunityButton community={community} />}
       </div>
 
       <NewPostForm

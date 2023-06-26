@@ -255,6 +255,203 @@
       "type": "function"
     },
     {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "groupId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "bannerCID",
+          "type": "bytes32"
+        }
+      ],
+      "name": "setGroupBanner",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "groupId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "description",
+          "type": "string"
+        }
+      ],
+      "name": "setGroupDescription",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "groupId",
+          "type": "uint256"
+        },
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "description",
+              "type": "string"
+            },
+            {
+              "internalType": "bytes32[]",
+              "name": "tags",
+              "type": "bytes32[]"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "bannerCID",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "logoCID",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct GroupDetails",
+          "name": "details",
+          "type": "tuple"
+        }
+      ],
+      "name": "setGroupDetails",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "groupId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "logoCID",
+          "type": "bytes32"
+        }
+      ],
+      "name": "setGroupLogo",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "groupId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32[]",
+          "name": "tags",
+          "type": "bytes32[]"
+        }
+      ],
+      "name": "setGroupTags",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "post",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "comment",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "upvote",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "downvote",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct ReputationRequirement",
+          "name": "repRequirement",
+          "type": "tuple"
+        }
+      ],
+      "name": "setReputationRequirement",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "post",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "comment",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "upvote",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "downvote",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "reply",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "upvoted",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "downvoted",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct ReputationWeight",
+          "name": "repWeight",
+          "type": "tuple"
+        }
+      ],
+      "name": "setReputationWeight",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
       "anonymous": false,
       "inputs": [
         {
@@ -272,7 +469,7 @@
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "creatorIdentityCommitment",
+          "name": "note",
           "type": "uint256"
         }
       ],
@@ -307,6 +504,24 @@
     {
       "inputs": [
         {
+          "internalType": "address",
+          "name": "attester",
+          "type": "address"
+        },
+        {
+          "internalType": "uint48",
+          "name": "epochLength",
+          "type": "uint48"
+        }
+      ],
+      "name": "attesterSignUp",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
           "internalType": "string",
           "name": "groupName",
           "type": "string"
@@ -334,45 +549,41 @@
           "type": "tuple[]"
         },
         {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "description",
+              "type": "string"
+            },
+            {
+              "internalType": "bytes32[]",
+              "name": "tags",
+              "type": "bytes32[]"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "bannerCID",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "logoCID",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct GroupDetails",
+          "name": "details",
+          "type": "tuple"
+        },
+        {
           "internalType": "uint256",
-          "name": "identityCommitment",
+          "name": "note",
           "type": "uint256"
         }
       ],
       "name": "createGroup",
       "outputs": [],
       "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "groupId",
-          "type": "uint256"
-        }
-      ],
-      "name": "getGroupRequirements",
-      "outputs": [
-        {
-          "components": [
-            {
-              "internalType": "address",
-              "name": "tokenAddress",
-              "type": "address"
-            },
-            {
-              "internalType": "uint256",
-              "name": "minAmount",
-              "type": "uint256"
-            }
-          ],
-          "internalType": "struct Requirement[]",
-          "name": "",
-          "type": "tuple[]"
-        }
-      ],
-      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -400,6 +611,106 @@
       "type": "function"
     },
     {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "groupAt",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "string",
+                  "name": "description",
+                  "type": "string"
+                },
+                {
+                  "internalType": "bytes32[]",
+                  "name": "tags",
+                  "type": "bytes32[]"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "bannerCID",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "logoCID",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct GroupDetails",
+              "name": "groupDetails",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "tokenAddress",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "minAmount",
+                  "type": "uint256"
+                }
+              ],
+              "internalType": "struct Requirement[]",
+              "name": "requirements",
+              "type": "tuple[]"
+            },
+            {
+              "internalType": "uint256",
+              "name": "id",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "note",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "userCount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "posts",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "bool",
+              "name": "removed",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct Group",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [],
       "name": "groupCount",
       "outputs": [
@@ -420,37 +731,65 @@
           "type": "uint256"
         }
       ],
-      "name": "groupInfo",
+      "name": "groupDetails",
       "outputs": [
         {
-          "internalType": "string",
+          "components": [
+            {
+              "internalType": "string",
+              "name": "description",
+              "type": "string"
+            },
+            {
+              "internalType": "bytes32[]",
+              "name": "tags",
+              "type": "bytes32[]"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "bannerCID",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "logoCID",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct GroupDetails",
           "name": "",
-          "type": "string"
-        },
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
         {
           "internalType": "uint256",
-          "name": "",
+          "name": "groupId",
           "type": "uint256"
-        },
+        }
+      ],
+      "name": "groupRequirements",
+      "outputs": [
         {
-          "internalType": "uint256",
+          "components": [
+            {
+              "internalType": "address",
+              "name": "tokenAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "minAmount",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct Requirement[]",
           "name": "",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        },
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
+          "type": "tuple[]"
         }
       ],
       "stateMutability": "view",
@@ -496,6 +835,216 @@
         }
       ],
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256[2]",
+          "name": "_a",
+          "type": "uint256[2]"
+        },
+        {
+          "internalType": "uint256[2][2]",
+          "name": "_b",
+          "type": "uint256[2][2]"
+        },
+        {
+          "internalType": "uint256[2]",
+          "name": "_c",
+          "type": "uint256[2]"
+        },
+        {
+          "internalType": "uint256",
+          "name": "groupId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "bannerCID",
+          "type": "bytes32"
+        }
+      ],
+      "name": "setGroupBannerByOwner",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256[2]",
+          "name": "_a",
+          "type": "uint256[2]"
+        },
+        {
+          "internalType": "uint256[2][2]",
+          "name": "_b",
+          "type": "uint256[2][2]"
+        },
+        {
+          "internalType": "uint256[2]",
+          "name": "_c",
+          "type": "uint256[2]"
+        },
+        {
+          "internalType": "uint256",
+          "name": "groupId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "description",
+          "type": "string"
+        }
+      ],
+      "name": "setGroupDescriptionByOwner",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256[2]",
+          "name": "_a",
+          "type": "uint256[2]"
+        },
+        {
+          "internalType": "uint256[2][2]",
+          "name": "_b",
+          "type": "uint256[2][2]"
+        },
+        {
+          "internalType": "uint256[2]",
+          "name": "_c",
+          "type": "uint256[2]"
+        },
+        {
+          "internalType": "uint256",
+          "name": "groupId",
+          "type": "uint256"
+        },
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "description",
+              "type": "string"
+            },
+            {
+              "internalType": "bytes32[]",
+              "name": "tags",
+              "type": "bytes32[]"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "bannerCID",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "logoCID",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct GroupDetails",
+          "name": "details",
+          "type": "tuple"
+        }
+      ],
+      "name": "setGroupDetailsByOwner",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256[2]",
+          "name": "_a",
+          "type": "uint256[2]"
+        },
+        {
+          "internalType": "uint256[2][2]",
+          "name": "_b",
+          "type": "uint256[2][2]"
+        },
+        {
+          "internalType": "uint256[2]",
+          "name": "_c",
+          "type": "uint256[2]"
+        },
+        {
+          "internalType": "uint256",
+          "name": "groupId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "logoCID",
+          "type": "bytes32"
+        }
+      ],
+      "name": "setGroupLogoByOwner",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256[2]",
+          "name": "_a",
+          "type": "uint256[2]"
+        },
+        {
+          "internalType": "uint256[2][2]",
+          "name": "_b",
+          "type": "uint256[2][2]"
+        },
+        {
+          "internalType": "uint256[2]",
+          "name": "_c",
+          "type": "uint256[2]"
+        },
+        {
+          "internalType": "uint256",
+          "name": "groupId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32[]",
+          "name": "tags",
+          "type": "bytes32[]"
+        }
+      ],
+      "name": "setGroupTagsByOwner",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "attester",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "publicSignals",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[8]",
+          "name": "proof",
+          "type": "uint256[8]"
+        }
+      ],
+      "name": "userUnirepSignUp",
+      "outputs": [],
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -561,12 +1110,6 @@
           "internalType": "bytes32",
           "name": "newCID",
           "type": "bytes32"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "newNote",
-          "type": "uint256"
         }
       ],
       "name": "UpdateItem",
@@ -643,8 +1186,45 @@
         },
         {
           "internalType": "uint256[8]",
-          "name": "proof",
+          "name": "semaphoreProof",
           "type": "uint256[8]"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256[]",
+              "name": "publicSignals",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[8]",
+              "name": "proof",
+              "type": "uint256[8]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "publicSignalsQ",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[8]",
+              "name": "proofQ",
+              "type": "uint256[8]"
+            },
+            {
+              "internalType": "uint48",
+              "name": "ownerEpoch",
+              "type": "uint48"
+            },
+            {
+              "internalType": "uint256",
+              "name": "ownerEpochKey",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct ReputationProof",
+          "name": "unirepProof",
+          "type": "tuple"
         }
       ],
       "name": "addComment",
@@ -681,8 +1261,45 @@
         },
         {
           "internalType": "uint256[8]",
-          "name": "proof",
+          "name": "semaphoreProof",
           "type": "uint256[8]"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256[]",
+              "name": "publicSignals",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[8]",
+              "name": "proof",
+              "type": "uint256[8]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "publicSignalsQ",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[8]",
+              "name": "proofQ",
+              "type": "uint256[8]"
+            },
+            {
+              "internalType": "uint48",
+              "name": "ownerEpoch",
+              "type": "uint48"
+            },
+            {
+              "internalType": "uint256",
+              "name": "ownerEpochKey",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct ReputationProof",
+          "name": "unirepProof",
+          "type": "tuple"
         }
       ],
       "name": "addPost",
@@ -716,11 +1333,6 @@
           "internalType": "bytes32",
           "name": "newCID",
           "type": "bytes32"
-        },
-        {
-          "internalType": "uint256",
-          "name": "newNote",
-          "type": "uint256"
         }
       ],
       "name": "editItem",
@@ -824,6 +1436,16 @@
               "type": "uint256"
             },
             {
+              "internalType": "uint256",
+              "name": "ownerEpoch",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "ownerEpochKey",
+              "type": "uint256"
+            },
+            {
               "internalType": "bytes32",
               "name": "contentCID",
               "type": "bytes32"
@@ -884,8 +1506,45 @@
         },
         {
           "internalType": "uint256[8]",
-          "name": "proof",
+          "name": "semaphoreProof",
           "type": "uint256[8]"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256[]",
+              "name": "publicSignals",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[8]",
+              "name": "proof",
+              "type": "uint256[8]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "publicSignalsQ",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[8]",
+              "name": "proofQ",
+              "type": "uint256[8]"
+            },
+            {
+              "internalType": "uint48",
+              "name": "ownerEpoch",
+              "type": "uint48"
+            },
+            {
+              "internalType": "uint256",
+              "name": "ownerEpochKey",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct ReputationProof",
+          "name": "unirepProof",
+          "type": "tuple"
         }
       ],
       "name": "vote",
