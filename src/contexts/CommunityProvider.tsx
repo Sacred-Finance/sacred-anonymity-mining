@@ -154,7 +154,7 @@ export function useActiveUser(): User | undefined {
 
   const identity = useIdentity(id ? { groupId: id as string } : undefined)
 
-  return useMemo(() => state.users.find(c => c.identityCommitment === identity.getCommitment().toString()), [state.users, identity])
+  return useMemo(() => state.users.find(c => c.identityCommitment === identity?.getCommitment().toString()), [state.users, identity])
 }
 
 export function useUserById(id: string): User | undefined {
