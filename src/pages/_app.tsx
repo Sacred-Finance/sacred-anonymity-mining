@@ -51,13 +51,13 @@ import ErrorBoundary from '../components/ErrorBoundary'
 function App({ Component, pageProps }: AppProps) {
   return (
     <ThemeProvider defaultTheme="system" attribute="class">
+      <LoaderProvider>
       <Web3Wrapper>
         <HeadGlobal />
-        <LoaderProvider>
           <Component {...pageProps} />
           <ToastContainer />
-        </LoaderProvider>
       </Web3Wrapper>
+      </LoaderProvider>
     </ThemeProvider>
   )
 }
