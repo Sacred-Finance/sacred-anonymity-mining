@@ -153,8 +153,8 @@ function HomePage({ createCommunity, isAdmin = false }: HomeProps) {
   };
 
   return (
-    <main className="mx-auto h-full w-full max-w-screen-xl space-y-12  p-24 md:px-0">
-      <div className="flex flex-col items-center py-16 text-purple-500 dark:text-purple-500">
+    <main className="xs:flex xs:flex-col xs:mx-0 xs:p-0 xs:text-center xs:align-center h-full w-full max-w-screen-xl space-y-12 sm:mx-auto  sm:p-24 md:px-0">
+      <div className="flex flex-col items-center px-8 py-16 text-purple-500 dark:text-purple-500">
         <h1 className="mb-8 text-6xl font-bold">{t('pageTitle.communities')}</h1>
         <div className="mb-8 flex w-full flex-col justify-between md:max-w-lg md:flex-row">
           <div className="relative mb-4 w-full md:mb-0 md:mr-2">
@@ -203,7 +203,7 @@ function HomePage({ createCommunity, isAdmin = false }: HomeProps) {
 
       </div>
 
-      <div className="row-gap-8 mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="row-gap-8 mb-8 grid grid-cols-1 justify-items-center   gap-4 sm:grid-cols-1 md:grid-cols-2 md:justify-items-center lg:grid-cols-3">
         {localCommunities.map((community, index) => (
           <CommunityCard key={index} community={community} index={index} isAdmin={isAdmin} />
         ))}
@@ -212,16 +212,18 @@ function HomePage({ createCommunity, isAdmin = false }: HomeProps) {
       {localCommunities?.length === 0 && (
         <div className="my-12 flex flex-col items-center justify-center space-y-4">
           <motion.h2
-            initial={{ opacity: 0, y: -50 }}
-            animate={{ opacity: 1, y: 0 }}
+            layout
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
             className="text-3xl font-semibold dark:text-gray-200"
           >
             Oops, No Results Found
           </motion.h2>
           <motion.p
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
+            layout
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             className="px-4 text-center text-lg dark:text-gray-300"
           >
