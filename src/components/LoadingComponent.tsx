@@ -1,10 +1,11 @@
-import { DynamicLogo, Logo, LogoDynamic, MobileLogo } from './Logo'
-const LoadingPage = () => {
-  return (
-      <div className={'scale-[25%]'}>
-        <DynamicLogo className={''}/>
-      </div>
-  )
-}
+import { DynamicLogo } from './Logo';
 
-export default LoadingPage
+const LoadingPage = () => {
+    return (
+        <div className='flex items-center justify-center h-screen'>
+            <DynamicLogo className='scale-[25%]'/>
+        </div>
+    );
+};
+
+export default LoadingPage;
