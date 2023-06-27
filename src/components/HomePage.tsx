@@ -9,7 +9,7 @@ import { useTranslation } from 'next-i18next'
 import { getGroupIdOrUserId, useCommunityContext } from '../contexts/CommunityProvider'
 import {
   ArrowDownIcon,
-  ArrowUpIcon,
+  ArrowUpIcon, BarsArrowDownIcon, BarsArrowUpIcon,
   ClockIcon,
   MagnifyingGlassIcon,
   MinusCircleIcon,
@@ -18,6 +18,7 @@ import {
   UserMinusIcon,
 } from '@heroicons/react/20/solid'
 import { motion } from 'framer-motion'
+import clsx from 'clsx'
 
 interface HomeProps {
   createCommunity: Function
@@ -132,13 +133,32 @@ function HomePage({ createCommunity, isAdmin = false }: HomeProps) {
     setLocalCommunities(filteredCommunities)
   }
 
+  const filterButtonClass =
+    'rounded-md p-2 text-white transition-colors duration-200 ease-in-out dark:bg-gray-900 '
+  const iconClass =
+      "h-5 w-5 fill-inherit stroke-inherit text-gray-500 dark:fill-white"
+
+  const FilterButton = ({ filterKey, iconTrue, iconFalse, applyFilter, currentFilter, filterClass, iconClass }) => {
+    const IconTrue = iconTrue;
+    const IconFalse = iconFalse;
+
+    return (
+        <button
+            onClick={() => applyFilter(filterKey)}
+            className={clsx(filterClass, currentFilter.includes(filterKey) && '!bg-primary-bg !fill-white')}
+        >
+          {currentFilter === `-${filterKey}` ? <IconTrue className={iconClass} /> : <IconFalse className={iconClass} />}
+        </button>
+    );
+  };
+
   return (
-    <main className="mx-auto w-full max-w-screen-xl space-y-12 p-24  md:px-0 h-full">
+    <main className="mx-auto h-full w-full max-w-screen-xl space-y-12  p-24 md:px-0">
       <div className="flex flex-col items-center py-16 text-purple-500 dark:text-purple-500">
         <h1 className="mb-8 text-6xl font-bold">{t('pageTitle.communities')}</h1>
         <div className="mb-8 flex w-full flex-col justify-between md:max-w-lg md:flex-row">
-          <div className="relative mb-4 w-full md:mr-2 md:mb-0">
-            <MagnifyingGlassIcon className="absolute top-0 left-0 ml-3 mt-3 h-5 w-5 fill-current text-gray-500 dark:text-gray-400" />
+          <div className="relative mb-4 w-full md:mb-0 md:mr-2">
+            <MagnifyingGlassIcon className="absolute left-0 top-0 ml-3 mt-3 h-5 w-5 fill-current text-gray-500 dark:text-gray-400" />
             <input
               id="search"
               name="search"
@@ -149,32 +169,38 @@ function HomePage({ createCommunity, isAdmin = false }: HomeProps) {
             />
           </div>
           <div className="flex space-x-2">
-            <button className="rounded-md bg-white p-2 transition-colors duration-200 ease-in-out hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600">
-              <div className="flex items-center">
-                <p className="mr-1 dark:text-white">A</p>
-                {currentFilter === '-Alphabetical' ? (
-                  <ArrowUpIcon className="h-5 w-5 fill-current text-gray-500 dark:text-gray-400" />
-                ) : (
-                  <ArrowDownIcon className="h-5 w-5 fill-current text-gray-500 dark:text-gray-400" />
-                )}
-              </div>
-            </button>
-            <button className="rounded-md bg-white p-2 transition-colors duration-200 ease-in-out hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600">
-              {currentFilter === '-User Count' ? (
-                <UserGroupIcon className="h-5 w-5 fill-current text-gray-500 dark:text-gray-400" />
-              ) : (
-                <UserMinusIcon className="h-5 w-5 fill-current text-gray-500 dark:text-gray-400" />
-              )}
-            </button>
-            <button className="rounded-md bg-white p-2 transition-colors duration-200 ease-in-out hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600">
-              {currentFilter === '-Age' ? (
-                <ClockIcon className="h-5 w-5 fill-current text-gray-500 dark:text-gray-400" />
-              ) : (
-                <MinusCircleIcon className="h-5 w-5 fill-current text-gray-500 dark:text-gray-400" />
-              )}
-            </button>
+            <FilterButton
+                filterKey='Alphabetical'
+                iconTrue={BarsArrowDownIcon}
+                iconFalse={BarsArrowUpIcon}
+                applyFilter={applyFilter}
+                currentFilter={currentFilter}
+                filterClass={filterButtonClass}
+                iconClass={iconClass}
+            />
+            <FilterButton
+                filterKey='User Count'
+                iconTrue={UserMinusIcon}
+                iconFalse={UserGroupIcon}
+                applyFilter={applyFilter}
+                currentFilter={currentFilter}
+                filterClass={filterButtonClass}
+                iconClass={iconClass}
+            />
+            <FilterButton
+                filterKey='Age'
+                iconTrue={ClockIcon}
+                iconFalse={MinusCircleIcon}
+                applyFilter={applyFilter}
+                currentFilter={currentFilter}
+                filterClass={filterButtonClass}
+                iconClass={iconClass}
+            />
           </div>
+
         </div>
+        {currentFilter}
+
       </div>
 
       <div className="row-gap-8 mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -211,7 +237,7 @@ function HomePage({ createCommunity, isAdmin = false }: HomeProps) {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="rounded bg-purple-500 py-2 px-4 font-bold text-white shadow dark:bg-purple-700 dark:text-gray-200"
+            className="rounded bg-purple-500 px-4 py-2 font-bold text-white shadow dark:bg-purple-700 dark:text-gray-200"
             onClick={() => createCommunity()}
           >
             Create a new community
@@ -223,7 +249,7 @@ function HomePage({ createCommunity, isAdmin = false }: HomeProps) {
         <div className="my-12 flex flex-col items-center justify-center">
           <p className="mb-4 text-xl dark:text-gray-200">0 Communities :(</p>
           <button
-            className="rounded bg-purple-500 py-2 px-4 font-bold text-white shadow dark:bg-purple-700 dark:text-gray-200"
+            className="rounded bg-purple-500 px-4 py-2 font-bold text-white shadow dark:bg-purple-700 dark:text-gray-200"
             onClick={() => createCommunity()}
           >
             Create
