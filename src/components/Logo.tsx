@@ -15,7 +15,7 @@ export const LogoDynamic = (props: any) => {
   return <DynamicLogo {...props} />
 }
 export const MobileLogo = (props: any) => {
-  return <Image src={mobileLogo} className={'w-16'} alt={logo} {...props} />
+  return <Image src={mobileLogo} className={'w-8'} alt={logo} {...props} />
 }
 
 const purpleAnimation = {
