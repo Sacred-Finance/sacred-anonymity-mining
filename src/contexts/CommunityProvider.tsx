@@ -6,6 +6,7 @@ import _ from 'lodash'
 import { useAccount } from 'wagmi'
 import { useIdentity } from '../hooks/useIdentity'
 import { useRouter } from 'next/router'
+import { useLoaderContext } from './LoaderContext'
 
 export type CommunityId = string | number | ethers.BigNumber
 type CommunityContextType = {
@@ -127,6 +128,14 @@ export function getGroupIdOrUserId(communityOrUser: Community | User): number {
 
 export const CommunityProvider: React.FC<any> = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(reducer, initialState)
+  const { setIsLoading } = useLoaderContext()
+
+  // when state has communities, stop loading
+  React.useEffect(() => {
+    if (state.communities.length > 0) {
+      setIsLoading(false)
+    }
+  }, [state.communities])
 
   return <CommunityContext.Provider value={{ state, dispatch }}>{children}</CommunityContext.Provider>
 }
@@ -154,7 +163,10 @@ export function useActiveUser(): User | undefined {
 
   const identity = useIdentity(id ? { groupId: id as string } : undefined)
 
-  return useMemo(() => state.users.find(c => c.identityCommitment === identity?.getCommitment().toString()), [state.users, identity])
+  return useMemo(
+    () => state.users.find(c => c.identityCommitment === identity?.getCommitment().toString()),
+    [state.users, identity]
+  )
 }
 
 export function useUserById(id: string): User | undefined {
@@ -188,10 +200,12 @@ export function useUserIfJoined(communityId: string | number): User | false {
     return false
   }
 
-  return state.usersGrouped[communityId]?.find(u => {
-    const generatedIdentity = new Identity(`${userAddress}_${communityId}_${u.name}`)
-    const userCommitment = generatedIdentity.getCommitment().toString()
+  return (
+    (state.usersGrouped[communityId]?.find(u => {
+      const generatedIdentity = new Identity(`${userAddress}_${communityId}_${u.name}`)
+      const userCommitment = generatedIdentity.getCommitment().toString()
 
-    return _.toNumber(+u?.groupId) === _.toNumber(communityId) && u?.identityCommitment === userCommitment
-  }) as User || false
+      return _.toNumber(+u?.groupId) === _.toNumber(communityId) && u?.identityCommitment === userCommitment
+    }) as User) || false
+  )
 }
