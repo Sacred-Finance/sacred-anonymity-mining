@@ -26,7 +26,7 @@ import Header from '../../../components/Header'
 import Footer from '../../../components/Footer'
 import { toast } from 'react-toastify'
 import { PostList } from '../../../components/postList'
-import { NewPostForm } from '../../../components/newPostForm'
+import { NewPostForm } from '../../../components/NewPostForm'
 import dynamic from 'next/dynamic'
 import { User } from 'lib/model'
 import { useUnirepSignUp } from '../../../hooks/useUnirepSignup'
@@ -186,17 +186,24 @@ export function Main() {
   }
 
   if (isLoading) return null
-
   return (
-    <div className="mx-auto mb-32 h-full w-full max-w-screen-xl space-y-12 p-24 md:px-2">
-      <div className="flex items-center justify-between">
+    <div className="mx-auto mb-32 h-screen w-full max-w-screen-xl space-y-12 sm:p-8 md:p-24">
+      <div
+          className="relative flex items-center justify-between bg-white/10 p-6 min-h-[200px] rounded-lg shadow-lg"
+          style={{ backgroundImage: community?.banner ? `url(https://ipfs.io/ipfs/${community?.banner})` : undefined, backgroundSize: 'cover', backgroundPosition: 'center' }}
+      >
         <img
-          className="border-indigo-500 h-20 w-20 rounded-full border-2 object-cover"
-          src={`https://ipfs.io/ipfs/${community?.logo}`}
-          alt="community logo"
+            className="absolute bottom-0 transform left-1/2 -translate-x-1/2 translate-y-1/2 border-white h-20 w-20 rounded-full border-2 object-cover"
+            src={`https://ipfs.io/ipfs/${community?.logo}`}
+            alt="community logo"
         />
+        <div className="flex flex-col items-center bg-white bg-opacity-50 p-4 rounded">
+          <h1 className="text-2xl font-bold text-black">{community?.name}</h1>
+          <h1 className="text-sm font-semibold text-gray-700">{community?.description}</h1>
+        </div>
         {!(user as User)?.identityCommitment && community && <JoinCommunityButton community={community} />}
       </div>
+
 
       <NewPostForm
         id={id}
@@ -211,15 +218,19 @@ export function Main() {
       />
 
       {sortedData?.length > 0 ? (
-        <PostList
-          posts={sortedData}
-          isLoading={isLoading}
-          data={data}
-          voteForPost={voteForPost}
-          handleSortChange={handleSortChange}
-        />
+        <div className="rounded-lg bg-white/10 p-6 shadow-lg">
+          <PostList
+            posts={sortedData}
+            isLoading={isLoading}
+            data={data}
+            voteForPost={voteForPost}
+            handleSortChange={handleSortChange}
+          />
+        </div>
       ) : (
-        <NoPosts />
+        <div className="rounded-lg bg-white/10 p-6 shadow-lg">
+          <NoPosts />
+        </div>
       )}
     </div>
   )
