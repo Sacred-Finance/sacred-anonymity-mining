@@ -9,7 +9,9 @@ import { useTranslation } from 'next-i18next'
 import { getGroupIdOrUserId, useCommunityContext } from '../contexts/CommunityProvider'
 import {
   ArrowDownIcon,
-  ArrowUpIcon, BarsArrowDownIcon, BarsArrowUpIcon,
+  ArrowUpIcon,
+  BarsArrowDownIcon,
+  BarsArrowUpIcon,
   ClockIcon,
   MagnifyingGlassIcon,
   MinusCircleIcon,
@@ -52,7 +54,7 @@ function HomePage({ createCommunity, isAdmin = false }: HomeProps) {
         .filter(c => c) as Community[]
 
       uniqueCommunities.forEach(c => {
-        if (!c?.id) return
+        if (isNaN(c?.id)) return
         gMap[c.id?.toString()] = users.find(u => {
           const generatedIdentity = new Identity(`${address}_${c.groupId}_${u.name}`)
           const userCommitment = generatedIdentity.getCommitment().toString()
@@ -133,24 +135,22 @@ function HomePage({ createCommunity, isAdmin = false }: HomeProps) {
     setLocalCommunities(filteredCommunities)
   }
 
-  const filterButtonClass =
-    'rounded-md p-2 text-white transition-colors duration-200 ease-in-out dark:bg-gray-900 '
-  const iconClass =
-      "h-5 w-5 fill-inherit stroke-inherit text-gray-500 dark:fill-white"
+  const filterButtonClass = 'rounded-md p-2 text-white transition-colors duration-200 ease-in-out dark:bg-gray-900 '
+  const iconClass = 'h-5 w-5 fill-inherit stroke-inherit text-gray-500 dark:fill-white'
 
   const FilterButton = ({ filterKey, iconTrue, iconFalse, applyFilter, currentFilter, filterClass, iconClass }) => {
-    const IconTrue = iconTrue;
-    const IconFalse = iconFalse;
+    const IconTrue = iconTrue
+    const IconFalse = iconFalse
 
     return (
-        <button
-            onClick={() => applyFilter(filterKey)}
-            className={clsx(filterClass, currentFilter.includes(filterKey) && '!bg-primary-bg !fill-white')}
-        >
-          {currentFilter === `-${filterKey}` ? <IconTrue className={iconClass} /> : <IconFalse className={iconClass} />}
-        </button>
-    );
-  };
+      <button
+        onClick={() => applyFilter(filterKey)}
+        className={clsx(filterClass, currentFilter.includes(filterKey) && '!bg-primary-bg !fill-white')}
+      >
+        {currentFilter === `-${filterKey}` ? <IconTrue className={iconClass} /> : <IconFalse className={iconClass} />}
+      </button>
+    )
+  }
 
   return (
     <main className="xs:flex xs:flex-col xs:mx-0 xs:p-0 xs:text-center xs:align-center h-full w-full max-w-screen-xl space-y-12 sm:mx-auto  sm:p-24 md:px-0">
@@ -170,37 +170,35 @@ function HomePage({ createCommunity, isAdmin = false }: HomeProps) {
           </div>
           <div className="flex space-x-2">
             <FilterButton
-                filterKey='Alphabetical'
-                iconTrue={BarsArrowDownIcon}
-                iconFalse={BarsArrowUpIcon}
-                applyFilter={applyFilter}
-                currentFilter={currentFilter}
-                filterClass={filterButtonClass}
-                iconClass={iconClass}
+              filterKey="Alphabetical"
+              iconTrue={BarsArrowDownIcon}
+              iconFalse={BarsArrowUpIcon}
+              applyFilter={applyFilter}
+              currentFilter={currentFilter}
+              filterClass={filterButtonClass}
+              iconClass={iconClass}
             />
             <FilterButton
-                filterKey='User Count'
-                iconTrue={UserMinusIcon}
-                iconFalse={UserGroupIcon}
-                applyFilter={applyFilter}
-                currentFilter={currentFilter}
-                filterClass={filterButtonClass}
-                iconClass={iconClass}
+              filterKey="User Count"
+              iconTrue={UserMinusIcon}
+              iconFalse={UserGroupIcon}
+              applyFilter={applyFilter}
+              currentFilter={currentFilter}
+              filterClass={filterButtonClass}
+              iconClass={iconClass}
             />
             <FilterButton
-                filterKey='Age'
-                iconTrue={ClockIcon}
-                iconFalse={MinusCircleIcon}
-                applyFilter={applyFilter}
-                currentFilter={currentFilter}
-                filterClass={filterButtonClass}
-                iconClass={iconClass}
+              filterKey="Age"
+              iconTrue={ClockIcon}
+              iconFalse={MinusCircleIcon}
+              applyFilter={applyFilter}
+              currentFilter={currentFilter}
+              filterClass={filterButtonClass}
+              iconClass={iconClass}
             />
           </div>
-
         </div>
         {currentFilter}
-
       </div>
 
       <div className="row-gap-8 mb-8 grid grid-cols-1 justify-items-center   gap-4 sm:grid-cols-1 md:grid-cols-2 md:justify-items-center lg:grid-cols-3">

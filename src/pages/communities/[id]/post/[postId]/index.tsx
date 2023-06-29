@@ -18,7 +18,6 @@ import useSWR, { useSWRConfig } from 'swr'
 import { OutputData } from '@editorjs/editorjs'
 import { CommentClass } from '@/lib/comment'
 import { Post, PostInterface } from '@/lib/post'
-import { useParams } from 'next/navigation'
 import { useAccount, useContractWrite } from 'wagmi'
 import { useLoaderContext } from '@/contexts/LoaderContext'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
@@ -495,6 +494,9 @@ export function PostPage() {
   }
 
   const sortedCommentsData = useSortedVotes(tempComments, comments, commentsSortBy)
+
+
+  console.log('check render count')
 
   return (
     <div className={'flex h-full w-full flex-col items-center justify-center'}>

@@ -60,9 +60,7 @@ export class CommentClass {
       console.log(`IPFS CID: ${cid}`)
 
       onIPFSUploadSuccess(commentContent, cid)
-
       const signal = getBytes32FromIpfsHash(cid)
-
       const userPosting = new Identity(`${address}_${this.groupId}_${postedByUser?.name}`)
       const unirepUser = new UnirepUser(userPosting)
       await unirepUser.updateUserState()

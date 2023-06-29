@@ -29,6 +29,7 @@ import { PostList } from '../../../components/postList'
 import { NewPostForm } from '../../../components/NewPostForm'
 import { User } from '@/lib/model'
 import { useUnirepSignUp } from '../../../hooks/useUnirepSignup'
+import { Breadcrumbs } from '@components/Breadcrumbs'
 
 export function Main() {
   const activeUser = useActiveUser()
@@ -57,7 +58,7 @@ export function Main() {
     postInstance.current = new Post(null, id)
   }, [id])
   const community = useCommunityById(id as string)
-  useCommunityUpdates({ user, postInstance })
+  useCommunityUpdates({ user, postInstance: postInstance.current })
   useUnirepSignUp({ groupId: id, name: (user as User)?.name })
 
   const { checkUserBalance } = useValidateUserBalance(community, address)
@@ -166,14 +167,18 @@ export function Main() {
     setIsLoading(true)
 
     try {
-      postInstance?.current?.updatePostsVote(postInstance, postId, voteType, false).then(() => setIsLoading(false))
-      const { status } = await postInstance?.current?.vote(voteType, address, users, activeUser, postId, id)
+      postInstance?.current
+        ?.updatePostsVote(postInstance.current, postId, voteType, false)
+        .then(() => setIsLoading(false))
+      const response = await postInstance?.current?.vote(voteType, address, users, activeUser, postId, id)
+      console.log('response', response)
+        const { status } = response
 
       if (status === 200) {
         setIsLoading(false)
       }
     } catch (error) {
-      postInstance?.current?.updatePostsVote(postInstance, postId, voteType, true, true)
+      postInstance?.current?.updatePostsVote(postInstance.current, postId, voteType, true, true)
       setIsLoading(false)
     }
   }
@@ -221,9 +226,9 @@ export function Main() {
         />
       )}
 
-      {postId ? (
+      {!isNaN(postId) ? (
         <PostList
-          posts={[sortedData?.find(post => post.id === postId)]}
+          posts={sortedData?.filter(post => Number(post.id) === Number(postId))}
           isLoading={isLoading}
           data={data}
           voteForPost={voteForPost}
@@ -255,6 +260,7 @@ export default function Home() {
   return (
     <div className={'flex h-screen flex-col'}>
       <Header createCommunity={() => setCreateCommunityModalOpen(true)} />
+      <Breadcrumbs />
 
       <CustomModal isOpen={createCommunityModalOpen} setIsOpen={setCreateCommunityModalOpen}>
         <CreateGroupFormUI onCreate={createCommunity} onCreateGroupClose={() => setCreateCommunityModalOpen(false)} />
