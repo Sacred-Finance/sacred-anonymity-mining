@@ -1,10 +1,10 @@
 import React, { createContext, ReactNode, useContext, useReducer, useMemo } from 'react'
-import { Community, User } from '../lib/model'
+import { Community, User } from '@/lib/model'
 import { ethers } from 'ethers'
 import { Identity } from '@semaphore-protocol/identity'
 import _ from 'lodash'
 import { useAccount } from 'wagmi'
-import { useIdentity } from '../hooks/useIdentity'
+import { useIdentity } from '@/hooks/useIdentity'
 import { useRouter } from 'next/router'
 import { useLoaderContext } from './LoaderContext'
 

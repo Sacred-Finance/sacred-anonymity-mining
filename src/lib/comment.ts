@@ -153,6 +153,7 @@ export class CommentClass {
 
   async getComments() {
     const getData = async () => {
+      console.log('fetching comments')
       const itemIds = await forumContract.getCommentIdList(this.postId)
       const rawComments = await Promise.all(itemIds.map(i => forumContract.itemAt(i.toNumber())))
       let p = []
@@ -198,7 +199,7 @@ export class CommentClass {
         itemIds.map(i => this.specificCommentId(i.toNumber()))
       )
 
-      console.log(mCache)
+      console.log('mCache', mCache)
 
       if (true) {
         return mCache
@@ -209,7 +210,7 @@ export class CommentClass {
         return getData()
       }
     } catch (error) {
-      console.log(error)
+      console.error('comment fetch error', error)
       return []
     }
   }

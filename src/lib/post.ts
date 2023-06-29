@@ -20,7 +20,7 @@ import { mutate } from 'swr'
 import { reverse } from 'lodash'
 import { UnirepUser } from './unirep'
 import { AxiosResponse } from 'axios'
-import { forumContract, jsonRPCProvider } from 'constant/const'
+import { forumContract, jsonRPCProvider } from '@/constant/const'
 
 const minRepsPost = 0
 

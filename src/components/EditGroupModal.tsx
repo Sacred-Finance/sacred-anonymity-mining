@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { ToolTip } from './HOC/ToolTip'
 import { useTranslation } from 'next-i18next'
-import { uploadAndCacheImages } from '../utils/communityUtils'
-import { useIdentity } from '../hooks/useIdentity'
-import { useFetchCommunities } from '../hooks/useFetchCommunities'
+import { uploadAndCacheImages } from '@/utils/communityUtils'
+import { useIdentity } from '@/hooks/useIdentity'
+import { useFetchCommunities } from '@/hooks/useFetchCommunities'
 import { PictureUpload } from './PictureUpload'
-import { createNote } from 'lib/utils'
+import { createNote } from '@/lib/utils'
 import { Identity } from '@semaphore-protocol/identity'
 
 function EditGroupModal({ community, hidden = false }) {
