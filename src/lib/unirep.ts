@@ -6,7 +6,6 @@ import { polygonMumbai } from 'wagmi/chains'
 import { userUnirepSignUp } from './api'
 import { UserState, schema } from '@unirep/core'
 import { Identity } from '@semaphore-protocol/identity'
-// import { defaultProver as prover } from '@unirep/circuits/provers/defaultProver';
 import unirepAbi from '@unirep/contracts/abi/Unirep.json'
 import prover from './prover'
 
@@ -26,6 +25,7 @@ export class UnirepUser {
     graffiti: 0,
     timestamp: 0,
   }
+
   static user = {
     identity: null,
     userState: null,
@@ -38,38 +38,44 @@ export class UnirepUser {
   }
   static hasSignedUp = false
 
-  provider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL, polygonMumbai.id)
-  signer = new Wallet(process.env.NEXT_PUBLIC_ETHEREUM_PRIVATE_KEY, this.provider)
-  unirep = new Contract(unirepAddress, unirepAbi, this.signer)
+  provider
+  signer
+  unirep
 
   constructor(public identity: Identity) {
+    if (!process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL || !process.env.NEXT_PUBLIC_ETHEREUM_PRIVATE_KEY) {
+      throw new Error("Environment variables are not set.")
+    }
+    this.provider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL, polygonMumbai.id)
+    this.signer = new Wallet(process.env.NEXT_PUBLIC_ETHEREUM_PRIVATE_KEY, this.provider)
+    this.unirep = new Contract(unirepAddress, unirepAbi, this.signer)
+
     if (!UnirepUser.hasSignedUp) {
-      this.load()
+      console.log('User has not signed up yet')
+      this.load().catch(console.error)
+    } else {
+      console.log('User has already signed up')
     }
   }
 
   async load() {
-    // this.userState = await this.genUserState();
-
     const userState = new UserState(
-      {
-        provider: this.provider,
-        prover,
-        unirepAddress: unirepAddress,
-        attesterId: BigInt(attesterAddress),
-        _id: this.identity,
-      },
-      this.identity
+        {
+          provider: this.provider,
+          prover,
+          unirepAddress: unirepAddress,
+          attesterId: BigInt(attesterAddress),
+          _id: this.identity,
+        },
+        this.identity
     )
+
     await userState.sync.start()
     UnirepUser.user.userState = userState
     await userState.waitForSync()
-    this.latestTransitionedEpoch = await UnirepUser.user.userState.latestTransitionedEpoch()
+    this.latestTransitionedEpoch = await UnirepUser?.user?.userState?.latestTransitionedEpoch()
 
-    UnirepUser.user = {
-      ...UnirepUser.user,
-      identity: this.identity,
-    }
+    UnirepUser.user.identity = this.identity
 
     UnirepUser.hasSignedUp = await userState.hasSignedUp()
     if (!UnirepUser.hasSignedUp) {
@@ -82,31 +88,25 @@ export class UnirepUser {
     console.log(`Reputaion`, reputation)
   }
 
-  getUserState() {
-    const u = UnirepUser.user
-    if (u?.userState && u.userState) {
-      return u.userState
-    }
-    return null
+  getUserState(): UserState {
+    return UnirepUser.user.userState
   }
+
   getEpochData() {
-    const u = UnirepUser.user
-    return u?.epochData
+    return UnirepUser.user.epochData
   }
 
   // It generate epoch key for the current epoch. It'll be outdated and not available to use once the epoch is ended.
   async updateUserEpochKey() {
-    const u = UnirepUser.user
-    const nonce = 0
     const userState = this.getUserState()
+
+    if (!userState) return console.error('User state not found')
     await userState.waitForSync()
-    if (!u?.epochData) UnirepUser.user.epochData = null
-    let epochData = UnirepUser.user.epochData
     const currentEpoch = await this.unirep.attesterCurrentEpoch(attesterAddress)
-    if (!epochData || !epochData.epochKey || epochData.epoch < currentEpoch) {
+    if (!this.getEpochData() || this.getEpochData().epoch < currentEpoch) {
       console.log('Updating Epoch Key:', attesterAddress)
-      const { publicSignals, proof, epochKey, epoch } = await userState.genEpochKeyProof({ nonce })
-      u.epochData = {
+      const { publicSignals, proof, epochKey, epoch } = await userState.genEpochKeyProof({ nonce: 0 })
+      UnirepUser.user.epochData = {
         epoch: epoch,
         epochKey: epochKey,
         proof: proof,
@@ -118,71 +118,58 @@ export class UnirepUser {
   async genUserState() {
     // generate a user state
     const db = new MemoryConnector(constructSchema(schema))
-
     const attesterId = BigInt(attesterAddress)
+
     const userState = new UserState(
-      {
-        db,
-        prover,
-        unirepAddress,
-        provider: this.provider,
-        attesterId,
-      },
-      this.identity
+        {
+          db,
+          prover,
+          unirepAddress,
+          provider: this.provider,
+          attesterId,
+        },
+        this.identity
     )
+
     await userState.sync.start()
     await userState.waitForSync()
-    UnirepUser.user.userState = { ...userState }
+    UnirepUser.user.userState = userState
     return userState
   }
 
   async userTransition() {
     const userState = this.getUserState()
     await userState.waitForSync()
-
-    //let waitTime = await this.unirep.attesterEpochRemainingTime(attesterAddress)
-    //await new Promise(resolve => setTimeout(resolve, waitTime * 1000));
-    //await this.provider.send('evm_increaseTime', [waitTime.toNumber() + 1])
-    //await this.provider.send('evm_mine', [])
     const targetEpoch = await this.unirep.attesterCurrentEpoch(attesterAddress)
 
-    let message = ''
     try {
-      const { publicSignals, proof } = await userState.genUserStateTransitionProof({
-        toEpoch: targetEpoch,
-      }) //toEpoch is a required param
-
+      const { publicSignals, proof } = await userState.genUserStateTransitionProof({ toEpoch: targetEpoch })
       await (await this.unirep.userStateTransition(publicSignals, proof)).wait()
       await userState.waitForSync()
       console.log('User transition Completed:', attesterAddress)
       await this.updateUserEpochKey()
     } catch (error) {
-      if (error instanceof Error) message = error.message
-      else message = String(error)
-      console.log('Error:', message)
+      console.error('Error:', error.message || String(error))
+      return error.message || String(error)
     }
-    return message
   }
 
   async signup() {
-    let userState = UnirepUser.user.userState
-    if (!UnirepUser.user.userState) {
-      userState = await this.genUserState()
-    }
+    let userState = UnirepUser.user.userState || await this.genUserState()
     const { publicSignals, proof } = await userState.genUserSignUpProof()
     const { status } = await userUnirepSignUp(publicSignals, proof)
-    if (status === 200) {
-      return await this.updateUserEpochKey()
-    } else {
-      throw new Error('User signup to Urnirep failed!')
+
+    if (status !== 200) {
+      throw new Error('User signup to Unirep failed!')
     }
+
+    return await this.updateUserEpochKey()
   }
 
   async updateUserState() {
-    let userState = UnirepUser.user.userState
+    let userState = this.getUserState()
     const currentEpoch = await this.unirep.attesterCurrentEpoch(attesterAddress)
     this.latestTransitionedEpoch = await userState.latestTransitionedEpoch()
-    console.log('#######', this.latestTransitionedEpoch, currentEpoch)
     if (this.latestTransitionedEpoch < currentEpoch) {
       await this.userTransition()
     }
