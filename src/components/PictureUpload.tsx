@@ -87,20 +87,21 @@ export const PictureUpload = (props: {
             )}
           </>
         ) : (
-          <div
+          <button
             className={clsx(
               'group pointer-events-auto flex h-[200px] flex-col items-center justify-center rounded border-2 border-dashed border-border-on-dark',
               props.name === 'banner' ? 'sm:w-screen md:w-[624px]' : ' w-[200px]'
             )}
+            onClick={openFileUpload}
           >
-            <button
+            <div
               className={clsx(
                 `h-100 bg-primary-500py-2 cursor-pointer select-none items-center rounded-lg text-center transition-colors duration-200 ease-in-out group-hover:bg-primary-light`,
                 props.uploadedImageUrl ? 'brightness-80 filter' : '',
                 primaryButtonStyle,
                 'border-none'
               )}
-              onClick={openFileUpload}
+
             >
               <span className="flex items-center justify-center">
                 {props.uploadedImageUrl ? (
@@ -141,8 +142,8 @@ export const PictureUpload = (props: {
                 accept="image/jpeg, image/png, image/jpg, image/webp, image/gif, image/svg+xml, image/avif"
                 onChange={handleFileImageUpload}
               />
-            </button>
-          </div>
+            </div>
+          </button>
         )}
       </div>
     </>

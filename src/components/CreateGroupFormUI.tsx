@@ -166,7 +166,7 @@ function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
         <label className="pointer-events-none text-base md:text-lg">{t('placeholder.communityDescription')}</label>
         <textarea
           className={clsx(classes.input)}
-          placeholder={'Description'}
+          placeholder={t('placeholder.communityDescriptionContent') || ''}
           value={groupDescription}
           onChange={handleDescriptionChange}
         />
