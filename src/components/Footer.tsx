@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
 
 const ListHeader = ({ children }) => {
-  return <p className="mb-2 text-lg font-semibold text-gray-700 dark:text-gray-200">{children}</p>
+  return <p className="mb-2 text-lg font-semibold text-gray-200 dark:text-gray-200">{children}</p>
 }
 
 export default function Footer(): JSX.Element {

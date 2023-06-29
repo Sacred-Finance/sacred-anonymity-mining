@@ -6,6 +6,8 @@ import { PrimaryButton } from '../components/buttons'
 import { ThemeToggleButton } from './Theme'
 import {PlusCircleIcon, QuestionMarkCircleIcon} from '@heroicons/react/20/solid'
 import ConnectWallet from './Connect/ConnectWallet'
+import {buttonVariants, primaryButtonStyle} from "../styles/classes";
+import clsx from "clsx";
 
 type HeaderProps = {
     createCommunity(): any
@@ -15,7 +17,7 @@ const Header = ({ createCommunity, ...headerProps }: HeaderProps) => {
     const { t } = useTranslation()
 
     return (
-        <nav className="my-1 grid grid-cols-1 md:grid-cols-5 items-center gap-1 p-2 dark:bg-gray-900  justify-items-center">
+        <nav className="my-1 grid grid-cols-1 md:grid-cols-6 items-center gap-1 p-2 dark:bg-gray-900  justify-items-center">
             <div className="flex items-center justify-start h-full justify-items-center">
                 <NavBarButton href="/" className="h-full">
                     <div className="md:hidden h-full"><DynamicLogo className="h-10" /></div>
@@ -23,17 +25,17 @@ const Header = ({ createCommunity, ...headerProps }: HeaderProps) => {
                 </NavBarButton>
             </div>
 
-            <div className="col-span-3 flex items-center justify-evenly gap-3">
-                <PrimaryButton onClick={createCommunity}>
-                    <div className="md:hidden">
-                        <PlusCircleIcon className="h-6 w-6" />
-                    </div>
-                    <div className="hidden md:flex">
+            <div className="col-span-2 flex items-center  gap-8 ">
+                <PrimaryButton onClick={createCommunity} className={clsx(primaryButtonStyle, buttonVariants.primarySolid )}>
+                    <div className="flex gap-2 ">
                         <PlusCircleIcon className="h-6 w-6" /> {t('toolTip.createCommunity')}
                     </div>
                 </PrimaryButton>
+            </div>
 
+            <div className="col-span-2 ">
                 <ConnectWallet />
+
             </div>
 
             <div className="flex items-center justify-end gap-2">
