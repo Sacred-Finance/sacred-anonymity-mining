@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import { app } from 'appConfig'
+import { app } from '@/appConfig'
 import { useTheme } from 'next-themes'
 
 export default function HeadGlobal() {

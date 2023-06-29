@@ -27,9 +27,9 @@ import Footer from '../../../components/Footer'
 import { toast } from 'react-toastify'
 import { PostList } from '../../../components/postList'
 import { NewPostForm } from '../../../components/NewPostForm'
-import dynamic from 'next/dynamic'
-import { User } from 'lib/model'
+import { User } from '@/lib/model'
 import { useUnirepSignUp } from '../../../hooks/useUnirepSignup'
+import { Breadcrumbs } from '@components/Breadcrumbs'
 
 export function Main() {
   const activeUser = useActiveUser()
@@ -49,7 +49,7 @@ export function Main() {
     signerOrProvider: provider,
   })
   const router = useRouter()
-  const { id } = router.query
+  const { id, postId } = router.query
   const user = useUserIfJoined(id as string)
   const postInstance = useRef<Post>(null)
 
@@ -58,7 +58,7 @@ export function Main() {
     postInstance.current = new Post(null, id)
   }, [id])
   const community = useCommunityById(id as string)
-  useCommunityUpdates({ user, postInstance })
+  useCommunityUpdates({ user, postInstance: postInstance.current })
   useUnirepSignUp({ groupId: id, name: (user as User)?.name })
 
   const { checkUserBalance } = useValidateUserBalance(community, address)
@@ -167,14 +167,18 @@ export function Main() {
     setIsLoading(true)
 
     try {
-      postInstance?.current?.updatePostsVote(postInstance, postId, voteType, false).then(() => setIsLoading(false))
-      const { status } = await postInstance?.current?.vote(voteType, address, users, activeUser, postId, id)
+      postInstance?.current
+        ?.updatePostsVote(postInstance.current, postId, voteType, false)
+        .then(() => setIsLoading(false))
+      const response = await postInstance?.current?.vote(voteType, address, users, activeUser, postId, id)
+      console.log('response', response)
+        const { status } = response
 
       if (status === 200) {
         setIsLoading(false)
       }
     } catch (error) {
-      postInstance?.current?.updatePostsVote(postInstance, postId, voteType, true, true)
+      postInstance?.current?.updatePostsVote(postInstance.current, postId, voteType, true, true)
       setIsLoading(false)
     }
   }
@@ -189,35 +193,48 @@ export function Main() {
   return (
     <div className="mx-auto mb-32 h-screen w-full max-w-screen-xl space-y-12 sm:p-8 md:p-24">
       <div
-          className="relative flex items-center justify-between bg-white/10 p-6 min-h-[200px] rounded-lg shadow-lg"
-          style={{ backgroundImage: community?.banner ? `url(https://ipfs.io/ipfs/${community?.banner})` : undefined, backgroundSize: 'cover', backgroundPosition: 'center' }}
+        className="relative flex min-h-[200px] items-center justify-between rounded-lg bg-white/10 p-6 shadow-lg"
+        style={{
+          backgroundImage: community?.banner ? `url(https://ipfs.io/ipfs/${community?.banner})` : undefined,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
       >
         <img
-            className="absolute bottom-0 transform left-1/2 -translate-x-1/2 translate-y-1/2 border-white h-20 w-20 rounded-full border-2 object-cover"
-            src={`https://ipfs.io/ipfs/${community?.logo}`}
-            alt="community logo"
+          className="absolute bottom-0 left-1/2 h-20 w-20 -translate-x-1/2 translate-y-1/2 transform rounded-full border-2 border-white object-cover"
+          src={`https://ipfs.io/ipfs/${community?.logo}`}
+          alt="community logo"
         />
-        <div className="flex flex-col items-center bg-white bg-opacity-50 p-4 rounded">
+        <div className="flex flex-col items-center rounded bg-white bg-opacity-50 p-4">
           <h1 className="text-2xl font-bold text-black">{community?.name}</h1>
-          <h1 className="text-sm font-semibold text-gray-700">{community?.description}</h1>
+          {/*<h1 className="text-sm font-semibold text-gray-700">{community?.description}</h1>*/}
         </div>
         {!(user as User)?.identityCommitment && community && <JoinCommunityButton community={community} />}
       </div>
 
+      {!postId && (
+        <NewPostForm
+          id={id}
+          postEditorRef={postEditorRef}
+          postTitle={postTitle}
+          setPostTitle={setPostTitle}
+          postDescription={postDescription}
+          setPostDescription={setPostDescription}
+          isLoading={isLoading || !community?.name || isContextLoading}
+          clearInput={clearInput}
+          addPost={addPost}
+        />
+      )}
 
-      <NewPostForm
-        id={id}
-        postEditorRef={postEditorRef}
-        postTitle={postTitle}
-        setPostTitle={setPostTitle}
-        postDescription={postDescription}
-        setPostDescription={setPostDescription}
-        isLoading={isLoading || !community?.name || isContextLoading}
-        clearInput={clearInput}
-        addPost={addPost}
-      />
-
-      {sortedData?.length > 0 ? (
+      {!isNaN(postId) ? (
+        <PostList
+          posts={sortedData?.filter(post => Number(post.id) === Number(postId))}
+          isLoading={isLoading}
+          data={data}
+          voteForPost={voteForPost}
+          handleSortChange={handleSortChange}
+        />
+      ) : sortedData?.length > 0 ? (
         <div className="rounded-lg bg-white/10 p-6 shadow-lg">
           <PostList
             posts={sortedData}
@@ -243,6 +260,7 @@ export default function Home() {
   return (
     <div className={'flex h-screen flex-col'}>
       <Header createCommunity={() => setCreateCommunityModalOpen(true)} />
+      <Breadcrumbs />
 
       <CustomModal isOpen={createCommunityModalOpen} setIsOpen={setCreateCommunityModalOpen}>
         <CreateGroupFormUI onCreate={createCommunity} onCreateGroupClose={() => setCreateCommunityModalOpen(false)} />
@@ -250,7 +268,7 @@ export default function Home() {
       <div>
         <Main />
       </div>
-      <div className={'flex-1  '} />
+      <div className={'flex-1'} />
       <Footer />
     </div>
   )

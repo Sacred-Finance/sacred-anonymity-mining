@@ -20,7 +20,7 @@ import { mutate } from 'swr'
 import { reverse } from 'lodash'
 import { UnirepUser } from './unirep'
 import { AxiosResponse } from 'axios'
-import { forumContract, jsonRPCProvider } from 'constant/const'
+import { forumContract, jsonRPCProvider } from '@/constant/const'
 
 const minRepsPost = 0
 
@@ -416,82 +416,120 @@ export class Post implements PostInterface {
     )
   }
 
-  async updatePostVote(voteType, confirmed: boolean, revert = false) {
-    //from a single post (with child comments)
-    const modifier = revert ? -1 : 1
-    mutate(
-      this.postCacheId(),
-      async posts => {
-        const postToUpdate = { ...posts }
-        if (voteType === 0 && (!confirmed || revert)) {
-          postToUpdate.upvote += 1 * modifier
-        }
-
-        if (voteType === 1 && (!confirmed || revert)) {
-          postToUpdate.downvote += 1 * modifier
-        }
-
-        if (confirmed) {
-          delete postToUpdate.voteUnconfirmed
-        } else {
-          postToUpdate.voteUnconfirmed = true
-        }
-
-        if (confirmed) {
-          setCacheAtSpecificPath(
-            this.specificPostId(postToUpdate.id),
-            voteType === 0 ? postToUpdate.upvote : postToUpdate.downvote,
-            voteType === 0 ? '$.data.upvote' : '$.data.downvote'
-          )
-        }
-        return postToUpdate
-      },
-      { revalidate: false }
-    )
-  }
-
-  async vote(voteType, address: string, users: User[], postedByUser: User, itemId, groupId) {
-    // Post.
-    const voteCmdNum = hashBytes2(+itemId, 'vote')
-    const signal = utils.hexZeroPad('0x' + voteCmdNum.toString(16), 32)
-    const extraNullifier = voteCmdNum.toString()
-    const g = new Group(groupId)
-    const userPosting = new Identity(`${address}_${this.groupId}_${postedByUser?.name}`)
-    const u = users.filter(u => u?.groupId === +this.groupId)
-    g.addMembers(u.map(u => u?.identityCommitment))
-
-    const unirepUser = new UnirepUser(userPosting)
-    await unirepUser.updateUserState()
-    const userState = await unirepUser.getUserState()
-
-    let reputationProof = await userState.genProveReputationProof({
-      epkNonce: 0,
-      minRep: minRepsVote,
-      graffitiPreImage: 0,
-    })
-
-    const epochData = unirepUser.getEpochData()
-    let voteProofData: ReputationProofStruct = {
-      publicSignals: epochData.publicSignals,
-      proof: epochData.proof,
-      publicSignalsQ: reputationProof.publicSignals,
-      proofQ: reputationProof.proof,
-      ownerEpoch: 0,
-      ownerEpochKey: 0,
+  async updatePostVote(voteType, confirmed = false, revert = false) {
+    // Verify the vote type is within the expected range (0 or 1)
+    if (![0, 1].includes(voteType)) {
+      throw new Error('Invalid vote type. Expected 0 (upvote) or 1 (downvote)');
     }
 
-    const { proof, nullifierHash, merkleTreeRoot } = await generateProof(userPosting, g, extraNullifier, signal)
+    // Determine if we should increment or decrement vote counts
+    const modifier = revert ? -1 : 1;
 
-    return vote(
-      itemId,
-      this.groupId?.toString(),
-      voteType,
-      merkleTreeRoot.toString(),
-      nullifierHash.toString(),
-      proof,
-      voteProofData
-    )
+    try {
+      mutate(
+          this.postCacheId(),
+          async (posts) => {
+            // Ensure posts are not undefined or null
+            if (!posts) {
+              throw new Error('Posts not found in cache');
+            }
+
+            const postToUpdate = { ...posts };
+
+            if (voteType === 0 && (!confirmed || revert)) {
+              postToUpdate.upvote += 1 * modifier;
+            }
+
+            if (voteType === 1 && (!confirmed || revert)) {
+              postToUpdate.downvote += 1 * modifier;
+            }
+
+            if (confirmed) {
+              // Only delete voteUnconfirmed if it exists in the object
+              if ('voteUnconfirmed' in postToUpdate) {
+                delete postToUpdate.voteUnconfirmed;
+              }
+
+              // Update the cache at the specific post ID
+              setCacheAtSpecificPath(
+                  this.specificPostId(postToUpdate.id),
+                  voteType === 0 ? postToUpdate.upvote : postToUpdate.downvote,
+                  voteType === 0 ? '$.data.upvote' : '$.data.downvote'
+              );
+            } else {
+              postToUpdate.voteUnconfirmed = true;
+            }
+
+            return postToUpdate;
+          },
+          { revalidate: false }
+      );
+    } catch (error) {
+      console.error('Error updating post vote:', error);
+      throw error;
+    }
   }
+
+
+  async vote(voteType, address, users, postedByUser, itemId, groupId) {
+    try {
+      // Validate parameters
+      if (!address) throw new Error("Invalid address");
+      if (!Array.isArray(users)) throw new Error("Invalid users array");
+      if (!itemId) throw new Error("Invalid item ID");
+      if (!groupId) throw new Error("Invalid group ID");
+
+      const voteCmdNum = hashBytes2(+itemId, 'vote');
+      const signal = utils.hexZeroPad('0x' + voteCmdNum.toString(16), 32);
+      const extraNullifier = voteCmdNum.toString();
+      const g = new Group(groupId);
+      const userPosting = new Identity(`${address}_${this.groupId}_${postedByUser?.name}`);
+
+      const filteredUsers = users.filter(u => u?.groupId === +this.groupId);
+      if (filteredUsers.length === 0) throw new Error("No matching users found for the provided groupId");
+
+      g.addMembers(filteredUsers.map(u => u?.identityCommitment));
+
+      const unirepUser = new UnirepUser(userPosting);
+      await unirepUser.updateUserState();
+      const userState = await unirepUser.getUserState();
+      if (!userState) throw new Error("Failed to get User State");
+
+      let reputationProof = await userState.genProveReputationProof({
+        epkNonce: 0,
+        minRep: minRepsVote,
+        graffitiPreImage: 0,
+      });
+
+      const epochData = unirepUser.getEpochData();
+      if (!epochData) throw new Error("Failed to get Epoch Data");
+
+      let voteProofData = {
+        publicSignals: epochData.publicSignals || [], // provide default empty array
+        proof: epochData.proof || [], // provide default empty array
+        publicSignalsQ: reputationProof.publicSignals,
+        proofQ: reputationProof.proof,
+        ownerEpoch: 0,
+        ownerEpochKey: 0,
+      };
+
+      const { proof, nullifierHash, merkleTreeRoot } = await generateProof(userPosting, g, extraNullifier, signal);
+
+      return vote(
+          itemId,
+          this.groupId?.toString(),
+          voteType,
+          merkleTreeRoot.toString(),
+          nullifierHash.toString(),
+          proof,
+          voteProofData
+      );
+    } catch (error) {
+      console.error('An error occurred while voting:', error);
+      throw error;
+    }
+  }
+
 
   cacheNewPost = async (post, postId, groupId, note: BigInt, contentCID, setWaiting) => {
     const parsedPost = parsePost(post)
