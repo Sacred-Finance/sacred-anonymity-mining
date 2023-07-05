@@ -7,13 +7,7 @@ import CreateGroupFormUI from '../../../../../components/CreateGroupFormUI'
 import Footer from '../../../../../components/Footer'
 import { useSortedVotes } from '@/hooks/useSortedVotes'
 import { SortByOption } from '@components/SortBy'
-import {
-  commentIsConfirmed,
-  createNote,
-  formatDistanceToNow,
-  getBytes32FromIpfsHash,
-  hashBytes
-} from '@/lib/utils'
+import { commentIsConfirmed, createNote, formatDistanceToNow, getBytes32FromIpfsHash, hashBytes } from '@/lib/utils'
 import useSWR, { useSWRConfig } from 'swr'
 import { OutputData } from '@editorjs/editorjs'
 import { CommentClass } from '@/lib/comment'
@@ -31,12 +25,15 @@ import { useUnirepSignUp } from '@/hooks/useUnirepSignup'
 import { useValidateUserBalance } from '@/utils/useValidateUserBalance'
 import { BigNumber } from 'ethers'
 import { toast } from 'react-toastify'
-import { useCommunityContext, useUserIfJoined } from '@/contexts/CommunityProvider'
+import { useActiveUser, useCommunityContext, useUserIfJoined } from '@/contexts/CommunityProvider'
 import _ from 'lodash'
 import dynamic from 'next/dynamic'
 import { motion } from 'framer-motion'
-import {Breadcrumbs} from "@components/Breadcrumbs";
-import {Main} from "@pages/communities/[id]";
+import { Breadcrumbs } from '@components/Breadcrumbs'
+import { Main } from 'src/pages/communities/[groupId]'
+import { CircularProgress } from '@components/CircularProgress'
+import { Identity } from '@semaphore-protocol/identity'
+import { NewPostForm } from '@components/NewPostForm'
 const Editor = dynamic(() => import('@/components/editor-js/Editor'), {
   ssr: false,
 })
@@ -55,12 +52,12 @@ interface CommentsMap {
 
 export function PostPage() {
   const router = useRouter()
-  const { id, postId } = router.query
-  const hasUserJoined = useUserIfJoined(id)
+  const { groupId, postId } = router.query
+  const hasUserJoined = useUserIfJoined(groupId)
   const { state } = useCommunityContext()
   const { users, communities } = state
 
-  const community = communities.find(c => c.id === id)
+  const community = communities.find(c => c.id.toString() === groupId)
 
   const { address } = useAccount()
   const { isLoading, setIsLoading } = useLoaderContext()
@@ -68,6 +65,7 @@ export function PostPage() {
   const { isAdmin, isModerator, fetchIsAdmin, fetchIsModerator } = useCheckIfUserIsAdminOrModerator(address)
 
   const canDelete = isAdmin || isModerator
+  const activeUser = useActiveUser()
 
   const { data, write } = useContractWrite({
     address: ForumContractAddress as `0x${string}`,
@@ -75,6 +73,7 @@ export function PostPage() {
     functionName: 'removeItem',
     mode: 'recklesslyUnprepared',
     onSettled: (data, error) => {
+      console.log('test-log', { data, error })
       setIsLoading(false)
     },
     onSuccess: async (data, variables) => {
@@ -111,6 +110,8 @@ export function PostPage() {
   const [comment, setComment] = useState<OutputData>(null)
   const [commentsMap, setCommentsMap] = useState<CommentsMap>({} as any)
 
+  console.log('test-log', { comment, commentsMap })
+
   const [isPostEditable, setIsPostEditable] = useState(false)
   const [isPostEditing, setPostEditing] = useState(false)
   const [isPostBeingSaved, setPostBeingSaved] = useState(false)
@@ -118,9 +119,6 @@ export function PostPage() {
   const [postTitle, setPostTitle] = useState('')
   const [postDescription, setPostDescription] = useState<OutputData>(null)
 
-  // const hasUserJoined: User | null = useAppSelector(state => {
-  //   return selectIfUserHasjoined(state, address, +id)
-  // })
   const commentEditorRef = useRef<any>()
   const postEditorRef = useRef<any>()
 
@@ -130,16 +128,17 @@ export function PostPage() {
 
   // Only update postInstance if id changes
   useEffect(() => {
-    if (id && postId) postInstance.current = new Post(postId, id)
-  }, [id, postId])
+    if (groupId && postId) postInstance.current = new Post(postId, groupId)
+  }, [groupId, postId])
 
   // commentClassInstance = new CommentClass(id, postId, null)
   const commentClassInstance = useRef<CommentClass>(null)
   useEffect(() => {
-    commentClassInstance.current = new CommentClass(id, postId, null)
-  }, [id, postId])
+    commentClassInstance.current =
+        new CommentClass(groupId, postId, null)
+  }, [groupId, postId])
 
-  useUnirepSignUp({ groupId: id, name: hasUserJoined?.name })
+  useUnirepSignUp({ groupId: groupId, name: hasUserJoined?.name })
 
   const { mutate } = useSWRConfig()
 
@@ -147,26 +146,30 @@ export function PostPage() {
     revalidateOnFocus: false,
     // isOnline: () => !!postInstance?.current?.postCacheId?.(),
   })
-  console.log('postFetched', postFetched)
-    console.log('postLoading', postLoading)
+
   const { data: comments, isLoading: commentsLoading } = useSWR(
     commentClassInstance?.current?.commentsCacheId?.(),
     fetchComments,
     {
       revalidateOnFocus: false,
-      // isOnline: () => !!commentClassInstance?.current?.commentsCacheId?.(),
     }
   )
-  console.log('comments', comments)
-  console.log('commentsLoading', commentsLoading)
+
   const [tempComments, setTempComments] = useState([])
+
   useEffect(() => {
-    if (postEditorRef?.current)
-    postEditorRef?.current?.reRender?.();
-  }, [postFetched]);
+    if (postEditorRef?.current) postEditorRef?.current?.reRender?.()
+  }, [postFetched])
+
+  useEffect(() => {
+    if (hasUserJoined && identityCommitment) {
+      checkIfCommentsAreEditable()
+    }
+  }, [hasUserJoined, comments])
   const { validationResult, checkUserBalance } = useValidateUserBalance(community, address)
   const checkIfPostIsEditable = async (note, contentCID) => {
-    const generatedNote = await createNote(hashBytes(getBytes32FromIpfsHash(contentCID)), identityCommitment)
+    const userPosting = new Identity(`${address}_${groupId}_${hasUserJoined?.name}`)
+    const generatedNote = await createNote(userPosting)
     const noteBigNumber = BigNumber.from(note).toString()
     const generatedNoteAsBigNumber = BigNumber.from(generatedNote).toString()
     setIsPostEditable(noteBigNumber === generatedNoteAsBigNumber)
@@ -178,7 +181,8 @@ export function PostPage() {
       const contentCID = c?.contentCID
       if (note && contentCID) {
         const noteBigNumber = BigNumber.from(note).toString()
-        const generatedNote = await createNote(hashBytes(getBytes32FromIpfsHash(contentCID)), identityCommitment)
+        const userPosting = new Identity(`${address}_${groupId}_${hasUserJoined?.name}`)
+        const generatedNote = await createNote(userPosting)
         const generatedNoteAsBigNumber = BigNumber.from(generatedNote).toString()
         if (generatedNoteAsBigNumber === noteBigNumber) {
           setCommentsMap(prevCommentsMap => {
@@ -199,8 +203,8 @@ export function PostPage() {
   }
 
   async function fetchComments() {
-    console.log('fetchComments', commentClassInstance.current)
-    return await commentClassInstance?.current?.getComments()
+    const comments = await commentClassInstance?.current?.getComments()
+    return comments
   }
 
   const checkIfUserHasJoined = (toastOnFalse = true) => {
@@ -260,8 +264,8 @@ export function PostPage() {
       try {
         const { status } =
           itemType === 0
-            ? await postInstance?.current?.delete(address, postId, users, hasUserJoined, id, setIsLoading)
-            : await commentClassInstance?.current?.delete(address, postId, users, hasUserJoined, id, setIsLoading)
+            ? await postInstance?.current?.delete(address, postId, users, hasUserJoined, groupId, setIsLoading)
+            : await commentClassInstance?.current?.delete(address, postId, users, hasUserJoined, groupId, setIsLoading)
         if (status === 200) {
           toast.success(t('alert.deleteSuccess'))
           if (itemType === 0) {
@@ -313,7 +317,7 @@ export function PostPage() {
         address,
         users,
         hasUserJoined,
-        id,
+        groupId,
         setIsLoading,
         (comment, cid) => {
           ipfsHash = cid
@@ -332,8 +336,10 @@ export function PostPage() {
         clearInput()
         // const newMessage = await getContent(getIpfsHashFromBytes32(signal))
         console.log(`Your greeting was posted 🎉`)
+        toast.success(t('alert.addCommentSuccess'))
       } else {
         console.log('Some error occurred, please try again!')
+        toast.error(t('alert.addCommentFailed'))
       }
     } catch (error) {
       console.error(error)
@@ -371,7 +377,7 @@ export function PostPage() {
         address,
         comment.id,
         hasUserJoined,
-        id,
+        groupId,
         setIsLoading
       )
 
@@ -436,7 +442,7 @@ export function PostPage() {
         postId,
         users,
         hasUserJoined,
-        id,
+        groupId,
         setIsLoading
       )
 
@@ -467,7 +473,7 @@ export function PostPage() {
       postInstance?.current
         ?.updatePostsVote(postInstance.current, postId, voteType, false)
         .then(() => setIsLoading(false))
-      const { status } = await postInstance?.current?.vote(voteType, address, users, activeUser, postId, id)
+      const { status } = await postInstance?.current?.vote(voteType, address, users, activeUser, postId, groupId)
 
       if (status === 200) {
         setIsLoading(false)
@@ -480,9 +486,8 @@ export function PostPage() {
 
   const hasUserRightsToEdit = async (note, cid) => {
     if (!note || !cid || identityCommitment) return false
-
-    const signal = cid
-    return createNote(hashBytes(signal), identityCommitment).then(r => {
+    const userPosting = new Identity(`${address}_${groupId}_${hasUserJoined?.name}`)
+    return createNote(userPosting).then(r => {
       return r
     })
   }
@@ -495,46 +500,58 @@ export function PostPage() {
 
   const sortedCommentsData = useSortedVotes(tempComments, comments, commentsSortBy)
 
-
-  console.log('check render count')
-
   return (
-    <div className={'flex h-full w-full flex-col items-center justify-center'}>
-      <div className={'flex h-full w-full flex-col items-center justify-center'}>
-        <div className="flex flex-col items-center rounded bg-white bg-opacity-50 p-4">
-          <h1 className="text-2xl font-bold text-black">Community Name</h1>
-          <h1 className="text-sm font-semibold text-gray-700">Community Description</h1>
+    <>
+      <div className={'mt-6 flex flex-col space-y-4 h-full mb-20'}>
+
+        <div className="flex w-full flex-col  justify-center">
+          <NewPostForm
+            id={`post_comment${groupId}`}
+            postTitle={false}
+            isComment={true}
+            // setPostTitle={setPostTitle}
+            // postEditorRef={postEditorRef}
+            postDescription={comment}
+            setPostDescription={setComment}
+            isLoading={isLoading}
+            addPost={addComment}
+            postEditorRef={undefined}
+            setPostTitle={undefined}
+            clearInput={() => setComment(null)}
+          />
         </div>
-      </div>
-      {/*{sortedCommentsData.length}*/}
-      {sortedCommentsData.map((c, i) => (
+        {sortedCommentsData.map((c, i) => (
           <motion.div
-              key={i}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-              className="p-4" // tailwind class for padding
+            key={i}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="p-4" // tailwind class for padding
           >
             <div key={c.id}>
-              <div className="flex flex-col mb-8">
+              <div className="mb-8 flex flex-col">
                 <div
-                    className={`${
-                        commentIsConfirmed(c.id) ||
-                        commentsMap[c?.id]?.isSaving
-                            ? "bg-gray-100 dark:bg-transparent"
-                            : "bg-gray-100 dark:bg-transparent"
-                    }`}
+                  className={`${
+                    commentIsConfirmed(c.id) || commentsMap[c?.id]?.isSaving
+                      ? 'bg-gray-100 dark:bg-transparent'
+                      : 'bg-gray-100 dark:bg-transparent'
+                  }`}
                 >
                   {c?.content && (
-                      <div
-                          className={`${
-                              commentsMap[c?.id]?.isEditing
-                                  ? "min-h-[150px] mt-4 pl-4 border border-solid rounded-md"
-                                  : ""
-                          }`}
-                      >
-                        {/* Your Editor component code */}
-                      </div>
+                    <div
+                      className={`${
+                        commentsMap[c?.id]?.isEditing ? 'mt-4 min-h-[150px] rounded-md border border-solid pl-4' : ''
+                      }`}
+                    >
+                      <Editor
+                        editorRef={commentEditorRef}
+                        holder={'comment' + '_' + c?.id}
+                        readOnly={commentsMap[c?.id]?.isEditing === false}
+                        onChange={val => setOnEditCommentContent(c, val)}
+                        placeholder={t('placeholder.enterComment')}
+                        data={c?.content?.blocks ? c?.content : []}
+                      />
+                    </div>
                   )}
                   {/*{(!commentIsConfirmed(c.id) ||*/}
                   {/*    commentsMap[c?.id]?.isSaving) && (*/}
@@ -544,24 +561,15 @@ export function PostPage() {
                 </div>
                 <div className="pt-3 text-gray-500">
                   <div
-                      className="flex gap-3"
-                      style={{
-                        visibility: commentIsConfirmed(c.id)
-                            ? "visible"
-                            : "hidden",
-                      }}
+                    className="flex gap-3"
+                    style={{
+                      visibility: commentIsConfirmed(c.id) ? 'visible' : 'hidden',
+                    }}
                   >
-                    <div>
-                      {/* Your VoteUpButton and VoteDownButton components code */}
-                    </div>
-                    <p className="my-auto text-sm inline-block">
-                      🕛{" "}
-                      {c?.createdAt
-                          ? formatDistanceToNow(
-                              new Date(c?.createdAt).getTime(),
-                              { addSuffix: true }
-                          )
-                          : "-"}
+                    <div>{/* Your VoteUpButton and VoteDownButton components code */}</div>
+                    <p className="my-auto inline-block text-sm">
+                      🕛{' '}
+                      {c?.createdAt ? formatDistanceToNow(new Date(c?.createdAt).getTime(), { addSuffix: true }) : '-'}
                     </p>
                   </div>
                   {/*{(identityCommitment || canDelete) && (*/}
@@ -571,55 +579,54 @@ export function PostPage() {
               </div>
             </div>
           </motion.div>
-      ))}
-
-      {isPostEditing ? (
-        <div className={'flex flex-col items-center justify-center'}>
-          <div className="flex flex-col items-center rounded bg-white bg-opacity-50 p-4">
-            <input id={'postTitle'} value={postTitle} onChange={e => setPostTitle(e.target.value)} />
-            <textarea
-              id={'postDescription'}
-              value={postDescription}
-              onChange={e => setPostDescription(e.target.value)}
-            />
+        ))}
+        {isPostBeingSaved && <CircularProgress className={'h-10 w-10'} />}
+        {isPostEditing ? (
+          <div className={'flex flex-col items-center justify-center'}>
+            <div className="flex flex-col items-center rounded bg-white bg-opacity-50 p-4">
+              <input id={'postTitle'} value={postTitle} onChange={e => setPostTitle(e.target.value)} />
+              <textarea
+                id={'postDescription'}
+                value={postDescription}
+                onChange={e => setPostDescription(e.target.value)}
+              />
+            </div>
           </div>
-        </div>
-      ) : (
-        <div className={'flex flex-col items-center justify-center'}>
-          <div className="flex flex-col items-center rounded bg-white bg-opacity-50 p-4">
-            <h1 className="text-2xl font-bold text-black">{postTitle}</h1>
-            {/*<h1 className="text-sm font-semibold text-gray-700">{postDescription}</h1>*/}
+        ) : (
+          <div className={'flex flex-col items-center justify-center'}>
+            <div className="flex flex-col items-center rounded bg-white bg-opacity-50 p-4">
+              <h1 className="text-2xl font-bold text-black">{postFetched?.name}</h1>
+            </div>
           </div>
-        </div>
-      )}
-      {typeof postFetched?.description === 'object' && id && (
-          <Editor
-              data={postDescription}
-              postEditorRef={postEditorRef}
-              onChange={setPostDescription}
-              placeholder={t('placeholder.enterPostContent')}
-              holder={id}
-          />
-      )}
-    </div>
+        )}
+        <>
+          {/*<Editor*/}
+          {/*    data={postDescription}*/}
+          {/*    editorRef={postEditorRef}*/}
+          {/*    onChange={setPostDescription}*/}
+          {/*    placeholder={t('placeholder.enterPostContent')}*/}
+          {/*    holder={groupId + ""}*/}
+          {/*/>*/}
+        </>
+      </div>
+    </>
   )
 }
 
-export default function Home() {
+export default function PostIndex() {
   const [createCommunityModalOpen, setCreateCommunityModalOpen] = useState(false)
   const createCommunity = useCreateCommunity(() => setCreateCommunityModalOpen(false))
 
   return (
     <div className={'flex h-screen flex-col'}>
       <Header createCommunity={() => setCreateCommunityModalOpen(true)} />
-      <Breadcrumbs/>
-      <Main />
+      <Breadcrumbs />
+      <Main>
+        <PostPage />
+      </Main>
       <CustomModal isOpen={createCommunityModalOpen} setIsOpen={setCreateCommunityModalOpen}>
         <CreateGroupFormUI onCreate={createCommunity} onCreateGroupClose={() => setCreateCommunityModalOpen(false)} />
       </CustomModal>
-      <div>
-        <PostPage />
-      </div>
       <div className={'flex-1  '} />
       <Footer />
     </div>

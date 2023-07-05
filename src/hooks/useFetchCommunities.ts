@@ -1,7 +1,7 @@
-import { ForumContractAddress, forumContract } from '../constant/const'
-import { fetchCommunitiesData, fetchCommunityData } from '../utils/communityUtils'
-import { useCommunityContext } from '../contexts/CommunityProvider'
-import { useEffect } from 'react'
+import { forumContract } from '@/constant/const'
+import { fetchCommunitiesData, fetchCommunityData } from '@/utils/communityUtils'
+import { useCommunityContext } from '@/contexts/CommunityProvider'
+import { useEffect, useRef } from 'react'
 
 export const useFetchCommunities = (loadOnInit = true) => {
   const { dispatch } = useCommunityContext()
@@ -12,8 +12,13 @@ export const useFetchCommunities = (loadOnInit = true) => {
     }
     try {
       const groups = await forumContract.queryFilter(forumContract.filters.NewGroupCreated())
+
+
+      console.log('groups', groups)
       const communitiesData = await fetchCommunitiesData({ groups })
       const fulfilledCommunities = communitiesData?.filter(community => community)
+
+      console.log('communitiesData', communitiesData)
       dispatch({
         type: 'SET_COMMUNITIES',
         payload: fulfilledCommunities,
@@ -23,10 +28,12 @@ export const useFetchCommunities = (loadOnInit = true) => {
       console.error(e)
     }
   }
-
+  const didLoadRef = useRef(false)
   useEffect(() => {
+    if (didLoadRef.current) return
+    didLoadRef.current = true
     if (loadOnInit) fetchCommunities()
-  }, [forumContract])
+  }, [])
 
   return fetchCommunities
 }

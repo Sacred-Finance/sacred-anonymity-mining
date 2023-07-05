@@ -9,6 +9,8 @@
   "placeholder": {
     "enterPostTitle": "Enter Post Title *",
     "enterPostContent": "Enter Post Content *",
+    "enterComment": "Enter Comment *",
+
     "noTokenRequirements": "No Token Requirements",
     "communityDescription": "Community Description *",
     "communityDescriptionContent": "Tell us about your community and what makes it unique. This will help members decide if they want to join.",

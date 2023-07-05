@@ -8,6 +8,7 @@ import {PlusCircleIcon, QuestionMarkCircleIcon} from '@heroicons/react/20/solid'
 import ConnectWallet from './Connect/ConnectWallet'
 import {buttonVariants, primaryButtonStyle} from "../styles/classes";
 import clsx from "clsx";
+import Link from "next/link";
 
 type HeaderProps = {
     createCommunity(): any
@@ -26,11 +27,11 @@ const Header = ({ createCommunity, ...headerProps }: HeaderProps) => {
             </div>
 
             <div className="col-span-2 flex items-center  gap-8 ">
-                <PrimaryButton onClick={createCommunity} className={clsx(primaryButtonStyle, buttonVariants.primarySolid )}>
+                <Link href={'/create-group'} className={clsx(primaryButtonStyle, buttonVariants.primarySolid )}>
                     <div className="flex gap-2 ">
                         <PlusCircleIcon className="h-6 w-6" /> {t('toolTip.createCommunity')}
                     </div>
-                </PrimaryButton>
+                </Link>
             </div>
 
             <div className="col-span-2 ">

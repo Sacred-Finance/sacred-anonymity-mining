@@ -30,46 +30,49 @@ export const NewPostForm = ({
   isLoading,
   clearInput,
   addPost,
+  isComment = false,
 }) => {
   const { t } = useTranslation()
   const [isPreview, setIsPreview] = React.useState(false)
   const [isNewPostOpen, setIsNewPostOpen] = React.useState(false)
 
   return (
-    <div className="mt-6 rounded-lg border bg-white/10 p-6 shadow-lg ">
+    <div className="mt-6 rounded-lg border bg-white/10 p-6 shadow-lg h-auto">
       {!isNewPostOpen && (
         <button
           onClick={() => setIsNewPostOpen(true)}
           className="flex items-center rounded bg-indigo-500 p-3 text-white transition-colors duration-150 hover:bg-indigo-600"
         >
           <PlusIcon className="mr-2 h-5 w-5" />
-          {t('newPost')}
+          {t(isComment ? 'newComment' : 'newPost')}
         </button>
       )}
-
       {isNewPostOpen && (
         <div>
-          <div className="mb-4 text-2xl font-semibold">{t('newPost')}</div>
-          <input
-            className="mb-4 w-full rounded border-gray-200 p-3 text-lg transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            placeholder={t('placeholder.enterPostTitle')}
-            value={postTitle}
-            onChange={e => setPostTitle(e.target.value)}
-          />
+          <div className="mb-4 text-2xl font-semibold">   {t(isComment ? 'newComment' : 'newPost')}</div>
+
+          {postTitle !== false && (
+            <input
+              className="mb-4 w-full rounded border-gray-200 p-3 text-lg transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder= {t(isComment ? 'placeholder.enterComment' : 'placeholder.enterPostTitle')}
+              value={postTitle}
+              onChange={e => setPostTitle(e.target.value)}
+            />
+          )}
           <div>
             <div className="mb-2 flex items-center justify-between text-lg">
               <div className="font-semibold"> {isPreview ? 'Preview' : 'Editor'}</div>
               <ToggleButton onClick={() => setIsPreview(!isPreview)} isPreview={isPreview} />
             </div>
-            <div className="h-96 rounded z-50 border-gray-200 bg-gray-800 p-6 text-white ">
+            <div className="z-50 h-96 rounded border-gray-200  p-6 text-white ">
               {isPreview ? (
                 postDescription && <EditorJsRenderer data={postDescription} />
               ) : (
                 <Editor
                   data={postDescription}
-                  postEditorRef={postEditorRef}
+                  editorRef={postEditorRef}
                   onChange={setPostDescription}
-                  placeholder={t('placeholder.enterPostContent')}
+                  placeholder={t(isComment ? 'placeholder.newComment' : 'new post form')}
                   holder={id}
                 />
               )}
@@ -87,7 +90,7 @@ export const NewPostForm = ({
                 onClick={addPost}
                 className="ml-4 rounded bg-green-500 p-3 text-white transition-colors duration-150 hover:bg-green-600"
               >
-                {isLoading ? <>loading</> : t('button.post')}
+                {isLoading ? <>loading</> : t(isComment ? 'button.comment' :'button.post')}
               </PrimaryButton>
             </div>
           </div>

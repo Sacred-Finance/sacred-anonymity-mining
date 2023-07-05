@@ -38,14 +38,15 @@ export class UnirepUser {
   }
   static hasSignedUp = false
 
-  provider
-  signer
-  unirep
+  public provider
+  public signer
+  public unirep
 
   constructor(public identity: Identity) {
     if (!process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL || !process.env.NEXT_PUBLIC_ETHEREUM_PRIVATE_KEY) {
-      throw new Error("Environment variables are not set.")
+      throw new Error('Environment variables are not set.')
     }
+
     this.provider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL, polygonMumbai.id)
     this.signer = new Wallet(process.env.NEXT_PUBLIC_ETHEREUM_PRIVATE_KEY, this.provider)
     this.unirep = new Contract(unirepAddress, unirepAbi, this.signer)
@@ -59,23 +60,27 @@ export class UnirepUser {
   }
 
   async load() {
-    const userState = new UserState(
-        {
-          provider: this.provider,
-          prover,
-          unirepAddress: unirepAddress,
-          attesterId: BigInt(attesterAddress),
-          _id: this.identity,
-        },
-        this.identity
-    )
+    // this.userState = await this.genUserState();
 
+    const userState = new UserState(
+      {
+        provider: this.provider,
+        prover,
+        unirepAddress: unirepAddress,
+        attesterId: BigInt(attesterAddress),
+        _id: this.identity,
+      },
+      this.identity
+    )
     await userState.sync.start()
     UnirepUser.user.userState = userState
     await userState.waitForSync()
-    this.latestTransitionedEpoch = await UnirepUser?.user?.userState?.latestTransitionedEpoch()
+    this.latestTransitionedEpoch = await UnirepUser.user.userState.latestTransitionedEpoch()
 
-    UnirepUser.user.identity = this.identity
+    UnirepUser.user = {
+      ...UnirepUser.user,
+      identity: this.identity,
+    }
 
     UnirepUser.hasSignedUp = await userState.hasSignedUp()
     if (!UnirepUser.hasSignedUp) {
@@ -107,10 +112,10 @@ export class UnirepUser {
       console.log('Updating Epoch Key:', attesterAddress)
       const { publicSignals, proof, epochKey, epoch } = await userState.genEpochKeyProof({ nonce: 0 })
       UnirepUser.user.epochData = {
-        epoch: epoch,
-        epochKey: epochKey,
-        proof: proof,
-        publicSignals: publicSignals,
+        epoch,
+        epochKey,
+        proof,
+        publicSignals,
       }
     }
   }
@@ -121,14 +126,14 @@ export class UnirepUser {
     const attesterId = BigInt(attesterAddress)
 
     const userState = new UserState(
-        {
-          db,
-          prover,
-          unirepAddress,
-          provider: this.provider,
-          attesterId,
-        },
-        this.identity
+      {
+        db,
+        prover,
+        unirepAddress,
+        provider: this.provider,
+        attesterId,
+      },
+      this.identity
     )
 
     await userState.sync.start()
@@ -155,7 +160,7 @@ export class UnirepUser {
   }
 
   async signup() {
-    let userState = UnirepUser.user.userState || await this.genUserState()
+    let userState = UnirepUser.user.userState || (await this.genUserState())
     const { publicSignals, proof } = await userState.genUserSignUpProof()
     const { status } = await userUnirepSignUp(publicSignals, proof)
 

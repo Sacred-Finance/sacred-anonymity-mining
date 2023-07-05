@@ -46,7 +46,6 @@ export const setCache = async (key: string, value: any, path = '$') => {
     console.log('redisClient not found - initializing')
     redisClient = await getRedisClient()
   }
-
   redisClient.json
     .set(key, path, {
       data: value,

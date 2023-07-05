@@ -2,16 +2,15 @@ import { ForumContractAddress } from '../constant/const'
 import ForumABI from '../constant/abi/Forum.json'
 import { polygonMumbai } from 'wagmi/chains'
 import { useCommunityContext } from '../contexts/CommunityProvider'
-import { useAccount, useContract, useProvider } from 'wagmi'
+import { useContract, useProvider } from 'wagmi'
 import { User } from '../lib/model'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { parseBytes32String } from 'ethers/lib/utils'
 
 export const useFetchUsers = (loadOnInit = true) => {
   const { dispatch } = useCommunityContext()
 
   const provider = useProvider({ chainId: polygonMumbai.id })
-  const { isConnected } = useAccount()
 
   const forumContract = useContract({
     address: ForumContractAddress,
@@ -44,9 +43,12 @@ export const useFetchUsers = (loadOnInit = true) => {
     }
   }
 
+  const didLoadRef = useRef(false)
   useEffect(() => {
+    if (didLoadRef.current) return
+    didLoadRef.current = true
     if (loadOnInit) fetchUsers()
-  }, [forumContract, isConnected])
+  }, [])
 
   return fetchUsers
 }

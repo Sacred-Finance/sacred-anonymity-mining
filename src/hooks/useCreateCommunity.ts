@@ -6,29 +6,30 @@ import { useHandleCommunityAction } from './useHandleCommunityAction'
 import { cacheGroupData, uploadImages } from '../utils/communityUtils'
 import { useAccount } from 'wagmi'
 import { useCommunityContext } from '../contexts/CommunityProvider'
+import { constants, ethers } from 'ethers'
+import { createNote, getBytes32FromIpfsHash } from '@/lib/utils'
+import { CommunityDetails } from '@/lib/model'
 
 export const useCreateCommunity = (onCreateGroupClose: () => void) => {
   const handleCommunityAction = useHandleCommunityAction()
   const { address, isConnected } = useAccount()
+
   const { dispatch } = useCommunityContext()
 
   return useCallback(
-    async ({ name, requirements, bannerFile, logoFile, chainId, groupDescription, note }) => {
+    async ({ name, requirements, bannerFile, logoFile, chainId }) => {
       const actionFn = async () => {
         const user = new Identity(address as string)
+        const note = await createNote(user)
 
         const [bannerCID, logoCID] = await uploadImages({ bannerFile, logoFile })
-
-        const details = {
-          description: groupDescription,
-          tags: ['0x0000000000000000000000000000000000000000000000000000000000000000'],
-          bannerCID: bannerCID || '0x0000000000000000000000000000000000000000000000000000000000000000',
-          logoCID: logoCID || '0x0000000000000000000000000000000000000000000000000000000000000000',
+        const communityDetails: CommunityDetails = {
+          description: name,
+          tags: [],
+          bannerCID: bannerCID ? getBytes32FromIpfsHash(bannerCID) : constants.HashZero,
+          logoCID: logoCID ? getBytes32FromIpfsHash(logoCID) : constants.HashZero,
         }
-        //todo: tags, bannerCID, logoCID need to be converted to Bytes32
-
-        const response = await createGroup(requirements, name, chainId, details, note.toString())
-
+        const response = await createGroup(requirements, name, chainId, communityDetails, note.toString())
         const { status, data } = response
 
         if (status === 200) {
@@ -43,10 +44,9 @@ export const useCreateCommunity = (onCreateGroupClose: () => void) => {
                 event: data.event,
                 args: data.args,
               }
-
               await cacheGroupData({
                 groupId: groupIdInt,
-                details,
+                details: communityDetails,
                 groupData,
                 chainId,
                 requirements,

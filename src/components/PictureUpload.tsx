@@ -42,36 +42,30 @@ export const PictureUpload = (props: {
     }
   }, [])
 
+  const [hovered, setHovered] = useState(0)
   return (
     <>
-      <div ref={imageRef} className="relative flex w-full max-w-[650px] justify-center sm:w-full">
+      <div
+        ref={imageRef}
+        className="relative flex aspect-1  h-full max-h-64 w-full items-center  justify-center  overflow-hidden rounded-lg"
+      >
         {props.uploadedImageUrl ? (
           <>
             <img
-              className="rounded-lg"
-              style={{
-                opacity: isDeleteIconVisible ? 0.5 : 1,
-              }}
-              width={props.name === 'banner' ? '100%' : 200}
-              height={props.name === 'banner' ? '100%' : 200}
+              className="h-full w-full object-contain transition-opacity "
+              style={{ opacity: isDeleteIconVisible ? 0.5 : 1 }}
               onClick={() => {
                 props.setImageFileState(null)
                 if (!inputRef.current) return
                 inputRef.current.value = ''
               }}
               src={props.uploadedImageUrl}
-              alt=""
+              alt="Uploaded"
             />
-
             {isDeleteIconVisible && (
-              <div
-                className={
-                  'absolute left-[50%] top-[50%] -translate-x-[50%] -translate-y-[50%] group-hover:text-error-dark'
-                }
-              >
-                {/* trash icon svg */}
+              <div className="absolute inset-0 flex items-center justify-center ">
                 <svg
-                  className="h-6 w-6 cursor-pointer text-inherit"
+                  className="h-full w-full  cursor-pointer text-red-500"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -81,69 +75,49 @@ export const PictureUpload = (props: {
                     inputRef.current.value = ''
                   }}
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </div>
             )}
           </>
         ) : (
-          <button
-            className={clsx(
-              'group pointer-events-auto flex h-[200px] flex-col items-center justify-center rounded border-2 border-dashed border-border-on-dark',
-              props.name === 'banner' ? 'sm:w-screen md:w-[624px]' : ' w-[200px]'
-            )}
+          <div
+            className={`group flex h-52 w-full cursor-pointer items-center  justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-gray-100 hover:bg-primary-300  hover:text-white`}
             onClick={openFileUpload}
+            onMouseOver={() => setHovered(hovered+45)}
+            onMouseLeave={() => setHovered(hovered+45)}
           >
             <div
-              className={clsx(
-                `h-100 bg-primary-500py-2 cursor-pointer select-none items-center rounded-lg text-center transition-colors duration-200 ease-in-out group-hover:bg-primary-light`,
-                props.uploadedImageUrl ? 'brightness-80 filter' : '',
-                primaryButtonStyle,
-                'border-none'
-              )}
+              className="flex items-center justify-center "
 
             >
-              <span className="flex items-center justify-center">
-                {props.uploadedImageUrl ? (
-                  <>
-                    {t('display', { displayName: props.displayName })}
-                    {/*svg checkmark icon*/}
-                    <svg className="ml-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </>
-                ) : (
-                  <>
-                    {t('upload', { displayName: props.displayName })}
-                    <motion.svg
-                      key="spinner"
-                      animate={{ rotate: 360 }}
-                      transition={{ loop: Infinity, duration: 2 }}
-                      className="group-hover:spin-reverse ml-2 h-5 w-5 cursor-pointer rounded-full border text-inherit transition-colors duration-200 ease-in-out"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                      />
-                    </motion.svg>
-                  </>
-                )}
-              </span>
-              <input
-                hidden={true}
-                ref={inputRef}
-                type="file"
-                name={props.name}
-                accept="image/jpeg, image/png, image/jpg, image/webp, image/gif, image/svg+xml, image/avif"
-                onChange={handleFileImageUpload}
-              />
+
+              <>
+                {t('upload', { displayName: props.displayName })}
+                <motion.svg
+                  key="spinner"
+                  animate={{ rotate: hovered}}
+                  exit={{ rotate: 0 }}
+                  transition={{ loop: Infinity, duration: 0.5 }}
+                  className="ml-2 h-5 w-5 cursor-pointer rounded-full text-gray-500 group-hover:text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </motion.svg>
+              </>
+              {/*)}*/}
             </div>
-          </button>
+            <input
+              hidden
+              ref={inputRef}
+              type="file"
+              name={props.name}
+              accept="image/jpeg, image/png, image/jpg, image/webp, image/gif, image/svg+xml, image/avif"
+              onChange={handleFileImageUpload}
+            />
+          </div>
         )}
       </div>
     </>
