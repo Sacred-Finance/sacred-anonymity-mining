@@ -166,7 +166,7 @@ export const numToBuffer = (number, size, endianess): Buffer => {
 }
 
 export const createNote = async (identity: Identity) => {
-  const trapdoor = identity.getTrapdoor()
+  const trapdoor = identity.getTrapdoor() //getTrapDoor is not a function, error on posting a comment
   const nullifier = identity.getNullifier()
   const trapdoorBuffer = numToBuffer(trapdoor, 32, 'le')
   const image = Buffer.concat([trapdoorBuffer, numToBuffer(nullifier, 32, 'le')])

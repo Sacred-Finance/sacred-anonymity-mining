@@ -22,9 +22,9 @@ import { UnirepUser } from './unirep'
 import { AxiosResponse } from 'axios'
 import { forumContract, jsonRPCProvider } from '@/constant/const'
 
-const minRepsPost = 0
+const MIN_REP_POST = 0
 
-const minRepsVote = 1
+const MIN_REP_VOTE = 1
 
 export interface PostInterface {
   id: string
@@ -142,6 +142,7 @@ export class Post implements PostInterface {
     try {
       const itemIds = await forumContract.getPostIdList(+this.groupId)
 
+      console.log('', { itemIds })
       if (!itemIds?.length) {
         return []
       }
@@ -244,7 +245,7 @@ export class Post implements PostInterface {
 
       let reputationProof = await userState.genProveReputationProof({
         epkNonce: 0,
-        minRep: minRepsPost,
+        minRep: MIN_REP_POST,
         graffitiPreImage: 0,
       })
 
@@ -261,14 +262,14 @@ export class Post implements PostInterface {
         hashBytes(signal)
       )
 
-      const epochData = unirepUser.getEpochData()
+      const { epochKey, publicSignals, proof: epochProof, epoch: ownerEpoch } = unirepUser.getEpochData()
       const epoch: ReputationProofStruct = {
-        publicSignals: epochData.publicSignals,
-        proof: epochData.proof,
+        publicSignals: publicSignals,
+        proof: epochProof,
         publicSignalsQ: reputationProof.publicSignals,
         proofQ: reputationProof.proof,
-        ownerEpoch: BigNumber.from(epochData.epoch)?.toString(),
-        ownerEpochKey: epochData.epochKey,
+        ownerEpoch: BigNumber.from(ownerEpoch)?.toString(),
+        ownerEpochKey: epochKey,
       }
 
       return await createPost(
@@ -381,11 +382,27 @@ export class Post implements PostInterface {
       itemId = +itemId
     }
 
+    console.log('updatePostsVote', {
+      postInstance,
+      itemId,
+      voteType,
+      confirmed,
+      revert,
+      cachedId: postInstance.groupCacheId(),
+    })
+
     mutate(
       postInstance.groupCacheId(),
       postList => {
-        const postIndex = postList.findIndex(p => +p.id === itemId)
+        console.log('postList', postList)
+        if (!postList?.length) return // should exist tho.
+        const postIndex = postList.findIndex(p => {
+          console.log('p', { p, itemId }, p.id === itemId)
+          return +p.id === itemId
+        })
+        console.log('postIndex', postIndex, postList)
         if (postIndex > -1) {
+          console.log('postIndex > -1', postIndex, postList)
           const postToUpdate = { ...postList[postIndex] }
           if (voteType === 0 && (!confirmed || revert)) {
             postToUpdate.upvote += 1 * modifier
@@ -402,14 +419,16 @@ export class Post implements PostInterface {
           }
 
           postList[postIndex] = postToUpdate
+
+          if (confirmed) {
+            setCacheAtSpecificPath(
+              this.specificPostId(itemId),
+              voteType === 0 ? postList[postIndex].upvote : postList[postIndex].downvote,
+              voteType === 0 ? '$.data.upvote' : '$.data.downvote'
+            )
+          }
         }
-        if (confirmed) {
-          setCacheAtSpecificPath(
-            this.specificPostId(itemId),
-            voteType === 0 ? postList[postIndex].upvote : postList[postIndex].downvote,
-            voteType === 0 ? '$.data.upvote' : '$.data.downvote'
-          )
-        }
+
         return [...postList]
       },
       { revalidate: false }
@@ -419,117 +438,115 @@ export class Post implements PostInterface {
   async updatePostVote(voteType, confirmed = false, revert = false) {
     // Verify the vote type is within the expected range (0 or 1)
     if (![0, 1].includes(voteType)) {
-      throw new Error('Invalid vote type. Expected 0 (upvote) or 1 (downvote)');
+      throw new Error('Invalid vote type. Expected 0 (upvote) or 1 (downvote)')
     }
 
     // Determine if we should increment or decrement vote counts
-    const modifier = revert ? -1 : 1;
+    const modifier = revert ? -1 : 1
 
     try {
       mutate(
-          this.postCacheId(),
-          async (posts) => {
-            // Ensure posts are not undefined or null
-            if (!posts) {
-              throw new Error('Posts not found in cache');
+        this.postCacheId(),
+        async posts => {
+          // Ensure posts are not undefined or null
+          if (!posts) {
+            throw new Error('Posts not found in cache')
+          }
+
+          const postToUpdate = { ...posts }
+
+          if (voteType === 0 && (!confirmed || revert)) {
+            postToUpdate.upvote += 1 * modifier
+          }
+
+          if (voteType === 1 && (!confirmed || revert)) {
+            postToUpdate.downvote += 1 * modifier
+          }
+
+          if (confirmed) {
+            // Only delete voteUnconfirmed if it exists in the object
+            if ('voteUnconfirmed' in postToUpdate) {
+              delete postToUpdate.voteUnconfirmed
             }
 
-            const postToUpdate = { ...posts };
+            // Update the cache at the specific post ID
+            setCacheAtSpecificPath(
+              this.specificPostId(postToUpdate.id),
+              voteType === 0 ? postToUpdate.upvote : postToUpdate.downvote,
+              voteType === 0 ? '$.data.upvote' : '$.data.downvote'
+            )
+          } else {
+            postToUpdate.voteUnconfirmed = true
+          }
 
-            if (voteType === 0 && (!confirmed || revert)) {
-              postToUpdate.upvote += 1 * modifier;
-            }
-
-            if (voteType === 1 && (!confirmed || revert)) {
-              postToUpdate.downvote += 1 * modifier;
-            }
-
-            if (confirmed) {
-              // Only delete voteUnconfirmed if it exists in the object
-              if ('voteUnconfirmed' in postToUpdate) {
-                delete postToUpdate.voteUnconfirmed;
-              }
-
-              // Update the cache at the specific post ID
-              setCacheAtSpecificPath(
-                  this.specificPostId(postToUpdate.id),
-                  voteType === 0 ? postToUpdate.upvote : postToUpdate.downvote,
-                  voteType === 0 ? '$.data.upvote' : '$.data.downvote'
-              );
-            } else {
-              postToUpdate.voteUnconfirmed = true;
-            }
-
-            return postToUpdate;
-          },
-          { revalidate: false }
-      );
+          return postToUpdate
+        },
+        { revalidate: false }
+      )
     } catch (error) {
-      console.error('Error updating post vote:', error);
-      throw error;
+      console.error('Error updating post vote:', error)
+      throw error
     }
   }
-
 
   async vote(voteType, address, users, postedByUser, itemId, groupId) {
     try {
       // Validate parameters
-      if (!address) throw new Error("Invalid address");
-      if (!Array.isArray(users)) throw new Error("Invalid users array");
-      if (!itemId) throw new Error("Invalid item ID");
-      if (!groupId) throw new Error("Invalid group ID");
+      if (!address) throw new Error('Invalid address')
+      if (!Array.isArray(users)) throw new Error('Invalid users array')
+      if (!itemId) throw new Error('Invalid item ID')
+      if (!groupId) throw new Error('Invalid group ID')
 
-      const voteCmdNum = hashBytes2(+itemId, 'vote');
-      const signal = utils.hexZeroPad('0x' + voteCmdNum.toString(16), 32);
-      const extraNullifier = voteCmdNum.toString();
-      const g = new Group(groupId);
-      const userPosting = new Identity(`${address}_${this.groupId}_${postedByUser?.name}`);
+      const voteCmdNum = hashBytes2(+itemId, 'vote')
+      const signal = utils.hexZeroPad('0x' + voteCmdNum.toString(16), 32)
+      const extraNullifier = voteCmdNum.toString()
+      const g = new Group(groupId)
+      const userPosting = new Identity(`${address}_${this.groupId}_${postedByUser?.name}`)
 
-      const filteredUsers = users.filter(u => u?.groupId === +this.groupId);
-      if (filteredUsers.length === 0) throw new Error("No matching users found for the provided groupId");
+      const filteredUsers = users.filter(u => u?.groupId === +this.groupId)
+      if (filteredUsers.length === 0) throw new Error('No matching users found for the provided groupId')
 
-      g.addMembers(filteredUsers.map(u => u?.identityCommitment));
+      g.addMembers(filteredUsers.map(u => u?.identityCommitment))
 
-      const unirepUser = new UnirepUser(userPosting);
-      await unirepUser.updateUserState();
-      const userState = await unirepUser.getUserState();
-      if (!userState) throw new Error("Failed to get User State");
+      const unirepUser = new UnirepUser(userPosting)
+      await unirepUser.updateUserState()
+      const userState = await unirepUser.getUserState()
+      // if (!userState) throw new Error("Failed to get User State");
 
       let reputationProof = await userState.genProveReputationProof({
         epkNonce: 0,
-        minRep: minRepsVote,
+        minRep: MIN_REP_VOTE,
         graffitiPreImage: 0,
-      });
+      })
 
-      const epochData = unirepUser.getEpochData();
-      if (!epochData) throw new Error("Failed to get Epoch Data");
+      const epochData = unirepUser.getEpochData()
+      if (!epochData) throw new Error('Failed to get Epoch Data')
 
-      let voteProofData = {
-        publicSignals: epochData.publicSignals || [], // provide default empty array
-        proof: epochData.proof || [], // provide default empty array
+      let voteProofData: ReputationProofStruct = {
+        publicSignals: epochData.publicSignals,
+        proof: epochData.proof,
         publicSignalsQ: reputationProof.publicSignals,
         proofQ: reputationProof.proof,
         ownerEpoch: 0,
         ownerEpochKey: 0,
-      };
+      }
 
-      const { proof, nullifierHash, merkleTreeRoot } = await generateProof(userPosting, g, extraNullifier, signal);
+      const { proof, nullifierHash, merkleTreeRoot } = await generateProof(userPosting, g, extraNullifier, signal)
 
       return vote(
-          itemId,
-          this.groupId?.toString(),
-          voteType,
-          merkleTreeRoot.toString(),
-          nullifierHash.toString(),
-          proof,
-          voteProofData
-      );
+        itemId,
+        this.groupId?.toString(),
+        voteType,
+        merkleTreeRoot.toString(),
+        nullifierHash.toString(),
+        proof,
+        voteProofData
+      )
     } catch (error) {
-      console.error('An error occurred while voting:', error);
-      throw error;
+      console.error('An error occurred while voting:', error)
+      throw error
     }
   }
-
 
   cacheNewPost = async (post, postId, groupId, note: BigInt, contentCID, setWaiting) => {
     const parsedPost = parsePost(post)

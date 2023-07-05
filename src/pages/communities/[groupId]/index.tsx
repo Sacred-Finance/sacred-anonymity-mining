@@ -1,37 +1,37 @@
-import { ethers } from 'ethers'
 import React, { useEffect, useRef, useState } from 'react'
 import { useAccount, useContract, useProvider } from 'wagmi'
-import { Post } from '../../../lib/post'
+import { Post } from '@/lib/post'
 
 import { OutputData } from '@editorjs/editorjs'
-import useSWR from 'swr'
-import { useLoaderContext } from '../../../contexts/LoaderContext'
-import { NoPosts } from '../../../components/NoPosts'
-import { SortByOption } from '../../../components/SortBy'
-import { useValidateUserBalance } from '../../../utils/useValidateUserBalance'
+import useSWR, { preload } from 'swr'
+import { useLoaderContext } from '@/contexts/LoaderContext'
+import { NoPosts } from '@components/NoPosts'
+import { SortByOption } from '@components/SortBy'
+import { useValidateUserBalance } from '@/utils/useValidateUserBalance'
 import { useTranslation } from 'react-i18next'
-import { useSortedVotes } from '../../../hooks/useSortedVotes'
-import { JoinCommunityButton } from '../../../components/JoinCommunityButton'
+import { useSortedVotes } from '@/hooks/useSortedVotes'
+import { JoinCommunityButton } from '@components/JoinCommunityButton'
 import { useRouter } from 'next/router'
-import { useActiveUser, useCommunityById, useUserIfJoined, useUsers } from '../../../contexts/CommunityProvider'
+import { useActiveUser, useCommunityById, useUserIfJoined, useUsers } from '@/contexts/CommunityProvider'
 import { polygonMumbai } from 'wagmi/chains'
-import { ForumContractAddress } from '../../../constant/const'
+import { ForumContractAddress } from '@/constant/const'
 import ForumABI from '../../../constant/abi/Forum.json'
-import { useCommunityUpdates } from '../../../hooks/useCommunityUpdates'
-import { useCreateCommunity } from '../../../hooks/useCreateCommunity'
-import { CustomModal } from '../../../components/CustomModal'
+import { useCommunityUpdates } from '@/hooks/useCommunityUpdates'
+import { useCreateCommunity } from '@/hooks/useCreateCommunity'
+import { CustomModal } from '@components/CustomModal'
 
 import CreateGroupFormUI from '../../../components/CreateGroupFormUI'
 import Header from '../../../components/Header'
 import Footer from '../../../components/Footer'
 import { toast } from 'react-toastify'
-import { PostList } from '../../../components/postList'
-import { NewPostForm } from '../../../components/NewPostForm'
+import { PostList } from '@components/postList'
+import { NewPostForm } from '@components/NewPostForm'
 import { User } from '@/lib/model'
-import { useUnirepSignUp } from '../../../hooks/useUnirepSignup'
+import { useUnirepSignUp } from '@/hooks/useUnirepSignup'
 import { Breadcrumbs } from '@components/Breadcrumbs'
+import clsx from 'clsx'
 
-export function Main() {
+export function Main({ children }: { children?: React.ReactNode }) {
   const activeUser = useActiveUser()
   const { address } = useAccount()
   const users = useUsers()
@@ -49,17 +49,16 @@ export function Main() {
     signerOrProvider: provider,
   })
   const router = useRouter()
-  const { id, postId } = router.query
-  const user = useUserIfJoined(id as string)
+  const { groupId, postId } = router.query
+  const user = useUserIfJoined(groupId as string)
   const postInstance = useRef<Post>(null)
 
-  // Only update postInstance if id changes
   useEffect(() => {
-    postInstance.current = new Post(null, id)
-  }, [id])
-  const community = useCommunityById(id as string)
+    postInstance.current = new Post(postId, groupId)
+  }, [groupId])
+  const community = useCommunityById(groupId as string)
   useCommunityUpdates({ user, postInstance: postInstance.current })
-  useUnirepSignUp({ groupId: id, name: (user as User)?.name })
+  useUnirepSignUp({ groupId: groupId, name: (user as User)?.name })
 
   const { checkUserBalance } = useValidateUserBalance(community, address)
   const { setIsLoading, isLoading: isContextLoading } = useLoaderContext()
@@ -70,15 +69,18 @@ export function Main() {
       if (!forumContract || !provider || initialized) return
       setInitialized(true)
       setIsLoading(false)
-      // preload(postInstance.groupCacheId(), fetchPosts);//start fetching before render
+      console.log('fetching posts, groupId: ', groupId, postInstance.current.groupCacheId())
+      // preload(postInstance.current.groupCacheId(), fetchPosts) //start fetching before render
     })()
-  }, [forumContract, id, provider])
+  }, [forumContract, groupId, provider])
 
-  const { data, isLoading } = useSWR(`${id}_group`, fetchPosts)
+  const { data, isLoading } = useSWR(`${groupId}_group`, postId ? fetchPost : fetchPosts)
 
   async function fetchPosts() {
-    console.log('fetching posts')
     return await postInstance.current.getAll()
+  }
+  async function fetchPost() {
+    return [await postInstance.current.get()]
   }
 
   const addPost = async () => {
@@ -106,7 +108,7 @@ export function Main() {
     setIsLoading(true)
 
     try {
-      const { status } = await postInstance.current.create(
+      const { status } = await postInstance?.current?.create(
         {
           title: postTitle,
           description: postDescription,
@@ -114,7 +116,7 @@ export function Main() {
         address,
         users,
         activeUser,
-        id as string,
+        groupId as string,
         setIsLoading,
         (post, cid) => {
           ipfsHash = cid
@@ -160,28 +162,36 @@ export function Main() {
 
   const sortedData = useSortedVotes(tempPosts, data, sortBy)
 
-  const voteForPost = async (postId, voteType: 0 | 1) => {
-    if (!user) return
-    const hasSufficientBalance = await checkUserBalance()
-    if (!hasSufficientBalance) return
-    setIsLoading(true)
+  const voteForPost = React.useCallback(
+    async (postId, voteType: 0 | 1) => {
+      if (!user || isNaN(postId)) {
+        toast.error('Missing PostId', { toastId: 'joinCommunityFirst' })
+        console.log('Missing PostId or user', { postId, user })
+        return
+      }
 
-    try {
-      postInstance?.current
-        ?.updatePostsVote(postInstance.current, postId, voteType, false)
-        .then(() => setIsLoading(false))
-      const response = await postInstance?.current?.vote(voteType, address, users, activeUser, postId, id)
-      console.log('response', response)
+      const hasSufficientBalance = await checkUserBalance()
+      if (!hasSufficientBalance) return
+      setIsLoading(true)
+
+      try {
+        postInstance?.current
+          ?.updatePostsVote(postInstance.current, postId, voteType, false)
+          .then(() => setIsLoading(false))
+        const response = await postInstance?.current?.vote(voteType, address, users, activeUser, postId, groupId)
+        console.log('response', response)
         const { status } = response
 
-      if (status === 200) {
+        if (status === 200) {
+          setIsLoading(false)
+        }
+      } catch (error) {
+        postInstance?.current?.updatePostsVote(postInstance.current, postId, voteType, true, true)
         setIsLoading(false)
       }
-    } catch (error) {
-      postInstance?.current?.updatePostsVote(postInstance.current, postId, voteType, true, true)
-      setIsLoading(false)
-    }
-  }
+    },
+    [user, address, groupId, users, activeUser]
+  )
 
   const clearInput = () => {
     setPostDescription(null)
@@ -190,8 +200,9 @@ export function Main() {
   }
 
   if (isLoading) return null
+  const sortedAndFilteredData = sortedData.filter(post => post?.id === postId)
   return (
-    <div className="mx-auto mb-32 h-screen w-full max-w-screen-xl space-y-12 sm:p-8 md:p-24">
+    <div className={clsx('mx-auto mb-32 h-screen overflow-y-auto w-full max-w-screen-xl space-y-12 sm:p-8 md:p-24')}>
       <div
         className="relative flex min-h-[200px] items-center justify-between rounded-lg bg-white/10 p-6 shadow-lg"
         style={{
@@ -212,9 +223,9 @@ export function Main() {
         {!(user as User)?.identityCommitment && community && <JoinCommunityButton community={community} />}
       </div>
 
-      {!postId && (
+      {isNaN(postId) && (
         <NewPostForm
-          id={id}
+          id={groupId}
           postEditorRef={postEditorRef}
           postTitle={postTitle}
           setPostTitle={setPostTitle}
@@ -226,20 +237,24 @@ export function Main() {
         />
       )}
 
-      {!isNaN(postId) ? (
-        <PostList
-          posts={sortedData?.filter(post => Number(post.id) === Number(postId))}
-          isLoading={isLoading}
-          data={data}
-          voteForPost={voteForPost}
-          handleSortChange={handleSortChange}
-        />
+      {!isNaN(postId) && sortedData.length ? (
+        <>
+          Post Page
+          <PostList
+            posts={sortedAndFilteredData}
+            isLoading={isLoading}
+            // data={data}
+            voteForPost={voteForPost}
+            handleSortChange={handleSortChange}
+          />
+        </>
       ) : sortedData?.length > 0 ? (
         <div className="rounded-lg bg-white/10 p-6 shadow-lg">
+          Community Page
           <PostList
             posts={sortedData}
             isLoading={isLoading}
-            data={data}
+            // data={data}
             voteForPost={voteForPost}
             handleSortChange={handleSortChange}
           />
@@ -249,11 +264,13 @@ export function Main() {
           <NoPosts />
         </div>
       )}
+
+      {children}
     </div>
   )
 }
 
-export default function Home() {
+export default function Group() {
   const [createCommunityModalOpen, setCreateCommunityModalOpen] = useState(false)
   const createCommunity = useCreateCommunity(() => setCreateCommunityModalOpen(false))
 

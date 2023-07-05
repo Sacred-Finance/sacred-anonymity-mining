@@ -1,8 +1,9 @@
+import clsx from 'clsx'
 
-export const CircularProgress = () => {
-    return (
-        <div className="flex justify-center items-center">
-            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
-        </div>
-    );
+export const CircularProgress = ({ className = 'h-32 w-32 ' }) => {
+  return (
+    <div className="flex items-center justify-center">
+      <div className={clsx('h-32 w-32 animate-spin rounded-full border-b-2 border-gray-900', className)}></div>
+    </div>
+  )
 }

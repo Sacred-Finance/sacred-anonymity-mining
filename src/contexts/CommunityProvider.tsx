@@ -1,4 +1,4 @@
-import React, { createContext, ReactNode, useContext, useReducer, useMemo } from 'react'
+import React, { createContext, ReactNode, useContext, useReducer, useMemo, useEffect } from 'react'
 import { Community, User } from '@/lib/model'
 import { ethers } from 'ethers'
 import { Identity } from '@semaphore-protocol/identity'
@@ -131,8 +131,9 @@ export const CommunityProvider: React.FC<any> = ({ children }: { children: React
   const { setIsLoading } = useLoaderContext()
 
   // when state has communities, stop loading
-  React.useEffect(() => {
+  useEffect(() => {
     if (state.communities.length > 0) {
+      console.log('communities loaded')
       setIsLoading(false)
     }
   }, [state.communities])
@@ -159,9 +160,9 @@ export function useActiveUser(): User | undefined {
   const { state } = useCommunityContext()
 
   const router = useRouter()
-  const { id } = router.query
+  const {  groupId } = router.query
 
-  const identity = useIdentity(id ? { groupId: id as string } : undefined)
+  const identity = useIdentity(groupId ? { groupId: groupId as string } : undefined)
 
   return useMemo(
     () => state.users.find(c => c.identityCommitment === identity?.getCommitment().toString()),

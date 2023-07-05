@@ -115,8 +115,8 @@ export const buttonVariants = {
     'text-primary-500 dark:text-primary-500 hover:text-primary-600 dark:hover:text-primary-600 focus:text-primary-600 dark:focus:text-primary-600 active:text-primary-600 dark:active:text-primary-600 selected:text-primary-600 dark:selected:text-primary-600 ' +
     'border-primary-500 dark:border-primary-500 hover:border-primary-600 dark:hover:border-primary-600 ',
   primarySolid:
-    'text-white dark:text-white hover:text-white dark:hover:text-white focus:text-white dark:focus:text-white active:text-white dark:active:text-white selected:text-white dark:selected:text-white ' +
-    'bg-primary-500 dark:bg-primary-500 hover:bg-primary-600 dark:hover:bg-primary-600 focus:bg-primary-600 dark:focus:bg-primary-600 active:bg-primary-600 dark:active:bg-primary-600 selected:bg-primary-600 dark:selected:bg-primary-600',
+      'text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-700 active:bg-primary-700',
+
   primarySolidOutline:
     'text-primary-500 dark:text-primary-500 hover:text-primary-600 dark:hover:text-primary-600 focus:text-primary-600 dark:focus:text-primary-600 active:text-primary-600 dark:active:text-primary-600 selected:text-primary-600 dark:selected:text-primary-600 ' +
     'border-primary-500 dark:border-primary-500 hover:border-primary-600 dark:hover:border-primary-600 ',
@@ -133,7 +133,7 @@ export const buttonVariants = {
 }
 
 export const primaryButtonStyle = clsx(
-  ' !focus-none !select-none p-2 text-center content-center align-middle  hover:scale-[102.5%] shadow-none  rounded-lg  focus:outline-none focus:text-bold active:scale-95 transition-transform duration-100 ease-in-out'
+  ' !focus-none !select-none p-2 text-center content-center align-middle  shadow-none  rounded-lg  focus:outline-none focus:text-bold active:scale-95 transition-transform duration-100 ease-in-out'
 )
 
 // The following Tailwind theme aspires to be a reproduction of the

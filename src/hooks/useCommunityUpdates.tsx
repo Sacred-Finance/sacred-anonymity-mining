@@ -9,7 +9,14 @@ import { useAccount } from 'wagmi'
 const POST_ITEM_TYPE = 0
 const POLLING_INTERVAL = 60000
 const updatePosts = (groupCacheId, mutate) => async (p, parsedPost) => {
-  mutate(
+  // groupCacheId is the cache key for the group posts
+  // it can be undefined on the first load
+  if (!groupCacheId) return console.error('groupCacheId is not defined')
+
+  if (!parsedPost) return console.error('parsedPost is not defined')
+  if (!p) return console.error('p is not defined')
+
+  return await mutate(
     groupCacheId,
     async posts => {
       const confirmedPosts = Array.isArray(posts) ? [...posts] : []
@@ -35,7 +42,7 @@ const gatherContent = updatePostsCallback => async (contentCID, postId) => {
   ])
 
   const parsedPost = parsePost(content)
-  await updatePostsCallback(p, parsedPost)
+  return await updatePostsCallback(p, parsedPost)
 }
 
 const handleNewItem =
@@ -48,7 +55,8 @@ const handleNewItem =
   }
 
 const handleVoteItem = postInstance => async (voteType, itemType, itemId, upvote, downvote) => {
-  if (!postInstance || isNaN(itemId)) return
+  if (!postInstance) throw new Error('postInstance is not defined')
+  if (isNaN(itemId)) return
   try {
     if (itemType === POST_ITEM_TYPE) {
       postInstance.updatePostsVote(postInstance, itemId, voteType, true)
@@ -59,22 +67,23 @@ const handleVoteItem = postInstance => async (voteType, itemType, itemId, upvote
 }
 
 const fetchEvents = (user, postInstance, handleNewItemCallback, handleVoteItemCallback) => async () => {
-  if (user && jsonRPCProvider && forumContract) {
-    console.log('fetching community events')
-
+  if (!jsonRPCProvider || !forumContract) throw new Error('jsonRPCProvider or forumContract is not defined')
+  if (user) {
     try {
       const [newItemEvents, voteItemEvents] = await Promise.all([
         forumContract.queryFilter(forumContract.filters.NewItem()),
         forumContract.queryFilter(forumContract.filters.VoteItem()),
       ])
 
-      await Promise.all([
+      return await Promise.all([
         ...newItemEvents.map(event => (event.args ? handleNewItemCallback(...Object.values(event.args)) : null)),
         ...voteItemEvents.map(event => (event.args ? handleVoteItemCallback(...Object.values(event.args)) : null)),
       ])
     } catch (error) {
       console.error('Error occurred while fetching contract events:', error)
     }
+  } else {
+    console.log('user is not defined in fetchEvents')
   }
 }
 
@@ -86,14 +95,15 @@ export const useCommunityUpdates = ({
   postInstance: any // replace any with the appropriate type if possible
 }) => {
   const router = useRouter()
-  const id = Number(router.query.id)
-  const groupCacheId = `${id}_group`
+  const { groupId } = router.query
+  const groupCacheId = `${groupId}_group`
   const { mutate } = useSWRConfig()
+
   const updatePostsCallback = useCallback(updatePosts(groupCacheId, mutate), [groupCacheId, mutate])
   const gatherContentCallback = useCallback(gatherContent(updatePostsCallback), [updatePostsCallback])
   const handleNewItemCallback = useCallback(
-    handleNewItem(gatherContentCallback, id, user !== false ? user : undefined),
-    [gatherContentCallback, id, user]
+    handleNewItem(gatherContentCallback, groupId, user !== false ? user : undefined),
+    [gatherContentCallback, groupId, user]
   )
   const handleVoteItemCallback = useCallback(handleVoteItem(postInstance), [postInstance])
 
@@ -103,10 +113,12 @@ export const useCommunityUpdates = ({
   )
 
   useEffect(() => {
-    if (!jsonRPCProvider || !forumContract) return
-    console.log('listening to events')
+    if (!jsonRPCProvider || !forumContract) throw new Error('jsonRPCProvider or forumContract is not defined')
+    if (!router.isReady) return
+    console.trace('useCommunityUpdates') // todo: investigate - this is being fired three times
+
     fetchEventsCallback()
-    const intervalId = setInterval(() => {
+    const intervalId = setInterval(async () => {
       fetchEventsCallback()
     }, POLLING_INTERVAL)
 
@@ -115,5 +127,5 @@ export const useCommunityUpdates = ({
       if (forumContract) forumContract.removeAllListeners()
       if (jsonRPCProvider) jsonRPCProvider.removeAllListeners()
     }
-  }, [fetchEventsCallback, forumContract, jsonRPCProvider])
+  }, [fetchEventsCallback, router.isReady])
 }

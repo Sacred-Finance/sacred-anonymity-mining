@@ -15,13 +15,13 @@ function useBreadcrumbs(): BreadCrumbItem[] {
   const [breadcrumbItems, setBreadcrumbItems] = useState<BreadCrumbItem[]>([])
 
   const router = useRouter()
-  const { id, postId } = router.query
-  const { community, postFetched, isValidating } = useCommunityAndPost(id, postId)
+  const { groupId, postId } = router.query
+  const { community, postFetched, isValidating } = useCommunityAndPost(groupId, postId)
 
   useEffect(() => {
     const items = generateBreadcrumbItems(community, postFetched, isValidating, location)
     setBreadcrumbItems(items)
-  }, [id, postId, community, postFetched, isValidating])
+  }, [groupId, postId, community, postFetched, isValidating])
 
   return breadcrumbItems
 }
@@ -66,7 +66,11 @@ export const Breadcrumbs = ({ backdrop = false }): JSX.Element => {
                   viewBox="0 0 20 20"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                  <path
+                    clipRule="evenodd"
+                    d="M10.707 3.293a1 1 0 010 1.414L7.414 9H13a7 7 0 110 14H7a9 9 0 100-18h6.586l-3.293 3.293a1 1 0 11-1.414-1.414l5-5z"
+                    fillRule="evenodd"
+                  />
                 </svg>
                 {item.label}
               </Link>
@@ -95,13 +99,14 @@ interface BreadCrumbItem {
 function generateBreadcrumbItems(community, postFetched, isValidating, location): BreadCrumbItem[] {
   let items: BreadCrumbItem[] = []
 
-  const communityLabel = elipsis(community?.name, 50) ?? <CircularProgress />
+  const communityLabel = elipsis(community?.name, 50) ?? <CircularProgress className={'h-5 w-5'} />
 
-  const postLabel = postFetched && !isValidating ? elipsis(postFetched?.title, 20) : <CircularProgress />
+  const postLabel =
+    postFetched && !isValidating ? elipsis(postFetched?.title, 20) : <CircularProgress className={'h-5 w-5'} />
 
   if (location.pathname === '/') {
     items = [{ label: 'Home', href: '/', isCurrentPage: true, hidden: true }]
-  } else if (location.pathname.includes('/posts/')) {
+  } else if (location.pathname.includes('/post/')) {
     items = [
       { label: 'Home', href: '/', isCurrentPage: false },
       {
@@ -111,7 +116,7 @@ function generateBreadcrumbItems(community, postFetched, isValidating, location)
       },
       {
         label: postLabel,
-        href: `/communities/${community?.id}/posts/${postFetched?.id}`,
+        href: `/communities/${community?.id}/post/${postFetched?.id}`,
         isCurrentPage: true,
       },
     ]
@@ -130,6 +135,15 @@ function generateBreadcrumbItems(community, postFetched, isValidating, location)
       {
         label: 'Access',
         href: `/access`,
+        isCurrentPage: true,
+      },
+    ]
+  } else if (location.pathname.includes('create-group')) {
+    items = [
+      { label: 'Home', href: '/', isCurrentPage: false },
+      {
+        label: 'Create Group',
+        href: `/create-group`,
         isCurrentPage: true,
       },
     ]

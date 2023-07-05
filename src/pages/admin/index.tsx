@@ -3,10 +3,10 @@ import { useAccount, useContractRead, useContractWrite } from 'wagmi'
 import ForumABI from '../../constant/abi/Forum.json'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'react-i18next'
-import { ForumContractAddress } from 'constant/const'
-import { useCheckIfUserIsAdminOrModerator } from 'hooks/useCheckIfUserIsAdminOrModerator'
-import { useLoaderContext } from 'contexts/LoaderContext'
-import { useFetchAdminsAndModerators } from 'hooks/useFetchAdminsAndModerators'
+import { ForumContractAddress } from '@/constant/const'
+import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
+import { useLoaderContext } from '@/contexts/LoaderContext'
+import { useFetchAdminsAndModerators } from '@/hooks/useFetchAdminsAndModerators'
 
 const Access: React.FC = () => {
   const { address } = useAccount()

@@ -1,9 +1,9 @@
 import { BigNumber, ethers } from 'ethers'
-import {erc20dummyABI, forumContract, jsonRPCProvider, supportedChains} from '../constant/const'
-import {getCache, getMCache, setCache} from '../lib/redis'
-import {uploadImageToIPFS} from '../lib/utils'
-import {fetchTokenInfo} from './tokenUtils'
-import { Community as CommunityInterface } from '../lib/model'
+import { erc20dummyABI, forumContract, jsonRPCProvider, supportedChains } from '../constant/const'
+import { getCache, getMCache, setCache } from '../lib/redis'
+import { uploadImageToIPFS } from '../lib/utils'
+import { fetchTokenInfo } from './tokenUtils'
+import { Community as CommunityInterface, CommunityDetails } from '../lib/model'
 
 import pica from 'pica'
 import { useCallback } from 'react'
@@ -26,6 +26,7 @@ export const fetchCommunitiesData = async ({
 
     const updatedDataPromises = groupIds.map(async (groupId, index) => {
       const cachedData = cachedDataArray[index]
+      const details = await forumContract.groupDetails(groupId.toString())
 
       if (cachedData?.removed) {
         return null
@@ -35,6 +36,8 @@ export const fetchCommunitiesData = async ({
         !cachedData?.refresh &&
         cachedData &&
         cachedData.note &&
+        cachedData?.banner &&
+        cachedData?.logo &&
         !!cachedData.requirements &&
         cachedData.name &&
         !isNaN(cachedData?.userCount)
@@ -46,8 +49,10 @@ export const fetchCommunitiesData = async ({
       }
 
       let groupData
+      let groupDetails
       try {
         groupData = await forumContract.groupAt(groupId.toString())
+        groupDetails = await forumContract.groupDetails(groupId.toString())
         if (groupData?.removed) {
           console.log('groupData removed', groupData)
           // if community is removed
@@ -59,10 +64,7 @@ export const fetchCommunitiesData = async ({
         return null
       }
 
-      const fulfilledRequirements = await fetchGroupRequirements(
-        groupId.toString(),
-        groupData?.chainId?.toNumber(),
-      )
+      const fulfilledRequirements = await fetchGroupRequirements(groupId.toString(), groupData?.chainId?.toNumber())
 
       const group = groups[index]
       const note = group.args['note'].toString()
@@ -76,6 +78,10 @@ export const fetchCommunitiesData = async ({
         note,
         chainId: groupData?.chainId?.toNumber(),
         removed: groupData?.removed,
+        banner: groupDetails.bannerCID,
+        logo: groupDetails.logoCID,
+        description: groupDetails.description,
+        tags: groupDetails.tags,
       }
       // remove groupData from newData if it exists
       if (newData?.['groupData']) {
@@ -99,9 +105,7 @@ export const fetchCommunitiesData = async ({
   }
 }
 
-export const fetchCommunityData = async ({
-  group,
-}: FetchCommunityDataParams): Promise<CommunityInterface | null> => {
+export const fetchCommunityData = async ({ group }: FetchCommunityDataParams): Promise<CommunityInterface | null> => {
   try {
     const groupId = group?.args?.['groupId']?.toNumber()
     console.log('groupId', groupId)
@@ -139,10 +143,7 @@ export const fetchCommunityData = async ({
       return null
     }
 
-    const fulfilledRequirements = await fetchGroupRequirements(
-      groupId.toString(),
-      groupData?.chainId?.toNumber(),
-    )
+    const fulfilledRequirements = await fetchGroupRequirements(groupId.toString(), groupData?.chainId?.toNumber())
     const note = group.args['note'].toString()
 
     const newData = {
@@ -247,18 +248,11 @@ export const uploadThenCacheGroupData = async ({
   groupData,
   chainId,
   requirements,
-  details,
 }: {
   groupId: any
   groupData: any
   chainId: number
   requirements: []
-  details: {
-    description: string
-    tags: string[]
-    bannerCID: string
-    logoCID: string
-  }
 }) => {
   const { blockHash, args, event, transactionIndex, blockNumber, ...otherData } = groupData
   const [groupIdArg, nameArg, note] = args
@@ -356,12 +350,7 @@ export const cacheGroupData = async ({
   groupData: any
   chainId: number
   requirements: []
-  details: {
-    description: string
-    tags: string[]
-    bannerCID: string
-    logoCID: string
-  }
+  details: CommunityDetails
 }): Promise<any> => {
   const { blockHash, args, event, transactionIndex, blockNumber, ...otherData } = groupData
   const [groupIdArg, nameArg, note] = args
@@ -376,12 +365,7 @@ export const cacheGroupData = async ({
     chainId: number
     requirements: []
     removed: boolean
-    details: {
-      description: string
-      tags: string[]
-      bannerCID: string
-      logoCID: string
-    }
+    details: CommunityDetails
     banner: string
     logo: string
   } = {

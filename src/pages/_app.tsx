@@ -4,7 +4,7 @@ import { ThemeProvider } from 'next-themes'
 import { useRouter } from 'next/router'
 import { useTheme } from 'next-themes'
 import { app } from '@/appConfig'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import HeadGlobal from '@/components/HeadGlobal'
 import '../../i18n'
 import { alchemyProvider } from 'wagmi/providers/alchemy'
@@ -50,21 +50,21 @@ import ErrorBoundary from '../components/ErrorBoundary'
 
 function App({ Component, pageProps }: AppProps) {
   return (
-    <ThemeProvider defaultTheme="system" attribute="class">
-      <LoaderProvider>
+    // <ThemeProvider defaultTheme="system" attribute="class">
+    <LoaderProvider>
       <Web3Wrapper>
         <HeadGlobal />
-          <Component {...pageProps} />
-          <ToastContainer />
+        <Component {...pageProps} />
+        <ToastContainer />
       </Web3Wrapper>
-      </LoaderProvider>
-    </ThemeProvider>
+    </LoaderProvider>
+    // </ThemeProvider>
   )
 }
 export default App
 
 // Web3 Configs
-const stallTimeout = 1_0000
+const stallTimeout = 10_0000
 const { chains, provider, webSocketProvider } = configureChains(
   [polygonMumbai, sepolia, avalancheFuji, goerli],
   [
@@ -72,31 +72,41 @@ const { chains, provider, webSocketProvider } = configureChains(
       apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY as string,
       stallTimeout,
     }),
-    // infuraProvider({
-    //   apiKey: process.env.NEXT_PUBLIC_INFURA_API_KEY as string,
-    //   stallTimeout: stallTimeout,
-    // }),
-
 
     jsonRpcProvider({
       rpc: chain => {
         if (chain.id === localhost.id) {
           return {
             http: process.env.NEXT_PUBLIC_LOCALHOST_URL ?? '',
+            webSocket: process.env.NEXT_PUBLIC_LOCALHOST_URL ?? '',
           }
         } else if (chain.id === goerli.id) {
           return {
             http: process.env.NEXT_PUBLIC_GOERLI_URL ?? '',
+            webSocket: process.env.NEXT_PUBLIC_LOCALHOST_URL ?? '',
           }
         } else if (chain.id === mainnet.id) {
           return {
             http: process.env.NEXT_PUBLIC_MAINNET_URL ?? '',
+            webSocket: process.env.NEXT_PUBLIC_LOCALHOST_URL ?? '',
           }
         } else if (chain.id === polygonMumbai.id) {
           return {
             http: process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL ?? '',
+            webSocket: process.env.NEXT_PUBLIC_LOCALHOST_URL ?? '',
+          }
+        } else if (chain.id === sepolia.id) {
+          return {
+            http: process.env.NEXT_PUBLIC_SEPOLIA_URL ?? '',
+            webSocket: process.env.NEXT_PUBLIC_LOCALHOST_URL ?? '',
+          }
+        } else if (chain.id === avalancheFuji.id) {
+          return {
+            http: process.env.NEXT_PUBLIC_AVALANCHE_FUJI_URL ?? '',
+            webSocket: process.env.NEXT_PUBLIC_LOCALHOST_URL ?? '',
           }
         }
+        console.error(`No RPC URL for chain ${chain.name}`)
         return null
       },
       stallTimeout: stallTimeout,
@@ -105,14 +115,15 @@ const { chains, provider, webSocketProvider } = configureChains(
     publicProvider({ stallTimeout: stallTimeout }),
   ],
 
-  { stallTimeout: stallTimeout }
+  { stallTimeout: stallTimeout, pollingInterval: stallTimeout }
 )
 
 const otherWallets = [
   braveWallet({ chains }),
-  ledgerWallet({ chains }),
+  // ledgerWallet({ chains }),
   coinbaseWallet({ chains, appName: app.name }),
-  rainbowWallet({ chains }),
+  // rainbowWallet({ chains }),
+  //   walletConnectWallet({ chains }),
 ]
 
 const connectors = connectorsForWallets([
@@ -129,41 +140,42 @@ const connectors = connectorsForWallets([
 const client = createClient({
   autoConnect: true,
   provider: provider({ chainId: polygonMumbai.id }),
-  // webSocketProvider: webSocketProvider({ chainId: polygonMumbai.id }),
-
+  webSocketProvider: webSocketProvider({ chainId: polygonMumbai.id }),
   connectors: connectors,
+  logger: console,
 })
 // Web3Wrapper
 export function Web3Wrapper({ children }) {
-  const [mounted, setMounted] = useState(false)
   const { resolvedTheme } = useTheme()
 
+  const didLoadRef = useRef(false)
   useEffect(() => {
-    setMounted(true)
-    startIPFS()
+    if (didLoadRef.current === false) {
+      didLoadRef.current = true
+      startIPFS()
+    }
   }, [])
-  if (!mounted) return null
 
   return (
-    <WagmiConfig client={client}>
-      <RainbowKitProvider
-        appInfo={{
-          appName: app.name,
-          learnMoreUrl: app.url,
-        }}
-        chains={chains}
-        initialChain={polygonMumbai.id} // Optional, initialChain={1}, initialChain={chain.mainnet}, initialChain={gnosisChain}
-        showRecentTransactions={false}
-        theme={resolvedTheme === 'dark' ? darkTheme() : lightTheme()}
-        id={'rainbowkit'}
-      >
-        <CommunityProvider>
-          <ErrorBoundary>
-            <InitialLoad>{children}</InitialLoad>
-          </ErrorBoundary>
-        </CommunityProvider>
-      </RainbowKitProvider>
-    </WagmiConfig>
+    <CommunityProvider>
+      <InitialLoad>
+        <WagmiConfig client={client}>
+          <RainbowKitProvider
+            appInfo={{
+              appName: app.name,
+              learnMoreUrl: app.url,
+            }}
+            chains={chains}
+            initialChain={polygonMumbai.id} // Optional, initialChain={1}, initialChain={chain.mainnet}, initialChain={gnosisChain}
+            showRecentTransactions={false}
+            theme={resolvedTheme === 'dark' ? darkTheme() : lightTheme()}
+            id={'rainbowkit'}
+          >
+            <ErrorBoundary>{children}</ErrorBoundary>
+          </RainbowKitProvider>
+        </WagmiConfig>
+      </InitialLoad>
+    </CommunityProvider>
   )
 }
 
@@ -172,14 +184,17 @@ const InitialLoad = ({ children }) => {
   useFetchUsers()
   const communities = useCommunities()
 
-  const [isMounted, setIsMounted] = useState(false)
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
+  const isMounted = useMounted()
 
   if (communities === null || communities?.length === 0 || !isMounted) {
     return <LoadingPage />
   }
 
   return <>{children}</>
+}
+
+export const useMounted = () => {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+  return mounted
 }

@@ -12,20 +12,14 @@ export async function joinGroup(groupId: string, identityCommitment: string, use
   })
 }
 
-export async function createGroup(
-  requirements: Requirement[],
-  groupName: string,
-  chainId: number,
-  details: CommunityDetails,
-  note: string
-) {
+export async function createGroup(requirements: Requirement[], groupName: string, chainId: number, details: CommunityDetails, note: string) {
   return axios.post(`${RELAYER_URL}/create-group`, {
     groupName,
     requirements,
     chainId,
     details,
-    note
-  })
+    note: note.toString()
+  });
 }
 
 export async function createPost(
