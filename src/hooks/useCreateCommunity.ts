@@ -8,8 +8,15 @@ import { useAccount } from 'wagmi'
 import { useCommunityContext } from '../contexts/CommunityProvider'
 import { constants, ethers } from 'ethers'
 import { createNote, getBytes32FromIpfsHash } from '@/lib/utils'
-import { CommunityDetails } from '@/lib/model'
-
+import { CommunityDetails, Requirement } from '@/lib/model'
+import { Group } from '@/types/contract/ForumInterface'
+interface ICreateCommunityArgs extends Group {
+  name: string
+  requirements: Requirement[]
+  bannerFile: File
+  logoFile: File
+  chainId: number
+}
 export const useCreateCommunity = (onCreateGroupClose: () => void) => {
   const handleCommunityAction = useHandleCommunityAction()
   const { address, isConnected } = useAccount()
@@ -17,10 +24,10 @@ export const useCreateCommunity = (onCreateGroupClose: () => void) => {
   const { dispatch } = useCommunityContext()
 
   return useCallback(
-    async ({ name, requirements, bannerFile, logoFile, chainId }) => {
+    async ({ name, requirements, bannerFile, logoFile, chainId }: ICreateCommunityArgs) => {
       const actionFn = async () => {
-        const user = new Identity(address as string)
-        const note = await createNote(user)
+        const user: Identity = new Identity(address as string)
+        const note: bigint = await createNote(user)
 
         const [bannerCID, logoCID] = await uploadImages({ bannerFile, logoFile })
         const communityDetails: CommunityDetails = {

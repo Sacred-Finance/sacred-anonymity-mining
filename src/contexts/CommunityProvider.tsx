@@ -1,5 +1,5 @@
 import React, { createContext, ReactNode, useContext, useReducer, useMemo, useEffect } from 'react'
-import { Community, User } from '@/lib/model'
+import { User } from '@/lib/model'
 import { ethers } from 'ethers'
 import { Identity } from '@semaphore-protocol/identity'
 import _ from 'lodash'
@@ -7,6 +7,7 @@ import { useAccount } from 'wagmi'
 import { useIdentity } from '@/hooks/useIdentity'
 import { useRouter } from 'next/router'
 import { useLoaderContext } from './LoaderContext'
+import { Group } from '@/types/contract/ForumInterface'
 
 export type CommunityId = string | number | ethers.BigNumber
 type CommunityContextType = {
@@ -15,17 +16,17 @@ type CommunityContextType = {
 }
 
 type State = {
-  communities: Community[]
+  communities: Group[]
   users: User[]
   usersGrouped: { [key: string]: User[] }
 }
 
 type Action =
-  | { type: 'ADD_COMMUNITY'; payload: Community }
+  | { type: 'ADD_COMMUNITY'; payload: Group }
   | { type: 'REMOVE_COMMUNITY'; payload: CommunityId }
   | { type: 'ADD_USER'; payload: User }
   | { type: 'REMOVE_USER'; payload: User }
-  | { type: 'SET_COMMUNITIES'; payload: Community[] }
+  | { type: 'SET_COMMUNITIES'; payload: Group[] }
   | { type: 'SET_USERS'; payload: User[] }
 
 const initialState: State = {
@@ -120,7 +121,7 @@ export const useCommunityContext = (): CommunityContextType => {
   return context
 }
 
-export function getGroupIdOrUserId(communityOrUser: Community | User): number {
+export function getGroupIdOrUserId(communityOrUser: Group | User): number {
   return typeof communityOrUser.groupId === 'object'
     ? communityOrUser?.groupId?.toNumber?.()
     : Number(communityOrUser?.groupId)
@@ -141,12 +142,12 @@ export const CommunityProvider: React.FC<any> = ({ children }: { children: React
   return <CommunityContext.Provider value={{ state, dispatch }}>{children}</CommunityContext.Provider>
 }
 
-export function useCommunities(): Community[] {
+export function useCommunities(): Group[] {
   const { state } = useCommunityContext()
   return state.communities
 }
 
-export function useCommunityById(id: string | number): Community | undefined {
+export function useCommunityById(id: string | number): Group | undefined {
   const { state } = useCommunityContext()
   return useMemo(() => state.communities.find(c => _.toNumber(c.groupId) === _.toNumber(id)), [state.communities, id])
 }
@@ -160,7 +161,7 @@ export function useActiveUser(): User | undefined {
   const { state } = useCommunityContext()
 
   const router = useRouter()
-  const {  groupId } = router.query
+  const { groupId } = router.query
 
   const identity = useIdentity(groupId ? { groupId: groupId as string } : undefined)
 

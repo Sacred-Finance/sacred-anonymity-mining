@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { Identity } from '@semaphore-protocol/identity'
-import { Community } from '../lib/model'
 import { useAccount } from 'wagmi'
 import { debounce } from 'lodash'
 import { CommunityCard } from '../components/CommunityCard/CommunityCard'
@@ -8,19 +7,17 @@ import { useLoaderContext } from '../contexts/LoaderContext'
 import { useTranslation } from 'next-i18next'
 import { getGroupIdOrUserId, useCommunityContext } from '../contexts/CommunityProvider'
 import {
-  ArrowDownIcon,
-  ArrowUpIcon,
   BarsArrowDownIcon,
   BarsArrowUpIcon,
   ClockIcon,
   MagnifyingGlassIcon,
   MinusCircleIcon,
-  TrashIcon,
   UserGroupIcon,
   UserMinusIcon,
 } from '@heroicons/react/20/solid'
 import { motion } from 'framer-motion'
 import clsx from 'clsx'
+import { Group } from '@/types/contract/ForumInterface'
 
 interface HomeProps {
   createCommunity: Function
@@ -36,7 +33,7 @@ function HomePage({ createCommunity, isAdmin = false }: HomeProps) {
 
   const [searchTerm, setSearchTerm] = useState('')
 
-  const [localCommunities, setLocalCommunities] = useState<Community[]>([])
+  const [localCommunities, setLocalCommunities] = useState<Group[]>([])
 
   const { address } = useAccount()
   const { t, i18n, ready } = useTranslation()
@@ -51,7 +48,7 @@ function HomePage({ createCommunity, isAdmin = false }: HomeProps) {
         .map(communityKey =>
           communities.find(c => JSON.stringify({ groupId: c.groupId, name: c.name }) === communityKey)
         )
-        .filter(c => c) as Community[]
+        .filter(c => c) as Group[]
 
       uniqueCommunities.forEach(c => {
         if (isNaN(c?.id)) return

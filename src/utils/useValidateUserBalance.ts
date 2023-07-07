@@ -1,37 +1,37 @@
-import { useContractReads } from 'wagmi';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { toast } from 'react-toastify';
-import { erc20dummyABI } from '../constant/const';
-import { Community } from '../lib/model';
+import { useContractReads } from 'wagmi'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { toast } from 'react-toastify'
+import { erc20dummyABI } from '../constant/const'
+import { Group } from '@/types/contract/ForumInterface'
 
 interface RequirementCheck {
-  symbol: string | undefined;
-  minAmount: number;
-  balance: number;
-  decimals: number | undefined;
+  symbol: string | undefined
+  minAmount: number
+  balance: number
+  decimals: number | undefined
 }
 
 interface ValidationResult {
-  hasSufficientBalance: boolean;
-  toastMessage: string;
+  hasSufficientBalance: boolean
+  toastMessage: string
 }
 
-export const useValidateUserBalance = (community: Community | undefined, address: `0x${string}` | undefined) => {
-  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
-  const [fetchEnabled, setFetchEnabled] = useState(false);
+export const useValidateUserBalance = (community: Group | undefined, address: `0x${string}` | undefined) => {
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
+  const [fetchEnabled, setFetchEnabled] = useState(false)
 
   const requirements = useMemo(() => {
-    if (!community?.requirements?.length || !address || !community?.chainId) return [];
+    if (!community?.requirements?.length || !address || !community?.chainId) return []
     return community.requirements.map(r => ({
       address: r.tokenAddress,
       abi: erc20dummyABI,
       functionName: 'balanceOf',
       args: [address],
       chainId: community.chainId,
-    }));
-  }, [community, address]);
+    }))
+  }, [community, address])
 
-  const isEnabled = useMemo(() => fetchEnabled && requirements.length > 0, [fetchEnabled, requirements]);
+  const isEnabled = useMemo(() => fetchEnabled && requirements.length > 0, [fetchEnabled, requirements])
 
   const { data, isError, isLoading } = useContractReads({
     contracts: requirements.filter(Boolean),
@@ -42,32 +42,32 @@ export const useValidateUserBalance = (community: Community | undefined, address
     enabled: isEnabled,
     onError: error => console.error('Error during balance check', error),
     onSuccess: data => console.log('Balance check successful', data),
-  });
+  })
 
   useEffect(() => {
     if (!isLoading && (isError || data)) {
-      setFetchEnabled(false);
+      setFetchEnabled(false)
     }
-  }, [data, isError, isLoading]);
+  }, [data, isError, isLoading])
 
   const checkUserBalance = useCallback(() => {
-    if (!community?.requirements.length) return true;
+    if (!community?.requirements.length) return true
 
     if (!data || isError || isLoading) {
-      setFetchEnabled(true);
-      return;
+      setFetchEnabled(true)
+      return
     }
 
-    let toastMessage = '';
+    let toastMessage = ''
     const requirementsMet = data.map((bal, i) => {
-      const requirement = community.requirements[i];
-      const balance = Number(bal);
-      const minAmount = Number(requirement.minAmount);
-      if (balance < minAmount) toastMessage += `Insufficient ${requirement?.symbol} \n`;
-      return { balance, symbol: requirement.symbol, minAmount, decimals: requirement.decimals };
-    });
+      const requirement = community.requirements[i]
+      const balance = Number(bal)
+      const minAmount = Number(requirement.minAmount)
+      if (balance < minAmount) toastMessage += `Insufficient ${requirement?.symbol} \n`
+      return { balance, symbol: requirement.symbol, minAmount, decimals: requirement.decimals }
+    })
 
-    const hasSufficientBalance = requirementsMet.every(e => e.balance >= e.minAmount / 10 ** e.decimals);
+    const hasSufficientBalance = requirementsMet.every(e => e.balance >= e.minAmount / 10 ** e.decimals)
 
     if (!hasSufficientBalance) {
       toast.warning(`Insufficient Balance`, {
@@ -78,18 +78,18 @@ export const useValidateUserBalance = (community: Community | undefined, address
         draggable: true,
         progress: undefined,
         toastId: 'insufficient-balance',
-      });
+      })
     }
 
-    setValidationResult({ hasSufficientBalance, toastMessage });
-    return hasSufficientBalance;
-  }, [community, data, isError, isLoading]);
+    setValidationResult({ hasSufficientBalance, toastMessage })
+    return hasSufficientBalance
+  }, [community, data, isError, isLoading])
 
   useEffect(() => {
     if (data === undefined && !isError && !isLoading) {
-      checkUserBalance();
+      checkUserBalance()
     }
-  }, [data, isError, isLoading, checkUserBalance]);
+  }, [data, isError, isLoading, checkUserBalance])
 
-  return { validationResult, checkUserBalance };
-};
+  return { validationResult, checkUserBalance }
+}

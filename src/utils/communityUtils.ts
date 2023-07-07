@@ -1,216 +1,82 @@
-import { BigNumber, ethers } from 'ethers'
-import { erc20dummyABI, forumContract, jsonRPCProvider, supportedChains } from '../constant/const'
-import { getCache, getMCache, setCache } from '../lib/redis'
-import { uploadImageToIPFS } from '../lib/utils'
-import { fetchTokenInfo } from './tokenUtils'
-import { Community as CommunityInterface, CommunityDetails } from '../lib/model'
+import { BigNumber } from 'ethers'
+import { forumContract } from '@/constant/const'
+import { getCache, getMCache, setCache } from '@/lib/redis'
+import { uploadImageToIPFS } from '@/lib/utils'
+import { CommunityDetails, Requirement } from '@/lib/model'
 
 import pica from 'pica'
 import { useCallback } from 'react'
-
-interface FetchCommunityDataParams {
-  group: any
-}
+import { Group, GroupDetails } from '@/types/contract/ForumInterface'
+import { Event } from '@ethersproject/contracts/src.ts'
 
 interface FetchCommunitiesDataParams {
-  groups: any[]
+  groups: Array<Event>
 }
 
 export const fetchCommunitiesData = async ({
   groups,
-}: FetchCommunitiesDataParams): Promise<CommunityInterface[] | null> => {
+}: FetchCommunitiesDataParams): Promise<
+  Awaited<null | {
+    id: bigint
+    note: bigint
+    requirements: Requirement[]
+    userCount: number
+    removed: any
+    chainId: number
+    groupId: number
+    name: string
+    banner: GroupDetails['bannerCID']
+    logo: GroupDetails['logoCID']
+    description: GroupDetails['description']
+    tags: GroupDetails['tags']
+  }>[]
+> => {
+  // ensure the event has the right name
   try {
     const groupIds = groups.map(group => group?.args?.['groupId']?.toNumber())
-
-    const cachedDataArray = await fetchCommunitiesDataFromCache(groupIds)
-
+    const checkEvent = groups.filter(group => group.event === 'NewGroupCreated')
+    if (checkEvent.length !== groups.length) {
+      console.error('Event name is not NewGroupCreated')
+      throw new Error('Event name is not NewGroupCreated')
+    }
     const updatedDataPromises = groupIds.map(async (groupId, index) => {
-      const cachedData = cachedDataArray[index]
-      const details = await forumContract.groupDetails(groupId.toString())
-
-      if (cachedData?.removed) {
-        return null
-      }
-
-      const shouldReturnCachedData =
-        !cachedData?.refresh &&
-        cachedData &&
-        cachedData.note &&
-        cachedData?.banner &&
-        cachedData?.logo &&
-        !!cachedData.requirements &&
-        cachedData.name &&
-        !isNaN(cachedData?.userCount)
-
-      if (shouldReturnCachedData) {
-        return cachedData
-      } else {
-        console.log('cachedData - communitiesData', { groupId }, cachedData?.userCount, cachedData?.groupId)
-      }
-
       let groupData
-      let groupDetails
       try {
         groupData = await forumContract.groupAt(groupId.toString())
-        groupDetails = await forumContract.groupDetails(groupId.toString())
         if (groupData?.removed) {
-          console.log('groupData removed', groupData)
-          // if community is removed
           return null
         }
-        console.log('groupData', groupData)
       } catch (error) {
-        console.log('error', error)
         return null
       }
 
-      const fulfilledRequirements = await fetchGroupRequirements(groupId.toString(), groupData?.chainId?.toNumber())
-
-      const group = groups[index]
-      const note = group.args['note'].toString()
-
-      const newData = {
+      return {
         groupId: groupId,
-        name: group.args['name'],
-        id: group.args['groupId'],
+        name: groupData?.name,
+        id: groupData?.id,
         userCount: groupData?.userCount?.toNumber() || 0,
-        requirements: fulfilledRequirements,
-        note,
+        note: groupData?.note,
+        requirements: groupData.requirements,
         chainId: groupData?.chainId?.toNumber(),
         removed: groupData?.removed,
-        banner: groupDetails.bannerCID,
-        logo: groupDetails.logoCID,
-        description: groupDetails.description,
-        tags: groupDetails.tags,
+        banner: groupData?.groupDetails.bannerCID,
+        logo: groupData?.groupDetails.logoCID,
+        description: groupData?.groupDetails.description,
+        tags: groupData?.groupDetails.tags,
       }
-      // remove groupData from newData if it exists
-      if (newData?.['groupData']) {
-        delete newData?.['groupData']
-      }
-      if (cachedData?.['groupData']) {
-        delete cachedData?.['groupData']
-      }
-
-      const mergedData = cachedData ? { ...cachedData, ...newData } : newData
-
-      await setCache(`group_${groupId}`, mergedData)
-
-      return mergedData
     })
 
-    return await Promise.all(updatedDataPromises)
+    return Promise.all(updatedDataPromises)
   } catch (error) {
     console.trace('error', error)
-    return null
+    return []
   }
-}
-
-export const fetchCommunityData = async ({ group }: FetchCommunityDataParams): Promise<CommunityInterface | null> => {
-  try {
-    const groupId = group?.args?.['groupId']?.toNumber()
-    console.log('groupId', groupId)
-    const cachedData = await fetchCommunityDataFromCache(groupId)
-
-    console.log('cachedData', cachedData)
-    if (cachedData?.removed) {
-      return null
-    }
-
-    const shouldReturnCachedData =
-      !cachedData?.refresh &&
-      cachedData &&
-      cachedData.note &&
-      !!cachedData.requirements &&
-      cachedData.name &&
-      !isNaN(cachedData.userCount)
-
-    if (shouldReturnCachedData) {
-      return cachedData
-    } else {
-      console.log('shouldReturnCachedData', cachedData.userCount, cachedData.groupId)
-    }
-
-    let groupData
-    try {
-      groupData = await forumContract.groupInfo(groupId.toString())
-      // if community is removed
-      if (groupData[5]) {
-        return null
-      }
-      console.log('groupData', groupData)
-    } catch (error) {
-      console.log('error', error)
-      return null
-    }
-
-    const fulfilledRequirements = await fetchGroupRequirements(groupId.toString(), groupData?.chainId?.toNumber())
-    const note = group.args['note'].toString()
-
-    const newData = {
-      groupId: groupId,
-      name: group.args['name'],
-      id: group.args['groupId'],
-      userCount: groupData?.userCount?.toNumber() || 0,
-      requirements: fulfilledRequirements,
-      note,
-      chainId: groupData?.chainId?.toNumber(),
-      removed: groupData?.removed,
-    }
-
-    // Merge new data with existing cached data, if available
-    const mergedData = cachedData ? { ...cachedData, ...newData } : newData
-
-    // Cache the merged data
-    await setCache(`group_${groupId}`, mergedData)
-
-    return mergedData
-  } catch (error) {
-    console.log('error', error)
-    return null
-  }
-}
-
-export async function fetchGroupRequirements(groupId, chainId) {
-  const groupRequirements = await forumContract.groupRequirements(groupId)
-  const provider = new ethers.providers.JsonRpcProvider(supportedChains[chainId].rpcUrls.public.http[0])
-  const requirementsPromises = groupRequirements.map(async requirement => {
-    const contract = new ethers.Contract(requirement.tokenAddress, erc20dummyABI, provider)
-    const { symbol, name, decimals } = await fetchTokenInfo(contract)
-    return {
-      minAmount: Number(requirement.minAmount),
-      symbol,
-      name,
-      tokenAddress: requirement.tokenAddress,
-      decimals,
-    }
-  })
-  const requirements = await Promise.allSettled(requirementsPromises)
-  return requirements.filter(r => r.status === 'fulfilled').map((r: PromiseFulfilledResult<any>) => r.value)
-}
-
-const fetchCommunityDataFromCache = async (
-  groupId: number
-): Promise<(CommunityInterface & { refresh: boolean }) | null> => {
-  const cachedData = await getCache(`group_${groupId}`)
-
-  if (cachedData && cachedData.cache) {
-    const cacheData = cachedData.cache.data || cachedData.cache
-
-    return {
-      ...cacheData,
-      groupId,
-      id: BigNumber.from(groupId),
-      note: cacheData?.note,
-    }
-  }
-
-  return null
 }
 
 const maxCacheAge = 1000 * 60 * 60 * 24 // 24 hours
 const fetchCommunitiesDataFromCache = async (
   groupIds: number[]
-): Promise<((CommunityInterface & { refresh: boolean }) | null)[]> => {
+): Promise<((Group & { refresh: boolean }) | null)[]> => {
   const cacheKeys = groupIds.map(groupId => `group_${groupId}`)
   const { cache: cachedDataArray } = await getMCache(cacheKeys, true)
 
@@ -241,56 +107,6 @@ const fetchCommunitiesDataFromCache = async (
 
     return null
   })
-}
-
-export const uploadThenCacheGroupData = async ({
-  groupId,
-  groupData,
-  chainId,
-  requirements,
-}: {
-  groupId: any
-  groupData: any
-  chainId: number
-  requirements: []
-}) => {
-  const { blockHash, args, event, transactionIndex, blockNumber, ...otherData } = groupData
-  const [groupIdArg, nameArg, note] = args
-
-  const groupIdInt = parseInt(groupIdArg.hex, 16)
-
-  const cacheData: {
-    name?: string
-    groupId?: number
-    id?: any
-    note?: string
-    groupData: any
-    chainId: number
-    requirements: []
-    removed: boolean
-  } = {
-    name: nameArg,
-    groupId: groupIdInt,
-    id: groupIdArg,
-    note: BigNumber.from(note).toString(),
-    groupData: {
-      blockHash,
-      args,
-      event,
-      transactionIndex,
-      blockNumber,
-      ...otherData,
-    },
-    chainId,
-    requirements,
-    removed: false,
-  }
-
-  await setCache(`group_${groupId}`, cacheData)
-
-  return {
-    ...cacheData,
-  }
 }
 
 interface UploadAndCacheImagesParams {
@@ -349,7 +165,7 @@ export const cacheGroupData = async ({
   groupId: any
   groupData: any
   chainId: number
-  requirements: []
+  requirements: Requirement[]
   details: CommunityDetails
 }): Promise<any> => {
   const { blockHash, args, event, transactionIndex, blockNumber, ...otherData } = groupData
@@ -363,7 +179,7 @@ export const cacheGroupData = async ({
     note?: string
     groupData: any
     chainId: number
-    requirements: []
+    requirements: Requirement[]
     removed: boolean
     details: CommunityDetails
     banner: string

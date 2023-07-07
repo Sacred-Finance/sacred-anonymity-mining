@@ -1,5 +1,4 @@
-import React, { memo, useEffect, useMemo, useRef } from 'react'
-import { Community } from '../../lib/model'
+import React, { useEffect, useRef } from 'react'
 import { Footer } from './Footer'
 import EditGroupModal from '../EditGroupModal'
 import RemoveGroup from '../RemoveGroup'
@@ -7,7 +6,9 @@ import { useRemoveGroup } from '../../hooks/useRemoveGroup'
 import { CommunityCardHeader } from './CommunityCardHeader'
 import { CommunityCardBody } from './CommunityCardBody'
 import Link from 'next/link'
-export const CommunityContext = React.createContext<Community | null>(null)
+import { Group } from '@/types/contract/ForumInterface'
+
+export const CommunityContext = React.createContext<Group | null>(null)
 
 export const useLocalCommunity = () => {
   const community = React.useContext(CommunityContext)
@@ -20,7 +21,7 @@ export const CommunityCard = ({
   isAdmin = false,
   ...props
 }: {
-  community: Community
+  community: Group
   index: number
   isAdmin?: boolean
 }) => {
