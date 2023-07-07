@@ -1,7 +1,8 @@
 import { forumContract } from '@/constant/const'
-import { fetchCommunitiesData, fetchCommunityData } from '@/utils/communityUtils'
+import { fetchCommunitiesData } from '@/utils/communityUtils'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { useEffect, useRef } from 'react'
+import { Event } from '@ethersproject/contracts/src.ts'
 
 export const useFetchCommunities = (loadOnInit = true) => {
   const { dispatch } = useCommunityContext()
@@ -11,14 +12,10 @@ export const useFetchCommunities = (loadOnInit = true) => {
       return
     }
     try {
-      const groups = await forumContract.queryFilter(forumContract.filters.NewGroupCreated())
-
-
-      console.log('groups', groups)
+      const groups: Array<Event> = await forumContract.queryFilter(forumContract.filters.NewGroupCreated())
+      if (!groups) return
       const communitiesData = await fetchCommunitiesData({ groups })
       const fulfilledCommunities = communitiesData?.filter(community => community)
-
-      console.log('communitiesData', communitiesData)
       dispatch({
         type: 'SET_COMMUNITIES',
         payload: fulfilledCommunities,

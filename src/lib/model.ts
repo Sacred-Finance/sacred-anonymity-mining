@@ -1,32 +1,18 @@
 import { OutputData } from '@editorjs/editorjs'
 import { BigNumberish } from 'ethers'
+import { Requirement as ContractRequirement } from '@/types/contract/ForumInterface'
 
-export interface Requirement {
+export interface Requirement extends ContractRequirement {
   name?: string
   symbol?: string
-  tokenAddress?: string
-  minAmount?: string
   decimals?: number
 }
 
-export interface Community {
-  groupId: number
-  id: number
-  name: string
-  userCount: number
-  requirements: Requirement[]
-  banner?: string
-  logo?: string
-  note?: string
-  chainId?: number
-  removed?: boolean
-}
-
 export interface CommunityDetails {
-  description: string;
-  tags: string[];
-  bannerCID: string;
-  logoCID: string;
+  description: string
+  tags: string[]
+  bannerCID: string
+  logoCID: string
 }
 export interface User {
   name: string
