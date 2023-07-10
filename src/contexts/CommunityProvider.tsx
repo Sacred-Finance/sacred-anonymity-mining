@@ -157,12 +157,8 @@ export function useUsers(): User[] {
   return state.users
 }
 
-export function useActiveUser(): User | undefined {
+export function useActiveUser({groupId}): User | undefined {
   const { state } = useCommunityContext()
-
-  const router = useRouter()
-  const { groupId } = router.query
-
   const identity = useIdentity(groupId ? { groupId: groupId as string } : undefined)
 
   return useMemo(

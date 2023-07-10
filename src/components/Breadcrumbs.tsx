@@ -155,12 +155,6 @@ function generateBreadcrumbItems(community, postFetched, isValidating, location)
 function useCommunityAndPost(communityId, postId) {
   const community = useCommunityById(+communityId)
 
-  const provider = useProvider({ chainId: polygonMumbai.id })
-  const forumContract = useContract({
-    address: ForumContractAddress,
-    abi: ForumABI.abi,
-    signerOrProvider: provider,
-  })
 
   const postClassInstance = new PostClass(postId, communityId)
 

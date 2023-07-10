@@ -116,6 +116,7 @@ export const buttonVariants = {
     'border-primary-500 dark:border-primary-500 hover:border-primary-600 dark:hover:border-primary-600 ',
   primarySolid:
       'text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-700 active:bg-primary-700',
+  solid:'text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-700 active:bg-primary-700',
 
   primarySolidOutline:
     'text-primary-500 dark:text-primary-500 hover:text-primary-600 dark:hover:text-primary-600 focus:text-primary-600 dark:focus:text-primary-600 active:text-primary-600 dark:active:text-primary-600 selected:text-primary-600 dark:selected:text-primary-600 ' +

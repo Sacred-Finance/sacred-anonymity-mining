@@ -80,11 +80,11 @@ export interface PostInterface {
 }
 
 export class Post implements PostInterface {
-  id: string
+  id: string | undefined
   groupId: string
   provider = jsonRPCProvider
 
-  constructor(id: string, groupId) {
+  constructor(id: string | undefined, groupId) {
     this.id = id
     this.groupId = groupId
   }
@@ -374,6 +374,7 @@ export class Post implements PostInterface {
   }
 
   async updatePostsVote(postInstance, itemId, voteType, confirmed: boolean, revert = false) {
+    return;
     //from the community level (multple posts)
     const modifier = revert ? -1 : 1
     try {
@@ -436,6 +437,8 @@ export class Post implements PostInterface {
   }
 
   async updatePostVote(voteType, confirmed = false, revert = false) {
+
+      console.log('updatePostVote', { voteType, confirmed, revert })
     // Verify the vote type is within the expected range (0 or 1)
     if (![0, 1].includes(voteType)) {
       throw new Error('Invalid vote type. Expected 0 (upvote) or 1 (downvote)')

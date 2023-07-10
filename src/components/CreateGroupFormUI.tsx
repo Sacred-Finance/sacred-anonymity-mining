@@ -8,11 +8,9 @@ import { CancelButton, PrimaryButton } from './buttons'
 import { useTranslation } from 'next-i18next'
 import { polygonMumbai } from 'wagmi/chains'
 import { PictureUpload } from './PictureUpload'
-import _ from 'lodash'
 import clsx from 'clsx'
 import { classes, buttonVariants, primaryButtonStyle } from '../styles/classes'
-import { toast } from 'react-toastify'
-import { ChevronDownIcon, ChevronRightIcon, ChevronUpIcon, QuestionMarkCircleIcon } from '@heroicons/react/20/solid'
+import { ChevronRightIcon, QuestionMarkCircleIcon } from '@heroicons/react/20/solid'
 import { AnimatePresence, motion } from 'framer-motion'
 function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
   const { t } = useTranslation()
@@ -149,7 +147,7 @@ function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
   }, [logoFile, bannerFile])
 
   return (
-    <div className="flex max-h-[80vh] flex-col justify-between space-y-4 overflow-y-scroll scrollbar rounded-lg border bg-background-dark p-2 text-white md:p-4">
+    <div className="scrollbar flex max-h-[80vh] flex-col justify-between space-y-4 overflow-y-scroll rounded-lg border bg-background-dark p-2 text-white md:p-4">
       <div className="flex items-center justify-between py-2 md:py-4">
         <h1 className="text-xl font-semibold md:text-2xl">{t('createCommunity')}</h1>
       </div>
@@ -192,9 +190,9 @@ function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
       <div className="flex items-center justify-between space-x-2">
         <div className="flex items-center space-x-3">
           <ToolTip
-              type="primary"
-              title={t('toolTip.tokenGating.title')}
-              message={t('toolTip.tokenGating.message') || ''}
+            type="primary"
+            title={t('toolTip.tokenGating.title')}
+            message={t('toolTip.tokenGating.message') || ''}
           >
             <QuestionMarkCircleIcon className="h-6 w-6" />
           </ToolTip>
@@ -202,18 +200,18 @@ function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
             {t('toolTip.tokenGating.title')}
           </label>
           <input
-              type="checkbox"
-              id="isChecked"
-              className="mr-3 h-6 w-6 rounded border-border-on-dark bg-primary-500 "
-              checked={reqMandatory}
-              onChange={e => {
-                setReqMandatory(e.target.checked)
-                if (!e.target.checked) {
-                  formik.setFieldValue('tokenRequirements', [])
-                } else {
-                  formik.setFieldValue('tokenRequirements', [initialValues])
-                }
-              }}
+            type="checkbox"
+            id="isChecked"
+            className="mr-3 h-6 w-6 rounded border-border-on-dark bg-primary-500 "
+            checked={reqMandatory}
+            onChange={e => {
+              setReqMandatory(e.target.checked)
+              if (!e.target.checked) {
+                formik.setFieldValue('tokenRequirements', [])
+              } else {
+                formik.setFieldValue('tokenRequirements', [initialValues])
+              }
+            }}
           />
         </div>
         <div className=" w-100 relative inline-flex gap-2">
@@ -222,8 +220,8 @@ function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
               <span className="flex w-full items-center justify-between">
                 {selectedChain.name}
                 <ChevronRightIcon
-                    className={clsx('-mr-1 ml-2 h-5 w-5 align-middle group-hover:rotate-90 ')}
-                    aria-hidden="true"
+                  className={clsx('-mr-1 ml-2 h-5 w-5 align-middle group-hover:rotate-90 ')}
+                  aria-hidden="true"
                 />
               </span>
             </button>
@@ -231,30 +229,30 @@ function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
             <div className="w-100 disabled:group-hover:none absolute left-0 z-50 hidden  rounded-md bg-black/50 shadow-lg ring-1 ring-background-dark ring-opacity-5 group-hover:block">
               <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
                 {supportedChainsArray.map((k, i) => (
-                    <button
-                        key={k.id}
-                        className={clsx(
-                            'mt-2 w-full rounded-md border border-white/50  bg-primary-bg px-4 py-2 shadow-sm hover:border-white  focus:outline-none focus:ring-2 focus:ring-primary-light focus:ring-offset-2 ',
-                            buttonVariants.success,
-                            primaryButtonStyle
-                        )}
-                        onClick={e => {
-                          selectChain(k)
-                          formik.setFieldValue('tokenRequirements', [initialValues])
-                          if (!reqMandatory) setReqMandatory(true)
-                          // hide for half second
-                        }}
-                    >
-                      {k.name}
-                    </button>
+                  <button
+                    key={k.id}
+                    className={clsx(
+                      'mt-2 w-full rounded-md border border-white/50  bg-primary-bg px-4 py-2 shadow-sm hover:border-white  focus:outline-none focus:ring-2 focus:ring-primary-light focus:ring-offset-2 ',
+                      buttonVariants.success,
+                      primaryButtonStyle
+                    )}
+                    onClick={e => {
+                      selectChain(k)
+                      formik.setFieldValue('tokenRequirements', [initialValues])
+                      if (!reqMandatory) setReqMandatory(true)
+                      // hide for half second
+                    }}
+                  >
+                    {k.name}
+                  </button>
                 ))}
               </div>
             </div>
           </div>
 
           <button
-              className={clsx(primaryButtonStyle, buttonVariants.success, 'w-[38.54px] border', 'hover:scale-[100%]')}
-              onClick={addReq}
+            className={clsx(primaryButtonStyle, buttonVariants.success, 'w-[38.54px] border', 'hover:scale-[100%]')}
+            onClick={addReq}
           >
             +
           </button>
@@ -264,92 +262,92 @@ function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
       <FormikProvider value={formik}>
         <motion.form onSubmit={submit}>
           {formik.values.tokenRequirements.length === 0 && (
-              <div className="-m-2 flex h-full flex-col content-center items-center justify-center space-y-4 p-0">
-                <p className="text-sm font-semibold text-white/50">{t('placeholder.noTokenRequirements')}</p>
-              </div>
+            <div className="-m-2 flex h-full flex-col content-center items-center justify-center space-y-4 p-0">
+              <p className="text-sm font-semibold text-white/50">{t('placeholder.noTokenRequirements')}</p>
+            </div>
           )}
           <FieldArray
-              name="tokenRequirements"
-              render={({ remove }) => (
-                  <div className="flex flex-col justify-center space-y-4 pb-2">
-                    <AnimatePresence>
-                      {formik.values.tokenRequirements.map((r, i, arr) => (
-                          <motion.div
-                              key={i}
-                              layout
-                              className="flex w-full items-center space-x-4"
-                              initial={{ opacity: 0, y: 20, overflowY: 'visible' }}
-                              animate={{ opacity: 1, y: 0, overflowY: 'hidden' }}
-                              exit={{ opacity: 0, y: 20, overflowY: 'hidden' }}
-                              transition={{ duration: 0.5 }}
-                          >
-                            <p className="pt-2">{i + 1}.</p>
-                            <div className="relative w-[100%]">
-                              <input
-                                  disabled={!reqMandatory}
-                                  className={clsx(classes.input, 'w-full')}
-                                  value={r.tokenAddress}
-                                  onChange={e => handleReqInput(e, i)}
-                                  name={`tokenRequirements.${i}.tokenAddress`}
-                                  placeholder={t('placeholder.tokenAddress')}
-                                  type="text"
-                              />
-                              <p
-                                  className={clsx(
-                                      'absolute text-sm text-error-dark',
-                                      er[`tokenRequirements_${i}`] && 'visible'
-                                  )}
-                              >
-                                {er[`tokenRequirements_${i}`]}
-                              </p>
-                            </div>
+            name="tokenRequirements"
+            render={({ remove }) => (
+              <div className="flex flex-col justify-center space-y-4 pb-2">
+                <AnimatePresence>
+                  {formik.values.tokenRequirements.map((r, i, arr) => (
+                    <motion.div
+                      key={i}
+                      layout
+                      className="flex w-full items-center space-x-4"
+                      initial={{ opacity: 0, y: 20, overflowY: 'visible' }}
+                      animate={{ opacity: 1, y: 0, overflowY: 'hidden' }}
+                      exit={{ opacity: 0, y: 20, overflowY: 'hidden' }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <p className="pt-2">{i + 1}.</p>
+                      <div className="relative w-[100%]">
+                        <input
+                          disabled={!reqMandatory}
+                          className={clsx(classes.input, 'w-full')}
+                          value={r.tokenAddress}
+                          onChange={e => handleReqInput(e, i)}
+                          name={`tokenRequirements.${i}.tokenAddress`}
+                          placeholder={t('placeholder.tokenAddress')}
+                          type="text"
+                        />
+                        <p
+                          className={clsx(
+                            'absolute text-sm text-error-dark',
+                            er[`tokenRequirements_${i}`] && 'visible'
+                          )}
+                        >
+                          {er[`tokenRequirements_${i}`]}
+                        </p>
+                      </div>
 
-                            <div className="w-[25%]">
-                              <input
-                                  disabled={!reqMandatory}
-                                  className={clsx('w-full', classes.input)}
-                                  type="number"
-                                  min={0}
-                                  defaultValue={r.minAmount}
-                                  value={r.minAmount}
-                                  onChange={formik.handleChange}
-                                  name={`tokenRequirements.${i}.minAmount`}
-                                  placeholder={t('placeholder.minAmount')}
-                              />
-                            </div>
+                      <div className="w-[25%]">
+                        <input
+                          disabled={!reqMandatory}
+                          className={clsx('w-full', classes.input)}
+                          type="number"
+                          min={0}
+                          defaultValue={r.minAmount}
+                          value={r.minAmount}
+                          onChange={formik.handleChange}
+                          name={`tokenRequirements.${i}.minAmount`}
+                          placeholder={t('placeholder.minAmount')}
+                        />
+                      </div>
 
-                            <button
-                                type="button"
-                                onClick={() => {
-                                  if (arr.length > 1) {
-                                    remove(i)
-                                  } else {
-                                    setReqMandatory(false)
-                                    remove(i)
-                                  }
-                                }}
-                                className={clsx(
-                                    primaryButtonStyle,
-                                    buttonVariants.primarySolid,
-                                    '!hover:scale-none',
-                                    'h-11 w-12 border focus:ring-0'
-                                )}
-                            >
-                              <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                  className="h-5 w-5"
-                              >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 12H6" />
-                              </svg>
-                            </button>
-                          </motion.div>
-                      ))}
-                    </AnimatePresence>
-                  </div>
-              )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (arr.length > 1) {
+                            remove(i)
+                          } else {
+                            setReqMandatory(false)
+                            remove(i)
+                          }
+                        }}
+                        className={clsx(
+                          primaryButtonStyle,
+                          buttonVariants.primarySolid,
+                          '!hover:scale-none',
+                          'h-11 w-12 border focus:ring-0'
+                        )}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          className="h-5 w-5"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 12H6" />
+                        </svg>
+                      </button>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            )}
           />
         </motion.form>
       </FormikProvider>

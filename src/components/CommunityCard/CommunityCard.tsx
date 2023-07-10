@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react'
-import { Footer } from './Footer'
+import { CommunityCardFooter } from './CommunityCardFooter'
 import EditGroupModal from '../EditGroupModal'
 import RemoveGroup from '../RemoveGroup'
 import { useRemoveGroup } from '../../hooks/useRemoveGroup'
@@ -53,8 +53,6 @@ export const CommunityCard = ({
   if (!community || !community?.id)
     return (
       <div className={'community-card-container'}>
-        {/*<Skeleton height="220px" minWidth={225} />*/}
-        {/*<SkeletonText mt={7} noOfLines={4} spacing="4" />*/}
       </div>
     )
 
@@ -63,7 +61,7 @@ export const CommunityCard = ({
       <div className={'relative  w-full max-w-[450px]'} ref={cardRef}>
         <CommunityContext.Provider value={community}>
           <div className={'community-card-container'}>
-            <div className="overflow-hidden rounded-lg shadow-lg">
+            <div className=" rounded-lg shadow-lg">
               <EditGroupModal community={community} hidden={!isEditGroupVisible} />
               {isAdmin && (
                 <RemoveGroup
@@ -76,7 +74,7 @@ export const CommunityCard = ({
                 <CommunityCardHeader />
                 <CommunityCardBody />
               </Link>
-              <Footer />
+              <CommunityCardFooter />
             </div>
           </div>
         </CommunityContext.Provider>

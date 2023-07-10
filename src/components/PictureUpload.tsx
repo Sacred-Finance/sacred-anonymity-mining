@@ -1,10 +1,7 @@
 import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'next-i18next'
-import { ToolTip } from './HOC/ToolTip'
 import { useHandleFileImageUpload } from '../utils/communityUtils'
-import clsx from 'clsx'
-import { primaryButtonStyle } from '../styles/classes'
-import { motion } from 'framer-motion'
+
 export const PictureUpload = (props: {
   uploadedImageUrl?: string
   displayName: string
@@ -47,12 +44,12 @@ export const PictureUpload = (props: {
     <>
       <div
         ref={imageRef}
-        className="relative flex aspect-1  h-full max-h-64 w-full items-center  justify-center  overflow-hidden rounded-lg"
+        className={`relative  rounded-2xl border-2 border-dashed border-gray-300 bg-gray-100 hover:bg-primary-300  hover:text-white`}
       >
         {props.uploadedImageUrl ? (
           <>
             <img
-              className="h-full w-full object-contain transition-opacity "
+              className=" h-52 w-full  object-contain transition-opacity "
               style={{ opacity: isDeleteIconVisible ? 0.5 : 1 }}
               onClick={() => {
                 props.setImageFileState(null)
@@ -63,51 +60,48 @@ export const PictureUpload = (props: {
               alt="Uploaded"
             />
             {isDeleteIconVisible && (
-              <div className="absolute inset-0 flex items-center justify-center ">
+              <button
+                className="absolute inset-0 flex h-full w-full items-center justify-center"
+                onClick={() => {
+                  props.setImageFileState(null)
+                  if (!inputRef.current) return
+                  inputRef.current.value = ''
+                }}
+              >
                 <svg
-                  className="h-full w-full  cursor-pointer text-red-500"
+                  className="h-10 w-10 cursor-pointer text-red-500"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
-                  onClick={() => {
-                    props.setImageFileState(null)
-                    if (!inputRef.current) return
-                    inputRef.current.value = ''
-                  }}
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M6 18L18 6M6 6l12 12" />
                 </svg>
-              </div>
+              </button>
             )}
           </>
         ) : (
           <div
-            className={`group flex h-52 w-full cursor-pointer items-center  justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-gray-100 hover:bg-primary-300  hover:text-white`}
+            className={`group flex h-52 w-full cursor-pointer items-center justify-center  rounded-2xl border-2 border-dashed border-gray-300 bg-gray-100 px-6 hover:bg-primary-300  hover:text-white`}
             onClick={openFileUpload}
-            onMouseOver={() => setHovered(hovered+45)}
-            onMouseLeave={() => setHovered(hovered+45)}
+            onMouseOver={() => setHovered(hovered + 45)}
+            onMouseLeave={() => setHovered(hovered + 45)}
           >
-            <div
-              className="flex items-center justify-center "
-
-            >
-
-              <>
-                {t('upload', { displayName: props.displayName })}
-                <motion.svg
-                  key="spinner"
-                  animate={{ rotate: hovered}}
-                  exit={{ rotate: 0 }}
-                  transition={{ loop: Infinity, duration: 0.5 }}
-                  className="ml-2 h-5 w-5 cursor-pointer rounded-full text-gray-500 group-hover:text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </motion.svg>
-              </>
-              {/*)}*/}
+            <div className="flex items-center justify-center text-lg">
+              {t('upload', { displayName: props.displayName })}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="ms-5 h-6 w-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
+                />
+              </svg>
             </div>
             <input
               hidden

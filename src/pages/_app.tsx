@@ -9,48 +9,25 @@ import HeadGlobal from '@/components/HeadGlobal'
 import '../../i18n'
 import { alchemyProvider } from 'wagmi/providers/alchemy'
 
-// Web3Wrapper deps:
 import { connectorsForWallets, RainbowKitProvider, lightTheme, darkTheme } from '@rainbow-me/rainbowkit'
-import {
-  injectedWallet,
-  metaMaskWallet,
-  braveWallet,
-  coinbaseWallet,
-  walletConnectWallet,
-  ledgerWallet,
-  rainbowWallet,
-} from '@rainbow-me/rainbowkit/wallets'
-import { Chain } from '@rainbow-me/rainbowkit'
-import {
-  mainnet,
-  polygon,
-  optimism,
-  arbitrum,
-  polygonMumbai,
-  localhost,
-  goerli,
-  hardhat,
-  sepolia,
-  avalancheFuji,
-} from 'wagmi/chains'
+import { injectedWallet, metaMaskWallet, braveWallet, coinbaseWallet } from '@rainbow-me/rainbowkit/wallets'
+import { mainnet, polygonMumbai, localhost, goerli, sepolia, avalancheFuji } from 'wagmi/chains'
 import { createClient, configureChains, WagmiConfig } from 'wagmi'
-import { infuraProvider } from 'wagmi/providers/infura'
 import { publicProvider } from 'wagmi/providers/public'
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc'
 import { LoaderProvider } from '../contexts/LoaderContext'
 import { CommunityProvider, useCommunities, useCommunityContext } from '../contexts/CommunityProvider'
-import { MetaMaskConnector } from 'wagmi/connectors/metaMask'
 import { startIPFS } from '../lib/utils'
 import { useFetchCommunities } from '../hooks/useFetchCommunities'
 import { useFetchUsers } from '../hooks/useFetchUsers'
-import { ToastContainer, toast } from 'react-toastify'
+import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import LoadingPage from '../components/LoadingComponent'
 import ErrorBoundary from '../components/ErrorBoundary'
+import { useMounted } from '@/hooks/useMounted'
 
 function App({ Component, pageProps }: AppProps) {
   return (
-    // <ThemeProvider defaultTheme="system" attribute="class">
     <LoaderProvider>
       <Web3Wrapper>
         <HeadGlobal />
@@ -58,7 +35,6 @@ function App({ Component, pageProps }: AppProps) {
         <ToastContainer />
       </Web3Wrapper>
     </LoaderProvider>
-    // </ThemeProvider>
   )
 }
 export default App
@@ -157,25 +133,25 @@ export function Web3Wrapper({ children }) {
   }, [])
 
   return (
-    <CommunityProvider>
-      <InitialLoad>
-        <WagmiConfig client={client}>
-          <RainbowKitProvider
-            appInfo={{
-              appName: app.name,
-              learnMoreUrl: app.url,
-            }}
-            chains={chains}
-            initialChain={polygonMumbai.id} // Optional, initialChain={1}, initialChain={chain.mainnet}, initialChain={gnosisChain}
-            showRecentTransactions={false}
-            theme={resolvedTheme === 'dark' ? darkTheme() : lightTheme()}
-            id={'rainbowkit'}
-          >
+    <WagmiConfig client={client}>
+      <RainbowKitProvider
+        appInfo={{
+          appName: app.name,
+          learnMoreUrl: app.url,
+        }}
+        chains={chains}
+        initialChain={polygonMumbai.id} // Optional, initialChain={1}, initialChain={chain.mainnet}, initialChain={gnosisChain}
+        showRecentTransactions={false}
+        theme={resolvedTheme === 'dark' ? darkTheme() : lightTheme()}
+        id={'rainbowkit'}
+      >
+        <CommunityProvider>
+          <InitialLoad>
             <ErrorBoundary>{children}</ErrorBoundary>
-          </RainbowKitProvider>
-        </WagmiConfig>
-      </InitialLoad>
-    </CommunityProvider>
+          </InitialLoad>
+        </CommunityProvider>
+      </RainbowKitProvider>
+    </WagmiConfig>
   )
 }
 
@@ -191,10 +167,4 @@ const InitialLoad = ({ children }) => {
   }
 
   return <>{children}</>
-}
-
-export const useMounted = () => {
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
-  return mounted
 }

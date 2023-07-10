@@ -1,7 +1,7 @@
 import { BigNumber } from 'ethers'
 import { forumContract } from '@/constant/const'
 import { getCache, getMCache, setCache } from '@/lib/redis'
-import { uploadImageToIPFS } from '@/lib/utils'
+import {getIpfsHashFromBytes32, uploadImageToIPFS} from '@/lib/utils'
 import { CommunityDetails, Requirement } from '@/lib/model'
 
 import pica from 'pica'
@@ -9,8 +9,10 @@ import { useCallback } from 'react'
 import { Group, GroupDetails } from '@/types/contract/ForumInterface'
 import { Event } from '@ethersproject/contracts/src.ts'
 
+type GroupId = number;
+
 interface FetchCommunitiesDataParams {
-  groups: Array<Event>
+  groups: Array<Event | GroupId>
 }
 
 export const fetchCommunitiesData = async ({
@@ -33,12 +35,21 @@ export const fetchCommunitiesData = async ({
 > => {
   // ensure the event has the right name
   try {
-    const groupIds = groups.map(group => group?.args?.['groupId']?.toNumber())
-    const checkEvent = groups.filter(group => group.event === 'NewGroupCreated')
-    if (checkEvent.length !== groups.length) {
+    const groupIds = groups.map(group =>
+        typeof group === 'number'
+            ? group
+            : group?.args?.['groupId']?.toNumber()
+    );
+
+    const checkEvent = groups.filter(
+        group => typeof group !== 'number' && group.event === 'NewGroupCreated'
+    );
+
+    if (checkEvent.length !== groups.filter(group => typeof group !== 'number').length) {
       console.error('Event name is not NewGroupCreated')
       throw new Error('Event name is not NewGroupCreated')
     }
+
     const updatedDataPromises = groupIds.map(async (groupId, index) => {
       let groupData
       try {
@@ -59,10 +70,11 @@ export const fetchCommunitiesData = async ({
         requirements: groupData.requirements,
         chainId: groupData?.chainId?.toNumber(),
         removed: groupData?.removed,
-        banner: groupData?.groupDetails.bannerCID,
-        logo: groupData?.groupDetails.logoCID,
+        banner: getIpfsHashFromBytes32(groupData?.groupDetails.bannerCID),
+        logo:  getIpfsHashFromBytes32(groupData?.groupDetails.logoCID),
         description: groupData?.groupDetails.description,
         tags: groupData?.groupDetails.tags,
+        groupDetails: groupData.groupDetails,
       }
     })
 
@@ -128,31 +140,28 @@ type UploadImagesParams = {
 export const uploadImages = async ({
   bannerFile,
   logoFile,
-}: UploadImagesParams): Promise<[string | null, string | null]> => {
+}: UploadImagesParams): Promise<{ bannerCID: string | null; logoCID: string | null }> => {
   const [bannerResult, logoResult] = await Promise.allSettled([
     bannerFile ? uploadImageToIPFS(bannerFile) : Promise.resolve(null),
     logoFile ? uploadImageToIPFS(logoFile) : Promise.resolve(null),
   ])
 
-  let bannerUrl: string | null = null
-  let logoUrl: string | null = null
+  let bannerCID: string | null = null
+  let logoCID: string | null = null
 
   if (bannerResult.status === 'fulfilled' && bannerResult.value) {
-    bannerUrl = bannerResult.value
+    bannerCID = bannerResult.value
   } else if (bannerResult.status === 'rejected' && bannerFile) {
     console.error('Error uploading banner image:', bannerResult.reason)
   }
 
   if (logoResult.status === 'fulfilled' && logoResult.value) {
-    logoUrl = logoResult.value
+    logoCID = logoResult.value
   } else if (logoResult.status === 'rejected' && logoFile) {
     console.error('Error uploading logo image:', logoResult.reason)
   }
 
-  console.log('bannerUrl', bannerUrl)
-  console.log('logoUrl', logoUrl)
-
-  return [bannerUrl, logoUrl]
+  return { bannerCID, logoCID }
 }
 
 export const cacheGroupData = async ({
@@ -263,12 +272,18 @@ export const useHandleFileImageUpload = setImageFileState => {
     handleFileImageUpload(e, setImageFileState)
   }, [])
 }
+
 export const handleFileImageUpload = (e, setImageFileState) => {
   const file = e.target.files[0]
 
   // Create a new Image object to check the dimensions
   const img = new Image()
-  img.src = URL.createObjectURL(file)
+  try {
+    img.src = URL.createObjectURL(file)
+  } catch (error) {
+    console.error('Error uploading image:', error)
+    return
+  }
   img.onload = () => {
     // Define the required aspect ratios for banners and logos
     const requiredAspectRatios = {
@@ -292,14 +307,6 @@ export const handleFileImageUpload = (e, setImageFileState) => {
       // Set the file based on the image type
       setImageFileState(file)
     } else {
-      // Show an error message if the aspect ratio doesn't match
-      // toast({
-      //   title: "Image aspect ratio mismatch",
-      //   description: `The uploaded ${imageType} has an aspect ratio of ${imageAspectRatio} - and does not meet the recommended aspect ratio of ${requiredDimensionsText}. We will try to resize it, but the quality might be affected.`,
-      //   position: "top",
-      //   }
-      // );
-
       // Create a canvas to resize the image
       const canvas = document.createElement('canvas')
       canvas.width = requiredDimensions[imageType].width

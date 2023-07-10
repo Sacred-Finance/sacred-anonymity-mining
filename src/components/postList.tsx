@@ -52,7 +52,8 @@ const PostItem = ({ isLoading, voteForPost, post }) => {
           </h2>
           <div className="flex items-center space-x-4">
             <VoteUpButton
-              onClick={async e => {
+                isLoading={isLoading}
+                onClick={async e => {
                 console.log('upvote')
                 e.stopPropagation()
                 e.preventDefault()
@@ -67,8 +68,8 @@ const PostItem = ({ isLoading, voteForPost, post }) => {
             />
             <span className="text-gray-500">{upvote}</span>
             <VoteDownButton
-              onClick={async e => {
-                console.log('downvote')
+                isLoading={isLoading}
+                onClick={async e => {
                 e.stopPropagation()
                 e.preventDefault()
                 if (isNaN(id)) {
@@ -77,6 +78,7 @@ const PostItem = ({ isLoading, voteForPost, post }) => {
                 }
                 await voteForPost(BigNumber.from(id).toNumber(), 1)
               }}
+
               disabled={isLoading}
             />
             <span className="text-gray-500">{downvote}</span>

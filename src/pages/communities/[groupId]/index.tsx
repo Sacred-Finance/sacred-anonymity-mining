@@ -17,10 +17,6 @@ import { polygonMumbai } from 'wagmi/chains'
 import { ForumContractAddress } from '@/constant/const'
 import ForumABI from '../../../constant/abi/Forum.json'
 import { useCommunityUpdates } from '@/hooks/useCommunityUpdates'
-import { useCreateCommunity } from '@/hooks/useCreateCommunity'
-import { CustomModal } from '@components/CustomModal'
-
-import CreateGroupFormUI from '../../../components/CreateGroupFormUI'
 import Header from '../../../components/Header'
 import Footer from '../../../components/Footer'
 import { toast } from 'react-toastify'
@@ -30,9 +26,24 @@ import { User } from '@/lib/model'
 import { useUnirepSignUp } from '@/hooks/useUnirepSignup'
 import { Breadcrumbs } from '@components/Breadcrumbs'
 import clsx from 'clsx'
+import LoadingPage from '@components/LoadingComponent'
+import { useMounted } from '@/hooks/useMounted'
+import ReputationCard from '@components/ReputationCard'
 
-export function Main({ children }: { children?: React.ReactNode }) {
-  const activeUser = useActiveUser()
+export function Main({
+  children,
+  groupId,
+  postId,
+  postInstance,
+}: {
+  children?: React.ReactNode
+  groupId: string
+  postId: string | undefined
+  postInstance: Post
+}) {
+  const user = useUserIfJoined(groupId as string)
+  useCommunityUpdates({ postInstance })
+  const activeUser = useActiveUser({ groupId })
   const { address } = useAccount()
   const users = useUsers()
   const { t } = useTranslation()
@@ -48,17 +59,9 @@ export function Main({ children }: { children?: React.ReactNode }) {
     abi: ForumABI.abi,
     signerOrProvider: provider,
   })
-  const router = useRouter()
-  const { groupId, postId } = router.query
-  const user = useUserIfJoined(groupId as string)
-  const postInstance = useRef<Post>(null)
 
-  useEffect(() => {
-    postInstance.current = new Post(postId, groupId)
-  }, [groupId])
   const community = useCommunityById(groupId as string)
-  useCommunityUpdates({ user, postInstance: postInstance.current })
-  useUnirepSignUp({ groupId: groupId, name: (user as User)?.name })
+  const unirepUser = useUnirepSignUp({ groupId: groupId, name: (user as User)?.name })
 
   const { checkUserBalance } = useValidateUserBalance(community, address)
   const { setIsLoading, isLoading: isContextLoading } = useLoaderContext()
@@ -69,37 +72,37 @@ export function Main({ children }: { children?: React.ReactNode }) {
       if (!forumContract || !provider || initialized) return
       setInitialized(true)
       setIsLoading(false)
-      console.log('fetching posts, groupId: ', groupId, postInstance.current.groupCacheId())
-      // preload(postInstance.current.groupCacheId(), fetchPosts) //start fetching before render
     })()
   }, [forumContract, groupId, provider])
 
   const { data, isLoading } = useSWR(`${groupId}_group`, postId ? fetchPost : fetchPosts)
 
   async function fetchPosts() {
-    return await postInstance.current.getAll()
+    console.log('fetching posts')
+    return await postInstance.getAll()
   }
+
   async function fetchPost() {
-    return [await postInstance.current.get()]
+    console.log('fetching post')
+    return [await postInstance.get()]
+  }
+
+  const validateRequirements = () => {
+    if (!address) return toast.error(t('alert.connectWallet'), { toastId: 'connectWallet' })
+    if (!user) return toast.error(t('toast.error.notJoined'), { type: 'error', toastId: 'min' })
+
+    return true
   }
 
   const addPost = async () => {
-    if (!address) {
-      console.log('Please connect your wallet')
-      toast.error(t('alert.connectWallet'), { toastId: 'connectWallet' })
-      return
-    }
+    if (validateRequirements() !== true) return
+
     if (!postTitle || !postDescription) {
       console.log('Please enter a title and description')
       toast.error('Please enter a title and description', { toastId: 'missingTitleOrDesc' })
       return
     }
 
-    if (!user) {
-      console.log('Please join the community first')
-      toast.error('Please join the community first', { toastId: 'joinCommunityFirst' })
-      return
-    }
     let ipfsHash
 
     const hasSufficientBalance = await checkUserBalance()
@@ -108,7 +111,7 @@ export function Main({ children }: { children?: React.ReactNode }) {
     setIsLoading(true)
 
     try {
-      const { status } = await postInstance?.current?.create(
+      const { status } = await postInstance?.create(
         {
           title: postTitle,
           description: postDescription,
@@ -164,21 +167,18 @@ export function Main({ children }: { children?: React.ReactNode }) {
 
   const voteForPost = React.useCallback(
     async (postId, voteType: 0 | 1) => {
-      if (!user || isNaN(postId)) {
-        toast.error('Missing PostId', { toastId: 'joinCommunityFirst' })
-        console.log('Missing PostId or user', { postId, user })
+
+      if (validateRequirements() !== true) return setIsLoading(false)
+      const hasSufficientBalance = await checkUserBalance()
+      if (!hasSufficientBalance) {
+        toast.error(t('toast.error.insufficientBalance'), { toastId: 'insufficientBalance' })
+        setIsLoading(false)
         return
       }
 
-      const hasSufficientBalance = await checkUserBalance()
-      if (!hasSufficientBalance) return
-      setIsLoading(true)
-
       try {
-        postInstance?.current
-          ?.updatePostsVote(postInstance.current, postId, voteType, false)
-          .then(() => setIsLoading(false))
-        const response = await postInstance?.current?.vote(voteType, address, users, activeUser, postId, groupId)
+        postInstance?.updatePostsVote(postInstance, postId, voteType, false).then(() => setIsLoading(false))
+        const response = await postInstance?.vote(voteType, address, users, activeUser, postId, groupId)
         console.log('response', response)
         const { status } = response
 
@@ -186,7 +186,7 @@ export function Main({ children }: { children?: React.ReactNode }) {
           setIsLoading(false)
         }
       } catch (error) {
-        postInstance?.current?.updatePostsVote(postInstance.current, postId, voteType, true, true)
+        postInstance?.updatePostsVote(postInstance, postId, voteType, true, true)
         setIsLoading(false)
       }
     },
@@ -202,7 +202,7 @@ export function Main({ children }: { children?: React.ReactNode }) {
   if (isLoading) return null
   const sortedAndFilteredData = sortedData.filter(post => post?.id === postId)
   return (
-    <div className={clsx('mx-auto mb-32 h-screen overflow-y-auto w-full max-w-screen-xl space-y-12 sm:p-8 md:p-24')}>
+    <div className={clsx('mx-auto h-screen w-full max-w-screen-xl space-y-12 overflow-y-auto sm:p-8 md:p-24')}>
       <div
         className="relative flex min-h-[200px] items-center justify-between rounded-lg bg-white/10 p-6 shadow-lg"
         style={{
@@ -237,12 +237,14 @@ export function Main({ children }: { children?: React.ReactNode }) {
         />
       )}
 
+      <ReputationCard unirepUser={unirepUser} />
+
       {!isNaN(postId) && sortedData.length ? (
         <>
           Post Page
           <PostList
             posts={sortedAndFilteredData}
-            isLoading={isLoading}
+            isLoading={isContextLoading}
             // data={data}
             voteForPost={voteForPost}
             handleSortChange={handleSortChange}
@@ -253,7 +255,7 @@ export function Main({ children }: { children?: React.ReactNode }) {
           Community Page
           <PostList
             posts={sortedData}
-            isLoading={isLoading}
+            isLoading={isContextLoading}
             // data={data}
             voteForPost={voteForPost}
             handleSortChange={handleSortChange}
@@ -271,21 +273,24 @@ export function Main({ children }: { children?: React.ReactNode }) {
 }
 
 export default function Group() {
-  const [createCommunityModalOpen, setCreateCommunityModalOpen] = useState(false)
-  const createCommunity = useCreateCommunity(() => setCreateCommunityModalOpen(false))
+  const router = useRouter()
+  const { groupId, postId } = router.query
+  const postInstance = useRef<Post>(null)
+  const isMounted = useMounted()
+
+  useEffect(() => {
+    if (router.isReady && groupId) {
+      postInstance.current = new Post(undefined, groupId as string)
+    }
+  }, [groupId, router?.isReady, postId])
+
+  if (isNaN(groupId) || !router.isReady || !postInstance.current || !isMounted) return <LoadingPage />
 
   return (
     <div className={'flex h-screen flex-col'}>
-      <Header createCommunity={() => setCreateCommunityModalOpen(true)} />
+      <Header />
       <Breadcrumbs />
-
-      <CustomModal isOpen={createCommunityModalOpen} setIsOpen={setCreateCommunityModalOpen}>
-        <CreateGroupFormUI onCreate={createCommunity} onCreateGroupClose={() => setCreateCommunityModalOpen(false)} />
-      </CustomModal>
-      <div>
-        <Main />
-      </div>
-      <div className={'flex-1'} />
+      <Main groupId={groupId as string} postId={undefined} postInstance={postInstance.current as Post} />
       <Footer />
     </div>
   )

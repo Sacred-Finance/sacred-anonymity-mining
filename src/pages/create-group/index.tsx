@@ -3,13 +3,13 @@ import { ethers, utils } from 'ethers'
 import { erc20dummyABI, jsonRPCProvider, supportedChains, supportedChainsArray } from '../../constant/const'
 import { FieldArray, FormikProvider, useFormik } from 'formik'
 import { Chain } from 'wagmi'
-import { ToolTip } from '../../components/HOC/ToolTip'
-import { CancelButton, PrimaryButton } from '../../components/buttons'
+import { ToolTip } from '@components/HOC/ToolTip'
+import { PrimaryButton } from '@components/buttons'
 import { useTranslation } from 'next-i18next'
 import { polygonMumbai } from 'wagmi/chains'
-import { PictureUpload } from '../../components/PictureUpload'
+import { PictureUpload } from '@components/PictureUpload'
 import clsx from 'clsx'
-import { buttonVariants, primaryButtonStyle } from '@styles/classes'
+import { buttonVariants } from '@styles/classes'
 import { ChevronRightIcon, QuestionMarkCircleIcon } from '@heroicons/react/20/solid'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useCreateCommunity } from '@/hooks/useCreateCommunity'
@@ -18,7 +18,21 @@ import { Breadcrumbs } from '@components/Breadcrumbs'
 import Footer from '@components/Footer'
 import Link from 'next/link'
 
-function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
+function RemoveIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      className="m-auto h-5 w-5"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 12H6" />
+    </svg>
+  )
+}
+
+function CreateGroupFormUI({ onCreate }) {
   const { t } = useTranslation()
 
   const initialValues = {
@@ -327,15 +341,7 @@ function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
                         }}
                         className="border-red-500 aspect-1 h-11 w-11 rounded border text-red-500 transition-colors hover:bg-red-500 hover:text-white focus:outline-none"
                       >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          className="m-auto h-5 w-5"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 12H6" />
-                        </svg>
+                        <RemoveIcon />
                       </button>
                     </motion.div>
                   ))}
@@ -347,7 +353,10 @@ function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
       </FormikProvider>
 
       <div className={'flex flex-col justify-between space-x-0 py-2 md:flex-row md:space-x-2 md:py-4'}>
-        <Link href="/" className="mb-2 rounded-lg p-2 hover:bg-red-500 hover:text-white md:mb-0 md:px-4 text-red-500 border-red-400 border-2">
+        <Link
+          href="/"
+          className="mb-2 rounded-lg border-2 border-red-400 p-2 text-red-500 hover:bg-red-500 hover:text-white md:mb-0 md:px-4"
+        >
           Close
         </Link>
         <PrimaryButton
@@ -363,14 +372,13 @@ function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
 }
 
 export default function CreateGroupForm() {
-  const [createCommunityModalOpen, setCreateCommunityModalOpen] = useState(false)
-  const createCommunity = useCreateCommunity(() => setCreateCommunityModalOpen(false))
+  const createCommunity = useCreateCommunity(() => {})
 
   return (
     <div className={'flex h-screen flex-col'}>
-      <Header createCommunity={() => setCreateCommunityModalOpen(true)} />
+      <Header />
       <Breadcrumbs />
-      <CreateGroupFormUI onCreate={createCommunity} onCreateGroupClose={() => setCreateCommunityModalOpen(false)} />
+      <CreateGroupFormUI onCreate={createCommunity} />
       <div className={'flex-1  '} />
       <Footer />
     </div>

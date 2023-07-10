@@ -9,22 +9,29 @@ import { Identity } from '@semaphore-protocol/identity'
 import unirepAbi from '@unirep/contracts/abi/Unirep.json'
 import prover from './prover'
 
+/**
+ * Class representing a Unirep user.
+ * Encapsulates user related functionality for Unirep.
+ */
 export class UnirepUser {
-  public identityCommitment = null
-  latestTransitionedEpoch
-  provableData: bigint[] = []
-  reputation = {
+  public identityCommitment: null | unknown = null
+  public latestTransitionedEpoch: number | null = null
+  public reputation = {
     posRep: 0,
     negRep: 0,
     graffiti: 0,
     timestamp: 0,
   }
-  provableReputation = {
+  public provableReputation = {
     posRep: 0,
     negRep: 0,
     graffiti: 0,
     timestamp: 0,
   }
+  public provider: ethers.providers.JsonRpcProvider
+  public signer: Wallet
+  public unirep: Contract
+  public provableData: bigint[] = []
 
   static user = {
     identity: null,
@@ -38,10 +45,10 @@ export class UnirepUser {
   }
   static hasSignedUp = false
 
-  public provider
-  public signer
-  public unirep
-
+  /**
+   * Creates a UnirepUser.
+   * @param identity User's identity.
+   */
   constructor(public identity: Identity) {
     if (!process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL || !process.env.NEXT_PUBLIC_ETHEREUM_PRIVATE_KEY) {
       throw new Error('Environment variables are not set.')
@@ -59,9 +66,10 @@ export class UnirepUser {
     }
   }
 
-  async load() {
-    // this.userState = await this.genUserState();
-
+  /**
+   * Load user state and sign up if necessary.
+   */
+  async load(): Promise<void> {
     const userState = new UserState(
       {
         provider: this.provider,
@@ -72,17 +80,16 @@ export class UnirepUser {
       },
       this.identity
     )
+
+    console.log('syncing user state...')
     await userState.sync.start()
     UnirepUser.user.userState = userState
     await userState.waitForSync()
     this.latestTransitionedEpoch = await UnirepUser.user.userState.latestTransitionedEpoch()
 
-    UnirepUser.user = {
-      ...UnirepUser.user,
-      identity: this.identity,
-    }
+    UnirepUser.user.identity = this.identity
+    UnirepUser.hasSignedUp = await userState.hasSignedUp( BigInt(attesterAddress))
 
-    UnirepUser.hasSignedUp = await userState.hasSignedUp()
     if (!UnirepUser.hasSignedUp) {
       await this.signup()
     } else {
@@ -93,21 +100,33 @@ export class UnirepUser {
     console.log(`Reputaion`, reputation)
   }
 
+  /**
+   * Get the user state.
+   * @returns User state.
+   */
   getUserState(): UserState {
     return UnirepUser.user.userState
   }
 
+  /**
+   * Get the epoch data.
+   * @returns Epoch data.
+   */
   getEpochData() {
     return UnirepUser.user.epochData
   }
 
-  // It generate epoch key for the current epoch. It'll be outdated and not available to use once the epoch is ended.
-  async updateUserEpochKey() {
+  /**
+   * Update the epoch key for the user.
+   * Note that this key will be outdated once the epoch ends.
+   */
+  async updateUserEpochKey(): Promise<void> {
     const userState = this.getUserState()
 
     if (!userState) return console.error('User state not found')
     await userState.waitForSync()
     const currentEpoch = await this.unirep.attesterCurrentEpoch(attesterAddress)
+
     if (!this.getEpochData() || this.getEpochData().epoch < currentEpoch) {
       console.log('Updating Epoch Key:', attesterAddress)
       const { publicSignals, proof, epochKey, epoch } = await userState.genEpochKeyProof({ nonce: 0 })
@@ -120,8 +139,12 @@ export class UnirepUser {
     }
   }
 
-  async genUserState() {
-    // generate a user state
+  /**
+   * Generate a user state.
+   * @returns User state.
+   */
+
+  async genUserState(): Promise<UserState> {
     const db = new MemoryConnector(constructSchema(schema))
     const attesterId = BigInt(attesterAddress)
 
@@ -142,7 +165,11 @@ export class UnirepUser {
     return userState
   }
 
-  async userTransition() {
+  /**
+   * Transition user state to the next epoch.
+   * @returns Error message or void.
+   */
+  async userTransition(): Promise<string | void> {
     const userState = this.getUserState()
     await userState.waitForSync()
     const targetEpoch = await this.unirep.attesterCurrentEpoch(attesterAddress)
@@ -159,7 +186,10 @@ export class UnirepUser {
     }
   }
 
-  async signup() {
+  /**
+   * Sign up user to Unirep.
+   */
+  async signup(): Promise<void> {
     let userState = UnirepUser.user.userState || (await this.genUserState())
     const { publicSignals, proof } = await userState.genUserSignUpProof()
     const { status } = await userUnirepSignUp(publicSignals, proof)
@@ -168,10 +198,13 @@ export class UnirepUser {
       throw new Error('User signup to Unirep failed!')
     }
 
-    return await this.updateUserEpochKey()
+    await this.updateUserEpochKey()
   }
 
-  async updateUserState() {
+  /**
+   * Update the user state.
+   */
+  async updateUserState(): Promise<void> {
     let userState = this.getUserState()
     const currentEpoch = await this.unirep.attesterCurrentEpoch(attesterAddress)
     this.latestTransitionedEpoch = await userState.latestTransitionedEpoch()
@@ -180,7 +213,11 @@ export class UnirepUser {
     }
   }
 
+  /**
+   * Fetch the user reputation.
+   * @returns Reputation data.
+   */
   async fetchReputation() {
-    return await UnirepUser.user.userState.getData()
+    return await UnirepUser?.user?.userState?.getData?.() || null
   }
 }

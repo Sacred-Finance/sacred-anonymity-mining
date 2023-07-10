@@ -29,7 +29,7 @@ export const useCreateCommunity = (onCreateGroupClose: () => void) => {
         const user: Identity = new Identity(address as string)
         const note: bigint = await createNote(user)
 
-        const [bannerCID, logoCID] = await uploadImages({ bannerFile, logoFile })
+        const {logoCID, bannerCID} = await uploadImages({ bannerFile, logoFile })
         const communityDetails: CommunityDetails = {
           description: name,
           tags: [],

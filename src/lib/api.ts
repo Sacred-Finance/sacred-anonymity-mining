@@ -100,3 +100,54 @@ export async function userUnirepSignUp(publicSignals: BigNumberish[], proof: Big
     proof,
   })
 }
+
+
+export async function setGroupDetails(groupId: string, a: any, b: any, c: any, details: any) {
+  return axios.post(`${RELAYER_URL}/set-group-details`, {
+    groupId,
+    a,
+    b,
+    c,
+    details
+  })
+}
+
+export async function setGroupDescription(groupId: string, a: any, b: any, c: any, description: string) {
+  return axios.post(`${RELAYER_URL}/set-group-description`, {
+    groupId,
+    a,
+    b,
+    c,
+    description
+  })
+}
+
+export async function setGroupTags(groupId: string, a: any, b: any, c: any, tags: string[]) {
+  return axios.post(`${RELAYER_URL}/set-group-tags`, {
+    groupId,
+    a,
+    b,
+    c,
+    tags
+  })
+}
+
+export async function setGroupBanner(groupId: string, a: any, b: any, c: any, bannerCID: string) {
+  return axios.post(`${RELAYER_URL}/set-group-banner`, {
+    groupId,
+    a,
+    b,
+    c,
+    bannerCID
+  })
+}
+
+export async function setGroupLogo(groupId: string, a: any, b: any, c: any, logoCID: string) {
+  return axios.post(`${RELAYER_URL}/set-group-logo`, {
+    groupId,
+    a,
+    b,
+    c,
+    logoCID
+  })
+}

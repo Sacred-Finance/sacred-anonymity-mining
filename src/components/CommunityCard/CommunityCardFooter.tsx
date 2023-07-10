@@ -2,7 +2,7 @@ import { JoinCommunityButton } from '../JoinCommunityButton'
 import React from 'react'
 import { useLocalCommunity } from './CommunityCard'
 
-export const Footer = () => {
+export const CommunityCardFooter = () => {
   const community = useLocalCommunity()
 
   if (!community) return null

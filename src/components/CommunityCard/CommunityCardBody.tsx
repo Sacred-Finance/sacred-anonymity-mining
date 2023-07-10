@@ -10,8 +10,16 @@ export const CommunityCardBody = () => {
   return (
     <div className={clsx('community-card-body bg-white p-4 shadow-lg dark:bg-gray-900')}>
       {community.name && (
-        <p className="mt-14 overflow-hidden overflow-ellipsis whitespace-nowrap text-lg font-bold">{community.name}</p>
+        <>
+          <p className="mt-14 overflow-hidden overflow-ellipsis whitespace-nowrap text-lg font-bold">
+            {community.name}
+          </p>
+          {community?.groupDetails?.description &&
+            community.name !== community?.groupDetails?.description &&
+            community?.groupDetails?.description}
+        </>
       )}
+
       <p className="text-xs">{`${community.userCount ?? 0} Members`}</p>
       {community?.requirements?.map(r => (
         <div className="mt-0" key={r?.tokenAddress}>

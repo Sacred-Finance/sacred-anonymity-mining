@@ -10,11 +10,8 @@ import {buttonVariants, primaryButtonStyle} from "../styles/classes";
 import clsx from "clsx";
 import Link from "next/link";
 
-type HeaderProps = {
-    createCommunity(): any
-}
 
-const Header = ({ createCommunity, ...headerProps }: HeaderProps) => {
+const Header = () => {
     const { t } = useTranslation()
 
     return (

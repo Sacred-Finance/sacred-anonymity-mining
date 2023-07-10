@@ -20,11 +20,10 @@ import clsx from 'clsx'
 import { Group } from '@/types/contract/ForumInterface'
 
 interface HomeProps {
-  createCommunity: Function
   isAdmin: boolean
 }
 
-function HomePage({ createCommunity, isAdmin = false }: HomeProps) {
+function HomePage({ isAdmin = false }: HomeProps) {
   const { dispatch, state } = useCommunityContext()
   const { users, communities } = state
   const { isLoading, setIsLoading } = useLoaderContext()
@@ -200,7 +199,7 @@ function HomePage({ createCommunity, isAdmin = false }: HomeProps) {
 
       <div className="row-gap-8 mb-8 grid grid-cols-1 justify-items-center   gap-4 sm:grid-cols-1 md:grid-cols-2 md:justify-items-center lg:grid-cols-3">
         {localCommunities.map((community, index) => (
-          <CommunityCard key={index} community={community} index={index} isAdmin={isAdmin} />
+          <CommunityCard key={community.groupId} community={community} index={index} isAdmin={isAdmin} />
         ))}
       </div>
 
@@ -235,22 +234,9 @@ function HomePage({ createCommunity, isAdmin = false }: HomeProps) {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.4 }}
             className="rounded bg-purple-500 px-4 py-2 font-bold text-white shadow dark:bg-purple-700 dark:text-gray-200"
-            onClick={() => createCommunity()}
           >
             Create a new community
           </motion.button>
-        </div>
-      )}
-
-      {communities?.length === 0 && !isLoading && (
-        <div className="my-12 flex flex-col items-center justify-center">
-          <p className="mb-4 text-xl dark:text-gray-200">0 Communities :(</p>
-          <button
-            className="rounded bg-purple-500 px-4 py-2 font-bold text-white shadow dark:bg-purple-700 dark:text-gray-200"
-            onClick={() => createCommunity()}
-          >
-            Create
-          </button>
         </div>
       )}
     </main>

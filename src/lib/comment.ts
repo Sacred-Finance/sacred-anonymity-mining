@@ -16,9 +16,9 @@ import {
   uploadIPFS,
 } from './utils'
 import { UnirepUser } from './unirep'
-import {forumContract, ForumContractAddress, jsonRPCProvider} from '../constant/const'
+import { forumContract, ForumContractAddress, jsonRPCProvider } from '../constant/const'
 
-const minRepsComment = 1
+const MIN_REP_COMMENT = 1
 
 export class CommentClass {
   postId: string
@@ -32,12 +32,10 @@ export class CommentClass {
   }
 
   commentsCacheId() {
-    console.log(`commentsCacheId: ${this.postId}_comments`)
     return this.postId + '_comments'
   }
 
   specificCommentId(commentId?) {
-    console.log(`specificCommentId: ${this.postId}_comment_${this.id ?? commentId}`)
     return `${this.postId}_comment_${this.id ?? commentId}`
   }
 
@@ -70,7 +68,7 @@ export class CommentClass {
 
       let reputationProof = await userState.genProveReputationProof({
         epkNonce: 0,
-        minRep: minRepsComment,
+        minRep: MIN_REP_COMMENT,
         graffitiPreImage: 0,
       })
 
@@ -153,18 +151,17 @@ export class CommentClass {
 
   async getComments() {
     const getData = async () => {
-      const itemIds = await forumContract.getCommentIdList(this.postId);
-      const rawComments = await Promise.all(itemIds.map((i) => forumContract.itemAt(i.toNumber())));
-      let p = [];
+      const itemIds = await forumContract.getCommentIdList(this.postId)
+      const rawComments = await Promise.all(itemIds.map(i => forumContract.itemAt(i.toNumber())))
+      let p = []
       for (const c of rawComments) {
-        if (!c?.removed &&  ethers.constants.HashZero !== c?.contentCID) {
+        if (!c?.removed && ethers.constants.HashZero !== c?.contentCID) {
           try {
-            const content = await getContent(getIpfsHashFromBytes32(c?.contentCID));
-            const block = await jsonRPCProvider.getBlock(c.createdAtBlock.toNumber());
-            let parsedContent;
+            const content = await getContent(getIpfsHashFromBytes32(c?.contentCID))
+            const block = await jsonRPCProvider.getBlock(c.createdAtBlock.toNumber())
+            let parsedContent
             try {
-              parsedContent = JSON.parse(content);
-
+              parsedContent = JSON.parse(content)
             } catch (error) {
               parsedContent = content
             }
@@ -175,40 +172,43 @@ export class CommentClass {
               upvote: c.upvote?.toNumber(),
               downvote: c.downvote?.toNumber(),
               note: BigNumber.from(c?.note),
-              contentCID: getIpfsHashFromBytes32(c?.contentCID)
+              contentCID: getIpfsHashFromBytes32(c?.contentCID),
             }
-            p.push(postData);
+            p.push(postData)
             await setCache(this.specificCommentId(c?.id?.toNumber()), postData)
           } catch (error) {
             console.log(error)
           }
         }
       }
-      p = p.sort((d1, d2) => d2.createdAt < d1.createdAt ? 1 : -1)
-      console.log({ p });
-      return p;
+      p = p.sort((d1, d2) => (d2.createdAt < d1.createdAt ? 1 : -1))
+      console.log({ p })
+      return p
     }
 
     try {
-      const itemIds = await forumContract.getCommentIdList(this.postId);
+      const itemIds = await forumContract.getCommentIdList(this.postId)
       if (!itemIds?.length) {
-        return [];
+        return []
       }
 
-      const { cache: mCache, refresh: mRefresh } = await getMCache(itemIds.map(i => this.specificCommentId(i.toNumber())));
+      const { cache: mCache, refresh: mRefresh } = await getMCache(
+        itemIds.map(i => this.specificCommentId(i.toNumber()))
+      )
 
-      console.log(mCache);
+      console.log(mCache)
 
       if (true) {
-        return (mCache?.map(c => c ? c[0] : null)).filter(a => a && !a?.removed).map(c => c?.data)
-
-
+        return mCache
+          ?.map(c => (c ? c[0] : null))
+          .filter(a => a && !a?.removed)
+          .map(c => c?.data)
       } else {
-        return getData();
+        return getData()
       }
     } catch (error) {
-      console.log(error);
-      return [];
+      console.log(error)
+      return []
     }
   }
 
@@ -253,17 +253,12 @@ export class CommentClass {
   async edit(commentContent, address: string, itemId, postedByUser: User, groupId: string, setWaiting: Function) {
     let currentDate = new Date()
     const message = currentDate.getTime().toString() + '#' + JSON.stringify(commentContent)
-    console.log(`Editing your anonymous Comment...`)
     let cid
     try {
       cid = await uploadIPFS(message)
       if (!cid) {
         throw Error('Upload to IPFS failed')
       }
-
-      //            this.cacheNewPost(post, cid, groupId, setWaiting); //we update redis with a new 'temp' comment here
-
-      console.log(`IPFS CID: ${cid}`)
       const signal = getBytes32FromIpfsHash(cid)
 
       //const extraNullifier = hashBytes(signal).toString();

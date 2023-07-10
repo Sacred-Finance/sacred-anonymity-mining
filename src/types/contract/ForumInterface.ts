@@ -195,6 +195,9 @@ export interface Requirement {
 
 export interface Group {
   name: string
+  groupId?: string // this is set after initialization with the app. It is not part of the contract.
+  banner?: string // this is set after initialization with the app. It is not part of the contract.
+  logo?: string // this is set after initialization with the app. It is not part of the contract.
   groupDetails: GroupDetails
   requirements: Requirement[]
   id: number
