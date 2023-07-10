@@ -3,15 +3,12 @@ import HomePage from '../components/HomePage'
 import Footer from '../components/Footer'
 
 export default function Home() {
-
-
   return (
     <>
       <div className={' flex h-screen flex-col'}>
         <Header />
         <div>
-          {' '}
-          <Main />
+          <HomePage isAdmin={false} />
         </div>
         <div className={'flex-1  '} />
         <div className={'relative'}>
@@ -20,9 +17,4 @@ export default function Home() {
       </div>
     </>
   )
-}
-
-function Main() {
-
-  return <HomePage  isAdmin={false} />
 }

@@ -27,19 +27,8 @@ import { CommunityCardHeader } from '@components/CommunityCard/CommunityCardHead
 import { CommunityContext } from '@components/CommunityCard/CommunityCard'
 import { CommunityCardBody } from '@components/CommunityCard/CommunityCardBody'
 
-function RemoveIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      className="m-auto h-5 w-5"
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 12H6" />
-    </svg>
-  )
-}
+
+// todo: figure out when/if it's beneficial to make calls to individual contract updates vs editing the entire group at once
 
 function EditGroup({ onEdit, group }: { onEdit: any; group: Group }) {
   const { address } = useAccount()
