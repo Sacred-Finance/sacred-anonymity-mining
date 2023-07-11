@@ -120,7 +120,8 @@ export function PostPage({ postInstance, postId, groupId }) {
   // commentClassInstance = new CommentClass(id, postId, null)
   const commentClassInstance = useRef<CommentClass>(null)
   useEffect(() => {
-    commentClassInstance.current = new CommentClass(groupId, postId, null)
+    commentClassInstance.current = new CommentClass(groupId, postId, null);
+    fetchIsAdmin();
   }, [groupId, postId])
 
   // useUnirepSignUp({ groupId: groupId, name: hasUserJoined?.name })
@@ -454,6 +455,48 @@ export function PostPage({ postInstance, postId, groupId }) {
   //   }
   // }
 
+  const CommentActions = ({ comment, canDelete }) => {
+    return (
+      <div className='flex flex-row mt-3 gap-4'>
+        {commentsMap[comment.id]?.isEditable &&
+          !commentsMap[comment.id]?.isEditing && (
+            <button
+              onClick={() => onClickEditComment(comment)}
+            >
+              {t("button.edit")}
+            </button>
+          )}
+        {commentsMap[comment.id]?.isEditing && (
+          <button
+            onClick={() => onClickCancelComment(comment)}
+          >
+            {t("button.cancel")}
+          </button>
+        )}
+        {commentsMap[comment.id]?.isEditing && (
+          <button
+            disabled={
+              !commentsMap[comment.id]?.comment?.content ||
+              !commentsMap[comment.id]?.comment?.content?.blocks?.length
+            }
+            onClick={() => saveEditedComment(comment)}
+          >
+            {t("button.save")}
+          </button>
+        )}
+        {(commentsMap[comment.id]?.isEditable || canDelete) &&
+          !commentsMap[comment.id]?.isEditing && (
+            <button
+              className='text-small color-[red.500]'
+              onClick={() => deleteItem(comment.id, 1)}
+            >
+              {t("button.delete")}
+            </button>
+          )}
+      </div>
+    );
+  };
+
   const voteForPost = async (postId, voteType: 0 | 1) => {
     if (!hasUserJoined) return
     const hasSufficientBalance = await checkUserBalance()
@@ -488,6 +531,8 @@ export function PostPage({ postInstance, postId, groupId }) {
   const handleCommentsSortChange = (newSortBy: SortByOption) => {
     setCommentsSortBy(newSortBy)
   }
+
+  console.log('commentsMap', commentsMap)
 
   const sortedCommentsData = useSortedVotes(tempComments, comments, commentsSortBy)
 
@@ -536,11 +581,14 @@ export function PostPage({ postInstance, postId, groupId }) {
                       <Editor
                         editorRef={commentEditorRef}
                         holder={'comment' + '_' + c?.id}
-                        readOnly={commentsMap[c?.id]?.isEditing === false}
+                        readOnly={!commentsMap[c?.id]?.isEditing}
                         onChange={val => setOnEditCommentContent(c, val)}
                         placeholder={t('placeholder.enterComment') as string}
                         data={c?.content?.blocks ? c?.content : []}
                       />
+                      {(Boolean(identityCommitment) || canDelete) && (
+                        <CommentActions comment={c} canDelete={canDelete} />
+                      )}
                     </div>
                   )}
                   {/*{(!commentIsConfirmed(c.id) ||*/}
