@@ -66,6 +66,7 @@ const fetchEvents = async (postInstance, handleNewItemCallback, handleVoteItemCa
     handleError('jsonRPCProvider or forumContract is not defined')
   }
 
+  console.log('fetchEvents - postInstance', postInstance)
 
   try {
     const newItemEvents = await forumContract.queryFilter(forumContract.filters.NewItem())
@@ -94,10 +95,10 @@ export const useCommunityUpdates = ({ postInstance }: { postInstance: Post }) =>
   const groupCacheId = `${groupId}_group`
   const { mutate } = useSWRConfig()
 
-  const updatePostsCB = useCallback(updatePosts(groupCacheId, mutate), [groupCacheId, mutate])
-  const getContentCB = useCallback(gatherContent(updatePostsCB), [updatePostsCB])
-  const handleNewItemCB = useCallback(handleNewItem(getContentCB, groupId), [getContentCB, groupId])
-  const handleVoteItemCB = useCallback(handleVoteItem(postInstance), [postInstance])
+  const updatePostsCB = updatePosts(groupCacheId, mutate)
+  const getContentCB = gatherContent(updatePostsCB)
+  const handleNewItemCB = handleNewItem(getContentCB, groupId)
+  const handleVoteItemCB = handleVoteItem(postInstance)
 
   const fetchEventsCallback = useCallback(() => {
     if (!postInstance) handleError('postInstance is not defined')

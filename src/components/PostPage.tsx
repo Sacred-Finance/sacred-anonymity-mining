@@ -179,15 +179,6 @@ export function PostPage({ postInstance, postId, groupId }) {
     return comments
   }
 
-  const checkIfUserHasJoined = (toastOnFalse = true) => {
-    if (hasUserJoined) {
-      return true
-    } else {
-      if (toastOnFalse) toast.error(t('toast.error.notJoined'), { type: 'error', toastId: 'min' })
-
-      return false
-    }
-  }
 
   const onClickEditPost = async () => {
     const hasSufficientBalance = await checkUserBalance()

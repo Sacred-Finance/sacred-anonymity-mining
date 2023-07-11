@@ -36,14 +36,13 @@ export const Breadcrumbs = ({ backdrop = false }): JSX.Element => {
             <li key={index} className="inline-flex items-center gap-5">
               <Link
                 href={item.href}
-                className={` inline-flex items-center border px-3 py-1 text-sm font-medium text-gray-700 rounded dark:text-gray-400 dark:hover:text-white ${
-                  item.isCurrentPage ? 'font-bold bg-primary-500 hover:bg-primary-700 text-white ' : 'hover:bg-white/80'
+                className={` inline-flex items-center rounded border px-3 py-1 text-sm font-medium text-gray-700 dark:text-gray-400 dark:hover:text-white ${
+                  item.isCurrentPage ? 'bg-primary-500 font-bold text-white hover:bg-primary-700 ' : 'hover:bg-white/80'
                 }`}
                 shallow={true}
                 onClick={e => {
                   if (item.isCurrentPage) {
                     e.preventDefault()
-                    return
                   }
                 }}
               >
