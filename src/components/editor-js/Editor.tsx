@@ -90,7 +90,6 @@ const EditorBlock = ({ data, onChange, holder, className, divProps = {}, editorR
 
   return (
     <>
-      {readOnly ? 'readonly' : 'not readonly'}
       <div className={isReady ? 'h-full w-full text-black dark:text-white' : 'hidden'} id={holder} {...divProps} />
     </>
   )
