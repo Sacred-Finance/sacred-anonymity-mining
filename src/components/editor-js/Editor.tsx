@@ -29,6 +29,27 @@ const EditorBlock = ({ data, onChange, holder, className, divProps = {}, editorR
       }
     },
   }))
+
+  useEffect(() => {
+    ref?.current?.readOnly?.toggle();;
+
+    if (!readOnly) {
+        // ref?.current?.render(data);
+        setTimeout(() => {
+            if (ref?.current?.focus) ref.current.focus(true);
+        }, 200)
+
+    } else {
+        setTimeout(() => {
+            if (ref?.current?.render && data?.blocks) ref.current.render(data);
+        }, 0)
+    }
+    if (!data?.blocks) {
+        setTimeout(() => {
+            if (ref?.current?.clear) ref.current.clear();
+        }, 200)
+    }
+}, [readOnly])
   //initialize editorjs
   useEffect(() => {
     //initialize editor if we don't have a reference
@@ -36,6 +57,7 @@ const EditorBlock = ({ data, onChange, holder, className, divProps = {}, editorR
       const editor = new EditorJS({
         holder: holder,
         tools: EDITOR_TOOLS,
+        readOnly,
         placeholder: placeholder || 'Start writing your post...',
         data,
         async onChange(api, event) {
