@@ -36,6 +36,7 @@
   "home": "Home",
   "button": {
     "edit": "Edit",
+    "confirm-edit": "Confirm Edit",
     "delete": "Delete",
     "add": "Add",
     "save": "Save",

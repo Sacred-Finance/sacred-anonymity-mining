@@ -8,86 +8,47 @@ import { polygonMumbai } from 'wagmi/chains'
 import { PictureUpload } from '@components/PictureUpload'
 import clsx from 'clsx'
 import { buttonVariants } from '@styles/classes'
-import { useCreateCommunity } from '@/hooks/useCreateCommunity'
-import Header from '@components/Header'
-import { Breadcrumbs } from '@components/Breadcrumbs'
-import Footer from '@components/Footer'
 import Link from 'next/link'
 import { useCommunityById } from '@/contexts/CommunityProvider'
 import { useRouter } from 'next/router'
 import { Group } from '@/types/contract/ForumInterface'
 import { uploadImages } from '@/utils/communityUtils'
 import ForumABI from '@/constant/abi/Forum.json'
-import { User } from '@/lib/model'
 import { Identity } from '@semaphore-protocol/identity'
-import { createInputNote, generateGroth16Proof, getBytes32FromIpfsHash } from '@/lib/utils'
-import { setGroupBanner, setGroupDetails, setGroupLogo } from '@/lib/api'
+import { createInputNote, generateGroth16Proof } from '@/lib/utils'
+import { setGroupDetails } from '@/lib/api'
 import { useFetchCommunitiesByIds } from '@/hooks/useFetchCommunities'
 import { CommunityCardHeader } from '@components/CommunityCard/CommunityCardHeader'
 import { CommunityContext } from '@components/CommunityCard/CommunityCard'
 import { CommunityCardBody } from '@components/CommunityCard/CommunityCardBody'
-
+import { toast } from 'react-toastify'
+import WithStandardLayout from "@components/HOC/WithStandardLayout";
 
 // todo: figure out when/if it's beneficial to make calls to individual contract updates vs editing the entire group at once
 
-function EditGroup({ onEdit, group }: { onEdit: any; group: Group }) {
+export interface HandleSetImage {
+  file: File | null
+  imageType: 'logo' | 'banner'
+}
+
+interface EditGroupProps {
+  group: Group
+}
+
+function EditGroup({ group }: EditGroupProps) {
+  const router = useRouter()
   const { address } = useAccount()
+  const { t } = useTranslation()
   const handleUpdateStateAfterEdit = useFetchCommunitiesByIds([Number(group.groupId)], false)
 
-  const { t } = useTranslation()
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+  const [groupName, setGroupName] = useState<string>('')
+  const [groupDescriptionState, setGroupDescriptionState] = useState<string>('')
+  const [bannerFile, setBannerFile] = useState<string | null>(null)
+  const [logoFile, setLogoFile] = useState<string | null>(null)
+  const [previewCard, setPreviewCard] = useState<boolean>(false)
 
-  const [groupName, setGroupName] = useState('')
-  const [groupDescriptionState, setGroupDescriptionState] = useState('')
-  const [bannerFile, setBannerFile] = useState<string>()
-  const [logoFile, setLogoFile] = useState<string>()
-
-  useEffect(() => {
-    if (group.banner) {
-      fetch('https://ipfs.io/ipfs/' + group.banner)
-        .then(res => res.blob())
-        .then(blob => {
-          const file = new File([blob], 'banner', { type: blob.type })
-          handleSetBanner(file)
-        })
-    }
-
-    if (group.logo) {
-      fetch('https://ipfs.io/ipfs/' + group.logo)
-        .then(res => res.blob())
-        .then(blob => {
-          const file = new File([blob], 'logo', { type: blob.type })
-          handleSetLogo(file)
-        })
-    }
-
-    setGroupName(group.name)
-    setGroupDescriptionState(group?.groupDetails?.description)
-  }, [])
-  const handleSetBanner = (file: File) => {
-    if (isImageFile(file) && file) {
-      const newBanner = file && isImageFile(file) ? URL.createObjectURL(file) : ''
-      setBannerFile(newBanner)
-    } else {
-      setBannerFile('')
-    }
-  }
-
-  const handleSetLogo = (file: File) => {
-    if (isImageFile(file) && file) {
-      const newLogo = file && isImageFile(file) ? URL.createObjectURL(file) : ''
-      setLogoFile(newLogo)
-    } else {
-      setLogoFile('')
-    }
-  }
-
-  const handleNameChange = e => {
-    setGroupName(e.target.value)
-  }
-  const handleDescriptionChange = e => {
-    console.log(e.target.value)
-    setGroupDescriptionState(e.target.value)
-  }
+  // Define the provider and contract within a useEffect to avoid unnecessary re-renders
   const provider = useProvider({ chainId: polygonMumbai.id })
   const forumContract = useContract({
     address: ForumContractAddress,
@@ -95,86 +56,57 @@ function EditGroup({ onEdit, group }: { onEdit: any; group: Group }) {
     signerOrProvider: provider,
   }) as ethers.Contract
 
-  // const submitGroupDescription = useCallback(async () => {
-  //   try {
-  //     const user = new Identity(address as string)
-  //     const input = await createInputNote(user)
-  //     const { a, b, c } = await generateGroth16Proof(
-  //       input,
-  //       '/circuits/VerifyOwner__prod.wasm',
-  //       '/circuits/VerifyOwner__prod.0.zkey'
-  //     )
-  //
-  //     // Call the setGroupDescription function
-  //     setGroupDescription(group.groupId as string, a, b, c, groupDescriptionState)
-  //       .then(async response => {
-  //         console.log(response) // log the response or do whatever you want with it
-  //       })
-  //       .catch(error => {
-  //         console.log(error) // log the error or handle it as you need
-  //       })
-  //   } catch (error) {
-  //     console.log(error)
-  //   }
-  // }, [groupDescriptionState])
+  // Helper function to check if a file is an image
+  const isImageFile = (file: File) => {
+    return file && file.type.startsWith('image/')
+  }
 
-  const submitBanner = useCallback(async () => {
-    try {
-      const user = new Identity(address as string)
-      const input = await createInputNote(user)
-      const { a, b, c } = await generateGroth16Proof(
-        input,
-        '/circuits/VerifyOwner__prod.wasm',
-        '/circuits/VerifyOwner__prod.0.zkey'
-      )
+  // Helper function to fetch and handle the image
+  const fetchImage = (imagePath: string, imageType: HandleSetImage['imageType']) => {
+    fetch('https://ipfs.io/ipfs/' + imagePath)
+      .then(res => res.blob())
+      .then(blob => {
+        const file = new File([blob], imageType, { type: blob.type })
+        handleSetImage({ file, imageType })
+      })
+  }
 
-      const { bannerCID } = await uploadImages({ bannerFile })
+  // The useEffect that handles the initial setup
+  useEffect(() => {
+    if (group.banner) fetchImage(group.banner, 'banner')
+    if (group.logo) fetchImage(group.logo, 'logo')
+    setGroupName(group.name)
+    setGroupDescriptionState(group?.groupDetails?.description)
+  }, [])
 
-      if (!bannerCID) return
-
-      // Call the setGroupDescription function
-      setGroupBanner(group.groupId as string, a, b, c, getBytes32FromIpfsHash(bannerCID))
-        .then(async response => {
-          console.log(response) // log the response or do whatever you want with it
-        })
-        .catch(error => {
-          console.log(error) // log the error or handle it as you need
-        })
-    } catch (error) {
-      console.log(error)
+  const handleSetImage = ({ file, imageType }: HandleSetImage) => {
+    let newImage = ''
+    if (file && isImageFile(file)) {
+      newImage = URL.createObjectURL(file)
     }
-  }, [bannerFile, groupDescriptionState])
 
-  const submitLogo = useCallback(async () => {
-    try {
-      const user = new Identity(address as string)
-      const input = await createInputNote(user)
-      const { a, b, c } = await generateGroth16Proof(
-        input,
-        '/circuits/VerifyOwner__prod.wasm',
-        '/circuits/VerifyOwner__prod.0.zkey'
-      )
+    const setImage = imageType === 'logo' ? setLogoFile : setBannerFile
+    setImage(newImage)
+  }
 
-      const { logoCID } = await uploadImages({ logoFile })
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setGroupName(e.target.value)
+  }
 
-      if (!logoCID) return
+  const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setGroupDescriptionState(e.target.value)
+  }
 
-      // Call the setGroupDescription function
-      setGroupLogo(group.groupId as string, a, b, c, logoCID)
-        .then(async response => {
-          console.log(response) // log the response or do whatever you want with it
-        })
-        .catch(error => {
-          console.log(error) // log the error or handle it as you need
-        })
-    } catch (error) {
-      console.log(error)
-    }
-  }, [logoFile, groupDescriptionState])
+  const hidePreview = () => {
+    setPreviewCard(false)
+  }
 
+  const togglePreview = () => {
+    setPreviewCard(!previewCard)
+  }
   const submitAllGroupDetails = useCallback(async () => {
-    console.log('submitAllGroupDetails', groupDescriptionState, groupName, bannerFile, logoFile)
     try {
+      setIsSubmitting(true)
       const user = new Identity(address as string)
       const input = await createInputNote(user)
       const { a, b, c } = await generateGroth16Proof(
@@ -197,53 +129,20 @@ function EditGroup({ onEdit, group }: { onEdit: any; group: Group }) {
       setGroupDetails(group.groupId as string, a, b, c, mergedGroupDetails)
         .then(async response => {
           await handleUpdateStateAfterEdit()
+          toast.success('Group details updated')
+          router.push(`/communities/${group.groupId}`)
         })
         .catch(error => {
           console.log(error) // log the error or handle it as you need
         })
     } catch (error) {
-      console.log(error)
+      // todo: handle better
+      toast.error(error.message)
+    } finally {
+      setIsSubmitting(false)
     }
   }, [bannerFile, logoFile, group.id, forumContract, groupDescriptionState, groupName])
 
-  function isImageFile(file) {
-    return file && file.type.startsWith('image/')
-  }
-
-  async function editGroupDetails(
-    groupDetails: any, // The structure of groupDetails depends on your application
-    address: string,
-    groupId: string,
-    users: User[], // List of group members or admins
-    setWaiting: Function
-  ) {
-    try {
-      const user = new Identity(address as string)
-      const input = await createInputNote(user)
-      const { a, b, c } = await generateGroth16Proof(
-        input,
-        '/circuits/VerifyOwner__prod.wasm',
-        '/circuits/VerifyOwner__prod.0.zkey'
-      )
-      return setGroupDetails(group.groupId as string, a, b, c, group.groupDetails).then(async data => {
-        await this.cacheUpdatedGroupDetails(groupId, groupDetails, setWaiting) // we update redis with a new 'temp' details here
-        return data
-      })
-    } catch (error) {
-      throw error
-    }
-  }
-
-  const [previewCard, setPreviewCard] = useState<boolean>(false)
-  const showPreview = () => {
-    setPreviewCard(true)
-  }
-  const hidePreview = () => {
-    setPreviewCard(false)
-  }
-  const togglePreview = () => {
-    setPreviewCard(!previewCard)
-  }
   return (
     <div
       className={clsx('relative mx-auto mb-64 grid h-screen w-full max-w-screen-2xl  grid-cols-1 gap-8 sm:p-8 md:p-24')}
@@ -279,14 +178,14 @@ function EditGroup({ onEdit, group }: { onEdit: any; group: Group }) {
             uploadedImageUrl={bannerFile}
             displayName={t('banner')}
             name={'banner'}
-            setImageFileState={handleSetBanner}
+            setImageFileState={handleSetImage}
           />
 
           <PictureUpload
             uploadedImageUrl={logoFile}
             displayName={t('logo')}
             name={'logo'}
-            setImageFileState={handleSetLogo}
+            setImageFileState={handleSetImage}
           />
         </div>
 
@@ -311,10 +210,12 @@ function EditGroup({ onEdit, group }: { onEdit: any; group: Group }) {
       {previewCard && <div className="fixed inset-0 m-0 h-screen w-screen bg-gray-900/60 " />}
       {previewCard && (
         <div className="absolute inset-0 flex flex-col items-center justify-center space-y-8 rounded-b rounded-t-full bg-gradient-to-t from-lightBlue-950">
-          <h1 className="text-[40px] text-white">Comparing Before and After</h1>
+          <h1 className="text-[40px] text-white">Double check your changes!</h1>
           <div className="flex w-3/4 justify-evenly gap-64">
             <CommunityContext.Provider value={group}>
-              <div className="w-1/2 shadow-2xl ring-emerald-500  ring-offset-8  ring-offset-transparent hover:ring-2">
+              <div className="w-1/2 shadow-2xl ">
+                <h4 className="text-[20px] text-white">Before</h4>
+
                 <CommunityCardHeader />
                 <CommunityCardBody />
               </div>
@@ -331,7 +232,9 @@ function EditGroup({ onEdit, group }: { onEdit: any; group: Group }) {
                 },
               }}
             >
-              <div className="w-1/2 shadow-2xl ring-emerald-500  ring-offset-8  ring-offset-transparent hover:ring-2">
+              <div className="w-1/2 shadow-2xl">
+                <h4 className="text-[20px] text-white">After</h4>
+
                 <CommunityCardHeader
                   srcBannerOverride={bannerFile || undefined}
                   srcLogoOverride={logoFile || undefined}
@@ -348,11 +251,12 @@ function EditGroup({ onEdit, group }: { onEdit: any; group: Group }) {
               Cancel
             </button>
             <PrimaryButton
-              className={clsx(buttonVariants.solid, 'z-50 w-16 border')}
+              className={clsx(buttonVariants.solid, 'z-50 border px-4')}
               // disabled={isSubmitDisabled}
               onClick={submitAllGroupDetails}
+              isLoading={isSubmitting}
             >
-              {t('button.edit')}
+              {t('button.confirm-edit')}
             </PrimaryButton>
           </div>
         </div>
@@ -361,20 +265,13 @@ function EditGroup({ onEdit, group }: { onEdit: any; group: Group }) {
   )
 }
 
-export default function CreateGroupForm() {
-  const createCommunity = useCreateCommunity(() => {})
+function CreateGroupForm() {
   const router = useRouter()
   const { groupId } = router.query
   const community = useCommunityById(groupId as string)
 
   if (!community) return
-  return (
-    <div className={'relative flex h-screen flex-col'}>
-      <Header />
-      <Breadcrumbs />
-      <EditGroup onEdit={createCommunity} group={community} />
-      <div className={'flex-1'} />
-      <Footer />
-    </div>
-  )
+  return <EditGroup group={community} />
 }
+
+export default WithStandardLayout(CreateGroupForm)

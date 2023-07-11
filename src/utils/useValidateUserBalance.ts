@@ -70,15 +70,7 @@ export const useValidateUserBalance = (community: Group | undefined, address: `0
     const hasSufficientBalance = requirementsMet.every(e => e.balance >= e.minAmount / 10 ** e.decimals)
 
     if (!hasSufficientBalance) {
-      toast.warning(`Insufficient Balance`, {
-        containerId: 'toast',
-        autoClose: 7000,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        toastId: 'insufficient-balance',
-      })
+      toast.warning(`Insufficient Balance`)
     }
 
     setValidationResult({ hasSufficientBalance, toastMessage })

@@ -169,8 +169,8 @@ export const useHandleFileImageUpload = setImageFileState => {
 }
 
 export const handleFileImageUpload = (e, setImageFileState) => {
-  const file = e.target.files[0]
-
+  const file = e?.target?.files?.[0]
+  const imageType = e?.target?.name
   // Create a new Image object to check the dimensions
   const img = new Image()
   try {
@@ -192,15 +192,13 @@ export const handleFileImageUpload = (e, setImageFileState) => {
       logo: { width: 512, height: 512 },
     }
 
-    const imageType = e.target.name
-
     // Calculate the aspect ratio of the uploaded image
     const imageAspectRatio = img.width / img.height
 
     // Check if the uploaded image's aspect ratio matches the required one
     if (Math.abs(imageAspectRatio - requiredAspectRatios[imageType]) <= 0.01) {
       // Set the file based on the image type
-      setImageFileState(file)
+      setImageFileState({ file, imageType: imageType })
     } else {
       // Create a canvas to resize the image
       const canvas = document.createElement('canvas')
@@ -221,7 +219,7 @@ export const handleFileImageUpload = (e, setImageFileState) => {
           })
 
           // Set the file based on the image type
-          setImageFileState(resizedFile)
+          setImageFileState({ file: resizedFile, imageType: imageType })
         })
         .catch(err => {
           console.error('Image resizing failed:', err)

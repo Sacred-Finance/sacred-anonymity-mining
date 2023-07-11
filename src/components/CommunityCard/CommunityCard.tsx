@@ -70,7 +70,7 @@ export const CommunityCard = ({
                 />
               )}
 
-              <Link href={`/communities/${community?.groupId}`}>
+              <Link href={`/communities/${community?.groupId}`} shallow={true}>
                 <CommunityCardHeader />
                 <CommunityCardBody />
               </Link>

@@ -6,8 +6,14 @@ import { Event } from '@ethersproject/contracts/src.ts'
 import { Group } from '@/types/contract/ForumInterface'
 
 export const useFetchCommunities = (loadOnInit = true) => {
-  const { dispatch } = useCommunityContext()
+  const { dispatch, state } = useCommunityContext()
   const fetchCommunities = async () => {
+    if (state.communities.length > 0) {
+      console.log('Communities already loaded')
+      return state.communities
+    } else {
+      console.log('Fetching communities')
+    }
     if (!forumContract) {
       console.error('Forum contract not found')
       return
