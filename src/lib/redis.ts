@@ -64,6 +64,35 @@ export const setCache = async (key: string, value: any, path = '$') => {
     })
 }
 
+
+export const removeFromCache = async (key: string, path = '$') => {
+  console.log('removeFromCache', key)
+
+  if (!redisClient) {
+    console.log('redisClient not found - initializing')
+    redisClient = await getRedisClient()
+  }
+
+  redisClient.json
+      .del(key, path)
+      .then(
+          success => {
+            if (success === 1) {
+              console.log('removal successful', key)
+            } else {
+              console.warn('No matching key was found for removal', key)
+            }
+          },
+          fail => {
+            console.error({ fail, key })
+          }
+      )
+      .catch(error => {
+        console.error('redisClient error ', error)
+      })
+}
+
+
 export const setCacheAtSpecificPath = async (key: string, value: any, path = '$') => {
   if (!redisClient) {
     redisClient = await getRedisClient()
@@ -231,7 +260,9 @@ export const insertAtBottom = async (key, value) => {
 export const removeAt = async (key, path) => {
   try {
     await redisClient.json.del(key, path)
-  } catch (error) {}
+  } catch (error) {
+    console.log('removeAt',key, error)
+  }
 }
 
 export const updateAt = async (key, value) => {

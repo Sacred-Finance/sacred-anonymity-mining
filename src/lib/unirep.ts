@@ -55,7 +55,7 @@ export class UnirepUser {
     }
 
     this.provider = new ethers.providers.JsonRpcProvider(
-      { url: process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL, timeout: 1000 },
+      { url: process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL },
       polygonMumbai.id
     )
     this.signer = new Wallet(process.env.NEXT_PUBLIC_ETHEREUM_PRIVATE_KEY, this.provider)
@@ -177,6 +177,7 @@ export class UnirepUser {
    */
   async userTransition(): Promise<string | void> {
     const userState = this.getUserState()
+    await userState.sync.start()
     await userState.waitForSync()
     const targetEpoch = await this.unirep.attesterCurrentEpoch(attesterAddress)
 
@@ -184,7 +185,6 @@ export class UnirepUser {
       const { publicSignals, proof } = await userState.genUserStateTransitionProof({ toEpoch: targetEpoch })
       await (await this.unirep.userStateTransition(publicSignals, proof)).wait()
       await userState.waitForSync()
-      console.log('User transition Completed:', attesterAddress)
       await this.updateUserEpochKey()
     } catch (error) {
       console.error('Error:', error.message || String(error))

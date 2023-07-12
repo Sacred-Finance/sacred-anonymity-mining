@@ -1,8 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { Identity } from '@semaphore-protocol/identity'
-import { UnirepUser } from '@/lib/unirep'
-
-// Dummy identity, replace with real identity when available
 
 // Tailwind CSS for simplicity
 const CardStyle = 'border border-blue-500 shadow rounded-md p-4   bg-white'
@@ -17,13 +13,10 @@ const ReputationCard = ({ unirepUser }) => {
     timestamp: 0,
   })
 
-  const updateReputation = React.useCallback(async () => {
-      console.log('unirepUser?.reputation', unirepUser?.reputation)
-    if (unirepUser?.reputation?.posRep !== undefined) setReputation(unirepUser.reputation)
-  }, [unirepUser])
-
   useEffect(() => {
-    updateReputation()
+    if (unirepUser?.reputation?.posRep !== undefined) {
+      setReputation(unirepUser.reputation)
+    }
   }, [unirepUser])
 
   if (!reputation) return <div></div>

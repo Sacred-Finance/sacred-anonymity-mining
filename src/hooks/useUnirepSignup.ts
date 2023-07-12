@@ -11,8 +11,6 @@ export const useUnirepSignUp = ({ name, groupId }) => {
 
     const generatedIdentity = new Identity(`${address}_${groupId}_${name}`)
 
-    console.log(generatedIdentity)
-
     try {
       const unirepUser = new UnirepUser(generatedIdentity)
       setUnirepUser(unirepUser)

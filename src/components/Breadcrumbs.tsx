@@ -1,6 +1,4 @@
 import React, { ReactNode, useEffect, useState } from 'react'
-import { Post as PostClass } from '../lib/post'
-import useSWR from 'swr'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { useCommunityById } from '@/contexts/CommunityProvider'
@@ -10,13 +8,16 @@ function useBreadcrumbs(): BreadCrumbItem[] {
   const [breadcrumbItems, setBreadcrumbItems] = useState<BreadCrumbItem[]>([])
 
   const router = useRouter()
+
   const { groupId, postId } = router.query
-  const { community, postFetched, isValidating } = useCommunityAndPost(groupId, postId)
+
+  const community = useCommunityById(groupId)
+
 
   useEffect(() => {
-    const items = generateBreadcrumbItems(community, postFetched, isValidating, location)
+    const items = generateBreadcrumbItems(community, postId, location)
     setBreadcrumbItems(items)
-  }, [groupId, postId, community, postFetched, isValidating])
+  }, [ community])
 
   return breadcrumbItems
 }
@@ -82,13 +83,13 @@ interface BreadCrumbItem {
   hidden?: boolean
 }
 
-function generateBreadcrumbItems(community, postFetched, isValidating, location): BreadCrumbItem[] {
+function generateBreadcrumbItems(community, postId,  location): BreadCrumbItem[] {
   let items: BreadCrumbItem[] = []
 
   const communityLabel = elipsis(community?.name, 50) ?? <CircularProgress className={'h-5 w-5'} />
 
   const postLabel =
-    postFetched && !isValidating ? elipsis(postFetched?.title, 20) : <CircularProgress className={'h-5 w-5'} />
+      postId  ? elipsis('postFetched?.title', 20) : <CircularProgress className={'h-5 w-5'} />
 
   if (location.pathname === '/') {
     items = [{ label: 'Home', href: '/', isCurrentPage: true, hidden: true }]
@@ -102,7 +103,7 @@ function generateBreadcrumbItems(community, postFetched, isValidating, location)
       },
       {
         label: postLabel,
-        href: `/communities/${community?.id}/post/${postFetched?.id}`,
+        href: `/communities/${community?.id}/post/${postId}`,
         isCurrentPage: true,
       },
     ]
@@ -138,18 +139,3 @@ function generateBreadcrumbItems(community, postFetched, isValidating, location)
   return items
 }
 
-function useCommunityAndPost(communityId, postId) {
-  const community = useCommunityById(+communityId)
-
-  const postClassInstance = new PostClass(postId, communityId)
-
-  async function fetchPost() {
-    return await postClassInstance.get()
-  }
-
-  const { data: postFetched, isValidating } = useSWR(postClassInstance.postCacheId(), postId ? fetchPost : null, {
-    revalidateOnFocus: false,
-  })
-
-  return { community, postFetched, isValidating }
-}

@@ -35,6 +35,9 @@ export function CommunityPage({
   postInstance: Post
 }) {
   const user = useUserIfJoined(groupId as string)
+  const community = useCommunityById(groupId as string)
+  const unirepUser = useUnirepSignUp({ groupId: groupId, name: (user as User)?.name })
+
   useCommunityUpdates({ postInstance })
   const activeUser = useActiveUser({ groupId })
   const { address } = useAccount()
@@ -53,8 +56,7 @@ export function CommunityPage({
     signerOrProvider: provider,
   })
 
-  const community = useCommunityById(groupId as string)
-  const unirepUser = useUnirepSignUp({ groupId: groupId, name: (user as User)?.name })
+
 
   const { checkUserBalance } = useValidateUserBalance(community, address)
   const { setIsLoading, isLoading: isContextLoading } = useLoaderContext()
@@ -68,7 +70,7 @@ export function CommunityPage({
     })()
   }, [forumContract, groupId, provider])
 
-  const { data, isLoading } = useSWR(`${groupId}_group`, postId ? fetchPost : fetchPosts)
+  const { data, isLoading } = useSWR(`${groupId}_group`, postId ? fetchPost : fetchPosts, {revalidateOnFocus:false})
 
   async function fetchPosts() {
     console.log('fetching posts')
@@ -77,7 +79,7 @@ export function CommunityPage({
 
   async function fetchPost() {
     console.log('fetching post')
-    return [await postInstance.get()]
+    return await postInstance.get()
   }
 
   const validateRequirements = () => {
@@ -194,7 +196,11 @@ export function CommunityPage({
   }
 
   if (isLoading) return null
-  const sortedAndFilteredData = sortedData.filter(post => post?.id === postId)
+  const sortedAndFilteredData = sortedData.filter(post => {
+    console.log({postId: post?.id, post})
+
+    return post?.id === postId
+  })
   return (
     <div className={clsx('mx-auto h-screen w-full max-w-screen-xl space-y-12 overflow-y-auto sm:p-8 md:p-24')}>
       <div

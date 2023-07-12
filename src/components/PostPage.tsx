@@ -21,6 +21,7 @@ import { NewPostForm } from '@components/NewPostForm'
 import { motion } from 'framer-motion'
 import { CircularProgress } from '@components/CircularProgress'
 import dynamic from 'next/dynamic'
+import { useRemoveItemFromForumContract } from '@/hooks/useRemoveItemFromForumContract'
 
 const Editor = dynamic(() => import('@/components/editor-js/Editor'), {
   ssr: false,
@@ -39,6 +40,13 @@ interface CommentsMap {
   }
 }
 
+interface TempComment {
+  id: string
+  createdAt: Date
+  content: string
+}
+
+
 export function PostPage({ postInstance, postId, groupId }) {
   const hasUserJoined = useUserIfJoined(groupId)
   const activeUser = useActiveUser({ groupId })
@@ -52,49 +60,27 @@ export function PostPage({ postInstance, postId, groupId }) {
   const { isAdmin, isModerator, fetchIsAdmin, fetchIsModerator } = useCheckIfUserIsAdminOrModerator(address)
 
   const canDelete = isAdmin || isModerator
+  const commentClassInstance = useRef<CommentClass>(null)
 
-  const { data, write } = useContractWrite({
-    address: ForumContractAddress as `0x${string}`,
-    abi: ForumABI.abi,
-    functionName: 'removeItem',
-    mode: 'recklesslyUnprepared',
-    onSettled: (data, error) => {
-      console.log('test-log', { data, error })
-      setIsLoading(false)
-    },
-    onSuccess: async (data, variables) => {
-      try {
-        const tx = await data.wait()
-        const itemId = variables.args[0]
-        const item = await forumContract.itemAt(itemId)
-        if (item.kind == 0) {
-          await setCacheAtSpecificPath(postInstance?.current?.specificPostId(itemId), true, '$.removed')
-          // navigate('../../', { relative: 'path' })
-        } else if (item.kind == 1) {
-          await setCacheAtSpecificPath(commentClassInstance.current.specificCommentId(itemId), true, '$.removed')
-          mutate(
-            commentClassInstance.current.commentsCacheId(),
-            data => {
-              const commentsListCopy = [...data]
-              const i = commentsListCopy.findIndex(c => +c.id === itemId)
-              commentsListCopy.splice(i, 1)
-              return commentsListCopy
-            },
-            { revalidate: false }
-          )
-        }
-        setIsLoading(false)
-      } catch (error) {
-        console.log(error)
-        setIsLoading(false)
-      }
-    },
-  })
+  useEffect(() => {
+    commentClassInstance.current = new CommentClass(groupId, postId, null)
+    fetchIsAdmin()
+  }, [groupId, postId])
+
+  const { data, write } = useRemoveItemFromForumContract(
+    ForumContractAddress,
+    ForumABI,
+    forumContract,
+    postInstance,
+    commentClassInstance,
+    setIsLoading
+  )
 
   const { t } = useTranslation()
 
   const [comment, setComment] = useState<OutputData>(null)
   const [commentsMap, setCommentsMap] = useState<CommentsMap>({} as any)
+  const [tempComments, setTempComments] = useState<TempComment[]>([])
 
   const [isPostEditable, setIsPostEditable] = useState(false)
   const [isPostEditing, setPostEditing] = useState(false)
@@ -104,28 +90,16 @@ export function PostPage({ postInstance, postId, groupId }) {
   const [postDescription, setPostDescription] = useState<OutputData>(null)
 
   const commentEditorRef = useRef<any>()
-  const postEditorRef = useRef<any>()
 
   const identityCommitment = hasUserJoined ? BigInt(hasUserJoined?.identityCommitment?.toString()) : null
-
-  // commentClassInstance = new CommentClass(id, postId, null)
-  const commentClassInstance = useRef<CommentClass>(null)
-  useEffect(() => {
-    commentClassInstance.current = new CommentClass(groupId, postId, null)
-  }, [groupId, postId])
-
-  const { mutate } = useSWRConfig()
-
 
   const { data: comments, isLoading: commentsLoading } = useSWR(
     commentClassInstance?.current?.commentsCacheId?.(),
     fetchComments,
     {
       revalidateOnFocus: false,
-    }
+    },
   )
-
-  const [tempComments, setTempComments] = useState([])
 
 
   useEffect(() => {
@@ -138,47 +112,18 @@ export function PostPage({ postInstance, postId, groupId }) {
   const checkIfPostIsEditable = async (note, contentCID) => {
     const userPosting = new Identity(`${address}_${groupId}_${hasUserJoined?.name}`)
     const generatedNote = await createNote(userPosting)
-    const noteBigNumber = BigNumber.from(note).toString()
     const generatedNoteAsBigNumber = BigNumber.from(generatedNote).toString()
+    const noteBigNumber = BigNumber.from(note).toString()
     setIsPostEditable(noteBigNumber === generatedNoteAsBigNumber)
   }
 
-  const checkIfCommentsAreEditable = async () => {
-    for (const c of comments) {
-      const note = c?.note
-      const contentCID = c?.contentCID
-      if (note && contentCID) {
-        const noteBigNumber = BigNumber.from(note).toString()
-        const userPosting = new Identity(`${address}_${groupId}_${hasUserJoined?.name}`)
-        const generatedNote = await createNote(userPosting)
-        const generatedNoteAsBigNumber = BigNumber.from(generatedNote).toString()
-        if (generatedNoteAsBigNumber === noteBigNumber) {
-          setCommentsMap(prevCommentsMap => {
-            return {
-              ...prevCommentsMap,
-              [c.id]: prevCommentsMap[c.id]
-                ? {
-                    ...prevCommentsMap[c.id],
-                    isEditable: true,
-                  }
-                : { comment: { ...c }, isEditable: true },
-            }
-          })
-        }
-      }
-    }
-  }
-  //
-  // async function fetchPost() {
-  //   return await postInstance?.current?.get()
-  // }
+
 
   async function fetchComments() {
     console.log('test-log', 'fetching comments')
     const comments = await commentClassInstance?.current?.getComments()
     return comments
   }
-
 
   const onClickEditPost = async () => {
     const hasSufficientBalance = await checkUserBalance()
@@ -188,30 +133,10 @@ export function PostPage({ postInstance, postId, groupId }) {
     // setPostDescription(postFetched?.description)
   }
 
-  const onClickEditComment = comment => {
-    setCommentsMap({
-      ...commentsMap,
-      [comment.id]: {
-        ...commentsMap[comment.id],
-        isSaving: false,
-        isEditing: true,
-      },
-    })
-  }
 
-  const setOnEditCommentContent = (comment, content) => {
-    setCommentsMap(prevCommentsMap => {
-      return {
-        ...prevCommentsMap,
-        [comment.id]: {
-          ...prevCommentsMap[comment.id],
-          comment: { ...comment, content },
-        },
-      }
-    })
-  }
 
   const deleteItem = async (itemId, itemType: number) => {
+    if (itemType !== 0 && itemType !== 1) return toast.error(t('alert.deleteFailed'))
     if (validateRequirements() !== true) return
     setIsLoading(true)
     await fetchIsAdmin()
@@ -243,17 +168,6 @@ export function PostPage({ postInstance, postId, groupId }) {
     }
   }
 
-  const onClickCancelComment = comment => {
-    setCommentsMap(prevCommentsMap => {
-      return {
-        ...prevCommentsMap,
-        [comment.id]: {
-          ...commentsMap[comment.id],
-          isEditing: false,
-        },
-      }
-    })
-  }
   const clearInput = () => {
     setComment({
       blocks: [],
@@ -267,7 +181,24 @@ export function PostPage({ postInstance, postId, groupId }) {
 
     return true
   }
+
+
+
+  // Helper function for updating the comments map
+  const updateCommentMap = (id: string, updates: Partial<CommentsMap[string]>) => {
+    setCommentsMap(prev => ({
+      ...prev,
+      [id]: {
+        ...prev[id],
+        ...updates,
+      },
+    }))
+  }
+
+
+
   const addComment = async () => {
+    console.log(groupId, 'groupId')
     if (validateRequirements() !== true) return
     const hasSufficientBalance = await checkUserBalance()
     if (!hasSufficientBalance) return
@@ -319,60 +250,86 @@ export function PostPage({ postInstance, postId, groupId }) {
           tempCommentsCopy.splice(tempCommentIndex, 1)
           return tempCommentsCopy
         }
+        return prevComments // return the previous state if no comment is found with the given ipfsHash
       })
+
     }
   }
+
+  const checkIfCommentsAreEditable = async () => {
+    console.log(comments)
+    for (const c of comments) {
+      const note = c?.note
+      const contentCID = c?.contentCID
+      if (note && contentCID) {
+        const noteBigNumber = BigNumber.from(note).toString()
+        const userPosting = new Identity(`${address}_${groupId}_${hasUserJoined?.name}`)
+        const generatedNote = await createNote(userPosting)
+        const generatedNoteAsBigNumber = BigNumber.from(generatedNote).toString()
+        if (generatedNoteAsBigNumber === noteBigNumber) {
+          updateCommentMap(c.id, {
+            comment: { ...(commentsMap[c.id]?.comment || c) },
+            isEditable: true,
+          })
+        }
+      }
+    }
+  }
+
+  const onClickEditComment = comment => {
+    updateCommentMap(comment.id, {
+      isSaving: false,
+      isEditing: true,
+    })
+  }
+
+  const setOnEditCommentContent = (comment, content) => {
+    updateCommentMap(comment.id, {
+      comment: { ...comment, content },
+    })
+  }
+
+  const onClickCancelComment = comment => {
+    updateCommentMap(comment.id, {
+      isEditing: false,
+    })
+  }
+
   const saveEditedComment = async comment => {
     if (!commentClassInstance.current || !address || !hasUserJoined) return
-    setCommentsMap(prevCommentsMap => {
-      return {
-        ...prevCommentsMap,
-        [comment.id]: {
-          ...prevCommentsMap[comment.id],
-          isSaving: true,
-          comment: { ...comment },
-        },
-      }
+    updateCommentMap(comment.id, {
+      isSaving: true,
+      comment: { ...comment },
     })
     setIsLoading(true)
 
     try {
       const { status } = await commentClassInstance.current.edit(
-        commentsMap[comment.id]?.comment,
-        address,
-        comment.id,
-        hasUserJoined,
-        groupId,
-        setIsLoading
+          commentsMap[comment.id]?.comment,
+          address,
+          comment.id,
+          hasUserJoined,
+          groupId,
+          setIsLoading
       )
 
       if (status === 200) {
         toast.success(t('alert.commentEditSuccess'))
         setIsLoading(false)
-        setCommentsMap(prevCommentsMap => {
-          return {
-            ...prevCommentsMap,
-            [comment.id]: {
-              ...prevCommentsMap[comment.id],
-              isSaving: false,
-              isEditing: false,
-            },
-          }
+        updateCommentMap(comment.id, {
+          isSaving: false,
+          isEditing: false,
         })
       }
     } catch (error) {
       console.log(error)
       toast.error(t('alert.editFailed'))
       setIsLoading(false)
-      setCommentsMap(prevCommentsMap => {
-        return {
-          ...prevCommentsMap,
-          [comment.id]: { ...prevCommentsMap[comment.id], isSaving: false },
-        }
+      updateCommentMap(comment.id, {
+        isSaving: false,
       })
     }
   }
-
   // const editPost = async () => {
   //   const hasSufficientBalance = await checkUserBalance()
   //   if (!hasSufficientBalance) return
@@ -450,18 +407,38 @@ export function PostPage({ postInstance, postId, groupId }) {
     }
   }
 
-  const hasUserRightsToEdit = async (note, cid) => {
-    if (!note || !cid || identityCommitment || !hasUserJoined) return false
-    const userPosting = new Identity(`${address}_${groupId}_${hasUserJoined?.name}`)
-    return createNote(userPosting).then(r => {
-      return r
-    })
-  }
-
   const [commentsSortBy, setCommentsSortBy] = useState<SortByOption>('highest')
 
   const handleCommentsSortChange = (newSortBy: SortByOption) => {
     setCommentsSortBy(newSortBy)
+  }
+
+  const CommentActions = ({ comment, canDelete }) => {
+    return (
+      <div className="mt-3 flex flex-row gap-4">
+        {commentsMap[comment.id]?.isEditable && !commentsMap[comment.id]?.isEditing && (
+          <button onClick={() => onClickEditComment(comment)}>{t('button.edit')}</button>
+        )}
+        {commentsMap[comment.id]?.isEditing && (
+          <button onClick={() => onClickCancelComment(comment)}>{t('button.cancel')}</button>
+        )}
+        {commentsMap[comment.id]?.isEditing && (
+          <button
+            disabled={
+              !commentsMap[comment.id]?.comment?.content || !commentsMap[comment.id]?.comment?.content?.blocks?.length
+            }
+            onClick={() => saveEditedComment(comment)}
+          >
+            {t('button.save')}
+          </button>
+        )}
+        {(commentsMap[comment.id]?.isEditable || canDelete) && !commentsMap[comment.id]?.isEditing && (
+          <button className="text-small color-[red.500]" onClick={() => deleteItem(comment.id, 1)}>
+            {t('button.delete')}
+          </button>
+        )}
+      </div>
+    )
   }
 
   const sortedCommentsData = useSortedVotes(tempComments, comments, commentsSortBy)
@@ -508,11 +485,12 @@ export function PostPage({ postInstance, postId, groupId }) {
                     <Editor
                       editorRef={commentEditorRef}
                       holder={'comment' + '_' + c?.id}
-                      readOnly={commentsMap[c?.id]?.isEditing === false}
+                      readOnly={!commentsMap[c?.id]?.isEditing}
                       onChange={val => setOnEditCommentContent(c, val)}
                       placeholder={t('placeholder.enterComment') as string}
                       data={c?.content?.blocks ? c?.content : []}
                     />
+                    {(Boolean(identityCommitment) || canDelete) && <CommentActions comment={c} canDelete={canDelete} />}
                   </div>
                 )}
                 {/*{(!commentIsConfirmed(c.id) ||*/}

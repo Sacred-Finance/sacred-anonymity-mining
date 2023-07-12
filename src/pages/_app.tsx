@@ -1,22 +1,20 @@
 import '@styles/style.scss'
 import type { AppProps } from 'next/app'
-import { ThemeProvider } from 'next-themes'
-import { useRouter } from 'next/router'
 import { useTheme } from 'next-themes'
 import { app } from '@/appConfig'
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import HeadGlobal from '@/components/HeadGlobal'
 import '../../i18n'
 import { alchemyProvider } from 'wagmi/providers/alchemy'
 
-import { connectorsForWallets, RainbowKitProvider, lightTheme, darkTheme } from '@rainbow-me/rainbowkit'
-import { injectedWallet, metaMaskWallet, braveWallet, coinbaseWallet } from '@rainbow-me/rainbowkit/wallets'
-import { mainnet, polygonMumbai, localhost, goerli, sepolia, avalancheFuji } from 'wagmi/chains'
-import { createClient, configureChains, WagmiConfig } from 'wagmi'
+import { connectorsForWallets, darkTheme, lightTheme, RainbowKitProvider } from '@rainbow-me/rainbowkit'
+import { braveWallet, coinbaseWallet, injectedWallet, metaMaskWallet } from '@rainbow-me/rainbowkit/wallets'
+import { avalancheFuji, goerli, localhost, mainnet, polygonMumbai, sepolia } from 'wagmi/chains'
+import { configureChains, createClient, WagmiConfig } from 'wagmi'
 import { publicProvider } from 'wagmi/providers/public'
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc'
 import { LoaderProvider } from '../contexts/LoaderContext'
-import { CommunityProvider, useCommunities, useCommunityContext } from '../contexts/CommunityProvider'
+import { CommunityProvider, useCommunities } from '../contexts/CommunityProvider'
 import { startIPFS } from '../lib/utils'
 import { useFetchCommunities } from '../hooks/useFetchCommunities'
 import { useFetchUsers } from '../hooks/useFetchUsers'
@@ -37,6 +35,7 @@ function App({ Component, pageProps }: AppProps) {
     </LoaderProvider>
   )
 }
+
 export default App
 
 // Web3 Configs
@@ -118,8 +117,11 @@ const client = createClient({
   provider: provider({ chainId: polygonMumbai.id }),
   webSocketProvider: webSocketProvider({ chainId: polygonMumbai.id }),
   connectors: connectors,
-  logger: console,
+  logger: {
+    warn: message => console.warn('Wagmi warning', message),
+  },
 })
+
 // Web3Wrapper
 export function Web3Wrapper({ children }) {
   const { resolvedTheme } = useTheme()

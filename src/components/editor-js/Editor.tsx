@@ -38,6 +38,30 @@ const EditorBlock = ({ data, onChange, holder, className, divProps = {}, editorR
       return (await ref?.current?.isReady) as unknown as Promise<void>
     },
   }))
+
+  useEffect(() => {
+    ref?.current?.readOnly?.toggle();
+
+    if (!readOnly) {
+      console.log('re-rendering for non-readonly')
+
+      // ref?.current?.render(data);
+        setTimeout(() => {
+            if (ref?.current?.focus) ref.current.focus(true);
+        }, 200)
+
+    } else {
+      console.log('re-rendering for readonly')
+        setTimeout(() => {
+            if (ref?.current?.render && data?.blocks) ref.current.render(data);
+        }, 0)
+    }
+    if (!data?.blocks) {
+        setTimeout(() => {
+            if (ref?.current?.clear) ref.current.clear();
+        }, 200)
+    }
+}, [readOnly])
   //initialize editorjs
   useEffect(() => {
     //initialize editor if we don't have a reference
@@ -45,6 +69,7 @@ const EditorBlock = ({ data, onChange, holder, className, divProps = {}, editorR
       const editor = new EditorJS({
         holder: holder,
         tools: EDITOR_TOOLS,
+        readOnly,
         placeholder: placeholder || 'Start writing your post...',
         data,
         async onChange(api, event) {
@@ -52,13 +77,14 @@ const EditorBlock = ({ data, onChange, holder, className, divProps = {}, editorR
           onChange(data)
         },
         onReady() {
-          const links = document.getElementsByTagName('a')
-          for (let i = 0; i < links.length; i++) {
-            const link = links[i]
-            link.setAttribute('target', '_blank')
-            link.setAttribute('rel', 'noopener')
-            link.setAttribute('aria-label', 'External link (opens in new tab)')
-          }
+          // todo: make it work only for editor
+          // const links = document.getElementsByTagName('a')
+          // for (let i = 0; i < links.length; i++) {
+          //   const link = links[i]
+          //   link.setAttribute('target', '_blank')
+          //   link.setAttribute('rel', 'noopener')
+          //   link.setAttribute('aria-label', 'External link (opens in new tab)')
+          // }
           // If readonly set the editor to readonly
           if (readOnly) {
             const el = document.getElementById(holder)
