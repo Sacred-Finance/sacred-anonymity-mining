@@ -8,12 +8,12 @@ import { formatDistanceToNow } from 'date-fns'
 import { BigNumber } from 'ethers'
 import { p } from '@noble/curves/pasta'
 
-export const PostList = ({ posts, isLoading,  voteForPost, handleSortChange }) => {
+export const PostList = ({ posts, voteForPost, handleSortChange }) => {
   return (
     <div className="mt-6 flex flex-col space-y-4 ">
       <SortBy onSortChange={handleSortChange} targetType="posts" />
       {posts.map((p, i) => (
-        <PostItem post={p} key={p.id} voteForPost={voteForPost} isLoading={isLoading} />
+        <PostItem post={p} key={p.id} voteForPost={voteForPost} />
       ))}
     </div>
   )
@@ -23,7 +23,7 @@ const classes = {
   postItem: 'flex items-start space-x-4 rounded-lg border-2 border-gray-200 p-4',
   postItemPostPage: 'cursor-auto flex items-start space-x-4 rounded-lg border-2 border-gray-200 p-4',
 }
-const PostItem = ({ isLoading, voteForPost, post }) => {
+const PostItem = ({ voteForPost, post }) => {
   const router = useRouter()
   const { postId } = router.query
 
@@ -32,6 +32,7 @@ const PostItem = ({ isLoading, voteForPost, post }) => {
   const onPostPage = !isNaN(postId)
   const classy = { [classes.postItem]: true, [classes.postItemPostPage]: onPostPage }
 
+  const [isLoading, setIsLoading] = React.useState(false)
   if (!post || !router.isReady) return null
   return (
     <Link
@@ -52,33 +53,35 @@ const PostItem = ({ isLoading, voteForPost, post }) => {
           </h2>
           <div className="flex items-center space-x-4">
             <VoteUpButton
-                isLoading={isLoading}
-                onClick={async e => {
-                console.log('upvote')
+              isLoading={isLoading}
+              onClick={async e => {
                 e.stopPropagation()
                 e.preventDefault()
                 if (isNaN(id)) {
                   throw new Error('postId is undefined, upvote')
                   return false
                 }
-
+                setIsLoading(true)
                 await voteForPost(BigNumber.from(id).toNumber(), 0)
+                setIsLoading(false)
               }}
               disabled={isLoading}
             />
             <span className="text-gray-500">{upvote}</span>
             <VoteDownButton
-                isLoading={isLoading}
-                onClick={async e => {
+              isLoading={isLoading}
+
+              onClick={async e => {
                 e.stopPropagation()
                 e.preventDefault()
                 if (isNaN(id)) {
                   throw new Error('postId is undefined, downvote')
                   return false
                 }
+                setIsLoading(true)
                 await voteForPost(BigNumber.from(id).toNumber(), 1)
+                setIsLoading(false)
               }}
-
               disabled={isLoading}
             />
             <span className="text-gray-500">{downvote}</span>

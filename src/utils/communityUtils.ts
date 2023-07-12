@@ -1,49 +1,26 @@
-import { BigNumber } from 'ethers'
-import { forumContract } from '@/constant/const'
+import { BigNumber, ethers } from 'ethers'
+import { erc20dummyABI, forumContract, jsonRPCProvider } from '@/constant/const'
 import { getCache, getMCache, setCache } from '@/lib/redis'
-import {getIpfsHashFromBytes32, uploadImageToIPFS} from '@/lib/utils'
+import { getIpfsHashFromBytes32, uploadImageToIPFS } from '@/lib/utils'
 import { CommunityDetails, Requirement } from '@/lib/model'
 
 import pica from 'pica'
 import { useCallback } from 'react'
-import { Group, GroupDetails } from '@/types/contract/ForumInterface'
-import { Event } from '@ethersproject/contracts/src.ts'
+import { Group } from '@/types/contract/ForumInterface'
+import { Event } from '@ethersproject/contracts'
 
-type GroupId = number;
+type GroupId = number
 
 interface FetchCommunitiesDataParams {
   groups: Array<Event | GroupId>
 }
 
-export const fetchCommunitiesData = async ({
-  groups,
-}: FetchCommunitiesDataParams): Promise<
-  Awaited<null | {
-    id: bigint
-    note: bigint
-    requirements: Requirement[]
-    userCount: number
-    removed: any
-    chainId: number
-    groupId: number
-    name: string
-    banner: GroupDetails['bannerCID']
-    logo: GroupDetails['logoCID']
-    description: GroupDetails['description']
-    tags: GroupDetails['tags']
-  }>[]
-> => {
+export const fetchCommunitiesData = async ({ groups }: FetchCommunitiesDataParams): Promise<Awaited<Group>[]> => {
   // ensure the event has the right name
   try {
-    const groupIds = groups.map(group =>
-        typeof group === 'number'
-            ? group
-            : group?.args?.['groupId']?.toNumber()
-    );
+    const groupIds = groups.map(group => (typeof group === 'number' ? group : group?.args?.['groupId']?.toNumber()))
 
-    const checkEvent = groups.filter(
-        group => typeof group !== 'number' && group.event === 'NewGroupCreated'
-    );
+    const checkEvent = groups.filter(group => typeof group !== 'number' && group.event === 'NewGroupCreated')
 
     if (checkEvent.length !== groups.filter(group => typeof group !== 'number').length) {
       console.error('Event name is not NewGroupCreated')
@@ -55,11 +32,13 @@ export const fetchCommunitiesData = async ({
       try {
         groupData = await forumContract.groupAt(groupId.toString())
         if (groupData?.removed) {
-          return null
+          return undefined
         }
       } catch (error) {
-        return null
+        return undefined
       }
+
+      const requirementDetails = await addRequirementDetails(groupData)
 
       return {
         groupId: groupId,
@@ -67,58 +46,21 @@ export const fetchCommunitiesData = async ({
         id: groupData?.id,
         userCount: groupData?.userCount?.toNumber() || 0,
         note: groupData?.note,
-        requirements: groupData.requirements,
+        requirements: requirementDetails,
         chainId: groupData?.chainId?.toNumber(),
         removed: groupData?.removed,
         banner: getIpfsHashFromBytes32(groupData?.groupDetails.bannerCID),
-        logo:  getIpfsHashFromBytes32(groupData?.groupDetails.logoCID),
-        description: groupData?.groupDetails.description,
-        tags: groupData?.groupDetails.tags,
+        logo: getIpfsHashFromBytes32(groupData?.groupDetails.logoCID),
         groupDetails: groupData.groupDetails,
-      }
+      } as Group
     })
 
-    return Promise.all(updatedDataPromises)
+    const result = await Promise.all(updatedDataPromises)
+    return result.filter(group => group) as Group[]
   } catch (error) {
     console.trace('error', error)
     return []
   }
-}
-
-const maxCacheAge = 1000 * 60 * 60 * 24 // 24 hours
-const fetchCommunitiesDataFromCache = async (
-  groupIds: number[]
-): Promise<((Group & { refresh: boolean }) | null)[]> => {
-  const cacheKeys = groupIds.map(groupId => `group_${groupId}`)
-  const { cache: cachedDataArray } = await getMCache(cacheKeys, true)
-
-  return groupIds.map((groupId, index) => {
-    const cachedData = cachedDataArray[index]
-    let refresh = false
-    // example of lastCachedAt value 1687468176683
-
-    if (cachedData?.data && !isNaN(groupId)) {
-      const cacheData = cachedData.data
-      const lastCachedAt = cachedData?.lastCachedAt
-      if (maxCacheAge < Date.now() - lastCachedAt) {
-        refresh = true
-        console.log('refreshing cache for group', groupId)
-        console.log('last cache in hours', (Date.now() - lastCachedAt) / 1000 / 60 / 60)
-      }
-      if (!cacheData?.note) {
-        return null
-      }
-      return {
-        ...cacheData,
-        groupId,
-        id: BigNumber.from(groupId),
-        note: cacheData?.note,
-        refresh: false, // assuming refresh should be false as per the provided getMCache implementation
-      }
-    }
-
-    return null
-  })
 }
 
 interface UploadAndCacheImagesParams {
@@ -141,6 +83,7 @@ export const uploadImages = async ({
   bannerFile,
   logoFile,
 }: UploadImagesParams): Promise<{ bannerCID: string | null; logoCID: string | null }> => {
+
   const [bannerResult, logoResult] = await Promise.allSettled([
     bannerFile ? uploadImageToIPFS(bannerFile) : Promise.resolve(null),
     logoFile ? uploadImageToIPFS(logoFile) : Promise.resolve(null),
@@ -218,6 +161,132 @@ export const cacheGroupData = async ({
 
   return cacheData
 }
+
+export const useHandleFileImageUpload = setImageFileState => {
+  return useCallback(e => {
+    handleFileImageUpload(e, setImageFileState)
+  }, [])
+}
+
+export const handleFileImageUpload = (e, setImageFileState) => {
+  const file = e?.target?.files?.[0]
+  const imageType = e?.target?.name
+  // Create a new Image object to check the dimensions
+  const img = new Image()
+  try {
+    img.src = URL.createObjectURL(file)
+  } catch (error) {
+    console.error('Error uploading image:', error)
+    return
+  }
+  img.onload = () => {
+    // Define the required aspect ratios for banners and logos
+    const requiredAspectRatios = {
+      banner: 16 / 9,
+      logo: 1, // assuming you want a square logo
+    }
+    const requiredDimensionsText = '1920x1080px for banners and 512x512px for logos.'
+
+    const requiredDimensions = {
+      banner: { width: 1920, height: 640 },
+      logo: { width: 512, height: 512 },
+    }
+
+    // Calculate the aspect ratio of the uploaded image
+    const imageAspectRatio = img.width / img.height
+
+    // Check if the uploaded image's aspect ratio matches the required one
+    if (Math.abs(imageAspectRatio - requiredAspectRatios[imageType]) <= 0.01) {
+      // Set the file based on the image type
+      setImageFileState({ file, imageType: imageType })
+    } else {
+      // Create a canvas to resize the image
+      const canvas = document.createElement('canvas')
+      canvas.width = requiredDimensions[imageType].width
+      canvas.height = requiredDimensions[imageType].height
+
+      // Resize the image using pica
+      pica()
+        .resize(img, canvas)
+        .then(result => {
+          // Convert the resized image to a Blob, then create a File object
+          return pica().toBlob(result, 'image/jpeg', 1)
+        })
+        .then(blob => {
+          // Create a new File object
+          const resizedFile = new File([blob], file.name, {
+            type: 'image/jpeg',
+          })
+
+          // Set the file based on the image type
+          setImageFileState({ file: resizedFile, imageType: imageType })
+        })
+        .catch(err => {
+          console.error('Image resizing failed:', err)
+        })
+    }
+  }
+}
+
+export const addRequirementDetails = async (community: Group): Promise<Awaited<Requirement[]>> => {
+  // looking at the requirements array, we need to get the details of each requirement from the contract and add it to the community object
+  // get symbol and name of token
+  return (await Promise.all(
+    community.requirements.map(async requirement => {
+      const token = await new ethers.Contract(requirement.tokenAddress, erc20dummyABI, jsonRPCProvider)
+      const symbol = await token.symbol()
+      const name = await token.name()
+      const decimals = await token.decimals()
+      const minAmount = requirement.minAmount
+
+      return {
+        tokenAddress: requirement.tokenAddress,
+        symbol,
+        name,
+        decimals,
+        minAmount,
+      }
+    })
+  )) as Requirement[]
+}
+
+const maxCacheAge = 1000 * 60 * 60 * 24 // 24 hours
+
+const fetchCommunitiesDataFromCache = async (
+  groupIds: number[]
+): Promise<((Group & { refresh: boolean }) | null)[]> => {
+  const cacheKeys = groupIds.map(groupId => `group_${groupId}`)
+  const { cache: cachedDataArray } = await getMCache(cacheKeys, true)
+
+  return groupIds.map((groupId, index) => {
+    const cachedData = cachedDataArray[index]
+    let refresh = false
+    // example of lastCachedAt value 1687468176683
+
+    if (cachedData?.data && !isNaN(groupId)) {
+      const cacheData = cachedData.data
+      const lastCachedAt = cachedData?.lastCachedAt
+      if (maxCacheAge < Date.now() - lastCachedAt) {
+        refresh = true
+        console.log('refreshing cache for group', groupId)
+        console.log('last cache in hours', (Date.now() - lastCachedAt) / 1000 / 60 / 60)
+      }
+      if (!cacheData?.note) {
+        return null
+      }
+      return {
+        ...cacheData,
+        groupId,
+        id: BigNumber.from(groupId),
+        note: cacheData?.note,
+        refresh: false, // assuming refresh should be false as per the provided getMCache implementation
+      }
+    }
+
+    return null
+  })
+}
+
 export const uploadAndCacheImages = async ({
   groupId,
   bannerFile,
@@ -264,73 +333,5 @@ export const uploadAndCacheImages = async ({
   } catch (error) {
     console.error('Error caching group images:', error)
     throw error
-  }
-}
-
-export const useHandleFileImageUpload = setImageFileState => {
-  return useCallback(e => {
-    handleFileImageUpload(e, setImageFileState)
-  }, [])
-}
-
-export const handleFileImageUpload = (e, setImageFileState) => {
-  const file = e.target.files[0]
-
-  // Create a new Image object to check the dimensions
-  const img = new Image()
-  try {
-    img.src = URL.createObjectURL(file)
-  } catch (error) {
-    console.error('Error uploading image:', error)
-    return
-  }
-  img.onload = () => {
-    // Define the required aspect ratios for banners and logos
-    const requiredAspectRatios = {
-      banner: 16 / 9,
-      logo: 1, // assuming you want a square logo
-    }
-    const requiredDimensionsText = '1920x1080px for banners and 512x512px for logos.'
-
-    const requiredDimensions = {
-      banner: { width: 1920, height: 640 },
-      logo: { width: 512, height: 512 },
-    }
-
-    const imageType = e.target.name
-
-    // Calculate the aspect ratio of the uploaded image
-    const imageAspectRatio = img.width / img.height
-
-    // Check if the uploaded image's aspect ratio matches the required one
-    if (Math.abs(imageAspectRatio - requiredAspectRatios[imageType]) <= 0.01) {
-      // Set the file based on the image type
-      setImageFileState(file)
-    } else {
-      // Create a canvas to resize the image
-      const canvas = document.createElement('canvas')
-      canvas.width = requiredDimensions[imageType].width
-      canvas.height = requiredDimensions[imageType].height
-
-      // Resize the image using pica
-      pica()
-        .resize(img, canvas)
-        .then(result => {
-          // Convert the resized image to a Blob, then create a File object
-          return pica().toBlob(result, 'image/jpeg', 1)
-        })
-        .then(blob => {
-          // Create a new File object
-          const resizedFile = new File([blob], file.name, {
-            type: 'image/jpeg',
-          })
-
-          // Set the file based on the image type
-          setImageFileState(resizedFile)
-        })
-        .catch(err => {
-          console.error('Image resizing failed:', err)
-        })
-    }
   }
 }

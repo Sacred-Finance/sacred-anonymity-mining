@@ -1,12 +1,13 @@
 import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'next-i18next'
 import { useHandleFileImageUpload } from '../utils/communityUtils'
+import { HandleSetImage } from '@pages/communities/[groupId]/edit'
 
 export const PictureUpload = (props: {
-  uploadedImageUrl?: string
+  uploadedImageUrl:  string | null
   displayName: string
   name: 'banner' | 'logo'
-  setImageFileState: Dispatch<SetStateAction<File | null>>
+  setImageFileState: Dispatch<SetStateAction<HandleSetImage>>
 }) => {
   const handleFileImageUpload = useHandleFileImageUpload(props.setImageFileState)
 
@@ -52,7 +53,7 @@ export const PictureUpload = (props: {
               className=" h-52 w-full  object-contain transition-opacity "
               style={{ opacity: isDeleteIconVisible ? 0.5 : 1 }}
               onClick={() => {
-                props.setImageFileState(null)
+                props.setImageFileState({ imageType: props.name, file: null })
                 if (!inputRef.current) return
                 inputRef.current.value = ''
               }}
@@ -63,7 +64,7 @@ export const PictureUpload = (props: {
               <button
                 className="absolute inset-0 flex h-full w-full items-center justify-center"
                 onClick={() => {
-                  props.setImageFileState(null)
+                  props.setImageFileState({ imageType: props.name, file: null })
                   if (!inputRef.current) return
                   inputRef.current.value = ''
                 }}

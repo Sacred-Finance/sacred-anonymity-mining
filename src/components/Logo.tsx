@@ -27,7 +27,7 @@ const purpleAnimation = {
 
 const logoAnimation = {
   initial: { fill: '#721BEF', opacity: 0.9, pathLength: 0 },
-  animate: { fill: ['#721BEF', 'url(#paint0_linear_2713_1307)'], opacity: [0.5, 1], pathLength: 1 },
+  animate: { opacity: [0.5, 1], pathLength: 1 },
   transition: { duration: 2, delay: 0 },
 }
 const duration = 0.5

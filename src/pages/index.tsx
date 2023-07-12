@@ -1,28 +1,7 @@
-import Header from '../components/Header'
 import HomePage from '../components/HomePage'
-import Footer from '../components/Footer'
+import WithStandardLayout from '@components/HOC/WithStandardLayout'
 
-export default function Home() {
-
-
-  return (
-    <>
-      <div className={' flex h-screen flex-col'}>
-        <Header />
-        <div>
-          {' '}
-          <Main />
-        </div>
-        <div className={'flex-1  '} />
-        <div className={'relative'}>
-          <Footer />
-        </div>
-      </div>
-    </>
-  )
+function Home() {
+  return <HomePage isAdmin={false} />
 }
-
-function Main() {
-
-  return <HomePage  isAdmin={false} />
-}
+export default WithStandardLayout(Home)

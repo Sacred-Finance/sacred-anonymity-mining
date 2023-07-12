@@ -17,6 +17,7 @@ import Header from '@components/Header'
 import { Breadcrumbs } from '@components/Breadcrumbs'
 import Footer from '@components/Footer'
 import Link from 'next/link'
+import WithStandardLayout from "@components/HOC/WithStandardLayout";
 
 function RemoveIcon() {
   return (
@@ -371,16 +372,11 @@ function CreateGroupFormUI({ onCreate }) {
   )
 }
 
-export default function CreateGroupForm() {
-  const createCommunity = useCreateCommunity(() => {})
-
+function CreateGroupForm() {
+  const createCommunity = useCreateCommunity(() => {});
   return (
-    <div className={'flex h-screen flex-col'}>
-      <Header />
-      <Breadcrumbs />
       <CreateGroupFormUI onCreate={createCommunity} />
-      <div className={'flex-1  '} />
-      <Footer />
-    </div>
-  )
+  );
 }
+
+export default WithStandardLayout(CreateGroupForm);

@@ -190,14 +190,15 @@ export interface NewUser {
 
 export interface Requirement {
   tokenAddress: string
-  minAmount: number
+  minAmount: bigint
+  // The following are not part of the contract
+  name?: string
+  symbol?: string
+  decimals?: number
 }
 
 export interface Group {
   name: string
-  groupId?: string // this is set after initialization with the app. It is not part of the contract.
-  banner?: string // this is set after initialization with the app. It is not part of the contract.
-  logo?: string // this is set after initialization with the app. It is not part of the contract.
   groupDetails: GroupDetails
   requirements: Requirement[]
   id: number
@@ -206,6 +207,10 @@ export interface Group {
   chainId: number
   posts: number[]
   removed: boolean
+  // The following are not part of the contract
+  groupId?: string
+  banner?: string
+  logo?: string
 }
 
 // Definitions for each function

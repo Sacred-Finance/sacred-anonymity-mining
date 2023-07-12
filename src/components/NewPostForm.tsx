@@ -4,6 +4,7 @@ import EditorJsRenderer from './editor-js/EditorJSRenderer'
 import { CancelButton, PrimaryButton } from './buttons'
 import { EyeIcon, PencilIcon, PlusIcon } from '@heroicons/react/20/solid'
 import dynamic from 'next/dynamic'
+import { CircularLoader } from '@components/JoinCommunityButton'
 
 const Editor = dynamic(() => import('./editor-js/Editor'), {
   ssr: false,
@@ -29,6 +30,7 @@ export const NewPostForm = ({
   setPostDescription,
   isLoading,
   clearInput,
+  readOnly,
   addPost,
   isComment = false,
 }) => {
@@ -37,11 +39,11 @@ export const NewPostForm = ({
   const [isNewPostOpen, setIsNewPostOpen] = React.useState(false)
 
   return (
-    <div className="mt-6 rounded-lg border bg-white/10 p-6 shadow-lg h-auto">
+    <div className="mt-6 h-auto rounded-lg border bg-white/10 p-6 shadow-lg">
       {!isNewPostOpen && (
         <button
           onClick={() => setIsNewPostOpen(true)}
-          className="flex items-center rounded bg-indigo-500 p-3 text-white transition-colors duration-150 hover:bg-indigo-600"
+          className="flex items-center rounded bg-indigo-100 p-2 text-indigo-500 transition-colors duration-150 hover:bg-indigo-200"
         >
           <PlusIcon className="mr-2 h-5 w-5" />
           {t(isComment ? 'newComment' : 'newPost')}
@@ -49,12 +51,12 @@ export const NewPostForm = ({
       )}
       {isNewPostOpen && (
         <div>
-          <div className="mb-4 text-2xl font-semibold">   {t(isComment ? 'newComment' : 'newPost')}</div>
+          <div className="mb-4 text-2xl font-semibold"> {t(isComment ? 'newComment' : 'newPost')}</div>
 
           {postTitle !== false && (
             <input
               className="mb-4 w-full rounded border-gray-200 p-3 text-lg transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder= {t(isComment ? 'placeholder.enterComment' : 'placeholder.enterPostTitle')}
+              placeholder={t(isComment ? 'placeholder.enterComment' : 'placeholder.enterPostTitle')}
               value={postTitle}
               onChange={e => setPostTitle(e.target.value)}
             />
@@ -64,7 +66,7 @@ export const NewPostForm = ({
               <div className="font-semibold"> {isPreview ? 'Preview' : 'Editor'}</div>
               <ToggleButton onClick={() => setIsPreview(!isPreview)} isPreview={isPreview} />
             </div>
-            <div className="z-50 h-96 rounded border-gray-200  p-6 text-white ">
+            <div className="z-50 rounded border-gray-200  p-6 text-white ">
               {isPreview ? (
                 postDescription && <EditorJsRenderer data={postDescription} />
               ) : (
@@ -72,6 +74,7 @@ export const NewPostForm = ({
                   data={postDescription}
                   editorRef={postEditorRef}
                   onChange={setPostDescription}
+                  readOnly={readOnly}
                   placeholder={t(isComment ? 'placeholder.newComment' : 'new post form')}
                   holder={id}
                 />
@@ -88,9 +91,10 @@ export const NewPostForm = ({
               </CancelButton>
               <PrimaryButton
                 onClick={addPost}
-                className="ml-4 rounded bg-green-500 p-3 text-white transition-colors duration-150 hover:bg-green-600"
+                isLoading={isLoading}
+                className=" rounded  bg-green-500  p-3 text-white transition-colors duration-150 hover:bg-green-600"
               >
-                {isLoading ? <>loading</> : t(isComment ? 'button.comment' :'button.post')}
+                {t(isComment ? 'button.comment' : 'button.post')}
               </PrimaryButton>
             </div>
           </div>

@@ -35,7 +35,9 @@ export const EDITOR_TOOLS: EditorConfig['tools'] = {
     inlineToolbar: true,
     config: {
       tunes: true,
+
     },
+
   },
   checklist: {
     class: Checklist,

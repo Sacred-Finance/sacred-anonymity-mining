@@ -2,7 +2,6 @@
 import React, { memo, useEffect, useImperativeHandle, useRef } from 'react'
 import EditorJS, { OutputData } from '@editorjs/editorjs'
 import { EDITOR_TOOLS } from './editor-tool'
-import { reference } from '@popperjs/core'
 
 //props
 type Props = {
@@ -12,34 +11,47 @@ type Props = {
   placeholder?: string
   className?: string
   editorRef?: React.MutableRefObject<EditorJS>
-    readOnly?: boolean
-    divProps?: any
+  readOnly?: boolean
+  divProps?: any
 }
 
 const EditorBlock = ({ data, onChange, holder, className, divProps = {}, editorRef, placeholder, readOnly }: Props) => {
+  const [isReady, setIsReady] = React.useState(false)
   //add a reference to editor
   const ref = useRef<EditorJS>()
   useImperativeHandle(editorRef, () => ({
     clear() {
       ref?.current?.clear()
     },
-    reRender() {
-      if (ref?.current?.render) {
-        ref?.current?.render(data)
-      }
+
+    destroy() {
+      ref?.current?.destroy()
+    },
+    render(data: OutputData): Promise<void> {
+      if (!ref.current || !data) return Promise.resolve()
+
+      return ref?.current?.render(data)
+    },
+    //@ts-ignore
+    async isReady() {
+      if (!ref.current || !data) return Promise.resolve()
+      return (await ref?.current?.isReady) as unknown as Promise<void>
     },
   }))
 
   useEffect(() => {
-    ref?.current?.readOnly?.toggle();;
+    ref?.current?.readOnly?.toggle();
 
     if (!readOnly) {
-        // ref?.current?.render(data);
+      console.log('re-rendering for non-readonly')
+
+      // ref?.current?.render(data);
         setTimeout(() => {
             if (ref?.current?.focus) ref.current.focus(true);
         }, 200)
 
     } else {
+      console.log('re-rendering for readonly')
         setTimeout(() => {
             if (ref?.current?.render && data?.blocks) ref.current.render(data);
         }, 0)
@@ -65,19 +77,30 @@ const EditorBlock = ({ data, onChange, holder, className, divProps = {}, editorR
           onChange(data)
         },
         onReady() {
-          const links = document.getElementsByTagName('a');
-          for (let i = 0; i < links.length; i++) {
-            const link = links[i]
-            link.setAttribute('target', '_blank')
-            link.setAttribute('rel', 'noopener')
-            link.setAttribute('aria-label', 'External link (opens in new tab)')
-          }
-          // If readonly remove extra margin applied to below mentioned class
+          // todo: make it work only for editor
+          // const links = document.getElementsByTagName('a')
+          // for (let i = 0; i < links.length; i++) {
+          //   const link = links[i]
+          //   link.setAttribute('target', '_blank')
+          //   link.setAttribute('rel', 'noopener')
+          //   link.setAttribute('aria-label', 'External link (opens in new tab)')
+          // }
+          // If readonly set the editor to readonly
           if (readOnly) {
             const el = document.getElementById(holder)
-            const codeEditorRedactor: any = el.getElementsByClassName('codex-editor__redactor')
-            codeEditorRedactor[0].style.marginRight = '0'
+            if (el) {
+              // get any input or textarea elements and set them to readonly
+              const inputs = el.getElementsByTagName('input')
+              const textareas = el.getElementsByTagName('textarea')
+              for (let i = 0; i < inputs.length; i++) {
+                inputs[i].setAttribute('readonly', 'readonly')
+              }
+              for (let i = 0; i < textareas.length; i++) {
+                textareas[i].setAttribute('readonly', 'readonly')
+              }
+            }
           }
+          setIsReady(true)
         },
       })
       ref.current = editor
@@ -91,7 +114,11 @@ const EditorBlock = ({ data, onChange, holder, className, divProps = {}, editorR
     }
   }, [])
 
-  return <>{readOnly}<div className={'w-full dark:text-white text-black '} id={holder} {...divProps} /></>
+  return (
+    <>
+      <div className={isReady ? 'h-full w-full text-black dark:text-white' : 'hidden'} id={holder} {...divProps} />
+    </>
+  )
 }
 
 export default memo(EditorBlock)

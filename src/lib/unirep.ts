@@ -54,7 +54,10 @@ export class UnirepUser {
       throw new Error('Environment variables are not set.')
     }
 
-    this.provider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL, polygonMumbai.id)
+    this.provider = new ethers.providers.JsonRpcProvider(
+      { url: process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL },
+      polygonMumbai.id
+    )
     this.signer = new Wallet(process.env.NEXT_PUBLIC_ETHEREUM_PRIVATE_KEY, this.provider)
     this.unirep = new Contract(unirepAddress, unirepAbi, this.signer)
 
@@ -88,7 +91,7 @@ export class UnirepUser {
     this.latestTransitionedEpoch = await UnirepUser.user.userState.latestTransitionedEpoch()
 
     UnirepUser.user.identity = this.identity
-    UnirepUser.hasSignedUp = await userState.hasSignedUp( BigInt(attesterAddress))
+    UnirepUser.hasSignedUp = await userState.hasSignedUp(BigInt(attesterAddress))
 
     if (!UnirepUser.hasSignedUp) {
       await this.signup()
@@ -97,7 +100,10 @@ export class UnirepUser {
     }
 
     const reputation = await this.fetchReputation()
-    console.log(`Reputaion`, reputation)
+
+    if (reputation?.posRep !== undefined) {
+      this.reputation = reputation
+    }
   }
 
   /**
@@ -171,6 +177,7 @@ export class UnirepUser {
    */
   async userTransition(): Promise<string | void> {
     const userState = this.getUserState()
+    await userState.sync.start()
     await userState.waitForSync()
     const targetEpoch = await this.unirep.attesterCurrentEpoch(attesterAddress)
 
@@ -178,7 +185,6 @@ export class UnirepUser {
       const { publicSignals, proof } = await userState.genUserStateTransitionProof({ toEpoch: targetEpoch })
       await (await this.unirep.userStateTransition(publicSignals, proof)).wait()
       await userState.waitForSync()
-      console.log('User transition Completed:', attesterAddress)
       await this.updateUserEpochKey()
     } catch (error) {
       console.error('Error:', error.message || String(error))
@@ -218,6 +224,9 @@ export class UnirepUser {
    * @returns Reputation data.
    */
   async fetchReputation() {
-    return await UnirepUser?.user?.userState?.getData?.() || null
+    console.log('Fetching reputation...')
+    const repuation = await UnirepUser?.user?.userState?.getData?.()
+    if (!repuation) return console.error('User state not found')
+    return this.reputation
   }
 }

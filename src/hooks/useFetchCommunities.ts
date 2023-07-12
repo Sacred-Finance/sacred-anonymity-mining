@@ -2,11 +2,18 @@ import { forumContract } from '@/constant/const'
 import { fetchCommunitiesData } from '@/utils/communityUtils'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { useEffect, useRef } from 'react'
-import { Event } from '@ethersproject/contracts/src.ts'
+import { Event } from '@ethersproject/contracts'
+import { Group } from '@/types/contract/ForumInterface'
 
 export const useFetchCommunities = (loadOnInit = true) => {
-  const { dispatch } = useCommunityContext()
+  const { dispatch, state } = useCommunityContext()
   const fetchCommunities = async () => {
+    if (state.communities.length > 0) {
+      console.log('Communities already loaded')
+      return state.communities
+    } else {
+      console.log('Fetching communities')
+    }
     if (!forumContract) {
       console.error('Forum contract not found')
       return
@@ -15,12 +22,11 @@ export const useFetchCommunities = (loadOnInit = true) => {
       const groups: Array<Event> = await forumContract.queryFilter(forumContract.filters.NewGroupCreated())
       if (!groups) return
       const communitiesData = await fetchCommunitiesData({ groups })
-      const fulfilledCommunities = communitiesData?.filter(community => community)
       dispatch({
         type: 'SET_COMMUNITIES',
-        payload: fulfilledCommunities,
+        payload: communitiesData as Group[],
       })
-      return fulfilledCommunities
+      return communitiesData
     } catch (e) {
       console.error(e)
     }
@@ -35,8 +41,7 @@ export const useFetchCommunities = (loadOnInit = true) => {
   return fetchCommunities
 }
 
-
-type GroupId = number; // Define GroupId type or replace it with your actual type
+type GroupId = number // Define GroupId type or replace it with your actual type
 export const useFetchCommunitiesByIds = (groupIds: GroupId[], loadOnInit = true) => {
   const { dispatch, state } = useCommunityContext()
 
@@ -48,12 +53,10 @@ export const useFetchCommunitiesByIds = (groupIds: GroupId[], loadOnInit = true)
     try {
       if (!groupIds) return
       const communitiesData = await fetchCommunitiesData({ groups: groupIds })
-      const fulfilledCommunities = communitiesData?.filter(community => community)
 
       // Merge new and existing communities, and remove duplicates
-      const existingGroupIds = new Set(state.communities.map(community => community.groupId));
-      const uniqueCommunities = fulfilledCommunities.filter(community => !existingGroupIds.has(community.groupId));
-
+      const existingGroupIds = new Set(state.communities.map(community => community.groupId))
+      const uniqueCommunities = communitiesData.filter(community => !existingGroupIds.has(community.groupId))
       const mergedCommunities = [...state.communities, ...uniqueCommunities]
 
       dispatch({

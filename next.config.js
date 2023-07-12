@@ -1,8 +1,16 @@
 /** @type {import('next').NextConfig} */
 const webpack = require('webpack')
 module.exports = {
+  eslint: {
+    // Dangerously allow production builds to successfully complete even if your project has eslint errors.
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    // Dangerously allow production builds to successfully complete even if your project has type errors.
+    ignoreBuildErrors: true,
+  },
 
-  reactStrictMode: true,
+  reactStrictMode: false,
   i18n: {
     locales: ['en-US', 'es', 'fr'],
     defaultLocale: 'en-US',

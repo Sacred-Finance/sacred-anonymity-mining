@@ -10,6 +10,7 @@ import { parseBytes32String } from 'ethers/lib/utils'
 export const useFetchUsers = (loadOnInit = true) => {
   const { dispatch } = useCommunityContext()
 
+
   const provider = useProvider({ chainId: polygonMumbai.id })
 
   const forumContract = useContract({
@@ -23,6 +24,7 @@ export const useFetchUsers = (loadOnInit = true) => {
       console.error('Forum contract not found or provider not found')
       return
     }
+    console.log('useFetchUsers')
 
     try {
       const users = await forumContract?.queryFilter(forumContract.filters.NewUser())
