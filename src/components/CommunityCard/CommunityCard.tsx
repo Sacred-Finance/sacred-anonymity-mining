@@ -7,6 +7,7 @@ import { CommunityCardHeader } from './CommunityCardHeader'
 import { CommunityCardBody } from './CommunityCardBody'
 import Link from 'next/link'
 import { Group } from '@/types/contract/ForumInterface'
+import {CommunityId} from "@/contexts/CommunityProvider";
 
 export const CommunityContext = React.createContext<Group | null>(null)
 
@@ -28,7 +29,7 @@ export const CommunityCard = ({
   const [isEditGroupVisible, setIsEditGroupVisible] = React.useState(false)
   const [isDeleteGroupVisible, setIsDeleteGroupVisible] = React.useState(false)
 
-  const { write } = useRemoveGroup(community.groupId)
+  const { write } = useRemoveGroup(community.groupId as CommunityId)
 
   // new ref for modal
   const cardRef = useRef<HTMLDivElement | null>(null)
@@ -65,7 +66,7 @@ export const CommunityCard = ({
               <EditGroupModal community={community} hidden={!isEditGroupVisible} />
               {isAdmin && (
                 <RemoveGroup
-                  onClick={() => write({ recklesslySetUnpreparedArgs: [community.id] })}
+                  onClick={() =>  write?.({ recklesslySetUnpreparedArgs: [community.id] })}
                   hidden={!isDeleteGroupVisible}
                 />
               )}

@@ -18,7 +18,7 @@ import type {
   Result,
   EventFragment,
 } from "@ethersproject/abi";
-import type { Listener, Provider } from "@ethersproject/providers";
+import { JsonRpcProvider, Listener } from "@ethersproject/providers";
 import type {
   TypedEventFilter,
   TypedEvent,
@@ -184,7 +184,7 @@ export type NewUserEvent = TypedEvent<
 export type NewUserEventFilter = TypedEventFilter<NewUserEvent>;
 
 export interface Forum extends BaseContract {
-  connect(signerOrProvider: Signer | Provider | string): this;
+  connect(signerOrProvider: Signer | JsonRpcProvider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 

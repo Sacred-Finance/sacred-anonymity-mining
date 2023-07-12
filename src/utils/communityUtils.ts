@@ -7,7 +7,7 @@ import { CommunityDetails, Requirement } from '@/lib/model'
 import pica from 'pica'
 import { useCallback } from 'react'
 import { Group } from '@/types/contract/ForumInterface'
-import { Event } from '@ethersproject/contracts/src.ts'
+import { Event } from '@ethersproject/contracts'
 
 type GroupId = number
 

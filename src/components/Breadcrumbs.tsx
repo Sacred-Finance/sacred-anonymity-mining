@@ -11,7 +11,7 @@ function useBreadcrumbs(): BreadCrumbItem[] {
 
   const { groupId, postId } = router.query
 
-  const community = useCommunityById(groupId)
+  const community = useCommunityById(groupId as string)
 
 
   useEffect(() => {

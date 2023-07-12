@@ -2,7 +2,7 @@ import { forumContract } from '@/constant/const'
 import { fetchCommunitiesData } from '@/utils/communityUtils'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { useEffect, useRef } from 'react'
-import { Event } from '@ethersproject/contracts/src.ts'
+import { Event } from '@ethersproject/contracts'
 import { Group } from '@/types/contract/ForumInterface'
 
 export const useFetchCommunities = (loadOnInit = true) => {
