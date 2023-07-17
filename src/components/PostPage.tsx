@@ -85,6 +85,7 @@ export function PostPage({ postInstance, postId, groupId }) {
   const [isPostEditable, setIsPostEditable] = useState(false)
   const [isPostEditing, setPostEditing] = useState(false)
   const [isPostBeingSaved, setPostBeingSaved] = useState(false)
+  const [editableComments, setEditableComments] = useState<string[]>([])
 
   const [postTitle, setPostTitle] = useState('')
   const [postDescription, setPostDescription] = useState<OutputData>(null)
@@ -114,10 +115,10 @@ export function PostPage({ postInstance, postId, groupId }) {
     const generatedNote = await createNote(userPosting)
     const generatedNoteAsBigNumber = BigNumber.from(generatedNote).toString()
     const noteBigNumber = BigNumber.from(note).toString()
+
+    console.log('test-log', generatedNoteAsBigNumber, noteBigNumber)
     setIsPostEditable(noteBigNumber === generatedNoteAsBigNumber)
   }
-
-
 
   async function fetchComments() {
     console.log('test-log', 'fetching comments')
@@ -129,8 +130,6 @@ export function PostPage({ postInstance, postId, groupId }) {
     const hasSufficientBalance = await checkUserBalance()
     if (!hasSufficientBalance) return
     setPostEditing(true)
-    // setPostTitle(postFetched?.title)
-    // setPostDescription(postFetched?.description)
   }
 
 
@@ -257,7 +256,6 @@ export function PostPage({ postInstance, postId, groupId }) {
   }
 
   const checkIfCommentsAreEditable = async () => {
-    console.log(comments)
     for (const c of comments) {
       const note = c?.note
       const contentCID = c?.contentCID
@@ -266,11 +264,14 @@ export function PostPage({ postInstance, postId, groupId }) {
         const userPosting = new Identity(`${address}_${groupId}_${hasUserJoined?.name}`)
         const generatedNote = await createNote(userPosting)
         const generatedNoteAsBigNumber = BigNumber.from(generatedNote).toString()
+
+        console.log('test-log comments', generatedNoteAsBigNumber, noteBigNumber)
         if (generatedNoteAsBigNumber === noteBigNumber) {
-          updateCommentMap(c.id, {
-            comment: { ...(commentsMap[c.id]?.comment || c) },
-            isEditable: true,
-          })
+          setEditableComments(prev => [...prev, c.id])
+          // updateCommentMap(c.id, {
+          //   comment: { ...(commentsMap[c.id]?.comment || c) },
+          //   isEditable: true,
+          // })
         }
       }
     }
@@ -330,61 +331,7 @@ export function PostPage({ postInstance, postId, groupId }) {
       })
     }
   }
-  // const editPost = async () => {
-  //   const hasSufficientBalance = await checkUserBalance()
-  //   if (!hasSufficientBalance) return
-  //
-  //   setPostBeingSaved(true)
-  //   // setPostEditing(false);
-  //   setIsLoading(true)
-  //
-  //   if (!postTitle || !postDescription) {
-  //     toast.error(t('alert.fillAllFields'))
-  //     setIsLoading(false)
-  //     setPostBeingSaved(false)
-  //     return
-  //   }
-  //
-  //   if (_.isEqual(postFetched.title, postTitle) && _.isEqual(postFetched.description, postDescription)) {
-  //     toast.error(t('alert.noChange'))
-  //
-  //     setIsLoading(false)
-  //     setPostBeingSaved(false)
-  //     return
-  //   }
-  //
-  //   try {
-  //     const postContent: PostContent = {
-  //       title: postTitle,
-  //       description: postDescription,
-  //     }
-  //     const { status } = await postInstance?.current?.edit(
-  //       postContent,
-  //       address,
-  //       postId,
-  //       users,
-  //       hasUserJoined,
-  //       groupId,
-  //       setIsLoading
-  //     )
-  //
-  //     if (status === 200) {
-  //       setPostEditing(false)
-  //       toast.success(t('alert.postEditSuccess'))
-  //
-  //       console.log(`Post Edited Successfully`)
-  //       setIsLoading(false)
-  //       setPostBeingSaved(false)
-  //     }
-  //   } catch (error) {
-  //     console.log(error)
-  //     toast.error(t('alert.editFailed'))
-  //
-  //     setIsLoading(false)
-  //     setPostBeingSaved(false)
-  //     setPostEditing(true)
-  //   }
-  // }
+
 
   const voteForPost = async (postId, voteType: 0 | 1) => {
     if (!hasUserJoined) return
@@ -414,31 +361,34 @@ export function PostPage({ postInstance, postId, groupId }) {
   }
 
   const CommentActions = ({ comment, canDelete }) => {
+    const isEditable = editableComments.includes(comment.id);
+    const currentCommentMap = commentsMap[comment.id];
+    const isEditing = currentCommentMap?.isEditing;
+    const commentContent = currentCommentMap?.comment?.content;
+
     return (
-      <div className="mt-3 flex flex-row gap-4">
-        {commentsMap[comment.id]?.isEditable && !commentsMap[comment.id]?.isEditing && (
-          <button onClick={() => onClickEditComment(comment)}>{t('button.edit')}</button>
-        )}
-        {commentsMap[comment.id]?.isEditing && (
-          <button onClick={() => onClickCancelComment(comment)}>{t('button.cancel')}</button>
-        )}
-        {commentsMap[comment.id]?.isEditing && (
-          <button
-            disabled={
-              !commentsMap[comment.id]?.comment?.content || !commentsMap[comment.id]?.comment?.content?.blocks?.length
-            }
-            onClick={() => saveEditedComment(comment)}
-          >
-            {t('button.save')}
-          </button>
-        )}
-        {(commentsMap[comment.id]?.isEditable || canDelete) && !commentsMap[comment.id]?.isEditing && (
-          <button className="text-small color-[red.500]" onClick={() => deleteItem(comment.id, 1)}>
-            {t('button.delete')}
-          </button>
-        )}
-      </div>
-    )
+        <div className="mt-3 flex flex-row gap-4">
+          {isEditable && !isEditing && (
+              <button onClick={() => onClickEditComment(comment)}>{t('button.edit')}</button>
+          )}
+          {isEditing && (
+              <>
+                <button onClick={() => onClickCancelComment(comment)}>{t('button.cancel')}</button>
+                <button
+                    disabled={!commentContent || !commentContent.blocks?.length}
+                    onClick={() => saveEditedComment(comment)}
+                >
+                  {t('button.save')}
+                </button>
+              </>
+          )}
+          {(currentCommentMap?.isEditable || canDelete) && !isEditing && (
+              <button className="text-small color-[red.500]" onClick={() => deleteItem(comment.id, 1)}>
+                {t('button.delete')}
+              </button>
+          )}
+        </div>
+    );
   }
 
   const sortedCommentsData = useSortedVotes(tempComments, comments, commentsSortBy)
@@ -460,65 +410,46 @@ export function PostPage({ postInstance, postId, groupId }) {
         clearInput={() => setComment(null)}
       />
       {sortedCommentsData.map((c, i) => (
-        <motion.div
-          key={i}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="p-4" // tailwind class for padding
-        >
-          <div key={c.id}>
-            <div className="mb-8 flex flex-col">
-              <div
-                className={`${
-                  commentIsConfirmed(c.id) || commentsMap[c?.id]?.isSaving
-                    ? 'bg-gray-100 dark:bg-transparent'
-                    : 'bg-gray-100 dark:bg-transparent'
-                }`}
-              >
+          <motion.div
+              key={i}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="p-4" // Tailwind class for padding
+          >
+            <div key={c.id} className="flex flex-col mb-8">
+              <div className={`bg-gray-100 dark:bg-transparent p-4 rounded-md ${commentIsConfirmed(c.id) || commentsMap[c?.id]?.isSaving ? 'border border-green-400' : 'border border-red-400'}`}>
                 {c?.content && (
-                  <div
-                    className={`${
-                      commentsMap[c?.id]?.isEditing ? 'mt-4 min-h-[150px] rounded-md border border-solid pl-4' : ''
-                    }`}
-                  >
-                    <Editor
-                      editorRef={commentEditorRef}
-                      holder={'comment' + '_' + c?.id}
-                      readOnly={!commentsMap[c?.id]?.isEditing}
-                      onChange={val => setOnEditCommentContent(c, val)}
-                      placeholder={t('placeholder.enterComment') as string}
-                      data={c?.content?.blocks ? c?.content : []}
-                    />
-                    {(Boolean(identityCommitment) || canDelete) && <CommentActions comment={c} canDelete={canDelete} />}
-                  </div>
+                    <div className={`mt-4 ${commentsMap[c?.id]?.isEditing ? 'min-h-[150px] rounded-md border border-solid pl-4' : ''}`}>
+                      <Editor
+                          editorRef={commentEditorRef}
+                          holder={'comment' + '_' + c?.id}
+                          readOnly={!commentsMap[c?.id]?.isEditing}
+                          onChange={val => setOnEditCommentContent(c, val)}
+                          placeholder={t('placeholder.enterComment') as string}
+                          data={c?.content?.blocks ? c?.content : []}
+                      />
+                      {(Boolean(identityCommitment) || canDelete) && <CommentActions comment={c} canDelete={canDelete} />}
+                    </div>
                 )}
-                {/*{(!commentIsConfirmed(c.id) ||*/}
-                {/*    commentsMap[c?.id]?.isSaving) && (*/}
-                {/*    // Your Progress component code*/}
-                {/*    <></>*/}
-                {/*)}*/}
               </div>
               <div className="pt-3 text-gray-500">
                 <div
-                  className="flex gap-3"
-                  style={{
-                    visibility: commentIsConfirmed(c.id) ? 'visible' : 'hidden',
-                  }}
+                    className="flex gap-3"
+                    style={{
+                      visibility: commentIsConfirmed(c.id) ? 'visible' : 'hidden',
+                    }}
                 >
                   <div>{/* Your VoteUpButton and VoteDownButton components code */}</div>
                   <p className="my-auto inline-block text-sm">
                     🕛 {c?.createdAt ? formatDistanceToNow(new Date(c?.createdAt).getTime(), { addSuffix: true }) : '-'}
                   </p>
                 </div>
-                {/*{(identityCommitment || canDelete) && (*/}
-                {/*    <></>*/}
-                {/*)}*/}
               </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
       ))}
+
       {isPostBeingSaved && <CircularProgress className={'h-10 w-10'} />}
       {isPostEditing ? (
         <div className={'flex flex-col items-center justify-center'}>
@@ -538,15 +469,6 @@ export function PostPage({ postInstance, postId, groupId }) {
           </div>
         </div>
       )}
-      <>
-        {/*<Editor*/}
-        {/*    data={postDescription}*/}
-        {/*    editorRef={postEditorRef}*/}
-        {/*    onChange={setPostDescription}*/}
-        {/*    placeholder={t('placeholder.enterPostContent')}*/}
-        {/*    holder={groupId + ""}*/}
-        {/*/>*/}
-      </>
     </>
   )
 }

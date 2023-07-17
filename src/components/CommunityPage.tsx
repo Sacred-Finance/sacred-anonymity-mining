@@ -56,8 +56,6 @@ export function CommunityPage({
     signerOrProvider: provider,
   })
 
-
-
   const { checkUserBalance } = useValidateUserBalance(community, address)
   const { setIsLoading, isLoading: isContextLoading } = useLoaderContext()
   const postEditorRef = useRef<any>()
@@ -70,7 +68,7 @@ export function CommunityPage({
     })()
   }, [forumContract, groupId, provider])
 
-  const { data, isLoading } = useSWR(`${groupId}_group`, postId ? fetchPost : fetchPosts, {revalidateOnFocus:false})
+  const { data, isLoading } = useSWR(`${groupId}_group`, postId ? fetchPost : fetchPosts, { revalidateOnFocus: false })
 
   async function fetchPosts() {
     console.log('fetching posts')
@@ -197,7 +195,7 @@ export function CommunityPage({
 
   if (isLoading) return null
   const sortedAndFilteredData = sortedData.filter(post => {
-    console.log({postId: post?.id, post})
+    console.log({ postId: post?.id, post })
 
     return post?.id === postId
   })
@@ -220,10 +218,8 @@ export function CommunityPage({
           <h1 className="text-2xl font-bold text-black">{community?.name}</h1>
         </div>
 
-
         {!(user as User)?.identityCommitment && community && <JoinCommunityButton community={community} />}
         <ReputationCard unirepUser={unirepUser} />
-
       </div>
 
       {isNaN(postId) && (
@@ -241,13 +237,12 @@ export function CommunityPage({
         />
       )}
 
-
       <div className="rounded-lg bg-white/10 p-6">
         {!isNaN(postId) && sortedData.length ? (
           <>
             <PostList
               posts={sortedAndFilteredData}
-              // data={data}
+              showFilter={false}
               voteForPost={voteForPost}
               handleSortChange={handleSortChange}
             />
@@ -255,7 +250,7 @@ export function CommunityPage({
         ) : sortedData?.length > 0 ? (
           <PostList
             posts={sortedData}
-            // data={data}
+            showFilter={true}
             voteForPost={voteForPost}
             handleSortChange={handleSortChange}
           />

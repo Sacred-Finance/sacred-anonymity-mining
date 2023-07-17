@@ -126,7 +126,7 @@ export async function create(content, type, address, users, postedByUser, groupI
         const { data } = res
         const commentHex = data.args[2].hex
         const commentId = parseInt(commentHex, 16)
-        await this.cacheNewComment(content, commentId, note, cid, setWaiting)
+        await this.cacheNewComment.call(this,content, commentId, note, cid, setWaiting)
         return res
       })
     }
@@ -218,7 +218,7 @@ export async function editContent(
     )
 
     return await edit(itemId, signal, note, a, b, c).then(async data => {
-      await cacheUpdatedContent(type, content, itemId, groupId, note, cid, setWaiting)
+      await cacheUpdatedContent.call(this,type, content, itemId, groupId, note, cid, setWaiting)
       return data
     })
   } catch (error) {
@@ -313,7 +313,7 @@ export async function getAllContent(type, ids = []) {
         )
         if (data) {
           parsedContentItems.push(data)
-          // await setCache(this.specificId(parseInt(item?.id)), data)
+          await setCache(this.specificId(parseInt(item?.id)), data)
         }
       } else {
         await removeFromCache(this.specificId(parseInt(item?.id)))
@@ -354,9 +354,6 @@ export async function getAllContent(type, ids = []) {
 
     let validCachedItems = []
     let outdatedItemIds = []
-
-
-    // ensure mCache has no null values
 
 
     // iterate through the cache and check if the items are outdated
@@ -426,6 +423,9 @@ export const cacheNewContent = async (content, contentId, note, contentCID, setW
     }
   }
 
+  console.log('this', this)
+  if (!this) throw new Error('this not set')
+  console.log(this.cacheId(), this.specificId(contentId), newContent)
   await setCache(this.specificId(contentId), newContent) // update the cache with the new content
 
   if (!this.cacheId()) throw new Error('cacheId not set')
@@ -454,8 +454,8 @@ export async function updateContentVote(itemId, voteType, confirmed: boolean, ty
     itemId = +itemId
   }
 
-  let cacheIdMethod = type + 'sCacheId'
-  let specificIdMethod = 'specific' + capitalizeFirstLetter(type) + 'Id'
+  let cacheIdMethod;
+  let specificIdMethod;
   if (type === 'post') {
     cacheIdMethod = this.groupCacheId()
   } else if (type === 'comment') {
@@ -498,5 +498,3 @@ export async function updateContentVote(itemId, voteType, confirmed: boolean, ty
     { revalidate: false }
   )
 }
-
-// Helper function

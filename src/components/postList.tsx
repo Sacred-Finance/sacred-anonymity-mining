@@ -8,10 +8,10 @@ import { formatDistanceToNow } from 'date-fns'
 import { BigNumber } from 'ethers'
 import { p } from '@noble/curves/pasta'
 
-export const PostList = ({ posts, voteForPost, handleSortChange }) => {
+export const PostList = ({ posts, voteForPost, handleSortChange, showFilter }) => {
   return (
     <div className="mt-6 flex flex-col space-y-4 ">
-      <SortBy onSortChange={handleSortChange} targetType="posts" />
+      {showFilter && <SortBy onSortChange={handleSortChange} targetType="posts" />}
       {posts.map((p, i) => (
         <PostItem post={p} key={p.id} voteForPost={voteForPost} />
       ))}
@@ -70,7 +70,6 @@ const PostItem = ({ voteForPost, post }) => {
             <span className="text-gray-500">{upvote}</span>
             <VoteDownButton
               isLoading={isLoading}
-
               onClick={async e => {
                 e.stopPropagation()
                 e.preventDefault()

@@ -106,8 +106,8 @@ export class Post {
       // Validate parameters
       if (!address) throw new Error('Invalid address')
       if (!Array.isArray(users)) throw new Error('Invalid users array')
-      if (!itemId) throw new Error('Invalid item ID')
-      if (!groupId) throw new Error('Invalid group ID')
+      if (isNaN(itemId)) throw new Error('Invalid item ID')
+      if (isNaN(groupId)) throw new Error('Invalid group ID')
 
       const voteCmdNum = hashBytes2(+itemId, 'vote')
       const signal = utils.hexZeroPad('0x' + voteCmdNum.toString(16), 32)
