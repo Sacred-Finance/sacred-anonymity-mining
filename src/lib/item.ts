@@ -48,6 +48,7 @@ export async function handleDeleteItem(address: string, postedByUser: User, item
   }
 }
 
+// todo: create works, but it fails in either the caching, or updating the UI after its made - fix currently is refreshing the page.
 export async function create(content, type, address, users, postedByUser, groupId, setWaiting, onIPFSUploadSuccess) {
   let currentDate = new Date()
   const message = currentDate.getTime().toString() + '#' + JSON.stringify(content)
@@ -136,47 +137,44 @@ export async function create(content, type, address, users, postedByUser, groupI
 }
 
 export async function cacheUpdatedContent(type, content, contentId, groupId, note, contentCID, setWaiting) {
-  if (type === 'post') {
-    await mutate(
-      this.postCacheId(),
-      async postFromCache => {
-        console.log(postFromCache)
-        const updatedPost = { ...postFromCache, ...content, contentCID, note: BigNumber.from(note) }
-        await setCacheAtSpecificPath(this.specificPostId(contentId), updatedPost, '$.data')
-        return { ...updatedPost }
-      },
-      { revalidate: false }
+  const handleMutation = async (updateContentCallback) => {
+    return await mutate(
+        this.cacheId(),
+        updateContentCallback,
+        { revalidate: false }
     )
-    setWaiting(false)
-  } else if (type === 'comment') {
-    await mutate(
-      this.commentsCacheId(),
-      async commentsFromCache => {
-        console.log(commentsFromCache)
-        const commentIndex = commentsFromCache.findIndex(p => {
-          return +p.id == +contentId || +this.id == BigNumber.from(p.id).toNumber()
-        })
-        commentsFromCache[commentIndex] = { ...commentsFromCache[commentIndex], ...content, contentCID, note }
+  }
 
-        await Promise.allSettled([
-          setCacheAtSpecificPath(
-            this.specificCommentId(contentId),
+  if (type === 'post') {
+    await handleMutation(async postFromCache => {
+      const updatedPost = { ...postFromCache, ...content, contentCID, note: BigNumber.from(note) }
+      await setCacheAtSpecificPath(this.specificId(contentId), updatedPost, '$.data')
+      return { ...updatedPost }
+    })
+  } else if (type === 'comment') {
+    await handleMutation(async commentsFromCache => {
+      const commentIndex = commentsFromCache.findIndex(p => {
+        return +p.id == +contentId || +this.id == BigNumber.from(p.id).toNumber()
+      })
+      commentsFromCache[commentIndex] = { ...commentsFromCache[commentIndex], ...content, contentCID, note }
+
+      await Promise.allSettled([
+        setCacheAtSpecificPath(
+            this.specificId(contentId),
             commentsFromCache[commentIndex]?.content,
             '$.data.content'
-          ),
-          setCacheAtSpecificPath(this.specificCommentId(contentId), JSON.stringify(contentCID), '$.data.contentCID'),
-          setCacheAtSpecificPath(this.specificCommentId(contentId), BigNumber.from(note), '$.data.note'),
-        ])
+        ),
+        setCacheAtSpecificPath(this.specificCommentId(contentId), JSON.stringify(contentCID), '$.data.contentCID'),
+        setCacheAtSpecificPath(this.specificCommentId(contentId), BigNumber.from(note), '$.data.note'),
+      ])
 
-        return [...commentsFromCache]
-      },
-      { revalidate: false }
-    )
-
-    setWaiting(false)
+      return [...commentsFromCache]
+    })
   } else {
     throw Error("Invalid type. Type must be 'post' or 'comment'.")
   }
+
+  setWaiting(false)
 }
 
 export async function editContent(
@@ -189,7 +187,7 @@ export async function editContent(
   setWaiting: Function
 ) {
   let currentDate = new Date()
-  let messageContent = type === 'post' ? JSON.stringify(content) : content
+  let messageContent = content
   const message = currentDate.getTime().toString() + '#' + JSON.stringify(messageContent)
   console.log(`Editing your anonymous ${type}...`)
   let cid
@@ -403,7 +401,7 @@ export const cacheNewContent = async (content, contentId, note, contentCID, setW
   let newContent
   if (type === 'post') {
     return console.log('skip post cache', content, contentId, note, contentCID, setWaiting, type);
-    const parsedPost = parsePost(content)
+    const parsedPost = parsePost(content) //todo: is this needed
     newContent = {
       ...parsedPost,
       createdAt: new Date(Date.now()),
@@ -424,12 +422,8 @@ export const cacheNewContent = async (content, contentId, note, contentCID, setW
       contentCID,
     }
   }
-
-  console.log('this', this)
   if (!this) throw new Error('this not set')
-  console.log(this.cacheId(), this.specificId(contentId), newContent)
   await setCache(this.specificId(contentId), newContent) // update the cache with the new content
-
   if (!this.cacheId()) throw new Error('cacheId not set')
   mutate(
     this.cacheId(),

@@ -22,6 +22,7 @@ import { motion } from 'framer-motion'
 import { CircularProgress } from '@components/CircularProgress'
 import dynamic from 'next/dynamic'
 import { useRemoveItemFromForumContract } from '@/hooks/useRemoveItemFromForumContract'
+import {useLocalCommunity} from "@components/CommunityCard/CommunityCard";
 
 const Editor = dynamic(() => import('@/components/editor-js/Editor'), {
   ssr: false,
@@ -52,7 +53,9 @@ export function PostPage({ postInstance, postId, groupId }) {
   const activeUser = useActiveUser({ groupId })
   const { state } = useCommunityContext()
   const { users, communities } = state
-  const community = useCommunityById(groupId)
+
+  const community = useLocalCommunity()
+
 
   const { address } = useAccount()
   const { isLoading, setIsLoading } = useLoaderContext()

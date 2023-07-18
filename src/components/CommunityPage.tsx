@@ -27,6 +27,7 @@ import { createNote, getBytes32FromIpfsHash, hashBytes } from '@/lib/utils'
 import { Identity } from '@semaphore-protocol/identity'
 import Edit from '@pages/communities/[groupId]/edit'
 import Editor from './editor-js/Editor'
+import { CommunityContext } from './CommunityCard/CommunityCard'
 
 export function CommunityPage({
   children,
@@ -86,14 +87,21 @@ export function CommunityPage({
   }) as { data: Post | Post[]; isLoading: boolean }
 
   async function fetchPosts() {
+    setIsLoading(true)
     const posts = await postInstance.getAll()
     setPosts(posts)
+    setIsLoading(false)
     return posts
   }
 
   async function fetchPost() {
+    setIsLoading(true)
     const post = await postInstance.get()
-    setPost(post[0])
+    const newPost = post[0]
+    setPost(newPost)
+    setPostTitle(newPost.title)
+    setPostDescription(newPost.description)
+    setIsLoading(false)
     return post
   }
 
@@ -121,7 +129,7 @@ export function CommunityPage({
     } else {
       setIsPostEditable(false)
     }
-  }, [user, post])
+  }, [user, post, postId])
 
   const validateRequirements = () => {
     if (!address) return toast.error(t('alert.connectWallet'), { toastId: 'connectWallet' })
@@ -256,6 +264,39 @@ export function CommunityPage({
           showFilter={false}
           voteForPost={voteForPost}
           handleSortChange={handleSortChange}
+          showDescription={true}
+          editor={
+            isPostEditable ? (
+              <>
+                <NewPostForm
+                  variant={''}
+                  id={groupId}
+                  postEditorRef={postEditorRef}
+                  postTitle={postTitle}
+                  setPostTitle={setPostTitle}
+                  postDescription={postDescription}
+                  setPostDescription={setPostDescription}
+                  readOnly={isLoading || !community?.name || isContextLoading}
+                  isLoading={isLoading || !community?.name || isContextLoading}
+                  clearInput={clearInput}
+                  isEdit={true}
+                  addPost={async () => {
+                    await postInstance?.edit(
+                      { title: postTitle, description: postDescription },
+                      address as string,
+                      postId,
+                      user as User,
+                      groupId,
+                      setIsLoading
+                    )
+                    setPostEditing(false)
+                  }}
+                />
+              </>
+            ) : (
+              <></>
+            )
+          }
         />
       )
     } else if (sortedData?.length > 0) {
@@ -310,45 +351,12 @@ export function CommunityPage({
           />
         </>
       ) : (
-        <>
-          {isPostEditable && (
-            <div className="flex items-center justify-between">
-                  <>
-                    <NewPostForm
-                        id={groupId}
-                        postEditorRef={postEditorRef}
-                        postTitle={postTitle}
-                        setPostTitle={setPostTitle}
-                        postDescription={postDescription}
-                        setPostDescription={setPostDescription}
-                        readOnly={isLoading || !community?.name || isContextLoading}
-                        isLoading={isLoading || !community?.name || isContextLoading}
-                        clearInput={clearInput}
-                        isEdit={true}
-                        addPost={async ()=>{
-                          await postInstance?.edit(
-                              { title: postTitle, description: postDescription },
-                              address as string,
-                              postId,
-                              user as User,
-                              groupId,
-                              setIsLoading
-                          )
-                          setPostEditing(false)
-                        }}
-                    />
-
-
-                  </>
-
-            </div>
-          )}
-        </>
+        <></>
       )}
 
       <div className="rounded-lg bg-white/10 p-6">{renderPostList()}</div>
-
-      {children}
+      {/*add a context provider for post data*/}
+      <CommunityContext.Provider value={community}>{children}</CommunityContext.Provider>
     </div>
   )
 }
