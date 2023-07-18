@@ -22,7 +22,7 @@ import { CommunityCardHeader } from '@components/CommunityCard/CommunityCardHead
 import { CommunityContext } from '@components/CommunityCard/CommunityCard'
 import { CommunityCardBody } from '@components/CommunityCard/CommunityCardBody'
 import { toast } from 'react-toastify'
-import WithStandardLayout from "@components/HOC/WithStandardLayout";
+import WithStandardLayout from '@components/HOC/WithStandardLayout'
 
 // todo: figure out when/if it's beneficial to make calls to individual contract updates vs editing the entire group at once
 
@@ -35,6 +35,10 @@ interface EditGroupProps {
   group: Group
 }
 
+export const isImageFile = (file: File) => {
+  return file && file.type.startsWith('image/')
+}
+
 function EditGroup({ group }: EditGroupProps) {
   const router = useRouter()
   const { address } = useAccount()
@@ -44,8 +48,10 @@ function EditGroup({ group }: EditGroupProps) {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const [groupName, setGroupName] = useState<string>('')
   const [groupDescriptionState, setGroupDescriptionState] = useState<string>('')
-  const [bannerFile, setBannerFile] = useState<string | null>(null)
-  const [logoFile, setLogoFile] = useState<string | null>(null)
+  const [bannerFile, setBannerFile] = useState<File | null>(null)
+  const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [bannerUrl, setBannerUrl] = useState<string | null>(null)
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const [previewCard, setPreviewCard] = useState<boolean>(false)
 
   // Define the provider and contract within a useEffect to avoid unnecessary re-renders
@@ -55,11 +61,6 @@ function EditGroup({ group }: EditGroupProps) {
     abi: ForumABI.abi,
     signerOrProvider: provider,
   }) as ethers.Contract
-
-  // Helper function to check if a file is an image
-  const isImageFile = (file: File) => {
-    return file && file.type.startsWith('image/')
-  }
 
   // Helper function to fetch and handle the image
   const fetchImage = (imagePath: string, imageType: HandleSetImage['imageType']) => {
@@ -84,9 +85,11 @@ function EditGroup({ group }: EditGroupProps) {
     if (file && isImageFile(file)) {
       newImage = URL.createObjectURL(file)
     }
-
     const setImage = imageType === 'logo' ? setLogoFile : setBannerFile
-    setImage(newImage)
+    setImage(file)
+
+    const setUrl = imageType === 'logo' ? setLogoUrl : setBannerUrl
+    setUrl(newImage)
   }
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -175,14 +178,14 @@ function EditGroup({ group }: EditGroupProps) {
 
         <div className="flex gap-3 ">
           <PictureUpload
-            uploadedImageUrl={bannerFile}
+            uploadedImageUrl={bannerUrl}
             displayName={t('banner')}
             name={'banner'}
             setImageFileState={handleSetImage}
           />
 
           <PictureUpload
-            uploadedImageUrl={logoFile}
+            uploadedImageUrl={logoUrl}
             displayName={t('logo')}
             name={'logo'}
             setImageFileState={handleSetImage}
@@ -226,8 +229,8 @@ function EditGroup({ group }: EditGroupProps) {
                 ...group,
                 groupDetails: {
                   ...group?.groupDetails,
-                  logo: logoFile,
-                  banner: bannerFile,
+                  logo: logoUrl,
+                  banner: bannerUrl,
                   description: groupDescriptionState,
                 },
               }}
@@ -236,8 +239,8 @@ function EditGroup({ group }: EditGroupProps) {
                 <h4 className="text-[20px] text-white">After</h4>
 
                 <CommunityCardHeader
-                  srcBannerOverride={bannerFile || undefined}
-                  srcLogoOverride={logoFile || undefined}
+                  srcBannerOverride={bannerUrl || undefined}
+                  srcLogoOverride={logoUrl || undefined}
                 />
                 <CommunityCardBody />
               </div>

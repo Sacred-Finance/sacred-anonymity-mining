@@ -17,8 +17,13 @@ import Header from '@components/Header'
 import { Breadcrumbs } from '@components/Breadcrumbs'
 import Footer from '@components/Footer'
 import Link from 'next/link'
-import WithStandardLayout from "@components/HOC/WithStandardLayout";
+import WithStandardLayout from '@components/HOC/WithStandardLayout'
+import { isImageFile } from '@pages/communities/[groupId]/edit'
 
+export interface HandleSetImage {
+  file: File | null
+  imageType: 'logo' | 'banner'
+}
 function RemoveIcon() {
   return (
     <svg
@@ -35,6 +40,8 @@ function RemoveIcon() {
 
 function CreateGroupFormUI({ onCreate }) {
   const { t } = useTranslation()
+
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const initialValues = {
     tokenAddress: '',
@@ -57,11 +64,22 @@ function CreateGroupFormUI({ onCreate }) {
 
   const [bannerFile, setBannerFile] = useState<File | null>(null)
   const [logoFile, setLogoFile] = useState<File | null>(null)
+
+  const [bannerUrl, setBannerUrl] = useState<string | null>(null)
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
+
   const handleNameChange = e => {
     setGroupName(e.target.value)
   }
   const handleDescriptionChange = e => {
     setGroupDescription(e.target.value)
+  }
+
+  const handleSetImage = ({ file, imageType }: HandleSetImage) => {
+    const setImage = imageType === 'logo' ? setLogoFile : setBannerFile
+    const setUrl = imageType === 'logo' ? setLogoUrl : setBannerUrl
+      setImage(file)
+      setUrl(file ? URL.createObjectURL(file): "")
   }
 
   const [selectedChain, setSelectedChain] = useState<Chain>(supportedChains[polygonMumbai.id])
@@ -129,6 +147,7 @@ function CreateGroupFormUI({ onCreate }) {
   }
 
   const submit = async () => {
+    setIsSubmitting(true)
     const tokenRequirements = formik.values.tokenRequirements.map(v => {
       return {
         ...v,
@@ -144,6 +163,7 @@ function CreateGroupFormUI({ onCreate }) {
       groupDescription,
       note: BigInt(0).toString(),
     })
+    setIsSubmitting(false)
   }
 
   const selectChain = async (c: Chain) => {
@@ -153,19 +173,13 @@ function CreateGroupFormUI({ onCreate }) {
   }
 
   const isSubmitDisabled =
+    isSubmitting ||
     !groupName ||
     (reqMandatory &&
       (!formik.isValid ||
         formik.values.tokenRequirements.every(
           r => isNaN(r.minAmount) || !utils.isAddress(r.tokenAddress) || !r?.token || isNaN(r.decimals)
         )))
-
-  const { logoUrl, bannerUrl } = useMemo(() => {
-    return {
-      logoUrl: logoFile ? URL.createObjectURL(logoFile) : '',
-      bannerUrl: bannerFile ? URL.createObjectURL(bannerFile) : '',
-    }
-  }, [logoFile, bannerFile])
 
   return (
     <div className={clsx('mx-auto mb-64 h-screen w-full max-w-screen-xl space-y-6 sm:p-8 md:p-24')}>
@@ -199,13 +213,13 @@ function CreateGroupFormUI({ onCreate }) {
           uploadedImageUrl={bannerUrl}
           displayName={t('banner')}
           name={'banner'}
-          setImageFileState={setBannerFile}
+          setImageFileState={handleSetImage}
         />
         <PictureUpload
           uploadedImageUrl={logoUrl}
           displayName={t('logo')}
           name={'logo'}
-          setImageFileState={setLogoFile}
+          setImageFileState={handleSetImage}
         />
       </div>
 
@@ -373,10 +387,8 @@ function CreateGroupFormUI({ onCreate }) {
 }
 
 function CreateGroupForm() {
-  const createCommunity = useCreateCommunity(() => {});
-  return (
-      <CreateGroupFormUI onCreate={createCommunity} />
-  );
+  const createCommunity = useCreateCommunity(() => {})
+  return <CreateGroupFormUI onCreate={createCommunity} />
 }
 
-export default WithStandardLayout(CreateGroupForm);
+export default WithStandardLayout(CreateGroupForm)

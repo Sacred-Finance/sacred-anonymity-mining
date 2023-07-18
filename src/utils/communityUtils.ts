@@ -83,7 +83,6 @@ export const uploadImages = async ({
   bannerFile,
   logoFile,
 }: UploadImagesParams): Promise<{ bannerCID: string | null; logoCID: string | null }> => {
-
   const [bannerResult, logoResult] = await Promise.allSettled([
     bannerFile ? uploadImageToIPFS(bannerFile) : Promise.resolve(null),
     logoFile ? uploadImageToIPFS(logoFile) : Promise.resolve(null),
@@ -164,6 +163,7 @@ export const cacheGroupData = async ({
 
 export const useHandleFileImageUpload = setImageFileState => {
   return useCallback(e => {
+    console.log('e', e, setImageFileState)
     handleFileImageUpload(e, setImageFileState)
   }, [])
 }
@@ -196,7 +196,7 @@ export const handleFileImageUpload = (e, setImageFileState) => {
     const imageAspectRatio = img.width / img.height
 
     // Check if the uploaded image's aspect ratio matches the required one
-    if (Math.abs(imageAspectRatio - requiredAspectRatios[imageType]) <= 0.01) {
+    if (Math.abs(imageAspectRatio - requiredAspectRatios[imageType]) <= 0.1) {
       // Set the file based on the image type
       setImageFileState({ file, imageType: imageType })
     } else {

@@ -9,6 +9,7 @@ export const PictureUpload = (props: {
   name: 'banner' | 'logo'
   setImageFileState: Dispatch<SetStateAction<HandleSetImage>>
 }) => {
+
   const handleFileImageUpload = useHandleFileImageUpload(props.setImageFileState)
 
   const { t } = useTranslation()

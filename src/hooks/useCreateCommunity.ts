@@ -25,11 +25,14 @@ export const useCreateCommunity = (onCreateGroupClose: () => void) => {
 
   return useCallback(
     async ({ name, requirements, bannerFile, logoFile, chainId }: ICreateCommunityArgs) => {
+      if (!isConnected || !address) {
+        throw new Error('Not connected')
+      }
       const actionFn = async () => {
         const user: Identity = new Identity(address as string)
         const note: bigint = await createNote(user)
 
-        const {logoCID, bannerCID} = await uploadImages({ bannerFile, logoFile })
+        const { logoCID, bannerCID } = await uploadImages({ bannerFile, logoFile })
         const communityDetails: CommunityDetails = {
           description: name,
           tags: [],
