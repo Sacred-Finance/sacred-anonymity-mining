@@ -73,6 +73,8 @@ export class UnirepUser {
    * Load user state and sign up if necessary.
    */
   async load(): Promise<void> {
+    console.time('time-initial-load')
+    console.time('time-initial-load-identity')
     const userState = new UserState(
       {
         provider: this.provider,
@@ -83,12 +85,17 @@ export class UnirepUser {
       },
       this.identity
     )
+    console.timeEnd('time-initial-load-identity')
 
-    console.log('syncing user state...')
+    console.time('time-initial-load-sync')
     await userState.sync.start()
     UnirepUser.user.userState = userState
     await userState.waitForSync()
+    console.timeEnd('time-initial-load-sync')
+
+    console.time('time-initial-load-identity-commitment')
     this.latestTransitionedEpoch = await UnirepUser.user.userState.latestTransitionedEpoch()
+    console.timeEnd('time-initial-load-identity-commitment')
 
     UnirepUser.user.identity = this.identity
     UnirepUser.hasSignedUp = await userState.hasSignedUp(BigInt(attesterAddress))
@@ -104,6 +111,7 @@ export class UnirepUser {
     if (reputation?.posRep !== undefined) {
       this.reputation = reputation
     }
+    console.timeEnd('time-initial-load')
   }
 
   /**
@@ -176,6 +184,7 @@ export class UnirepUser {
    * @returns Error message or void.
    */
   async userTransition(): Promise<string | void> {
+    console.time('userTransition')
     const userState = this.getUserState()
     await userState.sync.start()
     await userState.waitForSync()
@@ -188,14 +197,17 @@ export class UnirepUser {
       await this.updateUserEpochKey()
     } catch (error) {
       console.error('Error:', error.message || String(error))
+      console.timeEnd('userTransition')
       return error.message || String(error)
     }
+    console.timeEnd('userTransition')
   }
 
   /**
    * Sign up user to Unirep.
    */
   async signup(): Promise<void> {
+    console.time('signup')
     let userState = UnirepUser.user.userState || (await this.genUserState())
     const { publicSignals, proof } = await userState.genUserSignUpProof()
     const { status } = await userUnirepSignUp(publicSignals, proof)
@@ -205,6 +217,7 @@ export class UnirepUser {
     }
 
     await this.updateUserEpochKey()
+    console.timeEnd('signup')
   }
 
   /**

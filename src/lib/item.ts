@@ -109,7 +109,7 @@ export async function create(content, type, address, users, postedByUser, groupI
         const { data } = res
         const postIdHex = data.args[2].hex
         const postId = parseInt(postIdHex, 16)
-        await this.cacheNewPost(content, postId, groupId, note, cid, setWaiting)
+        await this.cacheNewPost.call(this,content, postId, groupId, note, cid, setWaiting)
         return res
       })
     } else if (type === 'comment') {
@@ -205,9 +205,10 @@ export async function editContent(
     const note = await createNote(userPosting)
 
     const item = await forumContract.itemAt(itemId)
+
     let input = {
-      note: BigInt(item.note.toHexString()),
       trapdoor: userPosting.getTrapdoor(),
+      note: BigInt(item.note.toHexString()),
       nullifier: userPosting.getNullifier(),
     }
 
@@ -218,7 +219,7 @@ export async function editContent(
     )
 
     return await edit(itemId, signal, note, a, b, c).then(async data => {
-      await cacheUpdatedContent.call(this,type, content, itemId, groupId, note, cid, setWaiting)
+      await cacheUpdatedContent.call(this, type, content, itemId, groupId, note, cid, setWaiting)
       return data
     })
   } catch (error) {
@@ -294,7 +295,7 @@ export async function getAllContent(type, ids = []) {
 
       return data
     } catch (error) {
-      console.error(error)
+      console.error('failed to parse content', error)
     }
   }
 
@@ -401,6 +402,7 @@ function capitalizeFirstLetter(string) {
 export const cacheNewContent = async (content, contentId, note, contentCID, setWaiting, type) => {
   let newContent
   if (type === 'post') {
+    return console.log('skip post cache', content, contentId, note, contentCID, setWaiting, type);
     const parsedPost = parsePost(content)
     newContent = {
       ...parsedPost,

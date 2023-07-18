@@ -21,16 +21,15 @@ const EditorBlock = ({ data, onChange, holder, className, divProps = {}, editorR
   const ref = useRef<EditorJS>()
   useImperativeHandle(editorRef, () => ({
     clear() {
-      ref?.current?.clear()
+      ref?.current?.clear?.()
     },
-
     destroy() {
-      ref?.current?.destroy()
+      ref?.current?.destroy?.()
     },
     render(data: OutputData): Promise<void> {
       if (!ref.current || !data) return Promise.resolve()
 
-      return ref?.current?.render(data)
+      return ref?.current?.render?.(data)
     },
     //@ts-ignore
     async isReady() {
@@ -40,12 +39,12 @@ const EditorBlock = ({ data, onChange, holder, className, divProps = {}, editorR
   }))
 
   useEffect(() => {
-    ref?.current?.readOnly?.toggle();
+    if (!ref.current) return;
+    ref?.current?.readOnly?.toggle?.();
 
     if (!readOnly) {
       console.log('re-rendering for non-readonly')
 
-      // ref?.current?.render(data);
         setTimeout(() => {
             if (ref?.current?.focus) ref.current.focus(true);
         }, 200)
@@ -66,6 +65,7 @@ const EditorBlock = ({ data, onChange, holder, className, divProps = {}, editorR
   useEffect(() => {
     //initialize editor if we don't have a reference
     if (!ref.current) {
+      if (!holder) return;
       const editor = new EditorJS({
         holder: holder,
         tools: EDITOR_TOOLS,

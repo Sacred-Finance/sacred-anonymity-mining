@@ -1,6 +1,7 @@
 import { OutputData } from '@editorjs/editorjs'
 import { BigNumberish } from 'ethers'
 import { Requirement as ContractRequirement } from '@/types/contract/ForumInterface'
+import {Identity} from "@semaphore-protocol/identity";
 
 export interface Requirement extends ContractRequirement {
   name?: string
@@ -16,7 +17,7 @@ export interface CommunityDetails {
 }
 export interface User {
   name: string
-  identityCommitment: string
+  identityCommitment: Identity
   id: number | string
   groupId: number
 }

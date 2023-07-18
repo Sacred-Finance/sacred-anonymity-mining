@@ -83,7 +83,6 @@ export class Post {
     postContent: PostContent,
     address: string,
     itemId,
-    users: User[],
     postedByUser: User,
     groupId: string,
     setWaiting: Function
@@ -143,8 +142,10 @@ export class Post {
         ownerEpochKey: 0,
       }
 
+      // time this
+      console.time('generateProof')
       const { proof, nullifierHash, merkleTreeRoot } = await generateProof(userPosting, g, extraNullifier, signal)
-
+        console.timeEnd('generateProof')
       return vote(
         itemId,
         this.groupId?.toString(),

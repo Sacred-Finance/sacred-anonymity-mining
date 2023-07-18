@@ -33,6 +33,7 @@ export const NewPostForm = ({
   readOnly,
   addPost,
   isComment = false,
+  isEdit = false,
 }) => {
   const { t } = useTranslation()
   const [isPreview, setIsPreview] = React.useState(false)
@@ -46,12 +47,15 @@ export const NewPostForm = ({
           className="flex items-center rounded bg-indigo-100 p-2 text-indigo-500 transition-colors duration-150 hover:bg-indigo-200"
         >
           <PlusIcon className="mr-2 h-5 w-5" />
-          {t(isComment ? 'newComment' : 'newPost')}
+          {isEdit ? t(isComment ? 'editComment' : 'editPost') : t(isComment ? 'newComment' : 'newPost')}
         </button>
       )}
       {isNewPostOpen && (
         <div>
-          <div className="mb-4 text-2xl font-semibold"> {t(isComment ? 'newComment' : 'newPost')}</div>
+          <div className="mb-4 text-2xl font-semibold">
+            {' '}
+            {isEdit ? t(isComment ? 'editComment' : 'editPost') : t(isComment ? 'newComment' : 'newPost')}
+          </div>
 
           {postTitle !== false && (
             <input
@@ -75,7 +79,11 @@ export const NewPostForm = ({
                   editorRef={postEditorRef}
                   onChange={setPostDescription}
                   readOnly={readOnly}
-                  placeholder={t(isComment ? 'placeholder.newComment' : 'new post form')}
+                  placeholder={
+                    isEdit
+                      ? t(isComment ? 'placeholder.editComment' : 'placeholder.editPost')
+                      : t(isComment ? 'placeholder.newComment' : 'new post form')
+                  }
                   holder={id}
                 />
               )}
@@ -94,7 +102,9 @@ export const NewPostForm = ({
                 isLoading={isLoading}
                 className=" rounded  bg-green-500  p-3 text-white transition-colors duration-150 hover:bg-green-600"
               >
-                {t(isComment ? 'button.comment' : 'button.post')}
+                {isEdit
+                  ? t(isComment ? 'button.editComment' : 'button.editPost')
+                  : t(isComment ? 'button.comment' : 'button.post')}
               </PrimaryButton>
             </div>
           </div>
