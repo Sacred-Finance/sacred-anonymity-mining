@@ -16,12 +16,13 @@ import { commentIsConfirmed, createNote, formatDistanceToNow } from '@/lib/utils
 import { BigNumber } from 'ethers'
 import { toast } from 'react-toastify'
 import { SortByOption } from '@components/SortBy'
-import { useSortedVotes } from '@/hooks/useSortedVotes'
+import { useItemsSortedByVote } from '@/hooks/useItemsSortedByVote'
 import { NewPostForm } from '@components/NewPostForm'
 import { motion } from 'framer-motion'
 import { CircularProgress } from '@components/CircularProgress'
 import dynamic from 'next/dynamic'
 import { useRemoveItemFromForumContract } from '@/hooks/useRemoveItemFromForumContract'
+import {useLocalCommunity} from "@components/CommunityCard/CommunityCard";
 
 const Editor = dynamic(() => import('@/components/editor-js/Editor'), {
   ssr: false,
@@ -52,7 +53,9 @@ export function PostPage({ postInstance, postId, groupId }) {
   const activeUser = useActiveUser({ groupId })
   const { state } = useCommunityContext()
   const { users, communities } = state
-  const community = useCommunityById(groupId)
+
+  const community = useLocalCommunity()
+
 
   const { address } = useAccount()
   const { isLoading, setIsLoading } = useLoaderContext()
@@ -116,9 +119,11 @@ export function PostPage({ postInstance, postId, groupId }) {
     const generatedNoteAsBigNumber = BigNumber.from(generatedNote).toString()
     const noteBigNumber = BigNumber.from(note).toString()
 
-    console.log('test-log', generatedNoteAsBigNumber, noteBigNumber)
     setIsPostEditable(noteBigNumber === generatedNoteAsBigNumber)
   }
+
+
+
 
   async function fetchComments() {
     console.log('test-log', 'fetching comments')
@@ -391,7 +396,7 @@ export function PostPage({ postInstance, postId, groupId }) {
     );
   }
 
-  const sortedCommentsData = useSortedVotes(tempComments, comments, commentsSortBy)
+  const sortedCommentsData = useItemsSortedByVote(tempComments, comments, commentsSortBy)
 
   return (
     <>
@@ -399,8 +404,6 @@ export function PostPage({ postInstance, postId, groupId }) {
         id={`post_comment${groupId}`}
         postTitle={false}
         isComment={true}
-        // setPostTitle={setPostTitle}
-        // postEditorRef={postEditorRef}
         postDescription={comment}
         setPostDescription={setComment}
         isLoading={isLoading}

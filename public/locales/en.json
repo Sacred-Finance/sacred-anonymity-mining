@@ -11,6 +11,8 @@
     "enterPostTitle": "Enter Post Title *",
     "enterPostContent": "Enter Post Content *",
     "enterComment": "Enter Comment *",
+    "editPost": "Edit Post Description *",
+    "editComment": "Edit Comment *",
 
     "noTokenRequirements": "No Token Requirements",
     "communityDescription": "Community Description *",
@@ -39,6 +41,7 @@
     "confirm-edit": "Confirm Edit",
     "delete": "Delete",
     "add": "Add",
+    "editPost": "Edit Post",
     "save": "Save",
     "cancel": "Cancel",
     "close": "Close",

@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 
-export const useSortedVotes = (tempData, data, sortBy) => {
+export const useItemsSortedByVote = (tempData, data, sortBy) => {
+
   return useMemo(() => {
     const sorted = [...tempData, ...(data ?? [])];
 

@@ -165,27 +165,36 @@ export const numToBuffer = (number, size, endianess): Buffer => {
   }
 }
 
+
+// export const createNote = async (cid: BigInt, identity:BigInt) => {
+//   const cidBuffer = numToBuffer(cid, 32, 'le')
+//   const image = Buffer.concat([cidBuffer, numToBuffer(identity, 32, 'le')])
+//   if(!babyJub) {
+//     babyJub = await buildBabyjub()
+//   }
+//   if(!pedersen)
+//     pedersen = await buildPedersenHash();
+//   return pedersenHash(image)
+// }
+
+// note is a Buffer of 64 bytes based on the identity of the user or the content
 export const createNote = async (identity: Identity) => {
   const trapdoor = identity.getTrapdoor() //getTrapDoor is not a function, error on posting a comment
   const nullifier = identity.getNullifier()
   const trapdoorBuffer = numToBuffer(trapdoor, 32, 'le')
   const image = Buffer.concat([trapdoorBuffer, numToBuffer(nullifier, 32, 'le')])
-  if(!babyJub)
-    babyJub = await buildBabyjub()
-  if(!pedersen)
-    pedersen = await buildPedersenHash();
+  if (!babyJub) babyJub = await buildBabyjub()
+  if (!pedersen) pedersen = await buildPedersenHash()
   return pedersenHash(image)
 }
 export const createInputNote = async (identity: Identity) => {
-    const trapdoor = identity.getTrapdoor() //getTrapDoor is not a function, error on posting a comment
-    const nullifier = identity.getNullifier()
-    const trapdoorBuffer = numToBuffer(trapdoor, 32, 'le')
-    const image = Buffer.concat([trapdoorBuffer, numToBuffer(nullifier, 32, 'le')])
-    if(!babyJub)
-        babyJub = await buildBabyjub()
-    if(!pedersen)
-        pedersen = await buildPedersenHash();
-    return {note: pedersenHash(image), trapdoor: trapdoor, nullifier: nullifier}
+  const trapdoor = identity.getTrapdoor() //getTrapDoor is not a function, error on posting a comment
+  const nullifier = identity.getNullifier()
+  const trapdoorBuffer = numToBuffer(trapdoor, 32, 'le')
+  const image = Buffer.concat([trapdoorBuffer, numToBuffer(nullifier, 32, 'le')])
+  if (!babyJub) babyJub = await buildBabyjub()
+  if (!pedersen) pedersen = await buildPedersenHash()
+  return { note: pedersenHash(image), trapdoor: trapdoor, nullifier: nullifier }
 }
 
 export const startIPFS = async () => {
