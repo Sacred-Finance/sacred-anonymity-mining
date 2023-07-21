@@ -18,53 +18,36 @@ import {
 import { motion } from 'framer-motion'
 import clsx from 'clsx'
 import { Group } from '@/types/contract/ForumInterface'
+import { User } from '@/lib/model'
 
 interface HomeProps {
   isAdmin: boolean
+  users: User[]
+  communities: Group[]
 }
+const filterButtonClass = 'rounded-md p-2 text-white transition-colors duration-200 ease-in-out dark:bg-gray-900 '
+const iconClass = 'h-5 w-5 fill-inherit stroke-inherit text-gray-500 dark:fill-white'
 
-function HomePage({ isAdmin = false }: HomeProps) {
-  const { dispatch, state } = useCommunityContext()
-  const { users, communities } = state
-  const { isLoading, setIsLoading } = useLoaderContext()
-  /** groupMap is only to store the groupName as key and whether the connected user has already joined it or not */
-  const [groupMap, setGroupMap] = useState<any>({})
+const FilterButton = ({ filterKey, iconTrue, iconFalse, applyFilter, currentFilter, filterClass, iconClass }) => {
+  const IconTrue = iconTrue
+  const IconFalse = iconFalse
 
+  return (
+      <button
+          onClick={() => applyFilter(filterKey)}
+          className={clsx(filterClass, currentFilter.includes(filterKey) && '!bg-primary-bg !fill-white')}
+      >
+        {currentFilter === `-${filterKey}` ? <IconTrue className={iconClass} /> : <IconFalse className={iconClass} />}
+      </button>
+  )
+}
+function HomePage({ isAdmin = false, users, communities }: HomeProps) {
+  const [localCommunities, setLocalCommunities] = useState<Group[]>(communities)
   const [searchTerm, setSearchTerm] = useState('')
-
-  const [localCommunities, setLocalCommunities] = useState<Group[]>([])
-
-  const { address } = useAccount()
   const { t, i18n, ready } = useTranslation()
-  /** To prepare a map of the group already joined by the user connected */
-  useEffect(() => {
-    if (communities?.length) {
-      const gMap = {}
-      // Filter out duplicate communities based on their groupId and name
-      const uniqueCommunities = Array.from(
-        new Set(communities.map(c => JSON.stringify({ groupId: c.groupId, name: c.name })))
-      )
-        .map(communityKey =>
-          communities.find(c => JSON.stringify({ groupId: c.groupId, name: c.name }) === communityKey)
-        )
-        .filter(c => c) as Group[]
 
-      uniqueCommunities.forEach(c => {
-        if (isNaN(c?.id)) return
-        gMap[c.id?.toString()] = users.find(u => {
-          const generatedIdentity = new Identity(`${address}_${c.groupId}_${u.name}`)
-          const userCommitment = generatedIdentity.getCommitment().toString()
-          return +u?.groupId === +c.groupId && u?.identityCommitment === userCommitment
-        })
-      })
-      setGroupMap(gMap)
-      // Update the localCommunities state with uniqueCommunities
-      if (!searchTerm) {
-        if (uniqueCommunities && uniqueCommunities.length) setLocalCommunities(uniqueCommunities)
-      }
-    }
-  }, [users, communities])
 
+  console.log('communitiescommunities',communities)
   useEffect(() => {
     return () => {
       debouncedResults.cancel()
@@ -131,23 +114,6 @@ function HomePage({ isAdmin = false }: HomeProps) {
     setLocalCommunities(filteredCommunities)
   }
 
-  const filterButtonClass = 'rounded-md p-2 text-white transition-colors duration-200 ease-in-out dark:bg-gray-900 '
-  const iconClass = 'h-5 w-5 fill-inherit stroke-inherit text-gray-500 dark:fill-white'
-
-  const FilterButton = ({ filterKey, iconTrue, iconFalse, applyFilter, currentFilter, filterClass, iconClass }) => {
-    const IconTrue = iconTrue
-    const IconFalse = iconFalse
-
-    return (
-      <button
-        onClick={() => applyFilter(filterKey)}
-        className={clsx(filterClass, currentFilter.includes(filterKey) && '!bg-primary-bg !fill-white')}
-      >
-        {currentFilter === `-${filterKey}` ? <IconTrue className={iconClass} /> : <IconFalse className={iconClass} />}
-      </button>
-    )
-  }
-
   return (
     <main className="xs:flex xs:flex-col xs:mx-0 xs:p-0 xs:text-center xs:align-center h-full w-full max-w-screen-xl space-y-12 sm:mx-auto  sm:p-24 md:px-0">
       <div className="flex flex-col items-center px-8 py-16 text-purple-500 dark:text-purple-500">
@@ -199,7 +165,7 @@ function HomePage({ isAdmin = false }: HomeProps) {
 
       <div className="row-gap-8 mb-8 grid grid-cols-1 justify-items-center   gap-4 sm:grid-cols-1 md:grid-cols-2 md:justify-items-center lg:grid-cols-3">
         {localCommunities.map((community, index) => (
-          <CommunityCard key={community.groupId} community={community} index={index} isAdmin={isAdmin} />
+          <CommunityCard key={community.groupId} community={community} index={index} />
         ))}
       </div>
 

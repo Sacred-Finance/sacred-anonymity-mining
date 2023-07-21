@@ -1,3 +1,5 @@
+import { ethers } from "ethers"
+
 export interface Admins {
   _admins: string[]
 }
@@ -190,27 +192,49 @@ export interface NewUser {
 
 export interface Requirement {
   tokenAddress: string
-  minAmount: bigint
+  minAmount: string
   // The following are not part of the contract
   name?: string
   symbol?: string
   decimals?: number
 }
 
+export interface RawRequirement {
+  tokenAddress: string
+  minAmount: ethers.BigNumber
+}
+
+
+export type RawGroupData = {
+  id: ethers.BigNumber,
+  name: string,
+  groupDetails: {
+    bannerCID: ethers.BigNumber,
+    logoCID: ethers.BigNumber,
+    description: ethers.BigNumber,
+    tags: ethers.BigNumber[],
+  },
+  requirements: RawRequirement[],
+  note: ethers.BigNumber,
+  userCount: ethers.BigNumber,
+  chainId: ethers.BigNumber,
+  posts: ethers.BigNumber[],
+  removed: boolean,
+};
+
+
 export interface Group {
   name: string
   groupDetails: GroupDetails
   requirements: Requirement[]
   id: number
-  note: number
+  note: string
   userCount: number
   chainId: number
   posts: number[]
   removed: boolean
   // The following are not part of the contract
   groupId?: string
-  banner?: string
-  logo?: string
 }
 
 // Definitions for each function
@@ -342,22 +366,43 @@ export interface EditItem {
 }
 
 export type ItemKind = number
+import { BigNumber } from 'ethers';
 
-export type Item = {
-  kind: ItemKind
-  id: number
-  parentId: number
-  groupId: number
-  createdAtBlock: number
-  childIds: number[]
-  upvote: number
-  downvote: number
-  note: number
-  ownerEpoch: number
-  ownerEpochKey: number
+export type RawItemData = {
+  kind: BigNumber
+  id: BigNumber
+  parentId: BigNumber
+  groupId: BigNumber
+  createdAtBlock: BigNumber
+  childIds: BigNumber[]
+  upvote: BigNumber
+  downvote: BigNumber
+  note: BigNumber
+  ownerEpoch: BigNumber
+  ownerEpochKey: BigNumber
   contentCID: string
   removed: boolean
 }
+
+
+export type Item = {
+  kind: ItemKind
+  id: string
+  parentId: string
+  groupId: string
+  createdAtBlock: number
+  childIds: string[]
+  upvote: number
+  downvote: number
+  note: string
+  ownerEpoch: string
+  ownerEpochKey: string
+  contentCID: string
+  removed: boolean
+  // The following are not part of the contract
+  createdAt: Date
+}
+
 
 export type ReputationProof = {
   publicSignals: number[]

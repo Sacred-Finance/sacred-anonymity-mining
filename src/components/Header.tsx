@@ -26,7 +26,7 @@ const Header = () => {
       </div>
 
       <div className="col-span-2 flex items-center gap-8">
-        <Link href={'/create-group'} className={clsx(primaryButtonStyle, buttonVariants.primarySolid)} shallow={true}>
+        <Link href={'/create-group'} className={clsx(primaryButtonStyle, buttonVariants.primarySolid)}>
           <div className="flex gap-2 ">
             <PlusCircleIcon className="h-6 w-6" /> {t('toolTip.createCommunity')}
           </div>

@@ -16,7 +16,6 @@ import { jsonRpcProvider } from 'wagmi/providers/jsonRpc'
 import { LoaderProvider } from '../contexts/LoaderContext'
 import { CommunityProvider, useCommunities } from '../contexts/CommunityProvider'
 import { startIPFS } from '../lib/utils'
-import { useFetchCommunities } from '../hooks/useFetchCommunities'
 import { useFetchUsers } from '../hooks/useFetchUsers'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -148,25 +147,9 @@ export function Web3Wrapper({ children }) {
         id={'rainbowkit'}
       >
         <CommunityProvider>
-          <InitialLoad>
             <ErrorBoundary>{children}</ErrorBoundary>
-          </InitialLoad>
         </CommunityProvider>
       </RainbowKitProvider>
     </WagmiConfig>
   )
-}
-
-const InitialLoad = ({ children }) => {
-  useFetchCommunities()
-  useFetchUsers()
-  const communities = useCommunities()
-
-  const isMounted = useMounted()
-
-  if (communities === null || communities?.length === 0 || !isMounted) {
-    return <LoadingPage />
-  }
-
-  return <>{children}</>
 }

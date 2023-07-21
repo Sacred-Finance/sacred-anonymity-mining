@@ -24,7 +24,6 @@ export const useFetchUsers = (loadOnInit = true) => {
       console.error('Forum contract not found or provider not found')
       return
     }
-    console.log('useFetchUsers')
 
     try {
       const users = await forumContract?.queryFilter(forumContract.filters.NewUser())

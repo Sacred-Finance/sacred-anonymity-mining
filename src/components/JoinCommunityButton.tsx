@@ -11,13 +11,14 @@ import { toast } from 'react-toastify'
 import { useLoaderContext } from '../contexts/LoaderContext'
 import { Group } from '@/types/contract/ForumInterface'
 import clsx from "clsx";
+import { PrimaryButton } from './buttons'
 
 interface JoinButtonProps {
   community: Group
 }
 
 export function CircularLoader({ className }: { className?: string}) {
-  return <svg className={clsx(" h-5 w-5 animate-spin", className)} viewBox="0 0 24 24">
+  return <svg className={clsx("h-5 w-5 animate-spin", className)} viewBox="0 0 24 24">
     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
     <path
         className="opacity-75"
@@ -53,7 +54,7 @@ export const JoinCommunityButton = memo(({ community }: JoinButtonProps) => {
     if (!hasUserJoined) await joinCommunity(groupName, groupId)
   }
   const joinButton = (
-    <button
+    <PrimaryButton
       onClick={join}
       className={`flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold text-white transition-colors duration-200 ${
         hasUserJoined ? 'bg-green-500 hover:bg-green-600' : 'bg-blue-500 hover:bg-blue-600'
@@ -74,7 +75,7 @@ export const JoinCommunityButton = memo(({ community }: JoinButtonProps) => {
         </svg>
       ) : null}
       {t('button.join', { count: hasUserJoined ? 0 : 1 })}
-    </button>
+    </PrimaryButton>
   )
 
   return (

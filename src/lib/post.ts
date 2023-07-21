@@ -29,7 +29,6 @@ export class Post {
   postCacheId() {
     return this.id + '_post'
   }
-
   cacheId() {
     return this.id + '_post'
   }
@@ -175,7 +174,7 @@ export class Post {
           if (i > -1) {
             postsCopy.splice(i, 1)
           }
-          await removeAt(this.specificPostId(postId), '$')
+          await removeAt(this.specificId(postId), '$')
         }
         return postsCopy
       },

@@ -793,7 +793,7 @@ export const jsonRPCProvider =  new ethers.providers.JsonRpcProvider(process.env
 });
 
 export const forumContract = new Contract(
-  ForumContractAddress,
-  ForumABI.abi,
-  jsonRPCProvider,
+    ForumContractAddress,
+    ForumABI.abi,
+    jsonRPCProvider,
 );

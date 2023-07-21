@@ -40,7 +40,6 @@ export const Breadcrumbs = ({ backdrop = false }): JSX.Element => {
                 className={` inline-flex items-center rounded border px-3 py-1 text-sm font-medium text-gray-700 dark:text-gray-400 dark:hover:text-white ${
                   item.isCurrentPage ? 'bg-primary-500 font-bold text-white hover:bg-primary-700 ' : 'hover:bg-white/80'
                 }`}
-                shallow={true}
                 onClick={e => {
                   if (item.isCurrentPage) {
                     e.preventDefault()

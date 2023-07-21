@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { utils } from 'ethers'
+import {ethers, utils } from 'ethers'
 import { create, IPFSHTTPClient } from 'ipfs-http-client'
 import { toBufferLE, toBufferBE } from 'bigint-buffer'
 import { buildBabyjub, buildPedersenHash } from 'circomlibjs'
@@ -81,7 +81,8 @@ export const getContent2 = async (CID: string) => {
 
 export const getContent = async (CID: string) => {
   if (!ipfs) {
-    return null
+    console.log('ipfs not started')
+    await startIPFS()
   }
   const decoder = new TextDecoder()
   let content = ''
@@ -106,6 +107,11 @@ export const getContent = async (CID: string) => {
 }
 
 export const getIpfsHashFromBytes32 = (bytes32Hex: string): string => {
+  if (bytes32Hex === ethers.constants.HashZero) {
+    return '';
+  }
+
+  console.log('bytes32Hex', bytes32Hex)
   // Add our default ipfs values for first 2 bytes:
   // function:0x12=sha2, size:0x20=256 bits
   // and cut off leading "0x"

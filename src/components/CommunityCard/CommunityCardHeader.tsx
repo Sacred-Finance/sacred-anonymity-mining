@@ -15,19 +15,23 @@ export const CommunityCardHeader = ({
 
   // Validate banner
   useEffect(() => {
+    console.log(community?.groupDetails)
+    if (!community?.groupDetails.bannerCID ) return
     const image = new Image()
-    image.src = community?.banner ? `https://ipfs.io/ipfs/${community.banner}` : ''
+    image.src = community?.groupDetails.bannerCID ? `https://ipfs.io/ipfs/${community?.groupDetails.bannerCID.toString()}` : ''
     image.onerror = () => setBannerSrc('') // Fallback to empty string if image is invalid
     image.onload = () => setBannerSrc(image.src)
-  }, [community?.banner])
+  }, [community?.groupDetails.bannerCID])
 
   // Validate logo
   useEffect(() => {
     const image = new Image()
-    image.src = community?.logo ? `https://ipfs.io/ipfs/${community.logo}` : ''
+    if (!community?.groupDetails.logoCID ) return
+
+    image.src = community?.groupDetails.logoCID ? `https://ipfs.io/ipfs/${community.groupDetails.logoCID}` : ''
     image.onerror = () => setLogoSrc('') // Fallback to empty string if image is invalid
     image.onload = () => setLogoSrc(image.src)
-  }, [community?.logo])
+  }, [community?.groupDetails.logoCID])
 
   return (
     <div className="relative">

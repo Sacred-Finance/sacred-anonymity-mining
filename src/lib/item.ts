@@ -20,6 +20,7 @@ import { generateProof } from '@semaphore-protocol/proof'
 import { Group } from '@semaphore-protocol/group'
 import { mutate } from 'swr'
 import { getMCache, removeFromCache, setCache, setCacheAtSpecificPath } from '@/lib/redis'
+import { Item, RawItemData } from '@/types/contract/ForumInterface'
 
 export async function handleDeleteItem(address: string, postedByUser: User, itemId) {
   try {
@@ -110,7 +111,7 @@ export async function create(content, type, address, users, postedByUser, groupI
         const { data } = res
         const postIdHex = data.args[2].hex
         const postId = parseInt(postIdHex, 16)
-        await this.cacheNewPost.call(this,content, postId, groupId, note, cid, setWaiting)
+        await this.cacheNewPost.call(this, content, postId, groupId, note, cid, setWaiting)
         return res
       })
     } else if (type === 'comment') {
@@ -127,7 +128,7 @@ export async function create(content, type, address, users, postedByUser, groupI
         const { data } = res
         const commentHex = data.args[2].hex
         const commentId = parseInt(commentHex, 16)
-        await this.cacheNewComment.call(this,content, commentId, note, cid, setWaiting)
+        await this.cacheNewComment.call(this, content, commentId, note, cid, setWaiting)
         return res
       })
     }
@@ -137,14 +138,9 @@ export async function create(content, type, address, users, postedByUser, groupI
 }
 
 export async function cacheUpdatedContent(type, content, contentId, groupId, note, contentCID, setWaiting) {
-  const handleMutation = async (updateContentCallback) => {
-    return await mutate(
-        this.cacheId(),
-        updateContentCallback,
-        { revalidate: false }
-    )
+  const handleMutation = async updateContentCallback => {
+    return await mutate(this.cacheId(), updateContentCallback, { revalidate: false })
   }
-
   if (type === 'post') {
     await handleMutation(async postFromCache => {
       const updatedPost = { ...postFromCache, ...content, contentCID, note: BigNumber.from(note) }
@@ -157,15 +153,10 @@ export async function cacheUpdatedContent(type, content, contentId, groupId, not
         return +p.id == +contentId || +this.id == BigNumber.from(p.id).toNumber()
       })
       commentsFromCache[commentIndex] = { ...commentsFromCache[commentIndex], ...content, contentCID, note }
-
       await Promise.allSettled([
-        setCacheAtSpecificPath(
-            this.specificId(contentId),
-            commentsFromCache[commentIndex]?.content,
-            '$.data.content'
-        ),
-        setCacheAtSpecificPath(this.specificCommentId(contentId), JSON.stringify(contentCID), '$.data.contentCID'),
-        setCacheAtSpecificPath(this.specificCommentId(contentId), BigNumber.from(note), '$.data.note'),
+        setCacheAtSpecificPath(this.specificId(contentId), commentsFromCache[commentIndex]?.content, '$.data.content'),
+        setCacheAtSpecificPath(this.specificId(contentId), JSON.stringify(contentCID), '$.data.contentCID'),
+        setCacheAtSpecificPath(this.specificId(contentId), BigNumber.from(note), '$.data.note'),
       ])
 
       return [...commentsFromCache]
@@ -262,134 +253,29 @@ type Post = {
 type ResponseArray = (null | Post[])[]
 
 //extend this to specify including certain ids
-export async function getAllContent(type, ids = []) {
-  console.log('Getting all content...', type, ids)
-  const parseContent = async (contentCID, id, upvote, downvote, note, createdAtBlock) => {
-    try {
-      const ipfsHash = getIpfsHashFromBytes32(contentCID)
-      const content = await getContent(ipfsHash)
-      const block = await jsonRPCProvider.getBlock(createdAtBlock.toNumber())
+export async function getAllContent(type, ids = []): Promise<Item[]> {
 
-      let parsedContent
-      try {
-        parsedContent = JSON.parse(content)
-      } catch (error) {
-        parsedContent = content
-      }
 
-      const data = {
-        ...parsedContent,
-        createdAt: new Date(block.timestamp * 1000),
-        id: id.toString(),
-        upvote: parseInt(upvote),
-        downvote: parseInt(downvote),
-        note: BigNumber.from(note),
-        contentCID: ipfsHash,
-      }
 
-      if (type === 'comment') {
-        data.content = parsedContent
-      }
+  const fetchAndParseContent = async (ids: number[]) => {
 
-      return data
-    } catch (error) {
-      console.error('failed to parse content', error)
-    }
-  }
+    const rawContentItems = (await Promise.all(ids.map(i => forumContract.itemAt(i)))) as RawItemData[]
+    console.log('rawContentItems', rawContentItems)
 
-  const fetchAndParseContent = async (ids:number[]) => {
-    const rawContentItems = await Promise.all(ids.map(i => forumContract.itemAt(i)))
     let parsedContentItems = []
     for (const item of rawContentItems) {
       if (!item?.removed && ethers.constants.HashZero !== item?.contentCID) {
-        const data = await parseContent(
-          item.contentCID,
-          item.id,
-          item.upvote,
-          item.downvote,
-          item.note,
-          item.createdAtBlock
-        )
-        if (data) {
-          parsedContentItems.push(data)
-          await setCache(this.specificId(parseInt(item?.id)), data)
-        }
-      } else {
-        await removeFromCache(this.specificId(parseInt(item?.id)))
+        const data = await parseContent(item)
+        if (data) parsedContentItems.push(data)
       }
     }
-
-    // sort posts by date
-    parsedContentItems.sort((d1, d2) => (d2.createdAt < d1.createdAt ? 1 : -1))
-    return parsedContentItems
   }
 
-  try {
-    let itemIdsBigNumber
-    if (type === 'post') {
-      if (ids.length) {
-        itemIdsBigNumber = ids.map(i => BigNumber.from(i))
-      } else {
-        itemIdsBigNumber = await forumContract.getPostIdList(+this.groupId)
-      }
-    } else if (type === 'comment') {
-      itemIdsBigNumber = await forumContract.getCommentIdList(+this.postId)
-      console.log('comment ids', itemIdsBigNumber)
-    }
+  console.log(ids)
 
-    if (!itemIdsBigNumber?.length) {
-      return []
-    }
-
-    const cacheIds = itemIdsBigNumber.map(i => this.specificId(i.toNumber())) as string[]
-
-    let { cache: mCache, refresh: mRefresh } = (await getMCache(cacheIds)) as {
-      cache: ResponseArray
-      refresh: boolean
-    }
-
-    const tenMinutesInMilliseconds = 10 * 60 * 1000
-    const currentTimestamp = Date.now()
-
-    let validCachedItems = []
-    let outdatedItemIds = []
+  return await fetchAndParseContent(ids)
 
 
-    // iterate through the cache and check if the items are outdated
-    // if they are not outdated, add them to the validCachedItems array
-    // if they are outdated, add them to the outdatedItemIds array
-    for (const itemArray of mCache) {
-      if (!itemArray) continue
-      const cachedItem = itemArray[0]
-      const cachedItemId = this.specificId(parseInt(cachedItem.data.id))
-      const cachedItemLastCachedAt = cachedItem.lastCachedAt
-      const cachedItemLastCachedAtTimestamp = new Date(cachedItemLastCachedAt).getTime()
-
-      if (currentTimestamp - cachedItemLastCachedAtTimestamp < tenMinutesInMilliseconds) {
-        validCachedItems.push(cachedItem)
-      } else {
-        if (outdatedItemIds.indexOf(parseInt(cachedItem.data.id)) === -1)
-        outdatedItemIds.push(parseInt(cachedItem.data.id))
-      }
-    }
-
-    const resetCache = true;
-    if (resetCache) {
-        outdatedItemIds = itemIdsBigNumber.map(i => i.toNumber())
-    }
-
-    if (outdatedItemIds.length > 0) {
-      console.log('content fetch response', 'Some ' + type + 's are outdated - fetching from the blockchain')
-      let fetchedItems = await fetchAndParseContent(outdatedItemIds) // Fetch only the outdated items
-      return validCachedItems.concat(fetchedItems) // Return valid cached items combined with freshly fetched items
-    } else {
-      console.log('content fetch response', 'All ' + type + 's in cache are valid - returning cached ' + type + 's')
-      return validCachedItems
-    }
-  } catch (error) {
-    console.error(error)
-    return null
-  }
 }
 
 // Helper function
@@ -400,7 +286,7 @@ function capitalizeFirstLetter(string) {
 export const cacheNewContent = async (content, contentId, note, contentCID, setWaiting, type) => {
   let newContent
   if (type === 'post') {
-    return console.log('skip post cache', content, contentId, note, contentCID, setWaiting, type);
+    return console.log('skip post cache', content, contentId, note, contentCID, setWaiting, type)
     const parsedPost = parsePost(content) //todo: is this needed
     newContent = {
       ...parsedPost,
@@ -450,13 +336,14 @@ export async function updateContentVote(itemId, voteType, confirmed: boolean, ty
     itemId = +itemId
   }
 
-  let cacheIdMethod;
-  let specificIdMethod;
+  let cacheIdMethod
+  let specificIdMethod
   if (type === 'post') {
-    cacheIdMethod = this.groupCacheId()
+    cacheIdMethod = this.groupCacheId() // list of all posts
   } else if (type === 'comment') {
-    cacheIdMethod = this.commentsCacheId()
+    cacheIdMethod = this.commentsCacheId() // list of all comments
   }
+
   specificIdMethod = this.specificId(itemId)
 
   mutate(

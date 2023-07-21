@@ -92,7 +92,7 @@ const fetchEvents = async (postInstance, handleNewItemCallback, handleVoteItemCa
 
 export const useCommunityUpdates = ({ postInstance }: { postInstance: Post }) => {
   const groupId = postInstance.groupId
-  const groupCacheId = `${groupId}_group`
+  const groupCacheId = postInstance.groupCacheId()
   const { mutate } = useSWRConfig()
 
   const updatePostsCB = updatePosts(groupCacheId, mutate)

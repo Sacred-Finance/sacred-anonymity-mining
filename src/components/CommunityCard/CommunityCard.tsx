@@ -29,7 +29,6 @@ export const CommunityCard = ({
   const [isEditGroupVisible, setIsEditGroupVisible] = React.useState(false)
   const [isDeleteGroupVisible, setIsDeleteGroupVisible] = React.useState(false)
 
-  const { write } = useRemoveGroup(community.groupId as CommunityId)
 
   // new ref for modal
   const cardRef = useRef<HTMLDivElement | null>(null)
@@ -64,14 +63,7 @@ export const CommunityCard = ({
           <div className={'community-card-container'}>
             <div className=" rounded-lg shadow-lg">
               <EditGroupModal community={community} hidden={!isEditGroupVisible} />
-              {isAdmin && (
-                <RemoveGroup
-                  onClick={() =>  write?.({ recklesslySetUnpreparedArgs: [community.id] })}
-                  hidden={!isDeleteGroupVisible}
-                />
-              )}
-
-              <Link href={`/communities/${community?.groupId}`} shallow={true}>
+              <Link href={`/communities/${community?.groupId}`}>
                 <CommunityCardHeader />
                 <CommunityCardBody />
               </Link>

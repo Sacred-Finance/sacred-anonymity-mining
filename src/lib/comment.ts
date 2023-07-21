@@ -23,11 +23,6 @@ export class CommentClass {
   cacheId() {
     return this.postId + '_comments'
   }
-
-  specificCommentId(commentId?) {
-    return `${this.postId}_comment_${this.id ?? commentId}`
-  }
-
   specificId(commentId?) {
     return `${this.postId}_comment_${this.id ?? commentId}`
   }
@@ -106,7 +101,7 @@ export class CommentClass {
           if (i > -1) {
             commentsCopy.splice(i, 1)
           }
-          await removeAt(this.specificCommentId(commentId), '$')
+          await removeAt(this.specificId(commentId), '$')
         }
         return commentsCopy
       },
