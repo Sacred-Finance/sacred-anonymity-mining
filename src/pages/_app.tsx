@@ -14,7 +14,7 @@ import { configureChains, createClient, WagmiConfig } from 'wagmi'
 import { publicProvider } from 'wagmi/providers/public'
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc'
 import { LoaderProvider } from '../contexts/LoaderContext'
-import { CommunityProvider, useCommunities } from '../contexts/CommunityProvider'
+import { CommunityProvider } from '../contexts/CommunityProvider'
 import { startIPFS } from '../lib/utils'
 import { useFetchUsers } from '../hooks/useFetchUsers'
 import { ToastContainer } from 'react-toastify'
@@ -22,13 +22,26 @@ import 'react-toastify/dist/ReactToastify.css'
 import LoadingPage from '../components/LoadingComponent'
 import ErrorBoundary from '../components/ErrorBoundary'
 import { useMounted } from '@/hooks/useMounted'
+import { SWRConfig } from 'swr'
 
 function App({ Component, pageProps }: AppProps) {
   return (
     <LoaderProvider>
       <Web3Wrapper>
         <HeadGlobal />
-        <Component {...pageProps} />
+        <SWRConfig
+          value={{
+            revalidateOnFocus: false,
+            revalidateOnReconnect: false,
+            fetcher: (resource, init) =>
+              fetch(resource, init).then(res => {
+                console.log('res', res)
+                return res.json()
+              }),
+          }}
+        >
+          <Component {...pageProps} />
+        </SWRConfig>
         <ToastContainer />
       </Web3Wrapper>
     </LoaderProvider>
@@ -147,7 +160,7 @@ export function Web3Wrapper({ children }) {
         id={'rainbowkit'}
       >
         <CommunityProvider>
-            <ErrorBoundary>{children}</ErrorBoundary>
+          <ErrorBoundary>{children}</ErrorBoundary>
         </CommunityProvider>
       </RainbowKitProvider>
     </WagmiConfig>

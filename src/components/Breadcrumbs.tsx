@@ -1,23 +1,27 @@
 import React, { ReactNode, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-import { useCommunityById } from '@/contexts/CommunityProvider'
+import { useCommunityById, useCommunityContext } from '@/contexts/CommunityProvider'
 import { CircularProgress } from './CircularProgress'
+import { CircularLoader } from '@components/JoinCommunityButton'
 
 function useBreadcrumbs(): BreadCrumbItem[] {
   const [breadcrumbItems, setBreadcrumbItems] = useState<BreadCrumbItem[]>([])
+
+  const { state } = useCommunityContext()
 
   const router = useRouter()
 
   const { groupId, postId } = router.query
 
-  const community = useCommunityById(groupId as string)
-
+  const community = state.activeCommunity.community
+  const post = state.activePost.post
 
   useEffect(() => {
-    const items = generateBreadcrumbItems(community, postId, location)
+    if (!community || !post) return
+    const items = generateBreadcrumbItems(community, post, location)
     setBreadcrumbItems(items)
-  }, [ community])
+  }, [community, post])
 
   return breadcrumbItems
 }
@@ -82,13 +86,13 @@ interface BreadCrumbItem {
   hidden?: boolean
 }
 
-function generateBreadcrumbItems(community, postId,  location): BreadCrumbItem[] {
+function generateBreadcrumbItems(community, post, location): BreadCrumbItem[] {
   let items: BreadCrumbItem[] = []
 
-  const communityLabel = elipsis(community?.name, 50) ?? <CircularProgress className={'h-5 w-5'} />
+  const communityLabel = elipsis(community?.name, 50) ?? <CircularLoader className={'text-white'} />
 
-  const postLabel =
-      postId  ? elipsis('postFetched?.title', 20) : <CircularProgress className={'h-5 w-5'} />
+  // const postLabel = elipsis(post.title, 20) ?? <CircularProgress className={'h-5 w-5 text-white'} />
+  const postLabel = elipsis(post.title, 20) ?? <CircularLoader className={'text-white'} />
 
   if (location.pathname === '/') {
     items = [{ label: 'Home', href: '/', isCurrentPage: true, hidden: true }]
@@ -102,7 +106,7 @@ function generateBreadcrumbItems(community, postId,  location): BreadCrumbItem[]
       },
       {
         label: postLabel,
-        href: `/communities/${community?.id}/post/${postId}`,
+        href: `/communities/${community?.id}/post/${post.id}`,
         isCurrentPage: true,
       },
     ]
@@ -137,4 +141,3 @@ function generateBreadcrumbItems(community, postId,  location): BreadCrumbItem[]
 
   return items
 }
-
