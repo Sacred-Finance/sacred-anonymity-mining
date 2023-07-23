@@ -36,8 +36,8 @@ export const ToolTip: React.ForwardRefExoticComponent<ToolTipProps & React.RefAt
           )}
           role="alert"
         >
-            {title && <div className="text-basefont-normal ml-3 text-inherit">{title}</div>}
-            {message && <div className="ml-3  w-fit text-sm font-normal">{message}</div>}
+            {title && <div className="text-base font-normal  w-fit ml-3 text-inherit">{title}</div>}
+            {message && <div className="ml-3 min-w-max text-sm font-normal">{message}</div>}
         </div>
       </div>
     )
