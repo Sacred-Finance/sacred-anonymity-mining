@@ -1,4 +1,4 @@
-import { ethers } from "ethers"
+import { BigNumber, ethers } from 'ethers'
 
 export interface Admins {
   _admins: string[]
@@ -204,24 +204,22 @@ export interface RawRequirement {
   minAmount: ethers.BigNumber
 }
 
-
 export type RawGroupData = {
-  id: ethers.BigNumber,
-  name: string,
+  id: ethers.BigNumber
+  name: string
   groupDetails: {
-    bannerCID: ethers.BigNumber,
-    logoCID: ethers.BigNumber,
-    description: ethers.BigNumber,
-    tags: ethers.BigNumber[],
-  },
-  requirements: RawRequirement[],
-  note: ethers.BigNumber,
-  userCount: ethers.BigNumber,
-  chainId: ethers.BigNumber,
-  posts: ethers.BigNumber[],
-  removed: boolean,
-};
-
+    bannerCID: ethers.BigNumber
+    logoCID: ethers.BigNumber
+    description: ethers.BigNumber
+    tags: ethers.BigNumber[]
+  }
+  requirements: RawRequirement[]
+  note: ethers.BigNumber
+  userCount: ethers.BigNumber
+  chainId: ethers.BigNumber
+  posts: ethers.BigNumber[]
+  removed: boolean
+}
 
 export interface Group {
   name: string
@@ -366,7 +364,6 @@ export interface EditItem {
 }
 
 export type ItemKind = number
-import { BigNumber } from 'ethers';
 
 export type RawItemData = {
   kind: BigNumber
@@ -384,7 +381,6 @@ export type RawItemData = {
   removed: boolean
 }
 
-
 export type Item = {
   kind: ItemKind
   id: string
@@ -401,8 +397,9 @@ export type Item = {
   removed: boolean
   // The following are not part of the contract
   createdAt: Date
+  title?: string
+  description?: string
 }
-
 
 export type ReputationProof = {
   publicSignals: number[]

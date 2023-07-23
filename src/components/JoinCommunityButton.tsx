@@ -8,34 +8,37 @@ import { useValidateUserBalance } from '../utils/useValidateUserBalance'
 import { useTranslation } from 'next-i18next'
 import { useUserIfJoined } from '../contexts/CommunityProvider'
 import { toast } from 'react-toastify'
-import { useLoaderContext } from '../contexts/LoaderContext'
 import { Group } from '@/types/contract/ForumInterface'
-import clsx from "clsx";
+import clsx from 'clsx'
 import { PrimaryButton } from './buttons'
 
 interface JoinButtonProps {
   community: Group
+  hideIfJoined?: boolean
 }
 
-export function CircularLoader({ className }: { className?: string}) {
-  return <svg className={clsx("h-5 w-5 animate-spin", className)} viewBox="0 0 24 24">
-    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-    <path
+export function CircularLoader({ className }: { className?: string }) {
+  return (
+    <svg className={clsx('h-5 w-5 animate-spin', className)} viewBox="0 0 24 24">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+      <path
         className="opacity-75"
         fill="currentColor"
         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-    ></path>
-  </svg>;
+      ></path>
+    </svg>
+  )
 }
 
-export const JoinCommunityButton = memo(({ community }: JoinButtonProps) => {
+export const JoinCommunityButton = memo(({ community, hideIfJoined }: JoinButtonProps) => {
   const { groupId, name: groupName } = community
+
+  const [isLoading, setIsLoading] = React.useState(false)
   const { t } = useTranslation()
   const { address } = useAccount()
   const hasUserJoined: User | undefined | false = useUserIfJoined(groupId as string | number)
 
-  const { setIsLoading, isLoading } = useLoaderContext()
-  const { checkUserBalance } = useValidateUserBalance(community, address)
+  const { checkUserBalance } = useValidateUserBalance(community, address, hasUserJoined)
 
   const joinCommunity = useJoinCommunity()
 
@@ -48,22 +51,24 @@ export const JoinCommunityButton = memo(({ community }: JoinButtonProps) => {
     return await checkUserBalance()
   }
   const join = async () => {
+    if (isLoading) return
     setIsLoading(true)
     const result = await validateBeforeOpen()
     if (!result) return
     if (!hasUserJoined) await joinCommunity(groupName, groupId)
+    setIsLoading(false)
   }
   const joinButton = (
     <PrimaryButton
+      isLoading={isLoading}
       onClick={join}
-      className={`flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold text-white transition-colors duration-200 ${
-        hasUserJoined ? 'bg-green-500 hover:bg-green-600' : 'bg-blue-500 hover:bg-blue-600'
-      } ${isLoading ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-      disabled={isLoading}
+      className={clsx(
+        `flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold text-white transition-colors duration-200 `,
+        hasUserJoined ? 'bg-green-500 hover:bg-green-600' : 'bg-blue-500 hover:bg-blue-600',
+        'disabled:opacity-50'
+      )}
     >
-      {isLoading ? (
-        <CircularLoader/>
-      ) : hasUserJoined ? (
+      {hasUserJoined ? (
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -77,11 +82,14 @@ export const JoinCommunityButton = memo(({ community }: JoinButtonProps) => {
       {t('button.join', { count: hasUserJoined ? 0 : 1 })}
     </PrimaryButton>
   )
-
   return (
     <>
       {hasUserJoined ? (
-        joinButton
+        hideIfJoined ? (
+          ''
+        ) : (
+          joinButton
+        )
       ) : (
         <TosConfirmationWrapper
           buttonElement={joinButton}

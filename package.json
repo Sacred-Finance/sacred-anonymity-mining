@@ -4,7 +4,7 @@
   "private": true,
   "contractVersion": "0.7.1",
   "scripts": {
-    "dev": "next dev",
+    "dev": "NODE_OPTIONS='--inspect' next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

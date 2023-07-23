@@ -5,7 +5,6 @@ import { CancelButton, PrimaryButton } from './buttons'
 import { EyeIcon, PencilIcon } from '@heroicons/react/20/solid'
 import dynamic from 'next/dynamic'
 import clsx from 'clsx'
-import { usePostListContext } from '@/contexts/PostListProvider'
 
 interface EditorJsType {
   blocks: {
@@ -40,21 +39,24 @@ interface NewPostFormProps {
   setTitle: (value: string) => void
   description: EditorJsType
   setDescription: (value: EditorJsType) => void
-  isAddingPost: boolean
   resetForm: (isEdited: boolean) => void
   isReadOnly: boolean
+  isEditable: boolean
   handleSubmit: () => void
-  isCommentForm?: boolean
-  isEditForm?: boolean
+  itemType?: 'comment' | 'post'
+  handlerType?: 'edit' | 'new'
   formVariant?: 'default' | 'icon'
-  setIsFormOpen: (value: boolean) => void
-  isFormOpen: boolean
+  onOpen?: () => void
 }
 
-function getButtonLabel(isEdit: boolean, t: (key: string) => string, isComment?: boolean) {
-  return isEdit
-    ? t(isComment ? 'button.editComment' : 'button.saveChanges')
-    : t(isComment ? 'button.newComment' : 'button.newPost')
+function getButtonLabel(
+  handlerType: NewPostFormProps['handlerType'],
+  itemType: NewPostFormProps['itemType'],
+  t: (key: string) => string
+) {
+  return handlerType === 'edit'
+    ? t(itemType === 'comment' ? 'button.editComment' : 'button.saveChanges')
+    : t(itemType === 'comment' ? 'button.newComment' : 'button.newPost')
 }
 
 export const NewPostForm = ({
@@ -64,27 +66,21 @@ export const NewPostForm = ({
   setTitle,
   description,
   setDescription,
-  isAddingPost,
   resetForm,
   isReadOnly,
   handleSubmit,
   formVariant = 'default',
+  itemType = 'post',
+  handlerType = 'new',
+  onOpen,
+  isEditable,
 }: NewPostFormProps) => {
   const { t } = useTranslation()
   const [isPreview, setIsPreview] = useState(false)
 
-  const {
-    showFilter,
-    isFormOpen,
-    showDescription,
-    setIsFormOpen,
-    isPostEditing,
-    setIsPostEditing,
-    isEditForm,
-    isCommentForm,
-  } = usePostListContext()
+  const [isFormOpen, setIsFormOpen] = useState(false)
 
-  const buttonLabel = getButtonLabel(isEditForm, t, isCommentForm)
+  const buttonLabel = getButtonLabel(handlerType, itemType, t)
 
   const showTextIfAllowed = text => {
     if (formVariant === 'icon') return ''
@@ -92,14 +88,28 @@ export const NewPostForm = ({
   }
 
   return (
-    <div className={clsx(formVariant === 'default' ? 'mt-6 h-auto rounded-lg border bg-white/10 p-6' : '')}>
+    <div className={clsx(formVariant === 'default' ? 'mt-6 h-auto rounded-lg  bg-white/10 p-6' : '')}>
+      {isEditable && !isFormOpen && (
+        <div className="flex items-center justify-between">
+          <PrimaryButton
+            className="rounded bg-green-500 p-3 text-white transition-colors duration-150 hover:bg-green-600"
+            onClick={() => {
+              setIsFormOpen(true)
+              onOpen && onOpen()
+            }}
+          >
+            {buttonLabel}
+          </PrimaryButton>
+        </div>
+      )}
+
       {isFormOpen && (
         <div>
           <div className="mb-4 text-xl font-semibold">Editor</div>
-          {Boolean(title) && (
+          {itemType === 'post' && (
             <input
               className="mb-4 w-full rounded border-gray-200 p-1 text-base transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder={t(isCommentForm ? 'placeholder.enterComment' : 'placeholder.enterPostTitle')}
+              placeholder={t(itemType === 'comment' ? 'placeholder.enterComment' : 'placeholder.enterPostTitle')}
               value={title}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
             />
@@ -121,9 +131,9 @@ export const NewPostForm = ({
                   onChange={setDescription}
                   readOnly={isReadOnly}
                   placeholder={
-                    isEditForm
-                      ? t(isCommentForm ? 'placeholder.editComment' : 'placeholder.editPost')
-                      : t(isCommentForm ? 'placeholder.newComment' : 'new post form')
+                    handlerType === 'edit'
+                      ? t(itemType === 'comment' ? 'placeholder.editComment' : 'placeholder.editPost')
+                      : t(itemType === 'comment' ? 'placeholder.newComment' : 'new post form')
                   }
                   holder={editorId}
                 />
@@ -133,14 +143,13 @@ export const NewPostForm = ({
               <CancelButton
                 onClick={() => {
                   setIsFormOpen(false)
-                  resetForm(isEditForm)
+                  resetForm(handlerType)
                 }}
               >
                 {t('button.cancel')}
               </CancelButton>
               <PrimaryButton
                 onClick={handleSubmit}
-                isLoading={isAddingPost}
                 className="rounded bg-green-500 p-3 text-white transition-colors duration-150 hover:bg-green-600"
               >
                 {buttonLabel}

@@ -80,6 +80,7 @@
   },
   "noResultsFound": "No results found",
   "noPostsFound": "No posts found",
+  "noCommentsFound": "No comments found",
   "pageNotFound": "Page not found",
   "redirecting": "Redirecting",
   "redirectingIn_one": "Redirecting to home page in {{remainingSeconds}} second",

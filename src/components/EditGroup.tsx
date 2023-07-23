@@ -1,14 +1,14 @@
 import { useRouter } from 'next/router'
-import { useAccount, useContract, useContractWrite, usePrepareContractWrite, useProvider, useSigner } from 'wagmi'
+import { useAccount, useContract, useProvider, useSigner } from 'wagmi'
 import { useTranslation } from 'next-i18next'
 import { ForumContractAddress } from '@/constant/const'
 import ForumABI from '@/constant/abi/Forum.json'
 import { useFetchCommunitiesByIds } from '@/hooks/useFetchCommunities'
 import React, { useCallback, useEffect, useState } from 'react'
 import { polygonMumbai } from 'wagmi/chains'
-import { ethers } from 'ethers'
+import { constants, ethers } from 'ethers'
 import { Identity } from '@semaphore-protocol/identity'
-import { createInputNote, generateGroth16Proof } from '@/lib/utils'
+import { createInputNote, generateGroth16Proof, getBytes32FromIpfsHash, getBytes32FromString } from '@/lib/utils'
 import { uploadImages } from '@/utils/communityUtils'
 import { setGroupDetails } from '@/lib/api'
 import { toast } from 'react-toastify'
@@ -22,7 +22,6 @@ import { CommunityCardHeader } from '@components/CommunityCard/CommunityCardHead
 import { CommunityCardBody } from '@components/CommunityCard/CommunityCardBody'
 import { HandleSetImage, isImageFile } from '@pages/communities/[groupId]/edit'
 import { Group } from '@/types/contract/ForumInterface'
-import { JsonRpcProvider } from '@ethersproject/providers'
 import RemoveGroup from '@components/RemoveGroup'
 import { useRemoveGroup } from '@/hooks/useRemoveGroup'
 import { CommunityId } from '@/contexts/CommunityProvider'
@@ -51,6 +50,8 @@ export function EditGroup({ group, isAdmin }: EditGroupProps) {
   const [bannerUrl, setBannerUrl] = useState<string | null>(null)
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const [previewCard, setPreviewCard] = useState<boolean>(false)
+
+  const [tags, setTags] = useState<string[]>([])
 
   // Define the provider and contract within a useEffect to avoid unnecessary re-renders
   const provider = useProvider({ chainId: polygonMumbai.id })
@@ -98,6 +99,18 @@ export function EditGroup({ group, isAdmin }: EditGroupProps) {
     setGroupDescriptionState(e.target.value)
   }
 
+  const handleTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // validate tags
+    try {
+      // spaces should be allowed
+      if (e.target.value.match(/^[a-zA-Z0-9, ]*$/)) {
+        setTags(e.target.value.split(','))
+      }
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
   const hidePreview = () => {
     setPreviewCard(false)
   }
@@ -122,8 +135,9 @@ export function EditGroup({ group, isAdmin }: EditGroupProps) {
         ...group.groupDetails,
         // add only if the value is not empty
         ...(groupDescriptionState && { description: groupDescriptionState }),
-        ...(bannerCID && { banner: bannerCID }),
-        ...(logoCID && { logo: logoCID }),
+        bannerCID: bannerCID ? getBytes32FromIpfsHash(bannerCID) : constants.HashZero,
+        logoCID: logoCID ? getBytes32FromIpfsHash(logoCID) : constants.HashZero,
+        tags: tags.map(tag => getBytes32FromString(tag)),
       }
 
       // Call the setGroupDescription function
@@ -131,6 +145,8 @@ export function EditGroup({ group, isAdmin }: EditGroupProps) {
         .then(async response => {
           await handleUpdateStateAfterEdit()
           toast.success('Group details updated')
+          setIsSubmitting(false)
+
           router.push(`/communities/${group.groupId}`)
         })
         .catch(error => {
@@ -139,8 +155,8 @@ export function EditGroup({ group, isAdmin }: EditGroupProps) {
     } catch (error) {
       // todo: handle better
       toast.error(error.message)
-    } finally {
       setIsSubmitting(false)
+    } finally {
     }
   }, [bannerFile, logoFile, group.id, forumContract, groupDescriptionState, groupName])
 
@@ -161,6 +177,31 @@ export function EditGroup({ group, isAdmin }: EditGroupProps) {
             type="text"
             value={groupName}
             onChange={handleNameChange}
+          />
+        </div>
+
+        <div className="flex flex-col space-y-4">
+          <label className="text-lg text-gray-700">{t('placeholder.communityTags')}</label>
+          <div className={'flex gap-2'}>
+            {tags.map((tag, index) => (
+              <div key={index}>
+                {tag.trim() && (
+                  <span
+                    key={index}
+                    className="rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
+                  >
+                    {tag}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+          <input
+            className="rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
+            placeholder={'tag1, tag2, tag3'}
+            type="text"
+            value={tags}
+            onChange={handleTagsChange}
           />
         </div>
 
@@ -210,13 +251,12 @@ export function EditGroup({ group, isAdmin }: EditGroupProps) {
 
       {previewCard && <div className="fixed inset-0 m-0 h-screen w-screen bg-gray-900/60 " />}
       {previewCard && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center space-y-8 rounded-b rounded-t-full bg-gradient-to-t from-lightBlue-950">
+        <div className="absolute inset-0 flex h-fit flex-col items-center justify-center  space-y-8 rounded bg-blue-500 p-10">
           <h1 className="text-[40px] text-white">Double check your changes!</h1>
           <div className="flex w-3/4 justify-evenly gap-64">
             <CommunityContext.Provider value={group}>
-              <div className="w-1/2 shadow-2xl ">
+              <div className="w-1/2 shadow-2xl   ">
                 <h4 className="text-[20px] text-white">Before</h4>
-
                 <CommunityCardHeader />
                 <CommunityCardBody />
               </div>
@@ -227,8 +267,8 @@ export function EditGroup({ group, isAdmin }: EditGroupProps) {
                 ...group,
                 groupDetails: {
                   ...group?.groupDetails,
-                  logo: logoUrl,
-                  banner: bannerUrl,
+                  logoCID: logoUrl as string,
+                  bannerCID: bannerUrl as string,
                   description: groupDescriptionState,
                 },
               }}
@@ -236,10 +276,7 @@ export function EditGroup({ group, isAdmin }: EditGroupProps) {
               <div className="w-1/2 shadow-2xl">
                 <h4 className="text-[20px] text-white">After</h4>
 
-                <CommunityCardHeader
-                  srcBannerOverride={bannerUrl || undefined}
-                  srcLogoOverride={logoUrl || undefined}
-                />
+                <CommunityCardHeader srcBannerOverride={bannerUrl} srcLogoOverride={logoUrl} />
                 <CommunityCardBody />
               </div>
             </CommunityContext.Provider>

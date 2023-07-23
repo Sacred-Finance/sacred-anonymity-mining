@@ -1,7 +1,7 @@
 import axios from 'axios'
-import {ethers, utils } from 'ethers'
+import { ethers, utils } from 'ethers'
 import { create, IPFSHTTPClient } from 'ipfs-http-client'
-import { toBufferLE, toBufferBE } from 'bigint-buffer'
+import { toBufferBE, toBufferLE } from 'bigint-buffer'
 import { buildBabyjub, buildPedersenHash } from 'circomlibjs'
 import { Identity } from '@semaphore-protocol/identity'
 
@@ -84,6 +84,7 @@ export const getContent = async (CID: string) => {
     console.log('ipfs not started')
     await startIPFS()
   }
+  if (!CID) return ''
   const decoder = new TextDecoder()
   let content = ''
   console.log(CID + ' loading')
@@ -108,7 +109,7 @@ export const getContent = async (CID: string) => {
 
 export const getIpfsHashFromBytes32 = (bytes32Hex: string): string => {
   if (bytes32Hex === ethers.constants.HashZero) {
-    return '';
+    return ''
   }
 
   console.log('bytes32Hex', bytes32Hex)
@@ -136,6 +137,14 @@ export const uploadIPFS = async (message: string) => {
     console.error('Error pinning file to IPFS', err)
     return null
   }
+}
+
+export const getBytes32FromString = (str: string): string => {
+  return ethers.utils.formatBytes32String(str)
+}
+
+export const getStringFromBytes32 = (bytes32Hex: string): string => {
+  return ethers.utils.parseBytes32String(bytes32Hex)
 }
 
 export const uploadImageToIPFS = async (message: File): Promise<string | null> => {
@@ -170,7 +179,6 @@ export const numToBuffer = (number, size, endianess): Buffer => {
     return Buffer.from('')
   }
 }
-
 
 // export const createNote = async (cid: BigInt, identity:BigInt) => {
 //   const cidBuffer = numToBuffer(cid, 32, 'le')
@@ -258,7 +266,10 @@ export const parseComment = content => {
       return content
     }
   } catch (error) {
-    parsedContent = content
+    parsedContent = {
+      title: content,
+      description: '',
+    }
   }
   return parsedContent
 }
