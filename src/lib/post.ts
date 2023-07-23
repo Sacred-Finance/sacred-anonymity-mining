@@ -9,7 +9,7 @@ import { getCache, removeAt, setCache } from '../lib/redis'
 import { mutate } from 'swr'
 import { UnirepUser } from './unirep'
 import { forumContract, jsonRPCProvider } from '@/constant/const'
-import { cacheNewContent, create, editContent, getAllContent, handleDeleteItem, updateContentVote } from '@/lib/item'
+import { create, editContent, handleDeleteItem, updateContentVote } from '@/lib/item'
 
 export const MIN_REP_POST = 0
 
@@ -43,17 +43,6 @@ export class Post {
 
   specificId(postId?) {
     return `${this.groupId}_post_${this.id ?? postId}`
-  }
-
-  async getAll() {
-    if (this.id) {
-      console.log(`Getting all posts for group ${this.id}...`)
-    }
-    return await getAllContent.call(this, 'post')
-  }
-
-  async get() {
-    return await getAllContent.call(this, 'post', [this.id])
   }
 
   async create(
@@ -160,9 +149,6 @@ export class Post {
     }
   }
 
-  cacheNewPost = async (post, postId, groupId, note: BigInt, contentCID, setWaiting) => {
-    return await cacheNewContent.call(this, post, postId, note, contentCID, setWaiting, 'post')
-  }
 
   removeFromCache = async postId => {
     mutate(
