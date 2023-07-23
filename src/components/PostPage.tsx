@@ -1,15 +1,12 @@
-import { useActiveUser, useCommunityById, useCommunityContext, useUserIfJoined } from '@/contexts/CommunityProvider'
-import { useAccount, useContractWrite } from 'wagmi'
+import { useActiveUser, useCommunityContext, useUserIfJoined } from '@/contexts/CommunityProvider'
+import { useAccount } from 'wagmi'
 import { useLoaderContext } from '@/contexts/LoaderContext'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
 import { forumContract, ForumContractAddress } from '@/constant/const'
 import ForumABI from '@/constant/abi/Forum.json'
-import { setCacheAtSpecificPath } from '@/lib/redis'
 import { useTranslation } from 'next-i18next'
 import React, { useEffect, useRef, useState } from 'react'
 import { OutputData } from '@editorjs/editorjs'
-import { CommentClass } from '@/lib/comment'
-import useSWR, { useSWRConfig } from 'swr'
 import { useValidateUserBalance } from '@/utils/useValidateUserBalance'
 import { Identity } from '@semaphore-protocol/identity'
 import { commentIsConfirmed, createNote, formatDistanceToNow } from '@/lib/utils'
@@ -19,10 +16,16 @@ import { SortByOption } from '@components/SortBy'
 import { useItemsSortedByVote } from '@/hooks/useItemsSortedByVote'
 import { NewPostForm } from '@components/NewPostForm'
 import { motion } from 'framer-motion'
-import { CircularProgress } from '@components/CircularProgress'
 import dynamic from 'next/dynamic'
 import { useRemoveItemFromForumContract } from '@/hooks/useRemoveItemFromForumContract'
-import {useLocalCommunity} from "@components/CommunityCard/CommunityCard";
+import { CommunityCard } from '@components/CommunityCard/CommunityCard'
+import { PostItem } from './postList'
+import { NoComments } from './NoPosts'
+import { useUnirepSignUp } from '@/hooks/useUnirepSignup'
+import { User } from '@/lib/model'
+
+import clsx from 'clsx'
+import { CancelButton, PrimaryButton } from '@components/buttons'
 
 const Editor = dynamic(() => import('@/components/editor-js/Editor'), {
   ssr: false,
@@ -47,15 +50,11 @@ interface TempComment {
   content: string
 }
 
-
-export function PostPage({ postInstance, postId, groupId }) {
-  const hasUserJoined = useUserIfJoined(groupId)
+export function PostPage({ postInstance, postId, groupId, comments, post, community, commentInstance }) {
+  const member = useUserIfJoined(groupId)
   const activeUser = useActiveUser({ groupId })
   const { state } = useCommunityContext()
-  const { users, communities } = state
-
-  const community = useLocalCommunity()
-
+  const { users } = state
 
   const { address } = useAccount()
   const { isLoading, setIsLoading } = useLoaderContext()
@@ -63,10 +62,8 @@ export function PostPage({ postInstance, postId, groupId }) {
   const { isAdmin, isModerator, fetchIsAdmin, fetchIsModerator } = useCheckIfUserIsAdminOrModerator(address)
 
   const canDelete = isAdmin || isModerator
-  const commentClassInstance = useRef<CommentClass>(null)
-
+  //
   useEffect(() => {
-    commentClassInstance.current = new CommentClass(groupId, postId, null)
     fetchIsAdmin()
   }, [groupId, postId])
 
@@ -75,7 +72,7 @@ export function PostPage({ postInstance, postId, groupId }) {
     ForumABI,
     forumContract,
     postInstance,
-    commentClassInstance,
+    commentInstance,
     setIsLoading
   )
 
@@ -86,35 +83,33 @@ export function PostPage({ postInstance, postId, groupId }) {
   const [tempComments, setTempComments] = useState<TempComment[]>([])
 
   const [isPostEditable, setIsPostEditable] = useState(false)
-  const [isPostEditing, setPostEditing] = useState(false)
-  const [isPostBeingSaved, setPostBeingSaved] = useState(false)
   const [editableComments, setEditableComments] = useState<string[]>([])
 
-  const [postTitle, setPostTitle] = useState('')
-  const [postDescription, setPostDescription] = useState<OutputData>(null)
+  const [tempPostTitle, setTempPostTitle] = useState('')
+  const [tempPostDescription, setTempPostDescription] = useState<OutputData>(null)
 
   const commentEditorRef = useRef<any>()
+  const postEditorRef = useRef<any>()
 
-  const identityCommitment = hasUserJoined ? BigInt(hasUserJoined?.identityCommitment?.toString()) : null
-
-  const { data: comments, isLoading: commentsLoading } = useSWR(
-    commentClassInstance?.current?.commentsCacheId?.(),
-    fetchComments,
-    {
-      revalidateOnFocus: false,
-    },
-  )
-
+  const identityCommitment = member ? BigInt(member?.identityCommitment?.toString()) : null
 
   useEffect(() => {
-    if (hasUserJoined && identityCommitment && comments) {
+    if (member && identityCommitment && comments) {
       checkIfCommentsAreEditable()
     }
-  }, [hasUserJoined, comments])
+  }, [member, comments, identityCommitment])
+
+  useEffect(() => {
+    // check if checkIfPostIsEditable
+    if (member && identityCommitment && post) {
+      checkIfPostIsEditable(post.note, post.contentCID)
+    }
+  }, [member, post, identityCommitment])
+
   const { validationResult, checkUserBalance } = useValidateUserBalance(community, address)
 
   const checkIfPostIsEditable = async (note, contentCID) => {
-    const userPosting = new Identity(`${address}_${groupId}_${hasUserJoined?.name}`)
+    const userPosting = new Identity(`${address}_${groupId}_${member?.name}`)
     const generatedNote = await createNote(userPosting)
     const generatedNoteAsBigNumber = BigNumber.from(generatedNote).toString()
     const noteBigNumber = BigNumber.from(note).toString()
@@ -122,22 +117,10 @@ export function PostPage({ postInstance, postId, groupId }) {
     setIsPostEditable(noteBigNumber === generatedNoteAsBigNumber)
   }
 
-
-
-
-  async function fetchComments() {
-    console.log('test-log', 'fetching comments')
-    const comments = await commentClassInstance?.current?.getComments()
-    return comments
-  }
-
   const onClickEditPost = async () => {
     const hasSufficientBalance = await checkUserBalance()
     if (!hasSufficientBalance) return
-    setPostEditing(true)
   }
-
-
 
   const deleteItem = async (itemId, itemType: number) => {
     if (itemType !== 0 && itemType !== 1) return toast.error(t('alert.deleteFailed'))
@@ -152,8 +135,8 @@ export function PostPage({ postInstance, postId, groupId }) {
       try {
         const { status } =
           itemType === 0
-            ? await postInstance?.current?.delete(address, postId, users, hasUserJoined, groupId, setIsLoading)
-            : await commentClassInstance?.current?.delete(address, postId, users, hasUserJoined, groupId, setIsLoading)
+            ? await postInstance?.delete(address, itemId, users, member, groupId, setIsLoading)
+            : await commentInstance?.delete(address, itemId, users, member, groupId, setIsLoading)
         if (status === 200) {
           toast.success(t('alert.deleteSuccess'))
           if (itemType === 0) {
@@ -181,12 +164,10 @@ export function PostPage({ postInstance, postId, groupId }) {
 
   const validateRequirements = () => {
     if (!address) return toast.error(t('toast.error.notLoggedIn'), { type: 'error', toastId: 'min' })
-    if (!hasUserJoined) return toast.error(t('toast.error.notJoined'), { type: 'error', toastId: 'min' })
+    if (!member) return toast.error(t('toast.error.notJoined'), { type: 'error', toastId: 'min' })
 
     return true
   }
-
-
 
   // Helper function for updating the comments map
   const updateCommentMap = (id: string, updates: Partial<CommentsMap[string]>) => {
@@ -199,10 +180,7 @@ export function PostPage({ postInstance, postId, groupId }) {
     }))
   }
 
-
-
   const addComment = async () => {
-    console.log(groupId, 'groupId')
     if (validateRequirements() !== true) return
     const hasSufficientBalance = await checkUserBalance()
     if (!hasSufficientBalance) return
@@ -210,12 +188,11 @@ export function PostPage({ postInstance, postId, groupId }) {
 
     try {
       setIsLoading(true)
-      //don't await. Create it. If succees, update redis with success, else delete redis
-      const { status } = await commentClassInstance?.current?.create(
+      const response = await commentInstance?.create(
         comment,
         address,
         users,
-        hasUserJoined,
+        member,
         groupId,
         setIsLoading,
         (comment, cid) => {
@@ -231,9 +208,11 @@ export function PostPage({ postInstance, postId, groupId }) {
         }
       )
 
-      if (status === 200) {
+      if (response?.status === 200) {
         clearInput()
+
         // const newMessage = await getContent(getIpfsHashFromBytes32(signal))
+        console.log(response)
         console.log(`Your greeting was posted 🎉`)
         toast.success(t('alert.addCommentSuccess'))
       } else {
@@ -241,10 +220,15 @@ export function PostPage({ postInstance, postId, groupId }) {
         toast.error(t('alert.addCommentFailed'))
       }
     } catch (error) {
+      clearInput()
       console.error(error)
-      toast.error(t('alert.addCommentFailed'))
+      if (error?.message?.includes('ProveReputation_227')) {
+        toast.error(t('error.notEnoughReputation'), { toastId: 'notEnoughReputation' })
+      } else {
+        toast.error(t('alert.addCommentFailed'))
+      }
 
-      console.log('Some error occurred, please try again!')
+      console.log('Some error occurred, please try again!', error)
     } finally {
       setIsLoading(false)
       setTempComments(prevComments => {
@@ -254,9 +238,8 @@ export function PostPage({ postInstance, postId, groupId }) {
           tempCommentsCopy.splice(tempCommentIndex, 1)
           return tempCommentsCopy
         }
-        return prevComments // return the previous state if no comment is found with the given ipfsHash
+        return prevComments
       })
-
     }
   }
 
@@ -266,17 +249,16 @@ export function PostPage({ postInstance, postId, groupId }) {
       const contentCID = c?.contentCID
       if (note && contentCID) {
         const noteBigNumber = BigNumber.from(note).toString()
-        const userPosting = new Identity(`${address}_${groupId}_${hasUserJoined?.name}`)
+        const userPosting = new Identity(`${address}_${groupId}_${member?.name}`)
         const generatedNote = await createNote(userPosting)
         const generatedNoteAsBigNumber = BigNumber.from(generatedNote).toString()
 
-        console.log('test-log comments', generatedNoteAsBigNumber, noteBigNumber)
         if (generatedNoteAsBigNumber === noteBigNumber) {
           setEditableComments(prev => [...prev, c.id])
-          // updateCommentMap(c.id, {
-          //   comment: { ...(commentsMap[c.id]?.comment || c) },
-          //   isEditable: true,
-          // })
+          updateCommentMap(c.id, {
+            comment: { ...(commentsMap[c.id]?.comment || c) },
+            isEditable: true,
+          })
         }
       }
     }
@@ -301,8 +283,33 @@ export function PostPage({ postInstance, postId, groupId }) {
     })
   }
 
+  const saveEditedPost = async () => {
+    if (!postInstance || !address || !member) return
+    setIsLoading(true)
+
+    try {
+      const { status } = await postInstance.edit(
+        { title: tempPostTitle, description: tempPostDescription },
+        address,
+        post.id,
+        member,
+        groupId,
+        setIsLoading
+      )
+
+      if (status === 200) {
+        toast.success(t('alert.postEditSuccess'))
+        setIsLoading(false)
+      }
+    } catch (error) {
+      console.log(error)
+      toast.error(t('alert.editFailed'))
+      setIsLoading(false)
+    }
+  }
+
   const saveEditedComment = async comment => {
-    if (!commentClassInstance.current || !address || !hasUserJoined) return
+    if (!commentInstance || !address || !member) return
     updateCommentMap(comment.id, {
       isSaving: true,
       comment: { ...comment },
@@ -310,13 +317,13 @@ export function PostPage({ postInstance, postId, groupId }) {
     setIsLoading(true)
 
     try {
-      const { status } = await commentClassInstance.current.edit(
-          commentsMap[comment.id]?.comment,
-          address,
-          comment.id,
-          hasUserJoined,
-          groupId,
-          setIsLoading
+      const { status } = await commentInstance.edit(
+        commentsMap[comment.id]?.comment,
+        address,
+        comment.id,
+        member,
+        groupId,
+        setIsLoading
       )
 
       if (status === 200) {
@@ -337,24 +344,25 @@ export function PostPage({ postInstance, postId, groupId }) {
     }
   }
 
-
   const voteForPost = async (postId, voteType: 0 | 1) => {
-    if (!hasUserJoined) return
+    if (!member) return
     const hasSufficientBalance = await checkUserBalance()
     if (!hasSufficientBalance) return
     setIsLoading(true)
 
     try {
-      postInstance?.current
-        ?.updatePostsVote(postInstance.current, postId, voteType, false)
-        .then(() => setIsLoading(false))
-      const { status } = await postInstance?.current?.vote(voteType, address, users, activeUser, postId, groupId)
+      const { status } = await postInstance?.vote(voteType, address, users, activeUser, postId, groupId)
+      console.log(status)
 
       if (status === 200) {
         setIsLoading(false)
+        postInstance?.updatePostsVote(postInstance, postId, voteType, false)
+      } else {
+        toast(t('alert.voteFailed'))
       }
     } catch (error) {
-      postInstance?.current?.updatePostsVote(postInstance.current, postId, voteType, true, true)
+      console.log(error)
+      toast(t('alert.voteFailed'))
       setIsLoading(false)
     }
   }
@@ -366,112 +374,147 @@ export function PostPage({ postInstance, postId, groupId }) {
   }
 
   const CommentActions = ({ comment, canDelete }) => {
-    const isEditable = editableComments.includes(comment.id);
-    const currentCommentMap = commentsMap[comment.id];
-    const isEditing = currentCommentMap?.isEditing;
-    const commentContent = currentCommentMap?.comment?.content;
+    const isEditable = editableComments.includes(comment.id)
+    const currentCommentMap = commentsMap[comment.id]
+    const isEditing = currentCommentMap?.isEditing
+    const commentContent = currentCommentMap?.comment?.content
 
     return (
-        <div className="mt-3 flex flex-row gap-4">
-          {isEditable && !isEditing && (
-              <button onClick={() => onClickEditComment(comment)}>{t('button.edit')}</button>
-          )}
-          {isEditing && (
-              <>
-                <button onClick={() => onClickCancelComment(comment)}>{t('button.cancel')}</button>
-                <button
-                    disabled={!commentContent || !commentContent.blocks?.length}
-                    onClick={() => saveEditedComment(comment)}
-                >
-                  {t('button.save')}
-                </button>
-              </>
-          )}
-          {(currentCommentMap?.isEditable || canDelete) && !isEditing && (
-              <button className="text-small color-[red.500]" onClick={() => deleteItem(comment.id, 1)}>
-                {t('button.delete')}
-              </button>
-          )}
-        </div>
-    );
+      <div className="mt-3 flex flex-row gap-4">
+        {comment.id}
+        {isEditable && !isEditing && <button onClick={() => onClickEditComment(comment)}>{t('button.edit')}</button>}
+        {isEditing && (
+          <>
+            <CancelButton onClick={() => onClickCancelComment(comment)}>{t('button.cancel')}</CancelButton>
+            <PrimaryButton
+              disabled={!commentContent || !commentContent.blocks?.length}
+              onClick={() => saveEditedComment(comment)}
+            >
+              {t('button.save')}
+            </PrimaryButton>
+          </>
+        )}
+        {(currentCommentMap?.isEditable || canDelete) && !isEditing && (
+          <button className="text-small color-[red.500]" onClick={() => deleteItem(comment.id, 1)}>
+            {t('button.delete')}
+          </button>
+        )}
+      </div>
+    )
   }
 
   const sortedCommentsData = useItemsSortedByVote(tempComments, comments, commentsSortBy)
+  const [isFormOpen, setIsFormOpen] = useState(false)
 
+  const user = useUserIfJoined(groupId as string)
+  const unirepUser = useUnirepSignUp({ groupId: groupId, name: (user as User)?.name })
   return (
-    <>
-      <NewPostForm
-        id={`post_comment${groupId}`}
-        postTitle={false}
-        isComment={true}
-        postDescription={comment}
-        setPostDescription={setComment}
-        isLoading={isLoading}
-        addPost={addComment}
-        postEditorRef={undefined}
-        setPostTitle={undefined}
-        clearInput={() => setComment(null)}
+    <div
+      className={clsx(
+        'mx-auto h-screen w-full max-w-screen-2xl space-y-4 overflow-y-auto !text-gray-900 sm:p-8 md:p-24'
+      )}
+    >
+      <CommunityCard community={community} index={0} isAdmin={false} variant={'banner'} />
+
+      {isPostEditable ? 'yes' : 'no'}
+      <PostItem
+        post={post}
+        address={address as string}
+        isPostEditable={isPostEditable}
+        setIsFormOpen={setIsFormOpen}
+        isFormOpen={isFormOpen}
+        voteForPost={voteForPost}
+        showDescription={true}
+        editor={
+          <NewPostForm
+            editorId={postInstance.specificPostId(postId)}
+            description={tempPostDescription || post?.description}
+            setDescription={setTempPostDescription}
+            handleSubmit={saveEditedPost}
+            editorReference={postEditorRef}
+            setTitle={setTempPostTitle}
+            resetForm={() => {
+              setTempPostDescription(null)
+              setTempPostTitle('')
+            }}
+            isEditable={isPostEditable}
+            isReadOnly={false}
+            isSubmitting={isLoading}
+            title={tempPostTitle || post?.title}
+            itemType={'post'}
+            handlerType={'edit'}
+            formVariant={'default'}
+          />
+        }
       />
+
+      <NewPostForm
+        editorId={`post_comment${groupId}`}
+        description={comment}
+        setDescription={setComment}
+        handleSubmit={addComment}
+        editorReference={postEditorRef}
+        setTitle={() => {}}
+        resetForm={() => setComment(null)}
+        isEditable={true}
+        isReadOnly={false}
+        isSubmitting={isLoading}
+        title={''}
+        itemType={'comment'}
+        handlerType={'new'}
+        formVariant={'default'}
+      />
+
+      {sortedCommentsData.length === 0 && <NoComments />}
       {sortedCommentsData.map((c, i) => (
-          <motion.div
-              key={i}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-              className="p-4" // Tailwind class for padding
-          >
-            <div key={c.id} className="flex flex-col mb-8">
-              <div className={`bg-gray-100 dark:bg-transparent p-4 rounded-md ${commentIsConfirmed(c.id) || commentsMap[c?.id]?.isSaving ? 'border border-green-400' : 'border border-red-400'}`}>
-                {c?.content && (
-                    <div className={`mt-4 ${commentsMap[c?.id]?.isEditing ? 'min-h-[150px] rounded-md border border-solid pl-4' : ''}`}>
-                      <Editor
-                          editorRef={commentEditorRef}
-                          holder={'comment' + '_' + c?.id}
-                          readOnly={!commentsMap[c?.id]?.isEditing}
-                          onChange={val => setOnEditCommentContent(c, val)}
-                          placeholder={t('placeholder.enterComment') as string}
-                          data={c?.content?.blocks ? c?.content : []}
-                      />
-                      {(Boolean(identityCommitment) || canDelete) && <CommentActions comment={c} canDelete={canDelete} />}
-                    </div>
-                )}
-              </div>
-              <div className="pt-3 text-gray-500">
+        <motion.div
+          key={i}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="p-4" // Tailwind class for padding
+        >
+          <div key={c.id} className=" flex flex-col">
+            <div
+              className={`rounded-md bg-gray-100 p-4 dark:bg-transparent ${
+                commentIsConfirmed(c.id) || commentsMap[c?.id]?.isSaving
+                  ? 'border border-green-400'
+                  : 'border border-red-400'
+              }`}
+            >
+              {c && (
                 <div
-                    className="flex gap-3"
-                    style={{
-                      visibility: commentIsConfirmed(c.id) ? 'visible' : 'hidden',
-                    }}
+                  className={`mt-4 ${
+                    commentsMap[c?.id]?.isEditing ? 'min-h-[150px] rounded-md border border-solid pl-4' : ''
+                  }`}
                 >
-                  <div>{/* Your VoteUpButton and VoteDownButton components code */}</div>
-                  <p className="my-auto inline-block text-sm">
-                    🕛 {c?.createdAt ? formatDistanceToNow(new Date(c?.createdAt).getTime(), { addSuffix: true }) : '-'}
-                  </p>
+                  <Editor
+                    editorRef={commentEditorRef}
+                    holder={'comment' + '_' + c?.id}
+                    readOnly={!commentsMap[c?.id]?.isEditing}
+                    onChange={val => setOnEditCommentContent(c, val)}
+                    placeholder={t('placeholder.enterComment') as string}
+                    data={c}
+                  />
+                  {(identityCommitment || canDelete) && <CommentActions comment={c} canDelete={canDelete} />}
                 </div>
+              )}
+            </div>
+            <div className="pt-3 text-gray-500">
+              <div
+                className="flex gap-3"
+                style={{
+                  visibility: commentIsConfirmed(c.id) ? 'visible' : 'hidden',
+                }}
+              >
+                <p className="my-auto inline-block text-sm">
+                  🕛 {c?.time ? formatDistanceToNow(new Date(c?.time).getTime(), { addSuffix: true }) : '-'}
+                </p>
               </div>
             </div>
-          </motion.div>
+          </div>
+        </motion.div>
       ))}
-
-      {isPostBeingSaved && <CircularProgress className={'h-10 w-10'} />}
-      {isPostEditing ? (
-        <div className={'flex flex-col items-center justify-center'}>
-          <div className="flex flex-col items-center rounded bg-white bg-opacity-50 p-4">
-            <input id={'postTitle'} value={postTitle} onChange={e => setPostTitle(e.target.value)} />
-            <textarea
-              id={'postDescription'}
-              value={postDescription}
-              onChange={e => setPostDescription(e.target.value)}
-            />
-          </div>
-        </div>
-      ) : (
-        <div className={'flex flex-col items-center justify-center'}>
-          <div className="flex flex-col items-center rounded bg-white bg-opacity-50 p-4">
-            {/*<h1 className="text-2xl font-bold text-black">{postFetched?.name}</h1>*/}
-          </div>
-        </div>
-      )}
-    </>
+    </div>
   )
 }

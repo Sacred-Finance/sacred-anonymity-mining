@@ -22,7 +22,7 @@ export const useRemoveItemFromForumContract = (
       const itemId = variables.args[0]
       const item = await forumContract.itemAt(itemId)
       if (item.kind == 0) {
-        await setCacheAtSpecificPath(postInstance?.current?.specificPostId(itemId), true, '$.removed')
+        await setCacheAtSpecificPath(postInstance?.current?.specificId(itemId), true, '$.removed')
       } else if (item.kind == 1) {
         await handleCommentItem(itemId)
       }
@@ -34,7 +34,7 @@ export const useRemoveItemFromForumContract = (
   }
 
   const handleCommentItem = async itemId => {
-    await setCacheAtSpecificPath(commentClassInstance.current.specificCommentId(itemId), true, '$.removed')
+    await setCacheAtSpecificPath(commentClassInstance.current.specificId(itemId), true, '$.removed')
     mutate(
       commentClassInstance.current.commentsCacheId(),
       data => {

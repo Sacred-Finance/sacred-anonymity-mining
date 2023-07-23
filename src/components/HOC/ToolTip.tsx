@@ -31,13 +31,13 @@ export const ToolTip: React.ForwardRefExoticComponent<ToolTipProps & React.RefAt
 
         <div
           className={clsx(
-            'bg-opacity-85 absolute top-0 left-0 z-40 mt-10  hidden w-auto items-center  rounded-lg border  border-white/80 p-2 shadow group-hover:flex dark:border-black/80',
+            'bg-opacity-85 absolute flex flex-col top-0 left-0 z-40 mt-10  hidden w-auto items-center  rounded-lg border  border-white/80 p-2 shadow group-hover:flex dark:border-black/80',
             colors
           )}
           role="alert"
         >
-          <div className="text-basefont-normal ml-3 text-inherit">{title}</div>
-          <div className="ml-3  w-[500px] text-sm font-normal">{message}</div>
+            {title && <div className="text-base font-normal  w-fit ml-3 text-inherit">{title}</div>}
+            {message && <div className="ml-3 min-w-max text-sm font-normal">{message}</div>}
         </div>
       </div>
     )

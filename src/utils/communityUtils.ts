@@ -1,12 +1,12 @@
-import { BigNumber, ethers } from 'ethers'
+import { ethers } from 'ethers'
 import { erc20dummyABI, forumContract, jsonRPCProvider } from '@/constant/const'
-import { getCache, getMCache, setCache } from '@/lib/redis'
-import { getIpfsHashFromBytes32, uploadImageToIPFS } from '@/lib/utils'
+import { setCache } from '@/lib/redis'
+import { getContent, getIpfsHashFromBytes32, parseComment, parsePost, uploadImageToIPFS } from '@/lib/utils'
 import { CommunityDetails, Requirement } from '@/lib/model'
 
 import pica from 'pica'
 import { useCallback } from 'react'
-import { Group } from '@/types/contract/ForumInterface'
+import { Group, Item, RawGroupData, RawItemData } from '@/types/contract/ForumInterface'
 import { Event } from '@ethersproject/contracts'
 
 type GroupId = number
@@ -43,14 +43,16 @@ export const fetchCommunitiesData = async ({ groups }: FetchCommunitiesDataParam
       return {
         groupId: groupId,
         name: groupData?.name,
-        id: groupData?.id,
+        id: groupData?.id?.toNumber(),
         userCount: groupData?.userCount?.toNumber() || 0,
-        note: groupData?.note,
+        note: groupData?.note?.toString(), // todo:review this
         requirements: requirementDetails,
         chainId: groupData?.chainId?.toNumber(),
         removed: groupData?.removed,
-        banner: getIpfsHashFromBytes32(groupData?.groupDetails.bannerCID),
-        logo: getIpfsHashFromBytes32(groupData?.groupDetails.logoCID),
+        banner: groupData?.groupDetails.bannerCID
+          ? getIpfsHashFromBytes32(groupData.groupDetails.bannerCID)
+          : undefined,
+        logo: groupData?.groupDetails.logoCID ? getIpfsHashFromBytes32(groupData.groupDetails.logoCID) : undefined,
         groupDetails: groupData.groupDetails,
       } as Group
     })
@@ -237,7 +239,7 @@ export const addRequirementDetails = async (community: Group): Promise<Awaited<R
       const symbol = await token.symbol()
       const name = await token.name()
       const decimals = await token.decimals()
-      const minAmount = requirement.minAmount
+      const minAmount = requirement.minAmount.toString()
 
       return {
         tokenAddress: requirement.tokenAddress,
@@ -247,91 +249,81 @@ export const addRequirementDetails = async (community: Group): Promise<Awaited<R
         minAmount,
       }
     })
-  )) as Requirement[]
+  )) as unknown as Requirement[]
 }
 
-const maxCacheAge = 1000 * 60 * 60 * 24 // 24 hours
-
-const fetchCommunitiesDataFromCache = async (
-  groupIds: number[]
-): Promise<((Group & { refresh: boolean }) | null)[]> => {
-  const cacheKeys = groupIds.map(groupId => `group_${groupId}`)
-  const { cache: cachedDataArray } = await getMCache(cacheKeys, true)
-
-  return groupIds.map((groupId, index) => {
-    const cachedData = cachedDataArray[index]
-    let refresh = false
-    // example of lastCachedAt value 1687468176683
-
-    if (cachedData?.data && !isNaN(groupId)) {
-      const cacheData = cachedData.data
-      const lastCachedAt = cachedData?.lastCachedAt
-      if (maxCacheAge < Date.now() - lastCachedAt) {
-        refresh = true
-        console.log('refreshing cache for group', groupId)
-        console.log('last cache in hours', (Date.now() - lastCachedAt) / 1000 / 60 / 60)
-      }
-      if (!cacheData?.note) {
-        return null
-      }
-      return {
-        ...cacheData,
-        groupId,
-        id: BigNumber.from(groupId),
-        note: cacheData?.note,
-        refresh: false, // assuming refresh should be false as per the provided getMCache implementation
-      }
-    }
-
-    return null
-  })
+// Normalization function
+function serializeGroupData(rawGroupData: RawGroupData): Group {
+  return {
+    id: rawGroupData.id.toNumber(),
+    name: rawGroupData.name,
+    groupId: rawGroupData.id.toString(),
+    groupDetails: {
+      bannerCID: getIpfsHashFromBytes32(rawGroupData.groupDetails.bannerCID.toString()),
+      logoCID: getIpfsHashFromBytes32(rawGroupData.groupDetails.logoCID.toString()),
+      description: rawGroupData.groupDetails.description.toString(),
+      tags: rawGroupData.groupDetails.tags.map(t => t.toString()),
+    },
+    requirements: rawGroupData.requirements.map(r => ({
+      tokenAddress: r.tokenAddress,
+      minAmount: r.minAmount.toString(),
+    })),
+    note: rawGroupData.note.toString(),
+    userCount: rawGroupData.userCount.toNumber(),
+    chainId: rawGroupData.chainId.toNumber(),
+    posts: rawGroupData.posts.map(p => p.toNumber()),
+    removed: rawGroupData.removed,
+  }
 }
 
-export const uploadAndCacheImages = async ({
-  groupId,
-  bannerFile,
-  logoFile,
-}: UploadAndCacheImagesParams): Promise<ImageCacheData> => {
+// Asynchronous function to normalize and augment data
+export async function augmentGroupData(rawGroupData: RawGroupData, forPaths = false): Promise<Group> {
+  const normalizedGroupData = serializeGroupData(rawGroupData)
+
+  if (forPaths) {
+    return normalizedGroupData
+  }
+
+  normalizedGroupData.requirements = await addRequirementDetails(normalizedGroupData)
+
+  return normalizedGroupData
+}
+
+function serializeRawItemData(rawItemData: RawItemData): Item {
+  return {
+    kind: rawItemData.kind.toString(),
+    id: rawItemData.id.toString(),
+    parentId: rawItemData.parentId.toString(),
+    groupId: rawItemData.groupId.toString(),
+    createdAtBlock: rawItemData.createdAtBlock.toNumber(),
+    childIds: rawItemData.childIds.map(id => id.toString()),
+    upvote: rawItemData.upvote.toNumber(),
+    downvote: rawItemData.downvote.toNumber(),
+    note: rawItemData.note.toString(),
+    ownerEpoch: rawItemData.ownerEpoch.toString(),
+    ownerEpochKey: rawItemData.ownerEpochKey.toString(),
+    contentCID: getIpfsHashFromBytes32(rawItemData.contentCID.toString()),
+    removed: rawItemData.removed,
+  }
+}
+
+export async function augmentItemData(rawItemData: RawItemData): Promise<Item> {
   try {
-    if (!bannerFile && !logoFile) {
-      const existingCache = await getCache(`group_${groupId}`)
-      return existingCache.cache
-    }
-
-    const [bannerResult, logoResult] = await Promise.allSettled([
-      bannerFile ? uploadImageToIPFS(bannerFile) : Promise.resolve(null),
-      logoFile ? uploadImageToIPFS(logoFile) : Promise.resolve(null),
-    ])
-
-    const existingCache = await getCache(`group_${groupId}`)
-    const updatedCacheData: ImageCacheData = {}
-
-    if (bannerResult.status === 'fulfilled' && bannerResult.value) {
-      updatedCacheData.banner = bannerResult.value
-    } else if (bannerResult.status === 'rejected' && bannerFile) {
-      console.error('Error uploading banner image:', bannerResult.reason)
-    }
-
-    if (logoResult.status === 'fulfilled' && logoResult.value) {
-      updatedCacheData.logo = logoResult.value
-    } else if (logoResult.status === 'rejected' && logoFile) {
-      console.error('Error uploading logo image:', logoResult.reason)
-    }
-
-    if (Object.keys(updatedCacheData).length > 0) {
-      const mergedCacheData = {
-        ...(existingCache.cache ?? {}),
-        ...updatedCacheData,
+    const normalizedItemData = serializeRawItemData(rawItemData)
+    const stringifiedContent = await getContent(normalizedItemData.contentCID)
+    if (!stringifiedContent) {
+      return {
+        ...normalizedItemData,
+        removed: true,
       }
-
-      await setCache(`group_${groupId}`, mergedCacheData)
-
-      return mergedCacheData
-    } else {
-      throw new Error('Both banner and logo uploads failed.')
     }
-  } catch (error) {
-    console.error('Error caching group images:', error)
-    throw error
+    const content = normalizedItemData.kind === 1 ? parseComment(stringifiedContent) : parsePost(stringifiedContent)
+
+    return {
+      ...normalizedItemData,
+      ...content,
+    }
+  } catch (e) {
+    console.error('augmentItemData', e)
   }
 }

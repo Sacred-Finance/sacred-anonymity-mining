@@ -1,6 +1,7 @@
 import { Contract, ethers } from 'ethers'
-import { Chain, avalancheFuji, goerli, polygonMumbai, sepolia } from 'wagmi/chains'
-import ForumABI from "../constant/abi/Forum.json";
+import { avalancheFuji, Chain, goerli, polygonMumbai, sepolia } from 'wagmi/chains'
+import ForumABI from '../constant/abi/Forum.json'
+import { Forum } from '@/types/contract/Forum'
 
 export const ForumContractAddress: `0x${string}` = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`
 export const unirepAddress = '0xCa61bFcA0107c5952f8bf59f4D510d111cbcE146'
@@ -787,13 +788,11 @@ export const supportedChains: { [key: string]: Chain } = {
 
 export const supportedChainsArray = Object.keys(supportedChains).map(k => supportedChains[k])
 
-export const jsonRPCProvider =  new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL, {
+export const jsonRPCProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL, {
   name: polygonMumbai.name,
-  chainId: polygonMumbai.id
-});
+  chainId: polygonMumbai.id,
+})
 
-export const forumContract = new Contract(
-  ForumContractAddress,
-  ForumABI.abi,
-  jsonRPCProvider,
-);
+const abiInterface = new ethers.utils.Interface(ForumABI.abi).functions
+
+export const forumContract = new Contract(ForumContractAddress, ForumABI.abi, jsonRPCProvider) as Forum

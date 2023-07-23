@@ -9,3 +9,13 @@ export const NoPosts = () => {
     </div>
   )
 }
+
+export const NoComments = () => {
+  const { t } = useTranslation()
+
+  return (
+    <div className={'rounded border p-2 text-center'}>
+      <span className={'bold text-xl'}>{t('noCommentsFound')}</span>
+    </div>
+  )
+}

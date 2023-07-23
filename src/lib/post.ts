@@ -9,7 +9,7 @@ import { getCache, removeAt, setCache } from '../lib/redis'
 import { mutate } from 'swr'
 import { UnirepUser } from './unirep'
 import { forumContract, jsonRPCProvider } from '@/constant/const'
-import { cacheNewContent, create, editContent, getAllContent, handleDeleteItem, updateContentVote } from '@/lib/item'
+import { create, editContent, handleDeleteItem, updateContentVote } from '@/lib/item'
 
 export const MIN_REP_POST = 0
 
@@ -29,7 +29,6 @@ export class Post {
   postCacheId() {
     return this.id + '_post'
   }
-
   cacheId() {
     return this.id + '_post'
   }
@@ -44,17 +43,6 @@ export class Post {
 
   specificId(postId?) {
     return `${this.groupId}_post_${this.id ?? postId}`
-  }
-
-  async getAll() {
-    if (this.id) {
-      console.log(`Getting all posts for group ${this.id}...`)
-    }
-    return await getAllContent.call(this, 'post')
-  }
-
-  async get() {
-    return await getAllContent.call(this, 'post', [this.id])
   }
 
   async create(
@@ -143,9 +131,7 @@ export class Post {
       }
 
       // time this
-      console.time('generateProof')
       const { proof, nullifierHash, merkleTreeRoot } = await generateProof(userPosting, g, extraNullifier, signal)
-        console.timeEnd('generateProof')
       return vote(
         itemId,
         this.groupId?.toString(),
@@ -157,12 +143,8 @@ export class Post {
       )
     } catch (error) {
       console.error('An error occurred while voting:', error)
-      throw error
+      return error
     }
-  }
-
-  cacheNewPost = async (post, postId, groupId, note: BigInt, contentCID, setWaiting) => {
-    return await cacheNewContent.call(this, post, postId, note, contentCID, setWaiting, 'post')
   }
 
   removeFromCache = async postId => {
@@ -175,7 +157,7 @@ export class Post {
           if (i > -1) {
             postsCopy.splice(i, 1)
           }
-          await removeAt(this.specificPostId(postId), '$')
+          await removeAt(this.specificId(postId), '$')
         }
         return postsCopy
       },

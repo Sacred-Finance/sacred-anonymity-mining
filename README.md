@@ -78,3 +78,52 @@ Learn about components of this kit is using:
 
 This app is open-source and licensed under the MIT license. For more details, check the [License file](LICENSE).
 # sacred-community-client-nextjs
+
+# User Acceptance Testing (UAT) Form
+
+## 1. General Features
+- [ ] Interaction with Smart Contract
+- [ ] Updates and Changes to Smart Contract
+- [ ] Immediate Updates to UI
+- [ ] Caching Mechanism
+- [ ] Loading and Blocking Animations
+- [ ] Passing Visual Aesthetics
+- [ ] Error and Exception Handling
+- [ ] Security and Privacy
+- [ ] Responsiveness on Different Devices
+- [ ] Accessibility Compliance (Screen Readers, Keyboard Navigation, etc.)
+
+## 2. Voting Features
+- [ ] Voting on Posts
+- [ ] Voting on Comments
+- [ ] Voting Loading Animation
+- [ ] Unvoting or Changing Vote
+
+## 3. Comment Features
+- [ ] Creating Comments
+- [ ] Editing a Comment
+- [ ] Deleting a Comment
+- [ ] Comment Loading Animation
+- [ ] Replying to a Comment - tbd
+
+## 4. Post Features
+- [ ] Creating Posts
+- [ ] Editing a Post
+- [ ] Deleting a Post
+- [ ] Post Loading Animation
+- [ ] Preview Post Before Submission
+
+## 5. Community Features
+- [ ] Creating a Community
+- [ ] Joining a Community
+- [ ] Leaving a Community - tbd
+- [ ] Editing a Community
+- [ ] Deleting a Community - tbd
+
+## 9. Miscellaneous
+- [ ] Photo Upload/Download
+- [ ] Linking Between Pages
+- [ ] URL Routing
+
+Please check the relevant box once you have successfully tested the respective feature.
+

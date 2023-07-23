@@ -1,29 +1,60 @@
-import { useRouter } from 'next/router'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect } from 'react'
 import { Post } from '@/lib/post'
-import { useMounted } from '@/hooks/useMounted'
+import WithStandardLayout from '@components/HOC/WithStandardLayout'
+import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { PostPage } from '@components/PostPage'
-import { CommunityPage } from '@components/CommunityPage'
-import WithStandardLayout from "@components/HOC/WithStandardLayout";
+import { ethers } from 'ethers'
+import useSWR from 'swr'
+import fetcher, { getGroupWithPostAndCommentData } from '@/lib/fetcher'
+import { useRouter } from 'next/router'
+import LoadingComponent from '@components/LoadingComponent'
+import { CommentClass } from '@/lib/comment'
 
 function PostIndex() {
+  const { dispatch } = useCommunityContext()
   const router = useRouter()
   const { groupId, postId } = router.query
-  const postInstance = useRef<Post>(null)
-  const isMounted = useMounted()
+
+  const { data, error, isLoading } = useSWR(getGroupWithPostAndCommentData(groupId, postId), fetcher)
 
   useEffect(() => {
-    if (!router.isReady) return
-    if (isNaN(groupId as number) || isNaN(postId as number)) return
-    postInstance.current = new Post(postId as string, groupId)
-  }, [groupId, postId, router.isReady])
+    const { group, post, comments } = data || {}
+    if (!group || !post || !comments) return
+    dispatch({
+      type: 'SET_ACTIVE_COMMUNITY',
+      payload: {
+        community: group,
+        postList: [post],
+      },
+    })
+    dispatch({
+      type: 'SET_ACTIVE_POST',
+      payload: {
+        community: group,
+        post: post,
+        comments: comments,
+      },
+    })
+  }, [data])
 
-  if (isNaN(groupId) || isNaN(postId) || !router.isReady || !postInstance.current || !isMounted) return null
+  if (error) return <div>Error: {error.message}</div>
+  if (!data || isLoading) return <LoadingComponent />
+
+  const { group, post, comments } = data
+  const postInstance = new Post(post.id, group.groupId)
+  const commentInstance = new CommentClass(group.groupId, post.id, null)
+  group.id = ethers.BigNumber.from(group.id)
 
   return (
-    <CommunityPage postId={postId as string} groupId={groupId as string} postInstance={postInstance.current as Post}>
-      <PostPage postId={postId} groupId={groupId as string} postInstance={postInstance.current as Post} />
-    </CommunityPage>
+    <PostPage
+      postId={post.id}
+      groupId={group.groupId}
+      postInstance={postInstance}
+      post={post}
+      community={group}
+      comments={comments}
+      commentInstance={commentInstance}
+    />
   )
 }
 

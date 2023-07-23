@@ -51,7 +51,7 @@ export const useValidateUserBalance = (community: Group | undefined, address: `0
   }, [data, isError, isLoading])
 
   const checkUserBalance = useCallback(() => {
-    if (!community?.requirements.length) return true
+    if (!community?.requirements?.length) return true
 
     if (!data || isError || isLoading) {
       setFetchEnabled(true)

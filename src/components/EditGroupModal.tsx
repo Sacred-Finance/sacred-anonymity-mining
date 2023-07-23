@@ -31,11 +31,10 @@ function EditGroupModal({ community, hidden = false }) {
       <ToolTip
         type="primary"
         title={t('toolTip.editCommunity.title')}
-        message={t('toolTip.editCommunity.message') || ''}
       >
         <Link
           id="edit-community-button"
-          className={`absolute right-0 mr-2 mt-2 rounded-full bg-gray-100 p-2 transition duration-300 hover:bg-purple-600 hover:text-white ${
+          className={`absolute right-0 mr-2 mt-2 rounded-full bg-gray-100 p-2 ring-1 ring-white transition duration-100 hover:bg-purple-600 hover:text-white ${
             !isOwner || hidden ? 'hidden' : ''
           }`}
           aria-label="edit community"

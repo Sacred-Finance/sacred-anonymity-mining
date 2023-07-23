@@ -1,109 +1,62 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Post } from '@/lib/post'
-import { useActiveUser, useCommunityById, useUserIfJoined, useUsers } from '@/contexts/CommunityProvider'
-import { useCommunityUpdates } from '@/hooks/useCommunityUpdates'
-import { useAccount, useContract, useProvider } from 'wagmi'
+import { useActiveUser, useUserIfJoined, useUsers } from '@/contexts/CommunityProvider'
+import { useAccount } from 'wagmi'
 import { useTranslation } from 'react-i18next'
 import { OutputData } from '@editorjs/editorjs'
 import { SortByOption } from '@components/SortBy'
-import { polygonMumbai } from 'wagmi/chains'
-import { ForumContractAddress } from '@/constant/const'
-import ForumABI from '@/constant/abi/Forum.json'
 import { useUnirepSignUp } from '@/hooks/useUnirepSignup'
 import { User } from '@/lib/model'
 import { useValidateUserBalance } from '@/utils/useValidateUserBalance'
 import { useLoaderContext } from '@/contexts/LoaderContext'
-import useSWR from 'swr'
 import { toast } from 'react-toastify'
 import { useItemsSortedByVote } from '@/hooks/useItemsSortedByVote'
 import clsx from 'clsx'
-import { JoinCommunityButton } from '@components/JoinCommunityButton'
 import { NewPostForm } from '@components/NewPostForm'
-import ReputationCard from '@components/ReputationCard'
-import { PostList } from '@components/postList'
+import { PostItem, PostList } from '@components/postList'
 import { NoPosts } from '@components/NoPosts'
 import { BigNumber } from 'ethers'
-import { createNote, getBytes32FromIpfsHash, hashBytes } from '@/lib/utils'
+import { createNote } from '@/lib/utils'
 import { Identity } from '@semaphore-protocol/identity'
-import Edit from '@pages/communities/[groupId]/edit'
-import Editor from './editor-js/Editor'
-import { CommunityContext } from './CommunityCard/CommunityCard'
+import { Group, Item } from '@/types/contract/ForumInterface'
+import { CommunityCard } from '@components/CommunityCard/CommunityCard'
 
 export function CommunityPage({
   children,
-  groupId,
-  postId,
   postInstance,
+  community,
+  posts,
+  post,
+  postId,
 }: {
   children?: React.ReactNode
-  groupId: string
   postId: string | undefined
+  community: Group
+  posts?: Item[]
+  post?: Item
   postInstance: Post
 }) {
+  const groupId = postInstance.groupId
   const user = useUserIfJoined(groupId as string)
-  const community = useCommunityById(groupId as string)
   const unirepUser = useUnirepSignUp({ groupId: groupId, name: (user as User)?.name })
-  useCommunityUpdates({ postInstance })
   const activeUser = useActiveUser({ groupId })
   const { address } = useAccount()
   const users = useUsers()
   const { t } = useTranslation()
 
   const [postDescription, setPostDescription] = useState<OutputData>(null)
-  const [postTitle, setPostTitle] = useState('')
+  const [postTitle, setPostTitle] = useState<string | null>(null)
   const [sortBy, setSortBy] = useState<SortByOption>('highest')
   const [tempPosts, setTempPosts] = useState([])
 
   // these can be ignored if more than one post is returned.
   const [isPostEditable, setIsPostEditable] = useState(false)
   const [isPostEditing, setPostEditing] = useState(false)
-  const [isPostBeingSaved, setPostBeingSaved] = useState(false)
-
-  const [post, setPost] = useState<Post | null>(null)
-  const [posts, setPosts] = useState<Post[] | null>([])
-
-  const provider = useProvider({ chainId: polygonMumbai.id })
-  const forumContract = useContract({
-    address: ForumContractAddress,
-    abi: ForumABI.abi,
-    signerOrProvider: provider,
-  })
+  const [isFormOpen, setIsFormOpen] = useState(false)
 
   const { checkUserBalance } = useValidateUserBalance(community, address)
   const { setIsLoading, isLoading: isContextLoading } = useLoaderContext()
   const postEditorRef = useRef<any>()
-  const [initialized, setInitialized] = useState(false)
-
-  useEffect(() => {
-    ;(async () => {
-      if (!forumContract || !provider || initialized) return
-      setInitialized(true)
-      setIsLoading(false)
-    })()
-  }, [forumContract, groupId, provider])
-
-  const { data: fetchedPostOrPosts, isLoading } = useSWR(`${groupId}_group`, postId ? fetchPost : fetchPosts, {
-    revalidateOnFocus: false,
-  }) as { data: Post | Post[]; isLoading: boolean }
-
-  async function fetchPosts() {
-    setIsLoading(true)
-    const posts = await postInstance.getAll()
-    setPosts(posts)
-    setIsLoading(false)
-    return posts
-  }
-
-  async function fetchPost() {
-    setIsLoading(true)
-    const post = await postInstance.get()
-    const newPost = post[0]
-    setPost(newPost)
-    setPostTitle(newPost.title)
-    setPostDescription(newPost.description)
-    setIsLoading(false)
-    return post
-  }
 
   const checkIfPostIsEditable = async (note, contentCID) => {
     if (!user || !user.identityCommitment) return setIsPostEditable(false)
@@ -121,7 +74,6 @@ export function CommunityPage({
       setIsPostEditable(false)
       return
     }
-
     const note = post.note
     const contentCID = post.contentCID
     if (user && BigInt(user?.identityCommitment?.toString()) && contentCID && note) {
@@ -138,7 +90,7 @@ export function CommunityPage({
     return true
   }
 
-  const addPost = async () => {
+  const addPost: () => Promise<void> = async () => {
     if (validateRequirements() !== true) return
 
     if (!postTitle || !postDescription) {
@@ -179,8 +131,7 @@ export function CommunityPage({
 
       if (status === 200) {
         clearInput()
-        // toast({
-        console.log(`Your greeting was posted 🎉`)
+        setIsLoading(false)
       } else {
         setIsLoading(false)
         console.log('Some error occurred, please try again!')
@@ -207,7 +158,7 @@ export function CommunityPage({
     setSortBy(newSortBy)
   }
 
-  const sortedData = useItemsSortedByVote(tempPosts, fetchedPostOrPosts, sortBy)
+  const sortedData = useItemsSortedByVote(tempPosts, posts, sortBy)
 
   const voteForPost = React.useCallback(
     async (postId, voteType: 0 | 1) => {
@@ -220,21 +171,24 @@ export function CommunityPage({
       }
 
       try {
-        postInstance?.updatePostsVote(postId, voteType, false).then(() => setIsLoading(false))
         const response = await postInstance?.vote(voteType, address, users, activeUser, postId, groupId)
+
+        if (response?.message?.includes('ProveReputation_227')){
+            toast.error(t('error.notEnoughReputation'), { toastId: 'notEnoughReputation' })
+        }
         const { status } = response
 
         if (status === 200) {
           setIsLoading(false)
           toast.success(t('toast.success.vote'), { toastId: 'vote' })
+          postInstance?.updatePostsVote(postId, voteType, false).then(() => setIsLoading(false))
         }
       } catch (error) {
-        postInstance?.updatePostsVote(postId, voteType, true, true)
         setIsLoading(false)
-        toast.error(t('toast.error.vote'), { toastId: 'vote' })
+        toast(t('toast.error.vote'), { toastId: 'vote' })
       }
     },
-    [user, address, groupId, users, activeUser]
+    [user, address, groupId, users, activeUser, postInstance]
   )
 
   const onClickEditPost = async () => {
@@ -245,64 +199,24 @@ export function CommunityPage({
     setPostDescription(post?.description)
   }
 
-  const clearInput = () => {
-    setPostDescription(null)
-    setPostTitle('')
-    postEditorRef?.current?.clear?.()
+  const clearInput = isEdit => {
+    if (isEdit) {
+      setPostEditing(false)
+      setPostTitle(post?.title)
+      setPostDescription(post?.description)
+      return
+    } else {
+      setPostTitle('')
+      setPostDescription(null)
+      postEditorRef?.current?.clear?.()
+    }
   }
 
-  if (isLoading) return null
-
-  function renderPostList() {
-    if (!isNaN(postId) && sortedData.length) {
-      const sortedAndFilteredData = sortedData.filter(post => {
-        return post?.id === postId
-      })
-      return (
-        <PostList
-          posts={sortedAndFilteredData}
-          showFilter={false}
-          voteForPost={voteForPost}
-          handleSortChange={handleSortChange}
-          showDescription={true}
-          editor={
-            isPostEditable ? (
-              <>
-                <NewPostForm
-                  variant={''}
-                  id={groupId}
-                  postEditorRef={postEditorRef}
-                  postTitle={postTitle}
-                  setPostTitle={setPostTitle}
-                  postDescription={postDescription}
-                  setPostDescription={setPostDescription}
-                  readOnly={isLoading || !community?.name || isContextLoading}
-                  isLoading={isLoading || !community?.name || isContextLoading}
-                  clearInput={clearInput}
-                  isEdit={true}
-                  addPost={async () => {
-                    await postInstance?.edit(
-                      { title: postTitle, description: postDescription },
-                      address as string,
-                      postId,
-                      user as User,
-                      groupId,
-                      setIsLoading
-                    )
-                    setPostEditing(false)
-                  }}
-                />
-              </>
-            ) : (
-              <></>
-            )
-          }
-        />
-      )
+  function renderItemList() {
+    if (post) {
+      return <PostItem post={post} voteForPost={voteForPost} address={address} isPostEditable={isPostEditable} />
     } else if (sortedData?.length > 0) {
-      return (
-        <PostList posts={sortedData} showFilter={true} voteForPost={voteForPost} handleSortChange={handleSortChange} />
-      )
+      return <PostList posts={sortedData} voteForPost={voteForPost} handleSortChange={handleSortChange} showFilter />
     } else {
       return (
         <div className="rounded-lg bg-white/10 p-6 shadow-lg">
@@ -313,50 +227,33 @@ export function CommunityPage({
   }
 
   return (
-    <div className={clsx('mx-auto h-screen w-full max-w-screen-xl space-y-12 overflow-y-auto sm:p-8 md:p-24')}>
-      <div
-        className="relative flex min-h-[200px] items-center justify-between rounded-lg bg-white/10 p-6 shadow-lg"
-        style={{
-          backgroundImage: community?.banner ? `url(https://ipfs.io/ipfs/${community?.banner})` : undefined,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      >
-        <img
-          className="absolute bottom-0 left-1/2 h-20 w-20 -translate-x-1/2 translate-y-1/2 transform rounded-full border-2 border-white object-cover"
-          src={`https://ipfs.io/ipfs/${community?.logo}`}
-          alt="community logo"
-        />
-        <div className="flex flex-col items-center rounded bg-white bg-opacity-50 p-4">
-          <h1 className="text-2xl font-bold text-black">{community?.name}</h1>
-        </div>
-
-        {!(user as User)?.identityCommitment && community && <JoinCommunityButton community={community} />}
-        <ReputationCard unirepUser={unirepUser} />
-      </div>
-
-      {isNaN(postId) ? (
-        <>
-          <NewPostForm
-            id={groupId}
-            postEditorRef={postEditorRef}
-            postTitle={postTitle}
-            setPostTitle={setPostTitle}
-            postDescription={postDescription}
-            setPostDescription={setPostDescription}
-            readOnly={isLoading || !community?.name || isContextLoading}
-            isLoading={isLoading || !community?.name || isContextLoading}
-            clearInput={clearInput}
-            addPost={addPost}
-          />
-        </>
-      ) : (
-        <></>
+    <div
+      className={clsx(
+        'mx-auto h-screen w-full max-w-screen-2xl space-y-12 overflow-y-auto !text-gray-900 sm:p-8 md:p-24'
       )}
+    >
+      <CommunityCard community={community} index={0} isAdmin={false} variant={'banner'} />
 
-      <div className="rounded-lg bg-white/10 p-6">{renderPostList()}</div>
-      {/*add a context provider for post data*/}
-      <CommunityContext.Provider value={community}>{children}</CommunityContext.Provider>
+      <NewPostForm
+        editorId={`${groupId}_post`}
+        description={postDescription}
+        setDescription={setPostDescription}
+        handleSubmit={addPost}
+        editorReference={postEditorRef}
+        setTitle={setPostTitle}
+        resetForm={() => clearInput(true)}
+        isReadOnly={false}
+        isSubmitting={isContextLoading}
+        title={postTitle as string}
+        isEditable={true}
+        itemType={'post'}
+        handlerType={'new'}
+        formVariant={'default'}
+      />
+
+      {!postId && renderItemList()}
+
+      {children}
     </div>
   )
 }
