@@ -8,6 +8,7 @@
   "banner": "Banner",
   "logo": "Logo",
   "placeholder": {
+    "communityTags" : "Community Tags",
     "enterPostTitle": "Enter Post Title *",
     "enterPostContent": "Enter Post Content *",
     "enterComment": "Enter Comment *",
