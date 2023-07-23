@@ -1,12 +1,12 @@
-import { BigNumber, ethers } from 'ethers'
+import { ethers } from 'ethers'
 import { erc20dummyABI, forumContract, jsonRPCProvider } from '@/constant/const'
-import { getCache, getMCache, setCache } from '@/lib/redis'
-import { getContent, getIpfsHashFromBytes32, uploadImageToIPFS } from '@/lib/utils'
+import { setCache } from '@/lib/redis'
+import { getContent, getIpfsHashFromBytes32, parseComment, parsePost, uploadImageToIPFS } from '@/lib/utils'
 import { CommunityDetails, Requirement } from '@/lib/model'
 
 import pica from 'pica'
 import { useCallback } from 'react'
-import { Group, Item, RawGroupData, RawItemData, RawRequirement } from '@/types/contract/ForumInterface'
+import { Group, Item, RawGroupData, RawItemData } from '@/types/contract/ForumInterface'
 import { Event } from '@ethersproject/contracts'
 
 type GroupId = number
@@ -253,7 +253,7 @@ export const addRequirementDetails = async (community: Group): Promise<Awaited<R
 }
 
 // Normalization function
-function normalizeGroupData(rawGroupData: RawGroupData): Group {
+function serializeGroupData(rawGroupData: RawGroupData): Group {
   return {
     id: rawGroupData.id.toNumber(),
     name: rawGroupData.name,
@@ -278,7 +278,7 @@ function normalizeGroupData(rawGroupData: RawGroupData): Group {
 
 // Asynchronous function to normalize and augment data
 export async function augmentGroupData(rawGroupData: RawGroupData, forPaths = false): Promise<Group> {
-  const normalizedGroupData = normalizeGroupData(rawGroupData)
+  const normalizedGroupData = serializeGroupData(rawGroupData)
 
   if (forPaths) {
     return normalizedGroupData
@@ -289,7 +289,7 @@ export async function augmentGroupData(rawGroupData: RawGroupData, forPaths = fa
   return normalizedGroupData
 }
 
-function normalizeRawItemData(rawItemData: RawItemData): Item {
+function serializeRawItemData(rawItemData: RawItemData): Item {
   return {
     kind: rawItemData.kind.toString(),
     id: rawItemData.id.toString(),
@@ -307,21 +307,23 @@ function normalizeRawItemData(rawItemData: RawItemData): Item {
   }
 }
 
-// Asynchronous function to normalize and augment data
 export async function augmentItemData(rawItemData: RawItemData): Promise<Item> {
-  const normalizedItemData = normalizeRawItemData(rawItemData)
-
-  const stringifiedContent = await getContent(getIpfsHashFromBytes32(rawItemData.contentCID.toString()))
-
-  let content
   try {
-    content = JSON.parse(stringifiedContent)
-  } catch (e) {
-    content = stringifiedContent
-  }
+    const normalizedItemData = serializeRawItemData(rawItemData)
+    const stringifiedContent = await getContent(normalizedItemData.contentCID)
+    if (!stringifiedContent) {
+      return {
+        ...normalizedItemData,
+        removed: true,
+      }
+    }
+    const content = normalizedItemData.kind === 1 ? parseComment(stringifiedContent) : parsePost(stringifiedContent)
 
-  return {
-    ...normalizedItemData,
-    ...content,
+    return {
+      ...normalizedItemData,
+      ...content,
+    }
+  } catch (e) {
+    console.error('augmentItemData', e)
   }
 }
