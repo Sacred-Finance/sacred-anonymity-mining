@@ -13,11 +13,8 @@ import fetcher, { getGroupWithPostData } from '@/lib/fetcher'
 function Group() {
   const router = useRouter()
   const { groupId, postId } = router.query
-  const { refreshInterval, cache, ...restConfig } = useSWRConfig()
-
   const { data, error, isValidating } = useSWR(getGroupWithPostData(groupId), fetcher)
-  const { isLoading } = useLoaderContext()
-  const { dispatch, state } = useCommunityContext()
+  const { dispatch } = useCommunityContext()
 
   useEffect(() => {
     if (data && !isValidating && !error && !data?.error) {

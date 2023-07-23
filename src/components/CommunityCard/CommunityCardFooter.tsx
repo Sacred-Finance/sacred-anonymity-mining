@@ -9,7 +9,7 @@ export const CommunityCardFooter = () => {
   if (!community) return null
 
   return (
-    <div className="flex items-center justify-end rounded-b-lg bg-white p-4 shadow-lg dark:bg-gray-900 ">
+    <div className="flex items-center justify-end rounded-b-lg bg-white p-4 dark:bg-gray-900 ">
       <div>
       {community ? (
         <JoinCommunityButton community={community} hideIfJoined={community.variant === 'banner'}  />

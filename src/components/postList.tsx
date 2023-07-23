@@ -80,7 +80,11 @@ export const PostItem = ({
     }
     setIsLoading(true)
     const val = vote === 'upvote' ? 0 : 1
-    await voteForPost(BigNumber.from(id).toNumber(), val)
+    const voteResponse = await voteForPost(BigNumber.from(id).toNumber(), val)
+    if (voteResponse) {
+      console.log('voteResponse', voteResponse)
+
+    }
     setIsLoading(false)
   }
 
@@ -108,20 +112,18 @@ export const PostItem = ({
           </div>
         </div>
         <div className="border-t bg-gray-100 px-4 py-2 text-black">
-          <div className={'text-gray-900'}>{editor && isPostEditable && editor}</div>
           {showDescription && !isFormOpen && postId && (
             <EditorJsRenderer data={post.description} onlyPreview={isPreview} />
           )}
-          {!isFormOpen && isPostEditable && editor && (
-            <PrimaryButton onClick={() => setIsFormOpen(true)}>{t('button.editPost')}</PrimaryButton>
-          )}
-
           <br />
           {isPreview
             ? (post?.childIds?.length && <span className="text-gray-600">{post?.childIds?.length} comments</span>) || (
                 <span className="text-gray-600">0 comments</span>
               )
             : ''}
+
+          <div className={'text-gray-900 text-sm'}>{editor && isPostEditable && editor}</div>
+
         </div>
       </div>
 

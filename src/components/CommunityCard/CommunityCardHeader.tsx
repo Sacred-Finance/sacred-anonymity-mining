@@ -48,7 +48,7 @@ export const CommunityCardHeader = ({
           <img
             className={clsx(
               'col-span-full  h-36 w-full rounded-t-lg object-cover',
-              isBanner ? 'max-full bottom-0 left-0 top-0 z-0 h-max opacity-90' : ''
+              isBanner ? 'max-full bottom-0 left-0 top-0 z-0 h-max opacity-90 rounded-b-lg' : ''
             )}
             src={srcBannerOverride ?? bannerSrc}
             alt={mobileLogo}

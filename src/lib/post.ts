@@ -131,9 +131,7 @@ export class Post {
       }
 
       // time this
-      console.time('generateProof')
       const { proof, nullifierHash, merkleTreeRoot } = await generateProof(userPosting, g, extraNullifier, signal)
-        console.timeEnd('generateProof')
       return vote(
         itemId,
         this.groupId?.toString(),
@@ -145,10 +143,9 @@ export class Post {
       )
     } catch (error) {
       console.error('An error occurred while voting:', error)
-      throw error
+      return error
     }
   }
-
 
   removeFromCache = async postId => {
     mutate(

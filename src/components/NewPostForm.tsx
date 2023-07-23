@@ -47,6 +47,8 @@ interface NewPostFormProps {
   handlerType?: 'edit' | 'new'
   formVariant?: 'default' | 'icon'
   onOpen?: () => void
+  isSubmitting?: boolean
+  isSubmitted?: boolean
 }
 
 function getButtonLabel(
@@ -55,7 +57,7 @@ function getButtonLabel(
   t: (key: string) => string
 ) {
   return handlerType === 'edit'
-    ? t(itemType === 'comment' ? 'button.editComment' : 'button.saveChanges')
+    ? t(itemType === 'comment' ? 'button.editComment' : 'button.editPost')
     : t(itemType === 'comment' ? 'button.newComment' : 'button.newPost')
 }
 
@@ -69,6 +71,8 @@ export const NewPostForm = ({
   resetForm,
   isReadOnly,
   handleSubmit,
+  isSubmitting,
+  isSubmitted,
   formVariant = 'default',
   itemType = 'post',
   handlerType = 'new',
@@ -81,11 +85,6 @@ export const NewPostForm = ({
   const [isFormOpen, setIsFormOpen] = useState(false)
 
   const buttonLabel = getButtonLabel(handlerType, itemType, t)
-
-  const showTextIfAllowed = text => {
-    if (formVariant === 'icon') return ''
-    return text
-  }
 
   return (
     <div className={clsx(formVariant === 'default' ? 'mt-6 h-auto rounded-lg  bg-white/10 p-6' : '')}>
@@ -109,7 +108,7 @@ export const NewPostForm = ({
           {itemType === 'post' && (
             <input
               className="mb-4 w-full rounded border-gray-200 p-1 text-base transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder={t(itemType === 'comment' ? 'placeholder.enterComment' : 'placeholder.enterPostTitle')}
+              placeholder={t(itemType !== 'post' ? 'placeholder.enterComment' : 'placeholder.enterPostTitle') as string}
               value={title}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
             />
@@ -131,9 +130,9 @@ export const NewPostForm = ({
                   onChange={setDescription}
                   readOnly={isReadOnly}
                   placeholder={
-                    handlerType === 'edit'
+                    (handlerType === 'edit'
                       ? t(itemType === 'comment' ? 'placeholder.editComment' : 'placeholder.editPost')
-                      : t(itemType === 'comment' ? 'placeholder.newComment' : 'new post form')
+                      : t(itemType === 'comment' ? 'placeholder.newComment' : 'new post form')) as string
                   }
                   holder={editorId}
                 />
@@ -150,9 +149,10 @@ export const NewPostForm = ({
               </CancelButton>
               <PrimaryButton
                 onClick={handleSubmit}
+                isLoading={isSubmitting}
                 className="rounded bg-green-500 p-3 text-white transition-colors duration-150 hover:bg-green-600"
               >
-                {buttonLabel}
+                Save Changes
               </PrimaryButton>
             </div>
           </div>

@@ -131,8 +131,7 @@ export function CommunityPage({
 
       if (status === 200) {
         clearInput()
-        // toast({
-        console.log(`Your greeting was posted 🎉`)
+        setIsLoading(false)
       } else {
         setIsLoading(false)
         console.log('Some error occurred, please try again!')
@@ -173,6 +172,10 @@ export function CommunityPage({
 
       try {
         const response = await postInstance?.vote(voteType, address, users, activeUser, postId, groupId)
+
+        if (response?.message?.includes('ProveReputation_227')){
+            toast.error(t('error.notEnoughReputation'), { toastId: 'notEnoughReputation' })
+        }
         const { status } = response
 
         if (status === 200) {
@@ -182,7 +185,7 @@ export function CommunityPage({
         }
       } catch (error) {
         setIsLoading(false)
-        toast.error(t('toast.error.vote'), { toastId: 'vote' })
+        toast(t('toast.error.vote'), { toastId: 'vote' })
       }
     },
     [user, address, groupId, users, activeUser, postInstance]
@@ -240,6 +243,7 @@ export function CommunityPage({
         setTitle={setPostTitle}
         resetForm={() => clearInput(true)}
         isReadOnly={false}
+        isSubmitting={isContextLoading}
         title={postTitle as string}
         isEditable={true}
         itemType={'post'}

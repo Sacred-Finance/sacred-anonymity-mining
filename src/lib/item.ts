@@ -54,8 +54,6 @@ export async function create(content, type, address, users, postedByUser, groupI
     if (!cid) {
       throw Error('Upload to IPFS failed')
     }
-    console.log(`IPFS CID: ${cid}`)
-
     onIPFSUploadSuccess(content, cid)
 
     const signal = getBytes32FromIpfsHash(cid)
@@ -169,8 +167,7 @@ export async function editContent(
   setWaiting: Function
 ) {
   let currentDate = new Date()
-  let messageContent = content
-  const message = currentDate.getTime().toString() + '#' + JSON.stringify(messageContent)
+  const message = currentDate.getTime().toString() + '#' + JSON.stringify(content)
   console.log(`Editing your anonymous ${type}...`)
   let cid
   try {
@@ -184,6 +181,8 @@ export async function editContent(
     const note = await createNote(userPosting)
 
     const item = await forumContract.itemAt(itemId)
+
+    console.log('item', item)
 
     let input = {
       trapdoor: userPosting.getTrapdoor(),
@@ -199,11 +198,8 @@ export async function editContent(
 
     return await edit(itemId, signal, note, a, b, c)
       .then(async data => {
-        if (type === 'comment') {
-          await mutate(getGroupWithPostAndCommentData(this.groupId, this.postId))
-        } else if (type === 'post') {
-          await mutate(getGroupWithPostData(this.groupId))
-        }
+        console.log('data', data, this.groupId, itemId)
+        await mutate(getGroupWithPostAndCommentData(this.groupId, itemId))
         return data
       })
       .catch(err => {

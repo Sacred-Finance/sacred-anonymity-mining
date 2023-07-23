@@ -8,7 +8,7 @@
   "banner": "Banner",
   "logo": "Logo",
   "placeholder": {
-    "communityTags" : "Community Tags",
+    "communityTags": "Community Tags",
     "enterPostTitle": "Enter Post Title *",
     "enterPostContent": "Enter Post Content *",
     "enterComment": "Enter Comment *",
@@ -25,6 +25,9 @@
     "communityName": "Community Name",
     "minAmount": "Min Amount *",
     "tokenAddress": "Token Address *"
+  },
+  "error": {
+    "notEnoughReputation": "Not enough reputation - Try again later"
   },
   "formErrors": {
     "required": "{{fieldName}} is required",
@@ -81,7 +84,7 @@
   },
   "noResultsFound": "No results found",
   "noPostsFound": "No posts found",
-  "noCommentsFound": "No comments found",
+  "noCommentsFound": "Be the first to comment on this post!",
   "pageNotFound": "Page not found",
   "redirecting": "Redirecting",
   "redirectingIn_one": "Redirecting to home page in {{remainingSeconds}} second",

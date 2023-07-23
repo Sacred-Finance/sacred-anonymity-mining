@@ -15,7 +15,7 @@ function PostIndex() {
   const router = useRouter()
   const { groupId, postId } = router.query
 
-  const { data, error, isValidating, isLoading } = useSWR(getGroupWithPostAndCommentData(groupId, postId), fetcher)
+  const { data, error, isLoading } = useSWR(getGroupWithPostAndCommentData(groupId, postId), fetcher)
 
   useEffect(() => {
     const { group, post, comments } = data || {}

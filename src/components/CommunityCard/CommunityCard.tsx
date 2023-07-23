@@ -62,7 +62,7 @@ export const CommunityCard = ({
     return (
       <div className={clsx('relative w-full', variant === 'banner' ? 'pointer-events-auto ' : 'max-w-[450px] ring-1 ring-gray-900 rounded-lg')} ref={cardRef}>
         <CommunityContext.Provider value={{ ...community, variant, user }}>
-          <div className={'rounded-lg relative'}>
+          <div className={'rounded-lg relative h-full flex flex-col'}>
             <EditGroupModal community={community} hidden={!isEditGroupVisible} />
             <Link href={`/communities/${community?.groupId}`} className={clsx(
                 variant !== 'banner' ? 'pointer-events-auto' : 'pointer-events-none',
@@ -70,6 +70,7 @@ export const CommunityCard = ({
               <CommunityCardHeader />
               <CommunityCardBody />
             </Link>
+            <div className={'flex-1'}/>
             {!user && <CommunityCardFooter />}
           </div>
         </CommunityContext.Provider>

@@ -51,10 +51,10 @@ interface TempComment {
 }
 
 export function PostPage({ postInstance, postId, groupId, comments, post, community, commentInstance }) {
-  const hasUserJoined = useUserIfJoined(groupId)
+  const member = useUserIfJoined(groupId)
   const activeUser = useActiveUser({ groupId })
   const { state } = useCommunityContext()
-  const { users, communities, activePost } = state
+  const { users } = state
 
   const { address } = useAccount()
   const { isLoading, setIsLoading } = useLoaderContext()
@@ -83,35 +83,33 @@ export function PostPage({ postInstance, postId, groupId, comments, post, commun
   const [tempComments, setTempComments] = useState<TempComment[]>([])
 
   const [isPostEditable, setIsPostEditable] = useState(false)
-  const [isPostEditing, setPostEditing] = useState(false)
-  const [isPostBeingSaved, setPostBeingSaved] = useState(false)
   const [editableComments, setEditableComments] = useState<string[]>([])
 
-  const [postTitle, setPostTitle] = useState('')
-  const [postDescription, setPostDescription] = useState<OutputData>(null)
+  const [tempPostTitle, setTempPostTitle] = useState('')
+  const [tempPostDescription, setTempPostDescription] = useState<OutputData>(null)
 
   const commentEditorRef = useRef<any>()
   const postEditorRef = useRef<any>()
 
-  const identityCommitment = hasUserJoined ? BigInt(hasUserJoined?.identityCommitment?.toString()) : null
+  const identityCommitment = member ? BigInt(member?.identityCommitment?.toString()) : null
 
   useEffect(() => {
-    if (hasUserJoined && identityCommitment && comments) {
+    if (member && identityCommitment && comments) {
       checkIfCommentsAreEditable()
     }
-  }, [hasUserJoined, comments, identityCommitment])
+  }, [member, comments, identityCommitment])
 
   useEffect(() => {
     // check if checkIfPostIsEditable
-    if (hasUserJoined && identityCommitment && post) {
+    if (member && identityCommitment && post) {
       checkIfPostIsEditable(post.note, post.contentCID)
     }
-  }, [hasUserJoined, post, identityCommitment])
+  }, [member, post, identityCommitment])
 
   const { validationResult, checkUserBalance } = useValidateUserBalance(community, address)
 
   const checkIfPostIsEditable = async (note, contentCID) => {
-    const userPosting = new Identity(`${address}_${groupId}_${hasUserJoined?.name}`)
+    const userPosting = new Identity(`${address}_${groupId}_${member?.name}`)
     const generatedNote = await createNote(userPosting)
     const generatedNoteAsBigNumber = BigNumber.from(generatedNote).toString()
     const noteBigNumber = BigNumber.from(note).toString()
@@ -122,7 +120,6 @@ export function PostPage({ postInstance, postId, groupId, comments, post, commun
   const onClickEditPost = async () => {
     const hasSufficientBalance = await checkUserBalance()
     if (!hasSufficientBalance) return
-    setPostEditing(true)
   }
 
   const deleteItem = async (itemId, itemType: number) => {
@@ -138,8 +135,8 @@ export function PostPage({ postInstance, postId, groupId, comments, post, commun
       try {
         const { status } =
           itemType === 0
-            ? await postInstance?.delete(address, itemId, users, hasUserJoined, groupId, setIsLoading)
-            : await commentInstance?.delete(address, itemId, users, hasUserJoined, groupId, setIsLoading)
+            ? await postInstance?.delete(address, itemId, users, member, groupId, setIsLoading)
+            : await commentInstance?.delete(address, itemId, users, member, groupId, setIsLoading)
         if (status === 200) {
           toast.success(t('alert.deleteSuccess'))
           if (itemType === 0) {
@@ -167,7 +164,7 @@ export function PostPage({ postInstance, postId, groupId, comments, post, commun
 
   const validateRequirements = () => {
     if (!address) return toast.error(t('toast.error.notLoggedIn'), { type: 'error', toastId: 'min' })
-    if (!hasUserJoined) return toast.error(t('toast.error.notJoined'), { type: 'error', toastId: 'min' })
+    if (!member) return toast.error(t('toast.error.notJoined'), { type: 'error', toastId: 'min' })
 
     return true
   }
@@ -195,7 +192,7 @@ export function PostPage({ postInstance, postId, groupId, comments, post, commun
         comment,
         address,
         users,
-        hasUserJoined,
+        member,
         groupId,
         setIsLoading,
         (comment, cid) => {
@@ -211,9 +208,11 @@ export function PostPage({ postInstance, postId, groupId, comments, post, commun
         }
       )
 
-      if (response?.transactionIndex) {
+      if (response?.status === 200) {
         clearInput()
+
         // const newMessage = await getContent(getIpfsHashFromBytes32(signal))
+        console.log(response)
         console.log(`Your greeting was posted 🎉`)
         toast.success(t('alert.addCommentSuccess'))
       } else {
@@ -223,7 +222,11 @@ export function PostPage({ postInstance, postId, groupId, comments, post, commun
     } catch (error) {
       clearInput()
       console.error(error)
-      toast.error(t('alert.addCommentFailed'))
+      if (error?.message?.includes('ProveReputation_227')) {
+        toast.error(t('error.notEnoughReputation'), { toastId: 'notEnoughReputation' })
+      } else {
+        toast.error(t('alert.addCommentFailed'))
+      }
 
       console.log('Some error occurred, please try again!', error)
     } finally {
@@ -246,7 +249,7 @@ export function PostPage({ postInstance, postId, groupId, comments, post, commun
       const contentCID = c?.contentCID
       if (note && contentCID) {
         const noteBigNumber = BigNumber.from(note).toString()
-        const userPosting = new Identity(`${address}_${groupId}_${hasUserJoined?.name}`)
+        const userPosting = new Identity(`${address}_${groupId}_${member?.name}`)
         const generatedNote = await createNote(userPosting)
         const generatedNoteAsBigNumber = BigNumber.from(generatedNote).toString()
 
@@ -280,8 +283,33 @@ export function PostPage({ postInstance, postId, groupId, comments, post, commun
     })
   }
 
+  const saveEditedPost = async () => {
+    if (!postInstance || !address || !member) return
+    setIsLoading(true)
+
+    try {
+      const { status } = await postInstance.edit(
+        { title: tempPostTitle, description: tempPostDescription },
+        address,
+        post.id,
+        member,
+        groupId,
+        setIsLoading
+      )
+
+      if (status === 200) {
+        toast.success(t('alert.postEditSuccess'))
+        setIsLoading(false)
+      }
+    } catch (error) {
+      console.log(error)
+      toast.error(t('alert.editFailed'))
+      setIsLoading(false)
+    }
+  }
+
   const saveEditedComment = async comment => {
-    if (!commentInstance || !address || !hasUserJoined) return
+    if (!commentInstance || !address || !member) return
     updateCommentMap(comment.id, {
       isSaving: true,
       comment: { ...comment },
@@ -293,7 +321,7 @@ export function PostPage({ postInstance, postId, groupId, comments, post, commun
         commentsMap[comment.id]?.comment,
         address,
         comment.id,
-        hasUserJoined,
+        member,
         groupId,
         setIsLoading
       )
@@ -317,19 +345,24 @@ export function PostPage({ postInstance, postId, groupId, comments, post, commun
   }
 
   const voteForPost = async (postId, voteType: 0 | 1) => {
-    if (!hasUserJoined) return
+    if (!member) return
     const hasSufficientBalance = await checkUserBalance()
     if (!hasSufficientBalance) return
     setIsLoading(true)
 
     try {
       const { status } = await postInstance?.vote(voteType, address, users, activeUser, postId, groupId)
+      console.log(status)
 
       if (status === 200) {
         setIsLoading(false)
         postInstance?.updatePostsVote(postInstance, postId, voteType, false)
+      } else {
+        toast(t('alert.voteFailed'))
       }
     } catch (error) {
+      console.log(error)
+      toast(t('alert.voteFailed'))
       setIsLoading(false)
     }
   }
@@ -371,6 +404,7 @@ export function PostPage({ postInstance, postId, groupId, comments, post, commun
   }
 
   const sortedCommentsData = useItemsSortedByVote(tempComments, comments, commentsSortBy)
+  const [isFormOpen, setIsFormOpen] = useState(false)
 
   const user = useUserIfJoined(groupId as string)
   const unirepUser = useUnirepSignUp({ groupId: groupId, name: (user as User)?.name })
@@ -382,12 +416,36 @@ export function PostPage({ postInstance, postId, groupId, comments, post, commun
     >
       <CommunityCard community={community} index={0} isAdmin={false} variant={'banner'} />
 
+      {isPostEditable ? 'yes' : 'no'}
       <PostItem
         post={post}
-        address={address}
+        address={address as string}
         isPostEditable={isPostEditable}
+        setIsFormOpen={setIsFormOpen}
+        isFormOpen={isFormOpen}
         voteForPost={voteForPost}
         showDescription={true}
+        editor={
+          <NewPostForm
+            editorId={postInstance.specificPostId(postId)}
+            description={tempPostDescription || post?.description}
+            setDescription={setTempPostDescription}
+            handleSubmit={saveEditedPost}
+            editorReference={postEditorRef}
+            setTitle={setTempPostTitle}
+            resetForm={() => {
+              setTempPostDescription(null)
+              setTempPostTitle('')
+            }}
+            isEditable={isPostEditable}
+            isReadOnly={false}
+            isSubmitting={isLoading}
+            title={tempPostTitle || post?.title}
+            itemType={'post'}
+            handlerType={'edit'}
+            formVariant={'default'}
+          />
+        }
       />
 
       <NewPostForm
@@ -400,6 +458,7 @@ export function PostPage({ postInstance, postId, groupId, comments, post, commun
         resetForm={() => setComment(null)}
         isEditable={true}
         isReadOnly={false}
+        isSubmitting={isLoading}
         title={''}
         itemType={'comment'}
         handlerType={'new'}
