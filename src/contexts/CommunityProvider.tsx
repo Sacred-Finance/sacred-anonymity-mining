@@ -7,7 +7,7 @@ import { useAccount } from 'wagmi'
 import { useIdentity } from '@/hooks/useIdentity'
 import { useRouter } from 'next/router'
 import { useLoaderContext } from './LoaderContext'
-import { Group } from '@/types/contract/ForumInterface'
+import { Group, Item } from '@/types/contract/ForumInterface'
 
 export type CommunityId = string | number | ethers.BigNumber
 type CommunityContextType = {
@@ -15,10 +15,23 @@ type CommunityContextType = {
   dispatch: React.Dispatch<Action>
 }
 
+interface ActiveCommunity {
+  community: Group
+  postList: Item[]
+}
+
+interface ActivePost {
+  community: Group
+  post: Item
+  comments: Item[]
+}
+
 type State = {
   communities: Group[]
   users: User[]
   usersGrouped: { [key: string]: User[] }
+  activeCommunity: ActiveCommunity
+  activePost: ActivePost
 }
 
 type Action =
@@ -28,15 +41,38 @@ type Action =
   | { type: 'REMOVE_USER'; payload: User }
   | { type: 'SET_COMMUNITIES'; payload: Group[] }
   | { type: 'SET_USERS'; payload: User[] }
+  // a new type for active community, and will store community details, post list, and comments for each post
+  | { type: 'SET_ACTIVE_COMMUNITY'; payload: ActiveCommunity }
+  | { type: 'SET_ACTIVE_POST'; payload: ActivePost }
 
 const initialState: State = {
   communities: [],
   users: [],
   usersGrouped: {},
+  activeCommunity: {
+    community: {} as Group,
+    postList: [] as Item[],
+  },
+  activePost: {
+    community: {} as Group,
+    post: {} as Item,
+    comments: [] as Item[],
+  },
 }
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
+    case 'SET_ACTIVE_COMMUNITY':
+      return {
+        ...state,
+        activeCommunity: action.payload,
+      }
+    case 'SET_ACTIVE_POST':
+      return {
+        ...state,
+        activePost: action.payload,
+      }
+
     case 'SET_COMMUNITIES':
       return { ...state, communities: action.payload }
     case 'SET_USERS':
@@ -142,11 +178,6 @@ export const CommunityProvider: React.FC<any> = ({ children }: { children: React
   return <CommunityContext.Provider value={{ state, dispatch }}>{children}</CommunityContext.Provider>
 }
 
-export function useCommunities(): Group[] {
-  const { state } = useCommunityContext()
-  return state.communities
-}
-
 export function useCommunityById(id: string | number): Group | undefined {
   const { state } = useCommunityContext()
   return useMemo(() => state.communities.find(c => _.toNumber(c.groupId) === _.toNumber(id)), [state.communities, id])
@@ -157,7 +188,7 @@ export function useUsers(): User[] {
   return state.users
 }
 
-export function useActiveUser({groupId}): User | undefined {
+export function useActiveUser({ groupId }): User | undefined {
   const { state } = useCommunityContext()
   const identity = useIdentity(groupId ? { groupId: groupId as string } : undefined)
 
@@ -165,26 +196,6 @@ export function useActiveUser({groupId}): User | undefined {
     () => state.users.find(c => c.identityCommitment === identity?.getCommitment().toString()),
     [state.users, identity]
   )
-}
-
-export function useUserById(id: string): User | undefined {
-  const { state } = useCommunityContext()
-  return useMemo(() => state.users.find(c => c.id === id), [state.users, id])
-}
-
-export function useGroupedUsers(): { [key: string]: User[] } {
-  const { state } = useCommunityContext()
-  return state.usersGrouped
-}
-
-export function useGroupedUserById(id: string): User[] | undefined {
-  const { state } = useCommunityContext()
-  return useMemo(() => state.usersGrouped[id], [state.usersGrouped, id])
-}
-
-export function useGroupedUserLength(id: string): number | undefined {
-  const { state } = useCommunityContext()
-  return useMemo(() => state.usersGrouped[id]?.length, [state.usersGrouped, id])
 }
 
 export function useUserIfJoined(communityId: string | number): User | false {
