@@ -1,37 +1,25 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Post } from '@/lib/post'
-import { useActiveUser, useCommunityById, useUserIfJoined, useUsers } from '@/contexts/CommunityProvider'
-import { useCommunityUpdates } from '@/hooks/useCommunityUpdates'
-import { useAccount, useContract, useProvider } from 'wagmi'
+import { useActiveUser, useUserIfJoined, useUsers } from '@/contexts/CommunityProvider'
+import { useAccount } from 'wagmi'
 import { useTranslation } from 'react-i18next'
 import { OutputData } from '@editorjs/editorjs'
 import { SortByOption } from '@components/SortBy'
-import { polygonMumbai } from 'wagmi/chains'
-import { ForumContractAddress } from '@/constant/const'
-import ForumABI from '@/constant/abi/Forum.json'
 import { useUnirepSignUp } from '@/hooks/useUnirepSignup'
 import { User } from '@/lib/model'
 import { useValidateUserBalance } from '@/utils/useValidateUserBalance'
 import { useLoaderContext } from '@/contexts/LoaderContext'
-import useSWR from 'swr'
 import { toast } from 'react-toastify'
 import { useItemsSortedByVote } from '@/hooks/useItemsSortedByVote'
 import clsx from 'clsx'
-import { JoinCommunityButton } from '@components/JoinCommunityButton'
 import { NewPostForm } from '@components/NewPostForm'
-import ReputationCard from '@components/ReputationCard'
-import { PostList } from '@components/postList'
+import { PostItem, PostList } from '@components/postList'
 import { NoPosts } from '@components/NoPosts'
 import { BigNumber } from 'ethers'
-import { createNote, getBytes32FromIpfsHash, hashBytes } from '@/lib/utils'
+import { createNote } from '@/lib/utils'
 import { Identity } from '@semaphore-protocol/identity'
-import Edit from '@pages/communities/[groupId]/edit'
-import Editor from './editor-js/Editor'
-import { CommunityContext } from './CommunityCard/CommunityCard'
-import { PrimaryButton } from '@components/buttons'
-import { PencilIcon } from '@heroicons/react/20/solid'
-import { PostListProvider } from '@/contexts/PostListProvider'
 import { Group, Item } from '@/types/contract/ForumInterface'
+import { CommunityCard } from '@components/CommunityCard/CommunityCard'
 
 export function CommunityPage({
   children,
@@ -57,7 +45,7 @@ export function CommunityPage({
   const { t } = useTranslation()
 
   const [postDescription, setPostDescription] = useState<OutputData>(null)
-  const [postTitle, setPostTitle] = useState('')
+  const [postTitle, setPostTitle] = useState<string | null>(null)
   const [sortBy, setSortBy] = useState<SortByOption>('highest')
   const [tempPosts, setTempPosts] = useState([])
 
@@ -102,7 +90,7 @@ export function CommunityPage({
     return true
   }
 
-  const addPost = async () => {
+  const addPost: () => Promise<void> = async () => {
     if (validateRequirements() !== true) return
 
     if (!postTitle || !postDescription) {
@@ -184,21 +172,20 @@ export function CommunityPage({
       }
 
       try {
-        postInstance?.updatePostsVote(postId, voteType, false).then(() => setIsLoading(false))
         const response = await postInstance?.vote(voteType, address, users, activeUser, postId, groupId)
         const { status } = response
 
         if (status === 200) {
           setIsLoading(false)
           toast.success(t('toast.success.vote'), { toastId: 'vote' })
+          postInstance?.updatePostsVote(postId, voteType, false).then(() => setIsLoading(false))
         }
       } catch (error) {
-        postInstance?.updatePostsVote(postId, voteType, true, true)
         setIsLoading(false)
         toast.error(t('toast.error.vote'), { toastId: 'vote' })
       }
     },
-    [user, address, groupId, users, activeUser]
+    [user, address, groupId, users, activeUser, postInstance]
   )
 
   const onClickEditPost = async () => {
@@ -222,65 +209,11 @@ export function CommunityPage({
     }
   }
 
-  function renderPostList() {
-    if (!isNaN(postId) && sortedData.length) {
-      const sortedAndFilteredData = sortedData.filter(post => {
-        return post?.id.toString() === postId
-      })
-      return (
-        <PostListProvider
-          isPostEditable={isPostEditable}
-          isEditForm={true}
-          showDescription={true}
-          showFilter={!!posts?.length}
-        >
-          <PostList
-            posts={sortedAndFilteredData}
-            voteForPost={voteForPost}
-            handleSortChange={handleSortChange}
-            onClickEditPost={onClickEditPost}
-            editor={
-              isPostEditable ? (
-                <>
-                  <NewPostForm
-                    formVariant={'icon'}
-                    editorId={`${groupId}_${postId}`}
-                    editorReference={postEditorRef}
-                    title={postTitle}
-                    setTitle={setPostTitle}
-                    description={postDescription}
-                    setDescription={setPostDescription}
-                    isReadOnly={isLoading || !community?.name || isContextLoading}
-                    isAddingPost={isLoading || !community?.name || isContextLoading}
-                    resetForm={clearInput}
-                    handleSubmit={async () => {
-                      setIsLoading(true)
-                      await postInstance?.edit(
-                        { title: postTitle, description: postDescription },
-                        address as string,
-                        postId,
-                        user as User,
-                        groupId,
-                        setIsLoading
-                      )
-                      setPostEditing(false)
-                      setIsLoading(false)
-                    }}
-                  />
-                </>
-              ) : (
-                <></>
-              )
-            }
-          />
-        </PostListProvider>
-      )
+  function renderItemList() {
+    if (post) {
+      return <PostItem post={post} voteForPost={voteForPost} address={address} isPostEditable={isPostEditable} />
     } else if (sortedData?.length > 0) {
-      return (
-        <PostListProvider isPostEditable={isPostEditable} showFilter={true} isEditForm={false} showDescription={false}>
-          <PostList posts={sortedData} voteForPost={voteForPost} handleSortChange={handleSortChange} />
-        </PostListProvider>
-      )
+      return <PostList posts={sortedData} voteForPost={voteForPost} handleSortChange={handleSortChange} showFilter />
     } else {
       return (
         <div className="rounded-lg bg-white/10 p-6 shadow-lg">
@@ -293,59 +226,30 @@ export function CommunityPage({
   return (
     <div
       className={clsx(
-        'mx-auto h-screen w-full max-w-screen-xl space-y-12 overflow-y-auto !text-gray-900 sm:p-8 md:p-24'
+        'mx-auto h-screen w-full max-w-screen-2xl space-y-12 overflow-y-auto !text-gray-900 sm:p-8 md:p-24'
       )}
     >
-      <div
-        className="relative flex min-h-[200px] items-center justify-between rounded-lg bg-white/10 p-6 shadow-lg"
-        style={{
-          backgroundImage: community?.groupDetails.bannerCID
-            ? `url(https://ipfs.io/ipfs/${community?.groupDetails.bannerCID})`
-            : ``,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      >
-        {community?.groupDetails?.logoCID && (
-          <img
-            className="absolute bottom-0 left-1/2 h-20 w-20 -translate-x-1/2 translate-y-1/2 transform rounded-full border-2 border-white object-cover"
-            src={`https://ipfs.io/ipfs/${community?.groupDetails.logoCID}`}
-            alt="community logo"
-          />
-        )}
-        <div className="flex flex-col items-center rounded bg-white bg-opacity-50 p-4">
-          <h1 className="text-2xl font-bold text-black">{community?.name}</h1>
-        </div>
+      <CommunityCard community={community} index={0} isAdmin={false} variant={'banner'} />
 
-        {!(user as User)?.identityCommitment && community && <JoinCommunityButton community={community} />}
-        <ReputationCard unirepUser={unirepUser} />
-      </div>
+      <NewPostForm
+        editorId={`${groupId}_post`}
+        description={postDescription}
+        setDescription={setPostDescription}
+        handleSubmit={addPost}
+        editorReference={postEditorRef}
+        setTitle={setPostTitle}
+        resetForm={() => clearInput(true)}
+        isReadOnly={false}
+        title={postTitle as string}
+        isEditable={true}
+        itemType={'post'}
+        handlerType={'new'}
+        formVariant={'default'}
+      />
 
-      {isNaN(postId) ? (
-        <>
-          <PostListProvider>
-            <NewPostForm
-              editorId={groupId}
-              editorReference={postEditorRef}
-              title={postTitle}
-              setTitle={setPostTitle}
-              formVariant={'icon'}
-              description={postDescription}
-              setDescription={setPostDescription}
-              isReadOnly={!community?.name || isContextLoading}
-              isAddingPost={!community?.name || isContextLoading}
-              resetForm={clearInput}
-              handleSubmit={addPost}
-            />
-          </PostListProvider>
-        </>
-      ) : (
-        <></>
-      )}
+      {!postId && renderItemList()}
 
-      {renderPostList()}
-      {/*add a context provider for post data*/}
-      <CommunityContext.Provider value={community}>{children}</CommunityContext.Provider>
+      {children}
     </div>
   )
 }
