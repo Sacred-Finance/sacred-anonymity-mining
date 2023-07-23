@@ -31,7 +31,6 @@ function EditGroupModal({ community, hidden = false }) {
       <ToolTip
         type="primary"
         title={t('toolTip.editCommunity.title')}
-        message={t('toolTip.editCommunity.message') || ''}
       >
         <Link
           id="edit-community-button"
