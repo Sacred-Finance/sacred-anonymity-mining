@@ -1,4 +1,4 @@
-import { ReputationProofStruct, User } from '@/lib/model'
+import { ItemCreationRequest, ReputationProofStruct, User } from '@/lib/model'
 import { BigNumber, ethers } from 'ethers'
 import { Identity } from '@semaphore-protocol/identity'
 import { createNote, generateGroth16Proof, getBytes32FromIpfsHash, hashBytes, uploadIPFS } from '@/lib/utils'
@@ -12,6 +12,15 @@ import { Group } from '@semaphore-protocol/group'
 import { mutate } from 'swr'
 import { setCacheAtSpecificPath } from '@/lib/redis'
 import { getGroupWithPostAndCommentData, getGroupWithPostData } from '@/lib/fetcher'
+
+const emptyPollRequest = {
+  pollType: 0,
+  duration: 0,
+  answerCount: 0,
+  rateScaleFrom: 0,
+  rateScaleTo: 0,
+  answerCIDs: []
+}
 
 export async function handleDeleteItem(address: string, postedByUser: User, itemId) {
   try {
@@ -91,29 +100,34 @@ export async function create(content, type, address, users, postedByUser, groupI
       ownerEpochKey: epochData.epochKey,
     }
 
-    if (type === 'post') {
+    const request : ItemCreationRequest = {
+      contentCID: signal,
+      merkleTreeRoot: merkleTreeRoot.toString(),
+      nullifierHash: nullifierHash.toString(),
+      note: note.toString()
+    }
+
+    if (type === 'post') {      
       return await createPost(
-        signal,
-        note,
         this.groupId,
-        merkleTreeRoot.toString(),
-        nullifierHash.toString(),
+        request,
         proof,
-        epoch
+        epoch,
+        false,
+        emptyPollRequest
       ).then(async res => {
         await mutate(getGroupWithPostData(this.groupId))
         return res
       })
     } else if (type === 'comment') {
       return await createComment(
-        signal.toString(),
-        note,
         this.groupId,
         this.postId,
-        merkleTreeRoot.toString(),
-        nullifierHash.toString(),
+        request,
         proof,
-        epoch
+        epoch,
+        false,
+        emptyPollRequest
       ).then(async res => {
         await mutate(getGroupWithPostAndCommentData(this.groupId, this.postId))
         return res

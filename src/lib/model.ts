@@ -46,3 +46,19 @@ export type ReputationProofStruct = {
   ownerEpoch: BigNumberish
   ownerEpochKey: BigNumberish
 }
+
+export type PollRequestStruct = {
+  pollType: BigNumberish;
+  duration: BigNumberish; //hours
+  answerCount: BigNumberish;
+  rateScaleFrom: BigNumberish;
+  rateScaleTo: BigNumberish;
+  answerCIDs: string[];
+}
+
+export type ItemCreationRequest = {
+  contentCID: string;
+  merkleTreeRoot: BigNumberish;
+  nullifierHash: BigNumberish;
+  note: BigNumberish;
+}

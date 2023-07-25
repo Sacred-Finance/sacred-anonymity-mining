@@ -1116,43 +1116,6 @@
       "type": "event"
     },
     {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "internalType": "enum VoteKind",
-          "name": "voteType",
-          "type": "uint8"
-        },
-        {
-          "indexed": false,
-          "internalType": "enum ItemKind",
-          "name": "itemType",
-          "type": "uint8"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "itemId",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "upvote",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "downvote",
-          "type": "uint256"
-        }
-      ],
-      "name": "VoteItem",
-      "type": "event"
-    },
-    {
       "inputs": [
         {
           "internalType": "uint256",
@@ -1165,24 +1128,31 @@
           "type": "uint256"
         },
         {
-          "internalType": "bytes32",
-          "name": "contentCID",
-          "type": "bytes32"
-        },
-        {
-          "internalType": "uint256",
-          "name": "merkleTreeRoot",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "nullifierHash",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "note",
-          "type": "uint256"
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "contentCID",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "merkleTreeRoot",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "nullifierHash",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "note",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct ItemCreationRequest",
+          "name": "request",
+          "type": "tuple"
         },
         {
           "internalType": "uint256[8]",
@@ -1225,6 +1195,48 @@
           "internalType": "struct ReputationProof",
           "name": "unirepProof",
           "type": "tuple"
+        },
+        {
+          "internalType": "bool",
+          "name": "asPoll",
+          "type": "bool"
+        },
+        {
+          "components": [
+            {
+              "internalType": "enum PollType",
+              "name": "pollType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint256",
+              "name": "duration",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "answerCount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "rateScaleFrom",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "rateScaleTo",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32[]",
+              "name": "answerCIDs",
+              "type": "bytes32[]"
+            }
+          ],
+          "internalType": "struct PollRequest",
+          "name": "pollRequest",
+          "type": "tuple"
         }
       ],
       "name": "addComment",
@@ -1240,24 +1252,31 @@
           "type": "uint256"
         },
         {
-          "internalType": "bytes32",
-          "name": "contentCID",
-          "type": "bytes32"
-        },
-        {
-          "internalType": "uint256",
-          "name": "merkleTreeRoot",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "nullifierHash",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "note",
-          "type": "uint256"
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "contentCID",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "merkleTreeRoot",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "nullifierHash",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "note",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct ItemCreationRequest",
+          "name": "request",
+          "type": "tuple"
         },
         {
           "internalType": "uint256[8]",
@@ -1299,6 +1318,48 @@
           ],
           "internalType": "struct ReputationProof",
           "name": "unirepProof",
+          "type": "tuple"
+        },
+        {
+          "internalType": "bool",
+          "name": "asPoll",
+          "type": "bool"
+        },
+        {
+          "components": [
+            {
+              "internalType": "enum PollType",
+              "name": "pollType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint256",
+              "name": "duration",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "answerCount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "rateScaleFrom",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "rateScaleTo",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32[]",
+              "name": "answerCIDs",
+              "type": "bytes32[]"
+            }
+          ],
+          "internalType": "struct PollRequest",
+          "name": "pollRequest",
           "type": "tuple"
         }
       ],
@@ -1481,6 +1542,128 @@
       "inputs": [
         {
           "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "pollAt",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum PollType",
+              "name": "pollType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint256",
+              "name": "startTime",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "duration",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "answerCount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "voteCount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "rateScaleFrom",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "rateScaleTo",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "results",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "bytes32[]",
+              "name": "answerCIDs",
+              "type": "bytes32[]"
+            }
+          ],
+          "internalType": "struct Poll",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "enum VoteKind",
+          "name": "voteType",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum ItemKind",
+          "name": "itemType",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "itemId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "upvote",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "downvote",
+          "type": "uint256"
+        }
+      ],
+      "name": "VoteItem",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "enum PollType",
+          "name": "pollType",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "itemId",
+          "type": "uint256"
+        }
+      ],
+      "name": "VotePoll",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
           "name": "groupId",
           "type": "uint256"
         },
@@ -1548,6 +1731,81 @@
         }
       ],
       "name": "vote",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "groupId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "itemId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "pollData",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256",
+          "name": "merkleTreeRoot",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "nullifierHash",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256[8]",
+          "name": "semaphoreProof",
+          "type": "uint256[8]"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256[]",
+              "name": "publicSignals",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[8]",
+              "name": "proof",
+              "type": "uint256[8]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "publicSignalsQ",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[8]",
+              "name": "proofQ",
+              "type": "uint256[8]"
+            },
+            {
+              "internalType": "uint48",
+              "name": "ownerEpoch",
+              "type": "uint48"
+            },
+            {
+              "internalType": "uint256",
+              "name": "ownerEpochKey",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct ReputationProof",
+          "name": "unirepProof",
+          "type": "tuple"
+        }
+      ],
+      "name": "votePoll",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"

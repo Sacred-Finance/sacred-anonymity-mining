@@ -1,10 +1,10 @@
 {
-  "name": "dapp-starter",
+  "name": "sacred-community-client",
   "version": "0.1.0",
   "private": true,
   "contractVersion": "0.7.1",
   "scripts": {
-    "dev": "NODE_OPTIONS='--inspect' next dev",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
