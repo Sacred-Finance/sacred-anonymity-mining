@@ -2,7 +2,8 @@ import { Proof } from '@semaphore-protocol/proof'
 import axios from 'axios'
 import { BigNumberish } from 'ethers'
 import { RELAYER_URL } from '../constant/const'
-import { CommunityDetails, ReputationProofStruct, Requirement } from './model'
+import { CommunityDetails, ItemCreationRequest, PollRequestStruct, ReputationProofStruct, Requirement } from './model'
+import { Item } from '@/types/contract/ForumInterface'
 
 export async function joinGroup(groupId: string, identityCommitment: string, username: string) {
   return axios.post(`${RELAYER_URL}/join-group`, {
@@ -23,44 +24,40 @@ export async function createGroup(requirements: Requirement[], groupName: string
 }
 
 export async function createPost(
-  contentCID: string,
-  note: BigInt,
   groupId: string,
-  merkleRoot: string,
-  nullifierHash: string,
+  request: ItemCreationRequest,
   solidityProof: Proof,
-  unirepProof: ReputationProofStruct
+  unirepProof: ReputationProofStruct,
+  asPoll: boolean,
+  pollRequest: PollRequestStruct
 ) {
   return axios.post(`${RELAYER_URL}/post`, {
-    contentCID,
-    note: note.toString(),
     groupId,
-    merkleRoot,
-    nullifierHash,
+    request,
     solidityProof,
     unirepProof,
+    asPoll,
+    pollRequest
   })
 }
 
 export async function createComment(
-  contentCID: string,
-  note: BigInt,
   groupId: string,
   parentId: string,
-  merkleRoot: string,
-  nullifierHash: string,
+  request: ItemCreationRequest,
   solidityProof: Proof,
-  unirepProof: ReputationProofStruct
+  unirepProof: ReputationProofStruct,
+  asPoll: boolean,
+  pollRequest: PollRequestStruct
 ) {
   return axios.post(`${RELAYER_URL}/comment`, {
-    contentCID,
-    note: note.toString(),
     groupId,
     parentId,
-    merkleRoot,
-    nullifierHash,
+    request,
     solidityProof,
     unirepProof,
+    asPoll,
+    pollRequest
   })
 }
 
@@ -150,7 +147,16 @@ export async function setGroupLogo(groupId: string, a: any, b: any, c: any, logo
     c,
     logoCID
   })
+}
 
-
-
+export async function votePoll(itemId: string, groupId: string, pollData: number[], merkleRoot: BigNumberish, nullifierHash: BigNumberish, solidityProof: Proof, voteRepProof: ReputationProofStruct) {
+  return axios.post(`${RELAYER_URL}/vote-poll`, {
+    itemId,
+    groupId,
+    pollData,
+    merkleRoot,
+    nullifierHash,
+    solidityProof,
+    voteRepProof
+  })
 }
