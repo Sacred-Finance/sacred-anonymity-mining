@@ -19,6 +19,7 @@ import { motion } from 'framer-motion'
 import clsx from 'clsx'
 import { Group } from '@/types/contract/ForumInterface'
 import { User } from '@/lib/model'
+import AllTopics from "@components/Discourse/AllTopics";
 
 interface HomeProps {
   isAdmin: boolean
@@ -162,6 +163,8 @@ function HomePage({ isAdmin = false, users, communities }: HomeProps) {
         </div>
         {currentFilter}
       </div>
+
+      <AllTopics/>
 
       <div className="row-gap-8 mb-8 grid grid-cols-1 justify-items-center   gap-4 sm:grid-cols-1 md:grid-cols-2 md:justify-items-center lg:grid-cols-3">
         {localCommunities.map((community, index) => (
