@@ -1,12 +1,13 @@
 import { postHandler } from '@pages/api/discourse/helper'
 import { NextApiRequest, NextApiResponse } from 'next/types'
 
-export default async function (req: NextApiRequest, res: NextApiResponse) {
-  const { topic_id, raw } = req.body
-  const url = `${process.env.NEXT_PUBLIC_DISCOURSE_API_ENDPOINT}/posts`
-  const body = {
-    topic_id,
-    raw,
+export default async function handler(req, res) {
+  console.log(req)
+
+  if (req.method === 'POST') {
+    const url = `${process.env.NEXT_PUBLIC_DISCOURSE_API_ENDPOINT}/posts.json`
+   const response =  await postHandler(res)(url, req.body)
+  } else {
+    // Handle any other HTTP method
   }
-  await postHandler(res)(url, body)
 }

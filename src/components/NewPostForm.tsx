@@ -35,7 +35,7 @@ function ToggleButton({ onClick, isPreview, showText = true }: ToggleButtonProps
 interface NewPostFormProps {
   editorId: string
   editorReference: RefObject<EditorJsType>
-  title: string
+  title: string | false
   setTitle: (value: string) => void
   description: EditorJsType
   setDescription: (value: EditorJsType) => void
@@ -105,7 +105,7 @@ export const NewPostForm = ({
       {isFormOpen && (
         <div>
           <div className="mb-4 text-xl font-semibold">Editor</div>
-          {itemType === 'post' && (
+          {itemType === 'post' && title !==false && (
             <input
               className="mb-4 w-full rounded border-gray-200 p-1 text-base transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               placeholder={t(itemType !== 'post' ? 'placeholder.enterComment' : 'placeholder.enterPostTitle') as string}
@@ -152,7 +152,9 @@ export const NewPostForm = ({
                 isLoading={isSubmitting}
                 className="rounded bg-green-500 p-3 text-white transition-colors duration-150 hover:bg-green-600"
               >
-                Save Changes
+                {(handlerType === 'edit'
+                    ? t(itemType === 'comment' ? 'placeholder.editComment' : 'placeholder.editPost')
+                    : t(itemType === 'comment' ? 'placeholder.newComment' : 'Submit')) as string}
               </PrimaryButton>
             </div>
           </div>

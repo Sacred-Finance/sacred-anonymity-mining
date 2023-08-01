@@ -1,11 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { Identity } from '@semaphore-protocol/identity'
-import { useAccount } from 'wagmi'
 import { debounce } from 'lodash'
 import { CommunityCard } from '../components/CommunityCard/CommunityCard'
-import { useLoaderContext } from '../contexts/LoaderContext'
 import { useTranslation } from 'next-i18next'
-import { getGroupIdOrUserId, useCommunityContext } from '../contexts/CommunityProvider'
+import { getGroupIdOrUserId } from '../contexts/CommunityProvider'
 import {
   BarsArrowDownIcon,
   BarsArrowUpIcon,
@@ -19,7 +16,8 @@ import { motion } from 'framer-motion'
 import clsx from 'clsx'
 import { Group } from '@/types/contract/ForumInterface'
 import { User } from '@/lib/model'
-import AllTopics from "@components/Discourse/AllTopics";
+import AllTopics from '@components/Discourse/AllTopics'
+import { Tab } from '@headlessui/react'
 
 interface HomeProps {
   isAdmin: boolean
@@ -28,18 +26,24 @@ interface HomeProps {
 }
 const filterButtonClass = 'rounded-md p-2 text-white transition-colors duration-200 ease-in-out dark:bg-gray-900 '
 const iconClass = 'h-5 w-5 fill-inherit stroke-inherit text-gray-500 dark:fill-white'
+const tabClass = selected =>
+  clsx(
+    'w-full rounded-lg py-2.5 text-sm font-medium leading-5 ',
+    'ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2',
+    selected ? 'bg-primary-500 text-white shadow' : 'text-blue-700 hover:bg-white/[0.12] hover:text-white'
+  )
 
 const FilterButton = ({ filterKey, iconTrue, iconFalse, applyFilter, currentFilter, filterClass, iconClass }) => {
   const IconTrue = iconTrue
   const IconFalse = iconFalse
 
   return (
-      <button
-          onClick={() => applyFilter(filterKey)}
-          className={clsx(filterClass, currentFilter.includes(filterKey) && '!bg-primary-bg !fill-white')}
-      >
-        {currentFilter === `-${filterKey}` ? <IconTrue className={iconClass} /> : <IconFalse className={iconClass} />}
-      </button>
+    <button
+      onClick={() => applyFilter(filterKey)}
+      className={clsx(filterClass, currentFilter.includes(filterKey) && '!bg-primary-bg !fill-white')}
+    >
+      {currentFilter === `-${filterKey}` ? <IconTrue className={iconClass} /> : <IconFalse className={iconClass} />}
+    </button>
   )
 }
 function HomePage({ isAdmin = false, users, communities }: HomeProps) {
@@ -47,8 +51,6 @@ function HomePage({ isAdmin = false, users, communities }: HomeProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const { t, i18n, ready } = useTranslation()
 
-
-  console.log('communitiescommunities',communities)
   useEffect(() => {
     return () => {
       debouncedResults.cancel()
@@ -164,50 +166,64 @@ function HomePage({ isAdmin = false, users, communities }: HomeProps) {
         {currentFilter}
       </div>
 
-      <AllTopics/>
-
-      <div className="row-gap-8 mb-8 grid grid-cols-1 justify-items-center   gap-4 sm:grid-cols-1 md:grid-cols-2 md:justify-items-center lg:grid-cols-3">
-        {localCommunities.map((community, index) => (
-          <CommunityCard key={community.groupId} community={community} index={index} />
-        ))}
-      </div>
-
-      {localCommunities?.length === 0 && (
-        <div className="my-12 flex flex-col items-center justify-center space-y-4">
-          <motion.h2
-            layout
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-            className="text-3xl font-semibold dark:text-gray-200"
-          >
-            Oops, No Results Found
-          </motion.h2>
-          <motion.p
-            layout
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="px-4 text-center text-lg dark:text-gray-300"
-          >
-            <>
-              {' '}
-              {searchTerm
-                ? 'We could not find any communities that match your search. Try adjusting your filters or search again with a different term'
-                : 'We could not find any communities at this time. Please try again later'}
-              .
-            </>
-          </motion.p>
-          <motion.button
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="rounded bg-purple-500 px-4 py-2 font-bold text-white shadow dark:bg-purple-700 dark:text-gray-200"
-          >
-            Create a new community
-          </motion.button>
-        </div>
-      )}
+      <Tab.Group>
+        <Tab.List className="flex space-x-1 rounded-xl bg-blue-900/20 p-1">
+          <Tab className={({ selected }) => tabClass(selected)}>Logos</Tab>
+          <Tab className={({ selected }) => tabClass(selected)}>Logos Discourse</Tab>
+          <Tab className={({ selected }) => tabClass(selected)}>Another Discourse</Tab>
+        </Tab.List>
+        <Tab.Panels>
+          <Tab.Panel>
+            <div className="row-gap-8 mb-8 grid grid-cols-1 justify-items-center   gap-4 sm:grid-cols-1 md:grid-cols-2 md:justify-items-center lg:grid-cols-3">
+              {localCommunities.map((community, index) => (
+                <CommunityCard key={community.groupId} community={community} index={index} />
+              ))}
+            </div>
+            {localCommunities?.length === 0 && (
+              <div className="my-12 flex flex-col items-center justify-center space-y-4">
+                <motion.h2
+                  layout
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                  className="text-3xl font-semibold dark:text-gray-200"
+                >
+                  Oops, No Results Found
+                </motion.h2>
+                <motion.p
+                  layout
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className="px-4 text-center text-lg dark:text-gray-300"
+                >
+                  <>
+                    {' '}
+                    {searchTerm
+                      ? 'We could not find any communities that match your search. Try adjusting your filters or search again with a different term'
+                      : 'We could not find any communities at this time. Please try again later'}
+                    .
+                  </>
+                </motion.p>
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5, delay: 0.4 }}
+                  className="rounded bg-purple-500 px-4 py-2 font-bold text-white shadow dark:bg-purple-700 dark:text-gray-200"
+                >
+                  Create a new community
+                </motion.button>
+              </div>
+            )}
+          </Tab.Panel>
+          <Tab.Panel>
+            <AllTopics />
+          </Tab.Panel>
+          <Tab.Panel>
+            <>wip</>
+          </Tab.Panel>
+        </Tab.Panels>
+      </Tab.Group>
     </main>
   )
 }

@@ -1,48 +1,113 @@
 import { useForm } from 'react-hook-form'
 import axios from 'axios'
+import { Topic } from '@components/Discourse/types'
+import dynamic from 'next/dynamic'
+import React, { useRef, useState } from 'react'
+import EditorJS, { OutputData } from '@editorjs/editorjs'
+import { useTranslation } from 'react-i18next'
+import { NewPostForm } from '@components/NewPostForm'
+import { toast } from 'react-toastify'
+import { mutate } from 'swr'
+import { getDiscourseData } from '@/lib/fetcher'
+const Editor = dynamic(() => import('../editor-js/Editor'), {
+  ssr: false,
+})
+const PostToTopic = ({ topic }: { topic: Topic }) => {
+  const { t } = useTranslation()
+  const [description, setDescription] = useState<OutputData>(null)
+  const editorReference = useRef<EditorJS>()
 
-const PostToTopic = ({ topicId }) => {
-  const { register, handleSubmit, reset, errors } = useForm()
+  const onSubmit = async () => {
+    if (!description) return toast.error(t('error.emptyPost'))
 
-  const onSubmit = async data => {
+    const raw = description.blocks.reduce((acc, block, idx) => {
+      let content = ''
+      if (idx !== 0) {
+        acc += '\n'
+      }
+
+      switch (block.type) {
+        case 'paragraph':
+          content = block.data.text
+          break
+        case 'header':
+          content = `# ${block.data.text}`
+          break
+        case 'list':
+          content = block.data.items.reduce((acc, item) => acc + `- ${item}\n`, '')
+          break
+        case 'code':
+          content = `\`\`\`${block.data.language}\n${block.data.code}\n\`\`\``
+          break
+        case 'delimiter':
+          content = `---`
+          break
+        case 'image':
+          content = `![${block.data.caption}](${block.data.file.url})`
+          break
+        case 'table':
+          // Need more complex handling for tables here...
+          break
+        case 'quote':
+          content = `> ${block.data.text}`
+          break
+        case 'warning':
+          content = `> ${block.data.title}\n${block.data.message}`
+          break
+        case 'linkTool':
+          content = `[${block.data.meta.title}](${block.data.link})` // Updated link structure
+          break
+        case 'embed':
+          content = `\`${block.data.html}\`` // Enclosed HTML with backticks
+          break
+        case 'raw':
+          content = `${block.data.html}`
+          break
+        case 'checklist':
+          content = block.data.items.reduce((acc, item) => acc + `- [${item.checked ? 'x' : ' '}] ${item.text}\n`, '')
+          break
+        default:
+          content = ''
+      }
+
+      acc += content
+      return acc
+    }, '')
+
     try {
-      const response = await axios.post('/api/discourse/postToTopic', {
-        topic_id: topicId,
-        raw: data.content,
+      await axios.post('/api/discourse/postToTopic', {
+        topic_id: topic.id,
+        raw: raw,
       })
-
-      // Handle success (e.g., show a success message, clear the form, etc.)
-      reset()
+      toast.success(t('success.postCreated'))
+      await mutate(getDiscourseData(topic.id))
     } catch (error) {
-      // Handle error (e.g., show an error message)
+      toast.error(t('error.postNotCreated'))
       console.error(error)
     }
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div>
-        <label htmlFor="content" className="block text-sm font-medium text-gray-700">
-          Content
-        </label>
-        <div className="mt-1">
-          <textarea
-            id="content"
-            name="content"
-            // ref={register({ required: true })}
-            className="focus:border-indigo-500 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 sm:text-sm"
-          />
-        </div>
-        {/*{errors.content && <span className="text-red-500 text-sm">This field is required</span>}*/}
-      </div>
-
-      <button
-        type="submit"
-        className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-      >
-        Post
-      </button>
-    </form>
+    <div>
+      <label htmlFor="content" className="block text-sm font-medium text-gray-700">
+        Content
+      </label>
+      <NewPostForm
+        isReadOnly={false}
+        editorId={`${topic.id}_post`}
+        description={description}
+        setDescription={setDescription}
+        handleSubmit={onSubmit}
+        editorReference={editorReference}
+        resetForm={() => {}}
+        isSubmitting={false}
+        title={false}
+        isEditable={true}
+        itemType={'post'}
+        handlerType={'new'}
+        formVariant={'default'}
+      />
+    </div>
   )
 }
 
