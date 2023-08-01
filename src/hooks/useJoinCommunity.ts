@@ -27,7 +27,7 @@ export const useJoinCommunity = () => {
         const freshUser = new Identity(`${address}_${groupId}_${username}`)
         try {
           // Attempt to join the community
-          const joinGroup = await joinGroup(groupId.toString(), freshUser.getCommitment().toString(), username)
+          const joinResponse = await joinGroup(groupId.toString(), freshUser.getCommitment().toString(), username)
           // Call the prependUser function from the context provider instead of dispatching the action
 
           dispatch({
@@ -42,7 +42,7 @@ export const useJoinCommunity = () => {
           if (successCallback) {
             successCallback()
           }
-          return joinGroup
+          return joinResponse
         } catch (error) {
           // If the transaction fails, roll back the state update by calling the removeUser function from the context provider
           //@ts-ignore
