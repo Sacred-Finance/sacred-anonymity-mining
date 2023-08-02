@@ -5,11 +5,24 @@ import { RELAYER_URL } from '../constant/const'
 import { CommunityDetails, ItemCreationRequest, PollRequestStruct, ReputationProofStruct, Requirement } from './model'
 import { Item } from '@/types/contract/ForumInterface'
 
-export async function joinGroup(groupId: string, identityCommitment: string, username: string) {
+export async function joinGroup(groupId: string, identityCommitment: string, username: string, note: string) {
   return axios.post(`${RELAYER_URL}/join-group`, {
     identityCommitment,
     groupId,
     username,
+    note
+  })
+}
+
+export async function leaveGroup(groupId: string, identityCommitment: string, a: any, b: any, c: any, siblings:any[], pathIndices: number[]) {
+  return axios.post(`${RELAYER_URL}/leave-group`, {
+    identityCommitment,
+    groupId,
+    a,
+    b,
+    c,
+    siblings,
+    pathIndices
   })
 }
 

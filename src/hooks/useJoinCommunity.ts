@@ -8,6 +8,7 @@ import { useAccount } from 'wagmi'
 import { ethers } from 'ethers'
 import _ from 'lodash'
 import { User } from '../lib/model' // Import the CommunityProvider context hook
+import { createNote } from '@/lib/utils'
 
 export const useJoinCommunity = () => {
   const { address, isConnected } = useAccount()
@@ -25,9 +26,10 @@ export const useJoinCommunity = () => {
       const actionFn = async () => {
         const username = 'anon'
         const freshUser = new Identity(`${address}_${groupId}_${username}`)
+        const note = await createNote(freshUser)
         try {
           // Attempt to join the community
-          const joinResponse = await joinGroup(groupId.toString(), freshUser.getCommitment().toString(), username)
+          const joinResponse = await joinGroup(groupId.toString(), freshUser.getCommitment().toString(), username, note.toString())
           // Call the prependUser function from the context provider instead of dispatching the action
 
           dispatch({
