@@ -6,7 +6,7 @@ import { Forum } from '@/types/contract/Forum'
 export const ForumContractAddress: `0x${string}` = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`
 export const unirepAddress = '0xCa61bFcA0107c5952f8bf59f4D510d111cbcE146'
 
-export const attesterAddress = '0xC655b7D919a39EDc1241cE14bA20a3244A5a6252'
+export const attesterAddress = '0x9B384b21a115E5f45764D77B85FAE755c2Ca038a'
 
 export const RELAYER_URL = process.env.NEXT_PUBLIC_RELAYER_URL ?? 'http://127.0.0.1:3000'
 
