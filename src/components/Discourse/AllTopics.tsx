@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { useState, useEffect } from 'react'
-import TopicComponent from '@components/Discourse/TopicComponent'
+import TopicCommunityCard from '@components/Discourse/TopicCommunityCard'
 import { TopicList } from '@components/Discourse/types'
 
 const AllTopics = () => {
@@ -23,7 +23,7 @@ const AllTopics = () => {
     <>
       <div className="row-gap-8 mb-8 grid grid-cols-1 justify-items-center   gap-4 sm:grid-cols-1 md:grid-cols-2 md:justify-items-center lg:grid-cols-3">
         {topicList?.topics?.map(topic => (
-          <TopicComponent key={topic.id} topic={topic} variant={'default'} />
+          <TopicCommunityCard key={topic.id} topic={topic} variant={'default'} />
         ))}
       </div>
     </>

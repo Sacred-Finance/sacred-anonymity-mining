@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import React, { ChangeEvent, RefObject, useState } from 'react'
+import React, { ChangeEvent, RefObject, useEffect, useRef, useState } from 'react'
 import EditorJsRenderer from './editor-js/EditorJSRenderer'
 import { CancelButton, PrimaryButton } from './buttons'
 import { EyeIcon, PencilIcon } from '@heroicons/react/20/solid'
@@ -23,12 +23,14 @@ interface ToggleButtonProps {
   showText?: boolean
 }
 
-function ToggleButton({ onClick, isPreview, showText = true }: ToggleButtonProps) {
+function TogglePreview({ onClick, isPreview, showText = true }: ToggleButtonProps) {
   return (
-    <PrimaryButton onClick={onClick} className={' bg-white/20 hover:bg-white/50'}>
-      {showText && (isPreview ? 'Show Editor' : 'Show Preview')}
-      {isPreview ? <PencilIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
-    </PrimaryButton>
+    <div className="mb-2 flex items-center justify-between text-lg">
+      <PrimaryButton onClick={onClick} className={' bg-white/20 hover:bg-white/50'}>
+        {showText && (isPreview ? 'Show Editor' : 'Show Preview')}
+        {isPreview ? <PencilIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+      </PrimaryButton>
+    </div>
   )
 }
 
@@ -49,16 +51,9 @@ interface NewPostFormProps {
   onOpen?: () => void
   isSubmitting?: boolean
   isSubmitted?: boolean
-}
-
-function getButtonLabel(
-  handlerType: NewPostFormProps['handlerType'],
-  itemType: NewPostFormProps['itemType'],
-  t: (key: string) => string
-) {
-  return handlerType === 'edit'
-    ? t(itemType === 'comment' ? 'button.editComment' : 'button.editPost')
-    : t(itemType === 'comment' ? 'button.newComment' : 'button.newPost')
+  submitButtonText?: string
+  openFormButtonText?: string
+  placeholder?: string
 }
 
 export const NewPostForm = ({
@@ -78,26 +73,35 @@ export const NewPostForm = ({
   handlerType = 'new',
   onOpen,
   isEditable,
+  submitButtonText,
+  openFormButtonText,
+  placeholder,
 }: NewPostFormProps) => {
   const { t } = useTranslation()
   const [isPreview, setIsPreview] = useState(false)
-
   const [isFormOpen, setIsFormOpen] = useState(false)
+  const inputRef = useRef(null)
 
-  const buttonLabel = getButtonLabel(handlerType, itemType, t)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (isFormOpen) {
+      inputRef?.current?.focus()
+    }
+  }, [isFormOpen, inputRef])
 
   return (
     <div className={clsx(formVariant === 'default' ? 'mt-6 h-auto rounded-lg  bg-white/10 p-6' : '')}>
       {isEditable && !isFormOpen && (
         <div className="flex items-center justify-between">
           <PrimaryButton
-            className="rounded bg-green-500 p-3 text-white transition-colors duration-150 hover:bg-green-600"
+            className="text-sm text-gray-500 border border-gray-500 hover:bg-gray-500 hover:text-white transition-colors duration-150"
             onClick={() => {
               setIsFormOpen(true)
               onOpen && onOpen()
             }}
           >
-            {buttonLabel}
+            {openFormButtonText}
           </PrimaryButton>
         </div>
       )}
@@ -105,8 +109,9 @@ export const NewPostForm = ({
       {isFormOpen && (
         <div>
           <div className="mb-4 text-xl font-semibold">Editor</div>
-          {itemType === 'post' && title !==false && (
+          {itemType === 'post' && title !== false && (
             <input
+              ref={inputRef}
               className="mb-4 w-full rounded border-gray-200 p-1 text-base transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               placeholder={t(itemType !== 'post' ? 'placeholder.enterComment' : 'placeholder.enterPostTitle') as string}
               value={title}
@@ -114,9 +119,7 @@ export const NewPostForm = ({
             />
           )}
           <div>
-            <div className="mb-2 flex items-center justify-between text-lg">
-              <ToggleButton onClick={() => setIsPreview(!isPreview)} isPreview={isPreview} />
-            </div>
+            <TogglePreview onClick={() => setIsPreview(!isPreview)} isPreview={isPreview} />
             <div className="rounded border-gray-200  ">
               {isPreview ? (
                 description && <EditorJsRenderer data={description} />
@@ -129,15 +132,12 @@ export const NewPostForm = ({
                   editorRef={editorReference}
                   onChange={setDescription}
                   readOnly={isReadOnly}
-                  placeholder={
-                    (handlerType === 'edit'
-                      ? t(itemType === 'comment' ? 'placeholder.editComment' : 'placeholder.editPost')
-                      : t(itemType === 'comment' ? 'placeholder.newComment' : 'new post form')) as string
-                  }
+                  placeholder={placeholder}
                   holder={editorId}
                 />
               )}
             </div>
+
             <div className="mt-4 flex justify-between">
               <CancelButton
                 onClick={() => {
@@ -150,13 +150,14 @@ export const NewPostForm = ({
               <PrimaryButton
                 onClick={handleSubmit}
                 isLoading={isSubmitting}
-                className="rounded bg-green-500 p-3 text-white transition-colors duration-150 hover:bg-green-600"
+                disabled={isSubmitting} // Disable while submitting
               >
-                {(handlerType === 'edit'
-                    ? t(itemType === 'comment' ? 'placeholder.editComment' : 'placeholder.editPost')
-                    : t(itemType === 'comment' ? 'placeholder.newComment' : 'Submit')) as string}
+                {submitButtonText}
               </PrimaryButton>
             </div>
+
+            {isSubmitted && <p>Form submitted successfully!</p>}
+            {error && <p>Error submitting form.</p>}
           </div>
         </div>
       )}

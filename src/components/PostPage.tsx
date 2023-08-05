@@ -416,7 +416,6 @@ export function PostPage({ postInstance, postId, groupId, comments, post, commun
     >
       <CommunityCard community={community} index={0} isAdmin={false} variant={'banner'} />
 
-      {isPostEditable ? 'yes' : 'no'}
       <PostItem
         post={post}
         address={address as string}
@@ -463,6 +462,9 @@ export function PostPage({ postInstance, postId, groupId, comments, post, commun
         itemType={'comment'}
         handlerType={'new'}
         formVariant={'default'}
+        submitButtonText={t('button.comment')}
+        placeholder={t('placeholder.comment')}
+        openFormButtonText={t('button.comment')}
       />
 
       {sortedCommentsData.length === 0 && <NoComments />}

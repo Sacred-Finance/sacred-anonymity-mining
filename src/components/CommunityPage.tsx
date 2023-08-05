@@ -236,6 +236,8 @@ export function CommunityPage({
 
       <NewPostForm
         editorId={`${groupId}_post`}
+        submitButtonText={t('button.submit') as string}
+        openFormButtonText={t('button.newPost') as string}
         description={postDescription}
         setDescription={setPostDescription}
         handleSubmit={addPost}

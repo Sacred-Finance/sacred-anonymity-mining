@@ -1,12 +1,12 @@
 // TopicList.tsx
 import React from 'react'
 import { TopicList } from '@components/Discourse/types'
-import TopicComponent from '@components/Discourse/TopicComponent'
+import TopicCommunityCard from '@components/Discourse/TopicCommunityCard'
 
 const TopicListComponent: React.FC<{ topicList: TopicList }> = ({ topicList }) => (
   <div>
     {topicList.topics.map(topic => (
-      <TopicComponent key={topic.id} topic={topic} />
+      <TopicCommunityCard key={topic.id} topic={topic} />
     ))}
   </div>
 )
