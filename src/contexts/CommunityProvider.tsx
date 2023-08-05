@@ -8,6 +8,7 @@ import { useIdentity } from '@/hooks/useIdentity'
 import { useRouter } from 'next/router'
 import { useLoaderContext } from './LoaderContext'
 import { Group, Item } from '@/types/contract/ForumInterface'
+import { Topic } from '@components/Discourse/types'
 
 export type CommunityId = string | number | ethers.BigNumber
 type CommunityContextType = {
@@ -18,6 +19,9 @@ type CommunityContextType = {
 interface ActiveCommunity {
   community: Group
   postList: Item[]
+}
+interface ActiveDiscourseCommunity {
+  community: Topic
 }
 
 interface ActivePost {
@@ -30,7 +34,7 @@ type State = {
   communities: Group[]
   users: User[]
   usersGrouped: { [key: string]: User[] }
-  activeCommunity: ActiveCommunity
+  activeCommunity: ActiveCommunity | ActiveDiscourseCommunity
   activePost: ActivePost
 }
 
@@ -42,7 +46,7 @@ type Action =
   | { type: 'SET_COMMUNITIES'; payload: Group[] }
   | { type: 'SET_USERS'; payload: User[] }
   // a new type for active community, and will store community details, post list, and comments for each post
-  | { type: 'SET_ACTIVE_COMMUNITY'; payload: ActiveCommunity }
+  | { type: 'SET_ACTIVE_COMMUNITY'; payload: ActiveCommunity | ActiveDiscourseCommunity }
   | { type: 'SET_ACTIVE_POST'; payload: ActivePost }
 
 const initialState: State = {

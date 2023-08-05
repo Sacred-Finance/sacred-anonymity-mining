@@ -38,7 +38,7 @@ export const JoinCommunityButton = memo(({ community, hideIfJoined }: JoinButton
   const { address } = useAccount()
   const hasUserJoined: User | undefined | false = useUserIfJoined(groupId as string | number)
 
-  const { checkUserBalance } = useValidateUserBalance(community, address, hasUserJoined)
+  const { checkUserBalance } = useValidateUserBalance(community, address)
 
   const joinCommunity = useJoinCommunity()
 

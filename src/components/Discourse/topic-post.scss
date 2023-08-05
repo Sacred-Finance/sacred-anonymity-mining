@@ -1,0 +1,54 @@
+.topic-post {
+  // Add vertical spacing between elements
+  & > *:not(:last-child) {
+    margin-bottom: 1rem; // Change as needed
+  }
+
+  // Add horizontal spacing between elements
+  *:not(:last-child) {
+    margin-block: 0.5rem; // Change as needed
+  }
+
+  h1,
+  h2,
+  h3 {
+    color: #333; // Dark gray
+    font-family: 'Arial', sans-serif; // Change as needed
+  }
+
+  h1 {
+    font-size: 2em; // Change as needed
+  }
+
+  h2 {
+    font-size: 1.75em; // Change as needed
+  }
+
+  h3 {
+    font-size: 1.5em; // Change as needed
+  }
+
+  p {
+    font-size: 1em; // Change as needed
+    line-height: 1.5; // Change as needed
+    color: #666; // Light gray
+  }
+
+  a {
+    color: #007bff; // Bootstrap default link color, change as needed
+    text-decoration: none; // Remove underline
+
+    &:hover {
+      text-decoration: underline; // Add underline on hover
+    }
+  }
+
+  ol,
+  ul {
+    padding-left: 20px; // Indent lists
+  }
+
+  .anchor {
+    display: none; // Hide anchor links
+  }
+}

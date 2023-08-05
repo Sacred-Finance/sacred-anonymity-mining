@@ -27,3 +27,7 @@ export function getGroupWithPostAndCommentData(
 ) {
   return !isNaN(groupId) ? `/api/groupWithPostAndCommentData?groupId=${groupId}&postId=${postId}` : null
 }
+
+export function getDiscourseData(groupId: string | string[] | undefined) {
+  return !isNaN(groupId) ? `/api/discourse/${groupId}` : null
+}
