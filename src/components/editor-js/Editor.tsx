@@ -3,6 +3,7 @@ import React, { memo, useEffect, useImperativeHandle, useRef } from 'react'
 import EditorJS, { OutputData } from '@editorjs/editorjs'
 import { EDITOR_TOOLS } from './editor-tool'
 import clsx from 'clsx'
+import { CircularLoader } from '@components/JoinCommunityButton'
 
 //props
 type Props = {
@@ -116,11 +117,14 @@ const EditorBlock = ({ data, onChange, holder, className, divProps = {}, editorR
   }, [])
 
   return (
-    <div
-      {...divProps}
-      className={clsx(isReady ? 'h-full w-full text-black dark:text-white' : 'hidden', divProps.className)}
-      id={holder}
-    />
+    <>
+      <div
+        {...divProps}
+        className={clsx(isReady ? 'h-full w-full text-black dark:text-white' : 'hidden', divProps.className)}
+        id={holder}
+      ></div>
+      {!isReady && <CircularLoader className={'h-12'} />}
+    </>
   )
 }
 

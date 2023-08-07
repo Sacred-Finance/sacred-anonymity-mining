@@ -44,6 +44,9 @@
   "home": "Home",
   "button": {
     "edit": "Edit",
+    "clear": "Clear",
+    "clearForm": "Clear Form",
+    "closeForm": "Close Form",
     "confirm-edit": "Confirm Edit",
     "delete": "Delete",
     "add": "Add",
@@ -65,7 +68,13 @@
     "comment": "Comment",
     "join_one": "Join",
     "join_other": "Joined",
-    "addComment": "Add Comment"
+    "addComment": "Add Comment",
+    "addReply": "Add Reply",
+    "addPost": "Add Post",
+    "addCommunity": "Add Community",
+    "addCommunityTags": "Add Community Tags",
+    "addCommunityDescription": "Add Community Description",
+    "addCommunityName": "Add Community Name"
   },
   "members": "Members",
   "alert": {
