@@ -20,6 +20,7 @@ import { createNote } from '@/lib/utils'
 import { Identity } from '@semaphore-protocol/identity'
 import { Group, Item } from '@/types/contract/ForumInterface'
 import { CommunityCard } from '@components/CommunityCard/CommunityCard'
+import CreatePollUI from './CreatePollUI'
 
 export function CommunityPage({
   children,
@@ -234,6 +235,10 @@ export function CommunityPage({
     >
       <CommunityCard community={community} index={0} isAdmin={false} variant={'banner'} />
 
+      <div>
+        <CreatePollUI groupId={groupId} />
+      </div>
+      
       <NewPostForm
         editorId={`${groupId}_post`}
         description={postDescription}

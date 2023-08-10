@@ -47,6 +47,7 @@ function PostIndex() {
 
   return (
     <PostPage
+      kind={post.kind}
       postId={post.id}
       groupId={group.groupId}
       postInstance={postInstance}
