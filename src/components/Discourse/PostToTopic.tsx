@@ -9,9 +9,7 @@ import { toast } from 'react-toastify'
 import { mutate } from 'swr'
 import { getDiscourseData } from '@/lib/fetcher'
 import { OutputDataToMarkDown } from '@components/Discourse/OutputDataToMarkDown'
-const Editor = dynamic(() => import('../editor-js/Editor'), {
-  ssr: false,
-})
+
 const PostToTopic = ({ topic }: { topic: Topic }) => {
   const { t } = useTranslation()
   const [description, setDescription] = useState<OutputData>(null)
@@ -26,10 +24,10 @@ const PostToTopic = ({ topic }: { topic: Topic }) => {
         topic_id: topic.id,
         raw: raw,
       })
-      toast.success(t('success.postCreated'))
+      toast.success(t('alert.postCreateSuccess'))
       await mutate(getDiscourseData(topic.id))
     } catch (error) {
-      toast.error(t('error.postNotCreated'))
+      toast.error(t('alert.postCreateFailed'))
       console.error(error)
     }
   }

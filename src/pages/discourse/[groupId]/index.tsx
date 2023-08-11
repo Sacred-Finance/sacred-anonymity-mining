@@ -35,7 +35,8 @@ const Index = ({ topic }: { topic: Topic }) => {
       <div className="flex flex-col space-y-4">
         {data && <TopicCommunityCard topic={data} variant={'banner'} />}
         {data && <PostToTopic topic={data} />}
-        <div className={' h flex items-center justify-between'}>{data && <TopicPosts topic={data} />}</div>
+        <div className={'flex items-center justify-between'}>{data && <TopicPosts topic={data} />}</div>
+
       </div>
     </div>
   )

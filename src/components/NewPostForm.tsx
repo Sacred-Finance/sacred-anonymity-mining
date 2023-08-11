@@ -35,7 +35,7 @@ function TogglePreview({ onClick, isPreview, showText = true }: ToggleButtonProp
   )
 }
 
-interface NewPostFormProps {
+export interface NewPostFormProps {
   editorId: string
   editorReference: RefObject<EditorJsType>
   title: string | false
@@ -55,6 +55,7 @@ interface NewPostFormProps {
   submitButtonText?: string
   openFormButtonText?: string
   placeholder?: string
+  showButtonWhenFormOpen?: boolean
   classes: {
     root?: string
     editor?: string
@@ -87,6 +88,7 @@ export const NewPostForm = ({
   submitButtonText,
   openFormButtonText,
   placeholder,
+  showButtonWhenFormOpen = false,
   classes: c,
 }: NewPostFormProps) => {
   const { t } = useTranslation()
@@ -105,12 +107,12 @@ export const NewPostForm = ({
   return (
     <div
       className={clsx(
-        'flex justify-stretch',
+        'flex justify-stretch ',
         formVariant === 'default' ? 'mt-6 h-auto rounded-lg  bg-white/10 p-6' : '',
         c?.root
       )}
     >
-      {isEditable && !isFormOpen && (
+      {isEditable && !(isFormOpen && !showButtonWhenFormOpen) && (
         <PrimaryButton
           className={clsx(
             'border-gray-500 border text-sm text-gray-500 transition-colors duration-150 hover:bg-gray-500 hover:text-white',
@@ -126,7 +128,7 @@ export const NewPostForm = ({
       )}
 
       {isFormOpen && (
-        <div className={clsx(c?.formContainer)}>
+        <div className={clsx(c?.formContainer, ' min-w-[600px]')}>
           {itemType === 'post' && title !== false && (
             <input
               ref={inputRef}
@@ -161,23 +163,20 @@ export const NewPostForm = ({
               <CancelButton
                 className={clsx(c?.cancelButton)}
                 onClick={() => {
-                  // if content, clear content
-                  // if no content, close form
-
-                  if (description.blocks.length > 0) {
+                  if (description?.blocks?.length > 0) {
                     resetForm(handlerType)
                   } else {
                     setIsFormOpen(false)
                   }
                 }}
               >
-                {description.blocks.length > 0 ? t('button.clearForm') : t('button.closeForm')}
+                {description?.blocks?.length > 0 ? t('button.clearForm') : t('button.closeForm')}
               </CancelButton>
               <PrimaryButton
                 className={clsx('bg-gray-500/20 hover:bg-gray-500/40', c?.submitButton)}
                 onClick={handleSubmit}
                 isLoading={isSubmitting}
-                disabled={isSubmitting} // Disable while submitting
+                disabled={isSubmitting}
               >
                 {submitButtonText}
               </PrimaryButton>
