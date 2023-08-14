@@ -64,9 +64,6 @@ const TopicPosts = ({ topic }: { topic: Topic }) => {
               <div />
               <ReplyToPost
                 post={post}
-                formProps={{
-                  showButtonWhenFormOpen: true,
-                }}
               />
             </div>
           </div>
