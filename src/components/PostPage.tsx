@@ -27,6 +27,7 @@ import { User } from '@/lib/model'
 import clsx from 'clsx'
 import { CancelButton, PrimaryButton } from '@components/buttons'
 import PollItem from './PollItem'
+import ReputationCard from "@components/ReputationCard";
 
 const Editor = dynamic(() => import('@/components/editor-js/Editor'), {
   ssr: false,
@@ -415,6 +416,7 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
         'mx-auto h-screen w-full max-w-screen-2xl space-y-4 overflow-y-auto !text-gray-900 sm:p-8 md:p-24'
       )}
     >
+      <ReputationCard unirepUser={unirepUser} />
       <CommunityCard community={community} index={0} isAdmin={false} variant={'banner'} />
 
       {kind < 2 ? (
