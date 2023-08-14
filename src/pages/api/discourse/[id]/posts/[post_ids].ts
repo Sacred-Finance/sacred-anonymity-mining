@@ -8,7 +8,6 @@ type Data = {
 export default async function (req: NextApiRequest, res: NextApiResponse<Data>) {
   const { id, post_ids } = req.query;
 
-  console.log(id, post_ids)
   // Convert post_ids from string or string[] to an array of strings
   const postIdsArray = Array.isArray(post_ids) ? post_ids : post_ids?.split(',');
 

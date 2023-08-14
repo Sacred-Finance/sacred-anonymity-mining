@@ -15,20 +15,28 @@ const Index = () => {
   const router = useRouter()
   const { groupId } = router.query
   const { dispatch } = useCommunityContext()
-  const [currentPage, setCurrentPage] = useState(1) // Initialize current page to 1
+  const [currentPage, setCurrentPage] = useState(1)
+  const [fetchedPosts, setFetchedPosts] = useState({})
 
   // Initial request to get the topic data
   const { data: initialData } = useSWR(groupId ? `/api/discourse/${groupId}` : null, fetcher)
 
-  // Based on current page, calculate post_ids and fetch posts
   const startIdx: number = (currentPage - 1) * PAGE_SIZE
   const post_ids: number[] = initialData?.post_stream.stream.slice(startIdx, startIdx + PAGE_SIZE) || []
+
   const { data: pageData, error } = useSWR(
     post_ids.length ? `/api/discourse/${groupId}/posts/${post_ids.join(',')}` : null,
     fetcher
   )
 
-  const posts = pageData ? pageData.post_stream.posts : []
+  useEffect(() => {
+    if (pageData && !fetchedPosts[currentPage]) {
+      setFetchedPosts({ ...fetchedPosts, [currentPage]: pageData.post_stream.posts })
+    }
+  }, [pageData])
+
+  const posts = fetchedPosts[currentPage] || []
+
   const topic = pageData as Topic
 
   useEffect(() => {
@@ -56,7 +64,10 @@ const Index = () => {
       <PostToTopic topic={topic as Topic} />
       <Pagination currentPage={currentPage - 1} totalPages={totalPages} onPageChange={handlePageChange} />
       <div className="relative z-0 mx-auto flex justify-center px-4 sm:w-full md:w-3/4 lg:w-1/2">
-        <TopicPosts topic={{ ...topic, post_stream: { ...topic.post_stream, posts } } as Topic} />
+        <TopicPosts
+          topic={{ ...topic, post_stream: { ...topic.post_stream, posts } } as Topic}
+          onPageChange={handlePageChange}
+        />
       </div>
     </div>
   )

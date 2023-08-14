@@ -36,7 +36,7 @@ const ReplyToPost = ({
         category: 4,
       })
       toast.success(t('alert.postCreateSuccess'))
-      await mutate(getDiscourseData(post.topic_id))
+      await mutate(getDiscourseData(post.topic_id, [post.id]))
       // @ts-ignore
       editorReference.current.clear()
       setDescription(null)

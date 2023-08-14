@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, memo } from 'react'
+import React, { useState, useRef, useEffect, memo, useMemo } from 'react'
 import { Topic } from '@components/Discourse/types'
 import parse from 'html-react-parser'
 import './topic-post.scss'
@@ -9,29 +9,46 @@ import pluralize from 'pluralize'
 import { motion, useAnimation } from 'framer-motion'
 import { FingerPrintIcon, HandThumbDownIcon, HandThumbUpIcon } from '@heroicons/react/20/solid'
 import { PrimaryButton } from '@components/buttons'
+import { useFetchReplies } from '@/hooks/useFetchReplies'
 
-const TopicPosts = ({ topic }: { topic: Topic }) => {
+const TopicPosts = ({ topic, onPageChange }: { topic: Topic; onPageChange: (newPage: number) => void }) => {
   const postRefs = useRef<{ [key: number]: React.RefObject<HTMLDivElement> }>({})
+  const [targetPostNumber, setTargetPostNumber] = useState<number | null>(null)
   const [postsInView, setPostsInView] = useState([])
+
+  const posts = useMemo(() => topic.post_stream.posts.filter(post => !post.hidden && !post.deleted_at), [topic])
+
+  useEffect(() => {
+    if (targetPostNumber) {
+      const postRef = postRefs.current[targetPostNumber]
+      if (postRef && postRef.current) {
+        postRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        // handleScrollToPost(targetPostNumber, postRefs)
+        setTargetPostNumber(null) // Clear the target post number
+      }
+    }
+  }, [targetPostNumber, topic])
+
   const controls = useAnimation()
 
-  if (!topic) {
+  const { postsWithReplies, loading } = useFetchReplies(posts)
+
+  if (!topic || loading) {
     return <div>Loading...</div>
   }
-
-  const posts = topic.post_stream.posts.filter(post => !post.hidden && !post.deleted_at)
-  const nestedPosts = prepareNestedPosts(posts)
 
   return (
     <div className="relative flex w-full">
       <div className="topic-post relative flex w-full flex-col gap-4">
-        {nestedPosts.map((post, index) => (
+        {postsWithReplies?.map(post => (
           <RenderPost
             key={post.id}
             post={post}
             postRefs={postRefs}
             setPostsInView={setPostsInView}
             controls={controls}
+            onPageChange={onPageChange}
+            setTargetPostNumber={setTargetPostNumber}
           />
         ))}
       </div>
@@ -78,9 +95,11 @@ const prepareNestedPosts = posts => {
     }
   })
 
-  // Add all posts to the result, including root posts and replies
+  // Add only root posts to the result, not the replies
   posts.forEach(post => {
-    resultPosts.push(post)
+    if (!post.reply_to_post_number) {
+      resultPosts.push(post)
+    }
   })
 
   return resultPosts
@@ -119,7 +138,7 @@ const PostContent = ({ post }) => (
     )}
   </div>
 )
-const RenderPost = ({ post, postRefs, setPostsInView, controls }) => {
+const RenderPost = ({ post, postRefs, setPostsInView, controls, onPageChange, setTargetPostNumber }) => {
   if (!postRefs.current[post.post_number]) {
     postRefs.current[post.post_number] = React.createRef<HTMLDivElement>()
   }
@@ -159,7 +178,13 @@ const RenderPost = ({ post, postRefs, setPostsInView, controls }) => {
           ref={postRef}
           className="relative flex flex-col  border-primary-500 bg-white py-4 shadow-lg"
         >
-          <PostHeader post={post} replyToPostRef={replyToPostRef} postRefs={postRefs} />
+          <PostHeader
+            post={post}
+            replyToPostRef={replyToPostRef}
+            postRefs={postRefs}
+            onPageChange={onPageChange}
+            setTargetPostNumber={setTargetPostNumber}
+          />
           <PostContent post={post} />
           <div className={'mt-4 flex w-full justify-between'}>
             <div />
@@ -191,67 +216,58 @@ const PostFooter = ({ post }) => (
     </div>
   </div>
 )
+const handleScrollToPost = (postNumber, postRefs) => {
+  const secondChild = postRefs.current[postNumber]?.current?.children[1]
 
-const PostHeader = ({ post, replyToPostRef, postRefs }) => (
+  if (secondChild) {
+    secondChild.style.backgroundColor = 'gray'
+    secondChild.style.transition = 'background-color 0.5s ease'
+
+    setTimeout(() => {
+      secondChild.style.backgroundColor = '' // revert to the original color
+    }, 2000)
+  }
+}
+
+const LinkedPostButton = ({ postNumber, onPageChange, setTargetPostNumber }) => (
+  <button
+    className="rounded-full border text-xs hover:bg-gray-700 hover:text-white"
+    onClick={() => {
+      const page = Math.ceil(postNumber / 20) - 1
+      onPageChange(page)
+      setTargetPostNumber(postNumber)
+    }}
+  >
+    <StatsBadge value={postNumber} />
+  </button>
+)
+
+const PostHeader = ({ post, replyToPostRef, postRefs, onPageChange, setTargetPostNumber }) => (
   <header className="mb-4 flex w-full justify-between">
     {post.reply_to_post_number ? (
       <div className="flex gap-2">
         Reply to:
-        <button
-          className="rounded-full border text-xs  hover:bg-gray-700 hover:text-white"
-          onClick={() => {
-            replyToPostRef?.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-            // change background color of the post we scrolled to
-            const secondChild = postRefs.current[post.reply_to_post_number]?.current?.children[1]
-
-            // change background color of the second child of the post we scrolled to for 2 seconds
-            if (secondChild) {
-              secondChild.style.backgroundColor = 'gray'
-
-              // You may want to add a transition for a smooth effect
-              secondChild.style.transition = 'background-color 0.5s ease'
-
-              setTimeout(() => {
-                secondChild.style.backgroundColor = '' // revert to the original color
-              }, 2000)
-            }
-          }}
-        >
-          <StatsBadge value={post.reply_to_post_number?.toString()} />
-        </button>
+        <LinkedPostButton
+          postNumber={post.reply_to_post_number}
+          postRefs={replyToPostRef || postRefs}
+          onPageChange={onPageChange}
+          setTargetPostNumber={setTargetPostNumber}
+        />
       </div>
     ) : (
       <UserInfo post={post} />
     )}
 
-    {post.replies.length > 0 && (
+    {post?.replies?.length > 0 && (
       <div className="flex items-center gap-2 justify-self-end ">
         Replies:
         {post.replies.map(reply => (
-          <button
+          <LinkedPostButton
             key={`${post.id}-${reply.id}`}
-            className="rounded-full border text-xs  hover:bg-gray-700 hover:text-white"
-            onClick={() => {
-              postRefs.current[reply.post_number]?.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-
-              // change background color of the post we scrolled to
-              const secondChild = postRefs.current[reply.post_number]?.current?.children[1]
-
-              // change background color of the second child of the post we scrolled to for 2 seconds
-              if (secondChild) {
-                secondChild.style.backgroundColor = 'gray'
-
-                // You may want to add a transition for a smooth effect
-                secondChild.style.transition = 'background-color 0.5s ease'
-
-                setTimeout(() => {
-                  secondChild.style.backgroundColor = '' // revert to the original color
-                }, 2000)
-              }
-            }}
-          >
-            <StatsBadge value={reply.post_number?.toString()} />
-          </button>
+            postNumber={reply.post_number}
+            setTargetPostNumber={setTargetPostNumber}
+            onPageChange={onPageChange}
+          />
         ))}
       </div>
     )}
@@ -276,8 +292,5 @@ function Avatar({ post, size }: { post: Topic['post_stream']['posts'][0]; size?:
 function Cooked(props: { post: any }) {
   return <span className="cooked text-base leading-normal">{parse(props.post.cooked)}</span>
 }
-
-
-
 
 export default TopicPosts

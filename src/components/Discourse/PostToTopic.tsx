@@ -20,7 +20,7 @@ const PostToTopic = ({ topic }: { topic: Topic }) => {
     const raw = OutputDataToMarkDown(description)
 
     try {
-      await axios.post('/api/discourse/postToTopic', {
+      const newPost = await axios.post('/api/discourse/postToTopic', {
         topic_id: topic.id,
         raw: raw,
         unlist_topic: false,
@@ -31,7 +31,7 @@ const PostToTopic = ({ topic }: { topic: Topic }) => {
         category: 4,
       })
       toast.success(t('alert.postCreateSuccess'))
-      await mutate(getDiscourseData(topic.id))
+      await mutate(getDiscourseData(topic.id, [newPost.data.id]))
     } catch (error) {
       toast.error(t('alert.postCreateFailed'))
       console.error(error)
