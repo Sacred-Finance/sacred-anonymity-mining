@@ -26,6 +26,7 @@ import { User } from '@/lib/model'
 
 import clsx from 'clsx'
 import { CancelButton, PrimaryButton } from '@components/buttons'
+import PollItem from './PollItem'
 
 const Editor = dynamic(() => import('@/components/editor-js/Editor'), {
   ssr: false,
@@ -50,7 +51,7 @@ interface TempComment {
   content: string
 }
 
-export function PostPage({ postInstance, postId, groupId, comments, post, community, commentInstance }) {
+export function PostPage({kind, postInstance, postId, groupId, comments, post, community, commentInstance }) {
   const member = useUserIfJoined(groupId)
   const activeUser = useActiveUser({ groupId })
   const { state } = useCommunityContext()
@@ -417,36 +418,40 @@ export function PostPage({ postInstance, postId, groupId, comments, post, commun
       <CommunityCard community={community} index={0} isAdmin={false} variant={'banner'} />
 
       {isPostEditable ? 'yes' : 'no'}
-      <PostItem
-        post={post}
-        address={address as string}
-        isPostEditable={isPostEditable}
-        setIsFormOpen={setIsFormOpen}
-        isFormOpen={isFormOpen}
-        voteForPost={voteForPost}
-        showDescription={true}
-        editor={
-          <NewPostForm
-            editorId={postInstance.specificPostId(postId)}
-            description={tempPostDescription || post?.description}
-            setDescription={setTempPostDescription}
-            handleSubmit={saveEditedPost}
-            editorReference={postEditorRef}
-            setTitle={setTempPostTitle}
-            resetForm={() => {
-              setTempPostDescription(null)
-              setTempPostTitle('')
-            }}
-            isEditable={isPostEditable}
-            isReadOnly={false}
-            isSubmitting={isLoading}
-            title={tempPostTitle || post?.title}
-            itemType={'post'}
-            handlerType={'edit'}
-            formVariant={'default'}
-          />
-        }
-      />
+      {+kind == 0 || +kind == 1 ? (
+        <PostItem
+          post={post}
+          address={address as string}
+          isPostEditable={isPostEditable}
+          setIsFormOpen={setIsFormOpen}
+          isFormOpen={isFormOpen}
+          voteForPost={voteForPost}
+          showDescription={true}
+          editor={
+            <NewPostForm
+              editorId={postInstance.specificPostId(postId)}
+              description={tempPostDescription || post?.description}
+              setDescription={setTempPostDescription}
+              handleSubmit={saveEditedPost}
+              editorReference={postEditorRef}
+              setTitle={setTempPostTitle}
+              resetForm={() => {
+                setTempPostDescription(null)
+                setTempPostTitle('')
+              }}
+              isEditable={isPostEditable}
+              isReadOnly={false}
+              isSubmitting={isLoading}
+              title={tempPostTitle || post?.title}
+              itemType={'post'}
+              handlerType={'edit'}
+              formVariant={'default'}
+            />
+          }
+        />
+      ) : (
+        <PollItem key={post.id} voteForPost={voteForPost} address={address} post={post} />
+      )}
 
       <NewPostForm
         editorId={`post_comment${groupId}`}
@@ -508,7 +513,7 @@ export function PostPage({ postInstance, postId, groupId, comments, post, commun
                 }}
               >
                 <p className="my-auto inline-block text-sm">
-                  🕛 {c?.time ? formatDistanceToNow(new Date(c?.time).getTime(), { addSuffix: true }) : '-'}
+                  🕛 {c?.time ? formatDistanceToNow(new Date(c?.time).getTime()) : '-'}
                 </p>
               </div>
             </div>
