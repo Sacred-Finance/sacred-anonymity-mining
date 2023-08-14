@@ -20,6 +20,7 @@ import { createNote } from '@/lib/utils'
 import { Identity } from '@semaphore-protocol/identity'
 import { Group, Item } from '@/types/contract/ForumInterface'
 import { CommunityCard } from '@components/CommunityCard/CommunityCard'
+import CreatePollUI from './CreatePollUI'
 
 export function CommunityPage({
   children,
@@ -173,8 +174,8 @@ export function CommunityPage({
       try {
         const response = await postInstance?.vote(voteType, address, users, activeUser, postId, groupId)
 
-        if (response?.message?.includes('ProveReputation_227')){
-            toast.error(t('error.notEnoughReputation'), { toastId: 'notEnoughReputation' })
+        if (response?.message?.includes('ProveReputation_227')) {
+          toast.error(t('error.notEnoughReputation'), { toastId: 'notEnoughReputation' })
         }
         const { status } = response
 
@@ -233,25 +234,30 @@ export function CommunityPage({
       )}
     >
       <CommunityCard community={community} index={0} isAdmin={false} variant={'banner'} />
-
-      <NewPostForm
-        editorId={`${groupId}_post`}
-        submitButtonText={t('button.submit') as string}
-        openFormButtonText={t('button.newPost') as string}
-        description={postDescription}
-        setDescription={setPostDescription}
-        handleSubmit={addPost}
-        editorReference={postEditorRef}
-        setTitle={setPostTitle}
-        resetForm={() => clearInput(true)}
-        isReadOnly={false}
-        isSubmitting={isContextLoading}
-        title={postTitle as string}
-        isEditable={true}
-        itemType={'post'}
-        handlerType={'new'}
-        formVariant={'default'}
-      />
+      <div className={'flex gap-3 items-center'}>
+        <CreatePollUI groupId={groupId} />
+        <NewPostForm
+          editorId={`${groupId}_post`}
+          submitButtonText={t('button.submit') as string}
+          openFormButtonText={t('button.newPost') as string}
+          description={postDescription}
+          setDescription={setPostDescription}
+          handleSubmit={addPost}
+          editorReference={postEditorRef}
+          setTitle={setPostTitle}
+          resetForm={() => clearInput(true)}
+          isReadOnly={false}
+          isSubmitting={isContextLoading}
+          title={postTitle as string}
+          isEditable={true}
+          itemType={'post'}
+          handlerType={'new'}
+          classes={{
+            rootClosed: '!w-fit !m-0 !p-0',
+          }}
+          formVariant={'default'}
+        />
+      </div>
 
       {!postId && renderItemList()}
 

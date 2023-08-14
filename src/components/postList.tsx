@@ -11,6 +11,7 @@ import { useUserIfJoined } from '@/contexts/CommunityProvider'
 import _ from 'lodash'
 import { useTranslation } from 'react-i18next'
 import { Item } from '@/types/contract/ForumInterface'
+import PollItem from './PollItem'
 
 export const PostList = ({ posts, voteForPost, handleSortChange, editor = undefined, showFilter }) => {
   const { address } = useAccount()
@@ -18,14 +19,19 @@ export const PostList = ({ posts, voteForPost, handleSortChange, editor = undefi
     <div className="mt-6 flex flex-col space-y-4 ">
       {showFilter && <SortBy onSortChange={handleSortChange} targetType="posts" />}
       {posts.map((p, i) => (
-        <PostItem
-          post={p}
-          key={p.id}
-          voteForPost={voteForPost}
-          editor={editor}
-          address={address}
-          showDescription={true}
-        />
+        <React.Fragment key={p.id}>
+          {p?.kind < 2 && (
+            <PostItem
+              post={p}
+              key={p.id}
+              voteForPost={voteForPost}
+              editor={editor}
+              address={address}
+              showDescription={true}
+            />
+          )}
+          {p?.kind == 2 && <PollItem key={p.id} voteForPost={voteForPost} address={address} post={p} />}
+        </React.Fragment>
       ))}
     </div>
   )
@@ -83,7 +89,6 @@ export const PostItem = ({
     const voteResponse = await voteForPost(BigNumber.from(id).toNumber(), val)
     if (voteResponse) {
       console.log('voteResponse', voteResponse)
-
     }
     setIsLoading(false)
   }
@@ -122,8 +127,7 @@ export const PostItem = ({
               )
             : ''}
 
-          <div className={'text-gray-900 text-sm'}>{editor && isPostEditable && editor}</div>
-
+          <div className={'text-sm text-gray-900'}>{editor && isPostEditable && editor}</div>
         </div>
       </div>
 

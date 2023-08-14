@@ -4,7 +4,7 @@ import { User } from './model'
 import { getCache, removeAt, setCache } from './redis'
 import { create, editContent, handleDeleteItem, updateContentVote} from '@/lib/item'
 
-export const MIN_REP_COMMENT = 1
+export const MIN_REP_COMMENT = 0
 
 export class CommentClass {
   id: string

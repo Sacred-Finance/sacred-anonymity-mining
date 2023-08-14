@@ -62,3 +62,9 @@ export type ItemCreationRequest = {
   nullifierHash: BigNumberish;
   note: BigNumberish;
 }
+
+export enum PollType {
+  'SINGLE_ANSWER',//User can select only one answer in the answer list.
+  'MULTI_ANSWER',//User can select multiple answers in the answer list.
+  'NUMERIC_RATING'//User can specify values per anwser, the value must be in the range(rateScaleFrom~rateScaleTo)
+}
