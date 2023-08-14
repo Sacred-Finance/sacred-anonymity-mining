@@ -21,6 +21,7 @@ import { Identity } from '@semaphore-protocol/identity'
 import { Group, Item } from '@/types/contract/ForumInterface'
 import { CommunityCard } from '@components/CommunityCard/CommunityCard'
 import CreatePollUI from './CreatePollUI'
+import ReputationCard from '@components/ReputationCard'
 
 export function CommunityPage({
   children,
@@ -228,13 +229,10 @@ export function CommunityPage({
   }
 
   return (
-    <div
-      className={clsx(
-        'mx-auto h-screen w-full max-w-screen-2xl space-y-12 overflow-y-auto !text-gray-900 sm:p-8 md:p-24'
-      )}
-    >
+    <div className={clsx('mx-auto h-screen w-full max-w-screen-2xl space-y-12 overflow-y-auto !text-gray-900 sm:p-8 md:p-24')}>
       <CommunityCard community={community} index={0} isAdmin={false} variant={'banner'} />
-      <div className={'flex gap-3 items-center'}>
+      <ReputationCard />
+      <div className={'flex items-center gap-3'}>
         <CreatePollUI groupId={groupId} />
         <NewPostForm
           editorId={`${groupId}_post`}

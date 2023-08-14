@@ -1,34 +1,57 @@
 import React, { useEffect, useState } from 'react'
+import { useUserIfJoined } from '@/contexts/CommunityProvider'
+import { useUnirepSignUp } from '@/hooks/useUnirepSignup'
+import { User } from '@/lib/model'
+import { useRouter } from 'next/router'
+import { CircularLoader } from '@components/JoinCommunityButton'
 
 // Tailwind CSS for simplicity
-const CardStyle = 'border border-blue-500 shadow rounded-md p-4   bg-white'
-const DataTitleStyle = 'text-blue-500 text-left font-bold text-lg'
-const DataStyle = 'text-gray-800 text-left text-sm'
+const CardStyle = 'border border-blue-500 shadow rounded-md p-4 bg-white w-fit'
+const DataTitleStyle = 'text-blue-500 text-left font-bold text-lg flex gap-1 items-center'
 
-const ReputationCard = ({ unirepUser }) => {
+const ReputationCard = () => {
+  const router = useRouter()
+  const { groupId } = router.query
+  const user = useUserIfJoined(groupId as string)
+  const unirepUser = useUnirepSignUp({ groupId: groupId, name: (user as User)?.name })
   const [reputation, setReputation] = useState({
     posRep: 0,
-    negRep: 0,
-    graffiti: 0,
-    timestamp: 0,
   })
+  const [isLoading, setIsLoading] = useState(true)
+
+  const asyncGetReputation = async () => {
+    return unirepUser?.fetchReputation?.()
+  }
 
   useEffect(() => {
-    if (unirepUser?.reputation?.posRep !== undefined) {
-      setReputation(unirepUser.reputation)
+    if (unirepUser) {
+      const interval = setInterval(async () => {
+        const reputation = await asyncGetReputation()
+        setReputation(reputation)
+        if (unirepUser.hasReputationLoaded()) {
+          clearInterval(interval)
+          setIsLoading(false)
+        }
+      }, 5000)
+
+      // Fetch the user's reputation once outside the interval if it's already loaded
+      if (unirepUser.hasReputationLoaded()) {
+        asyncGetReputation().then(reputation => {
+          setReputation(reputation)
+        })
+        setIsLoading(false)
+      }
+
+      return () => clearInterval(interval)
     }
   }, [unirepUser])
 
   if (!reputation) return <div></div>
   return (
     <div className={CardStyle}>
-      <h2 className={DataTitleStyle}>Your Reputation</h2>
-      <p className={DataStyle}>Positive Rep: {reputation.posRep || 0}</p>
-      <p className={DataStyle}>Negative Rep: {reputation.negRep || 0}</p>
-      <p className={DataStyle}>Graffiti: {reputation.graffiti || 0}</p>
-      <p className={DataStyle}>
-        Timestamp: {reputation?.timestamp ? new Date(reputation?.timestamp * 1000)?.toLocaleString?.() : 0}
-      </p>
+      <h2 className={DataTitleStyle}>
+        Your Reputation: {isLoading ? <CircularLoader /> : reputation.posRep || 0} Points{' '}
+      </h2>
     </div>
   )
 }

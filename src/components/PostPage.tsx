@@ -27,6 +27,7 @@ import { User } from '@/lib/model'
 import clsx from 'clsx'
 import { CancelButton, PrimaryButton } from '@components/buttons'
 import PollItem from './PollItem'
+import ReputationCard from "@components/ReputationCard";
 
 const Editor = dynamic(() => import('@/components/editor-js/Editor'), {
   ssr: false,
@@ -407,16 +408,15 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
   const sortedCommentsData = useItemsSortedByVote(tempComments, comments, commentsSortBy)
   const [isFormOpen, setIsFormOpen] = useState(false)
 
-  const user = useUserIfJoined(groupId as string)
-  const unirepUser = useUnirepSignUp({ groupId: groupId, name: (user as User)?.name })
+
   return (
     <div
       className={clsx(
         'mx-auto h-screen w-full max-w-screen-2xl space-y-4 overflow-y-auto !text-gray-900 sm:p-8 md:p-24'
       )}
     >
+      <ReputationCard/>
       <CommunityCard community={community} index={0} isAdmin={false} variant={'banner'} />
-
       {kind < 2 ? (
           <PostItem
               post={post}
@@ -445,6 +445,9 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
                       itemType={'post'}
                       handlerType={'edit'}
                       formVariant={'default'}
+                        submitButtonText={t('button.save')}
+                        placeholder={t('placeholder.enterPost') as string}
+                        openFormButtonText={t('button.edit')}
                   />
               }
           />
