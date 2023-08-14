@@ -195,7 +195,10 @@ export const NewPostForm = ({
               </CancelButton>
               <PrimaryButton
                 className={clsx('bg-gray-500/20 hover:bg-gray-500/40', c?.submitButton)}
-                onClick={handleSubmit}
+                onClick={() => {
+                  handleSubmit()
+                  setIsFormOpen(false)
+                }}
                 isLoading={isSubmitting}
                 disabled={isSubmitting}
               >

@@ -13,7 +13,7 @@ const Header = () => {
   const { t } = useTranslation()
 
   return (
-    <nav className="my-1 grid grid-cols-1 items-center justify-items-center gap-1 p-2 dark:bg-gray-900  md:grid-cols-6">
+    <nav id={'header'} className="my-1 grid grid-cols-1 items-center justify-items-center gap-1 p-2 dark:bg-gray-900  md:grid-cols-6">
       <div className="flex h-full items-center justify-start justify-items-center">
         <NavBarButton href="/" className="h-full">
           <div className="h-full md:hidden">

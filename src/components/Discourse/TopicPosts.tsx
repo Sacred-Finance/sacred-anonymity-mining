@@ -16,7 +16,17 @@ const TopicPosts = ({ topic, onPageChange }: { topic: Topic; onPageChange: (newP
   const [targetPostNumber, setTargetPostNumber] = useState<number | null>(null)
   const [postsInView, setPostsInView] = useState([])
 
-  const posts = useMemo(() => topic.post_stream.posts.filter(post => !post.hidden && !post.deleted_at), [topic])
+  const [posts, setPosts] = useState(topic.post_stream.posts)
+
+  useEffect(() => {
+    const filteredPosts = topic.post_stream.posts.filter(post => !post.hidden && !post.deleted_at)
+    setPosts(filteredPosts)
+  }, [topic])
+
+
+  const addReplyToPosts = (newPost: Topic['post_stream']['posts'][0]) => {
+    setPosts(posts => [...posts, newPost])
+  }
 
   useEffect(() => {
     if (targetPostNumber) {
@@ -40,6 +50,7 @@ const TopicPosts = ({ topic, onPageChange }: { topic: Topic; onPageChange: (newP
   return (
     <div className="relative flex w-full">
       <div className="topic-post relative flex w-full flex-col gap-4">
+
         {postsWithReplies?.map(post => (
           <RenderPost
             key={post.id}
@@ -49,6 +60,7 @@ const TopicPosts = ({ topic, onPageChange }: { topic: Topic; onPageChange: (newP
             controls={controls}
             onPageChange={onPageChange}
             setTargetPostNumber={setTargetPostNumber}
+            addToPosts={addReplyToPosts}
           />
         ))}
       </div>
@@ -76,34 +88,6 @@ const StatsBadge = memo(
   )
 )
 StatsBadge.displayName = 'StatsBadge'
-
-const prepareNestedPosts = posts => {
-  const postMap = new Map()
-  const resultPosts = []
-
-  // Initialize replies array and map the posts by post_number
-  posts.forEach(post => {
-    post.replies = []
-    postMap.set(post.post_number, post)
-  })
-
-  // Link replies to their parent posts
-  posts.forEach(post => {
-    if (post.reply_to_post_number) {
-      const parentPost = postMap.get(post.reply_to_post_number)
-      if (parentPost) parentPost.replies.push(post)
-    }
-  })
-
-  // Add only root posts to the result, not the replies
-  posts.forEach(post => {
-    if (!post.reply_to_post_number) {
-      resultPosts.push(post)
-    }
-  })
-
-  return resultPosts
-}
 
 const UserInfo = ({ post }) => (
   <div className="mb-4 flex items-center space-x-4">
@@ -138,7 +122,7 @@ const PostContent = ({ post }) => (
     )}
   </div>
 )
-const RenderPost = ({ post, postRefs, setPostsInView, controls, onPageChange, setTargetPostNumber }) => {
+const RenderPost = ({ post, postRefs, setPostsInView, controls, onPageChange, setTargetPostNumber, addReplyToPosts: addReplyToPosts }) => {
   if (!postRefs.current[post.post_number]) {
     postRefs.current[post.post_number] = React.createRef<HTMLDivElement>()
   }
@@ -188,7 +172,7 @@ const RenderPost = ({ post, postRefs, setPostsInView, controls, onPageChange, se
           <PostContent post={post} />
           <div className={'mt-4 flex w-full justify-between'}>
             <div />
-            <ReplyToPost post={post} />
+            <ReplyToPost post={post} addReplyToPosts={addReplyToPosts} />
           </div>
         </div>
         <PostFooter post={post} />
@@ -216,18 +200,7 @@ const PostFooter = ({ post }) => (
     </div>
   </div>
 )
-const handleScrollToPost = (postNumber, postRefs) => {
-  const secondChild = postRefs.current[postNumber]?.current?.children[1]
 
-  if (secondChild) {
-    secondChild.style.backgroundColor = 'gray'
-    secondChild.style.transition = 'background-color 0.5s ease'
-
-    setTimeout(() => {
-      secondChild.style.backgroundColor = '' // revert to the original color
-    }, 2000)
-  }
-}
 
 const LinkedPostButton = ({ postNumber, onPageChange, setTargetPostNumber }) => (
   <button

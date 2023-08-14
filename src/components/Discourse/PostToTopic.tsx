@@ -31,7 +31,8 @@ const PostToTopic = ({ topic }: { topic: Topic }) => {
         category: 4,
       })
       toast.success(t('alert.postCreateSuccess'))
-      await mutate(getDiscourseData(topic.id, [newPost.data.id]))
+      // mutate where key includes topic_id and post_id
+      await mutate(key => key.includes(newPost.data.topic_id))
     } catch (error) {
       toast.error(t('alert.postCreateFailed'))
       console.error(error)
@@ -47,7 +48,7 @@ const PostToTopic = ({ topic }: { topic: Topic }) => {
         classes={{
           // root open needs to have content centered perfectly
           // we need to gray out the background
-          rootClosed: '!m-0 !p-0 !h-0' ,
+          rootClosed: '!m-0 !p-0 !h-0',
           rootOpen:
             'fixed inset-0 z-50 mt-0 !bg-black/60 !w-full !h-full bg-opacity-50 left-0 top-0 right-0 bottom-0 inset-0  ' +
             'flex flex-col justify-center items-center' +
@@ -55,7 +56,7 @@ const PostToTopic = ({ topic }: { topic: Topic }) => {
           formContainerOpen: 'bg-white  rounded-lg shadow-lg p-6 w-full max-w-3xl mx-auto',
           openFormButton: 'text-white z-60 !bg-gray-900 fixed bottom-4 right-4 z-50',
         }}
-        editorId={`${topic.id}_post`}
+        editorId={`${topic?.id}_post`}
         description={description}
         setDescription={setDescription}
         handleSubmit={onSubmit}

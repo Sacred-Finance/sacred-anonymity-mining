@@ -12,9 +12,11 @@ import { Topic } from '@components/Discourse/types'
 const ReplyToPost = ({
   post,
   formProps,
+  addReplyToPosts,
 }: {
   post: Topic['post_stream']['posts'][0]
   formProps?: Partial<NewPostFormProps>
+  addReplyToPosts?: (newPost: Topic['post_stream']['posts'][0]) => void
 }) => {
   const { t } = useTranslation()
   const [description, setDescription] = useState<OutputData>(null)
@@ -24,7 +26,7 @@ const ReplyToPost = ({
     if (!description) return toast.error(t('error.emptyPost'))
     const raw = OutputDataToMarkDown(description)
     try {
-      await axios.post('/api/discourse/postToTopic', {
+      const newPost = await axios.post('/api/discourse/postToTopic', {
         topic_id: post.topic_id,
         reply_to_post_number: post.post_number,
         raw: raw,
@@ -36,10 +38,8 @@ const ReplyToPost = ({
         category: 4,
       })
       toast.success(t('alert.postCreateSuccess'))
-      await mutate(getDiscourseData(post.topic_id, [post.id]))
-      // @ts-ignore
-      editorReference.current.clear()
-      setDescription(null)
+      addReplyToPosts(newPost.data.post)
+
     } catch (error) {
       toast.error(t('alert.postCreateFailed'))
       console.error(error)

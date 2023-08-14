@@ -29,6 +29,7 @@ export const useFetchReplies = posts => {
         return updatedPost || post
       })
 
+      console.log(mergedPosts)
       setPostsWithReplies(mergedPosts)
       setLoading(false)
     }

@@ -52,12 +52,14 @@ const Index = () => {
 
   const handlePageChange = newPage => {
     setCurrentPage(newPage + 1) // Update the current page state
+    // scroll to top of page
+    const header = document.getElementById('header')
+    if (header && newPage) {
+        header.scrollIntoView({ behavior: 'auto' })
+    }
   }
 
-  if (!initialData || !pageData) return <div>Loading...</div>
-  if (error) return <div>An error occurred</div>
-
-  const totalPages = Math.ceil(initialData.post_stream.stream.length / PAGE_SIZE)
+  const totalPages = Math.ceil(initialData?.post_stream?.stream.length / PAGE_SIZE)
 
   return (
     <div className="relative mb-10 flex flex-col content-center items-center justify-center gap-4 space-y-8">
@@ -65,7 +67,7 @@ const Index = () => {
       <Pagination currentPage={currentPage - 1} totalPages={totalPages} onPageChange={handlePageChange} />
       <div className="relative z-0 mx-auto flex justify-center px-4 sm:w-full md:w-3/4 lg:w-1/2">
         <TopicPosts
-          topic={{ ...topic, post_stream: { ...topic.post_stream, posts } } as Topic}
+          topic={{ ...topic, post_stream: { ...topic?.post_stream, posts } } as Topic}
           onPageChange={handlePageChange}
         />
       </div>
