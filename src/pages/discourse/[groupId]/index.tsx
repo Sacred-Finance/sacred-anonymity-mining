@@ -9,7 +9,7 @@ import { Pagination } from '@components/Pagination'
 import useSWR from 'swr'
 import { Topic } from '@components/Discourse/types'
 
-const PAGE_SIZE = 20 // Matches the chunk_size from your API
+const PAGE_SIZE = 20
 
 const Index = () => {
   const router = useRouter()
@@ -21,19 +21,16 @@ const Index = () => {
   const { data: initialData } = useSWR(groupId ? `/api/discourse/${groupId}` : null, fetcher)
 
   // Based on current page, calculate post_ids and fetch posts
-  const startIdx = (currentPage - 1) * PAGE_SIZE
-  const post_ids = initialData?.post_stream.stream.slice(startIdx, startIdx + PAGE_SIZE) || []
+  const startIdx: number = (currentPage - 1) * PAGE_SIZE
+  const post_ids: number[] = initialData?.post_stream.stream.slice(startIdx, startIdx + PAGE_SIZE) || []
   const { data: pageData, error } = useSWR(
     post_ids.length ? `/api/discourse/${groupId}/posts/${post_ids.join(',')}` : null,
     fetcher
   )
 
-  // Concatenating all the posts
-
   const posts = pageData ? pageData.post_stream.posts : []
-  const topic = pageData
+  const topic = pageData as Topic
 
-  console.log('initial topic', initialData)
   useEffect(() => {
     if (initialData) {
       dispatch({
@@ -58,8 +55,8 @@ const Index = () => {
     <div className="relative mb-10 flex flex-col content-center items-center justify-center gap-4 space-y-8">
       <PostToTopic topic={topic as Topic} />
       <Pagination currentPage={currentPage - 1} totalPages={totalPages} onPageChange={handlePageChange} />
-      <div className="relative z-0 mx-auto flex md:w-3/4 lg:w-1/2 sm:w-full justify-center px-4">
-        {topic && <TopicPosts topic={{ ...topic, post_stream: { ...topic.post_stream, posts } } as Topic} />}
+      <div className="relative z-0 mx-auto flex justify-center px-4 sm:w-full md:w-3/4 lg:w-1/2">
+        <TopicPosts topic={{ ...topic, post_stream: { ...topic.post_stream, posts } } as Topic} />
       </div>
     </div>
   )

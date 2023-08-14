@@ -14,7 +14,7 @@ const ReplyToPost = ({
   formProps,
 }: {
   post: Topic['post_stream']['posts'][0]
-  formProps: Partial<NewPostFormProps>
+  formProps?: Partial<NewPostFormProps>
 }) => {
   const { t } = useTranslation()
   const [description, setDescription] = useState<OutputData>(null)

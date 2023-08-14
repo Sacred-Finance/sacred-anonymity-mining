@@ -1,5 +1,4 @@
 import { postHandler } from '@pages/api/discourse/helper'
-import { NextApiRequest, NextApiResponse } from 'next/types'
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {

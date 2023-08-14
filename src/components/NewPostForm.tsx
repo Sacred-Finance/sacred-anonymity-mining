@@ -6,7 +6,7 @@ import { EyeIcon, PencilIcon } from '@heroicons/react/20/solid'
 import dynamic from 'next/dynamic'
 import clsx from 'clsx'
 
-interface EditorJsType {
+export interface EditorJsType {
   blocks: {
     type: string
     data: any

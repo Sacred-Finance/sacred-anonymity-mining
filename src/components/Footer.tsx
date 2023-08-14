@@ -47,7 +47,7 @@ export default function Footer(): JSX.Element {
       </div>
       <div className="container mx-auto mt-8 border-t border-gray-700 px-4 pt-10 sm:px-6 lg:px-8">
         <div className="flex justify-center">
-          <Logo />
+          <Logo invertTheme={true}  />
         </div>
         <p className="pt-6 text-center text-sm text-gray-300">© 2023 Sacred.</p>
       </div>

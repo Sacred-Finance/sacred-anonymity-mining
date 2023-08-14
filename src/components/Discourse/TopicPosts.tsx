@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, memo } from 'react'
 import { Topic } from '@components/Discourse/types'
 import parse from 'html-react-parser'
 import './topic-post.scss'
@@ -8,6 +8,7 @@ import ReplyToPost from '@components/Discourse/ReplyToPost'
 import pluralize from 'pluralize'
 import { motion, useAnimation } from 'framer-motion'
 import { FingerPrintIcon, HandThumbDownIcon, HandThumbUpIcon } from '@heroicons/react/20/solid'
+import { PrimaryButton } from '@components/buttons'
 
 const TopicPosts = ({ topic }: { topic: Topic }) => {
   const postRefs = useRef<{ [key: number]: React.RefObject<HTMLDivElement> }>({})
@@ -18,95 +19,47 @@ const TopicPosts = ({ topic }: { topic: Topic }) => {
     return <div>Loading...</div>
   }
 
-  const renderPost = post => {
-    if (!postRefs.current[post.post_number]) {
-      postRefs.current[post.post_number] = React.createRef<HTMLDivElement>()
-    }
-
-    const onViewportEnter = async () => {
-      setPostsInView(postsInView => [...postsInView, post.post_number])
-    }
-    const onViewportLeave = async () => {
-      setPostsInView(postsInView => postsInView.filter(postInView => postInView !== post.post_number))
-    }
-
-    const postRef = postRefs.current[post.post_number]
-    const replyToPostRef = post.reply_to_post_number ? postRefs.current[post.reply_to_post_number] : null
-
-    return (
-      <motion.div
-        id={`post-${post.post_number}`}
-        ref={postRefs.current[post.post_number]}
-        animate={controls}
-        initial={{ backgroundColor: '' }}
-        onViewportEnter={onViewportEnter}
-        onViewportLeave={onViewportLeave}
-        viewport={{
-          amount: 0.5,
-        }}
-        className="grid w-full gap-4"
-      >
-        <div className="relative col-span-4 flex w-full flex-col ">
-          <div className="z-10 flex items-center justify-between  rounded-t bg-primary-500 py-1 text-center text-white">
-            <StatsBadge label="#" value={post.post_number} icon={<FingerPrintIcon width={20} />} />
-            <div className="me-4 flex items-center text-base text-white">
-              {_.startCase(formatDistanceToNow(new Date(post.created_at).getTime()))}
-            </div>
-          </div>
-          <div
-            id={`post-${post.post_number}`}
-            ref={postRef}
-            className="relative flex flex-col  border-primary-500 bg-white py-4 shadow-lg"
-          >
-            <PostHeader post={post} replyToPostRef={replyToPostRef} postRefs={postRefs} />
-            <PostContent post={post} />
-            <div className={'mt-4 flex w-full justify-between'}>
-              <div />
-              <ReplyToPost
-                post={post}
-              />
-            </div>
-          </div>
-          <PostFooter post={post} />
-        </div>
-      </motion.div>
-    )
-  }
-
   const posts = topic.post_stream.posts.filter(post => !post.hidden && !post.deleted_at)
   const nestedPosts = prepareNestedPosts(posts)
 
   return (
     <div className="relative flex w-full">
       <div className="topic-post relative flex w-full flex-col gap-4">
-        {nestedPosts.map((post, index) => renderPost(post, index))}
-        {/*<Timeline posts={nestedPosts} postsInView={postsInView} />*/}
+        {nestedPosts.map((post, index) => (
+          <RenderPost
+            key={post.id}
+            post={post}
+            postRefs={postRefs}
+            setPostsInView={setPostsInView}
+            controls={controls}
+          />
+        ))}
       </div>
     </div>
   )
 }
 
-const StatsBadge = ({
-  label,
-  value,
-  onClick,
-  icon,
-}: {
-  label?: string
-  value?: string | number
-  onClick?: () => void
-  icon?: any
-}) => (
-  <>
-    <div className="flex h-full cursor-auto  items-center space-x-2 px-2 text-sm " onClick={onClick}>
-      {label && <span>{_.startCase(label)}</span>}
+const StatsBadge = memo(
+  ({
+    label,
+    value,
+    icon,
+    pluralizeLabel,
+  }: {
+    label?: string
+    value?: string
+    icon?: any
+    pluralizeLabel?: boolean
+  }) => (
+    <div className="flex h-full cursor-auto items-center space-x-2 px-2 text-sm">
+      {label && <span>{_.startCase(pluralizeLabel ? pluralize(label, value) : label)}</span>}
       {icon}
       {value && <span>{value}</span>}
     </div>
-  </>
+  )
 )
+StatsBadge.displayName = 'StatsBadge'
 
-export default TopicPosts
 const prepareNestedPosts = posts => {
   const postMap = new Map()
   const resultPosts = []
@@ -166,19 +119,75 @@ const PostContent = ({ post }) => (
     )}
   </div>
 )
+const RenderPost = ({ post, postRefs, setPostsInView, controls }) => {
+  if (!postRefs.current[post.post_number]) {
+    postRefs.current[post.post_number] = React.createRef<HTMLDivElement>()
+  }
+
+  const onViewportEnter = async () => {
+    setPostsInView(postsInView => [...postsInView, post.post_number])
+  }
+  const onViewportLeave = async () => {
+    setPostsInView(postsInView => postsInView.filter(postInView => postInView !== post.post_number))
+  }
+
+  const postRef = postRefs.current[post.post_number]
+  const replyToPostRef = post.reply_to_post_number ? postRefs.current[post.reply_to_post_number] : null
+
+  return (
+    <motion.div
+      id={`post-${post.post_number}`}
+      ref={postRefs.current[post.post_number]}
+      animate={controls}
+      initial={{ backgroundColor: '' }}
+      onViewportEnter={onViewportEnter}
+      onViewportLeave={onViewportLeave}
+      viewport={{
+        amount: 0.5,
+      }}
+      className="mb-16 grid w-full gap-4"
+    >
+      <div className="relative col-span-4 flex w-full flex-col ">
+        <div className="z-10 flex items-center justify-between  rounded-t bg-primary-500 py-1 text-center text-white">
+          <StatsBadge label="#" value={post.post_number} icon={<FingerPrintIcon width={20} />} />
+          <div className="me-4 flex items-center text-base text-white">
+            {_.startCase(formatDistanceToNow(new Date(post.created_at).getTime()))}
+          </div>
+        </div>
+        <div
+          id={`post-${post.post_number}`}
+          ref={postRef}
+          className="relative flex flex-col  border-primary-500 bg-white py-4 shadow-lg"
+        >
+          <PostHeader post={post} replyToPostRef={replyToPostRef} postRefs={postRefs} />
+          <PostContent post={post} />
+          <div className={'mt-4 flex w-full justify-between'}>
+            <div />
+            <ReplyToPost post={post} />
+          </div>
+        </div>
+        <PostFooter post={post} />
+      </div>
+    </motion.div>
+  )
+}
 
 const PostFooter = ({ post }) => (
-  <div className="z-10 flex items-center md:justify-center sm:justify-start rounded-b bg-primary-500 px-3 py-1 text-white w-full">
-
+  <div className="z-10 flex w-full items-center rounded-b bg-graySlate-800 px-3 py-1 text-white sm:justify-start md:justify-center">
     <div className="flex items-center space-x-2">
-      <StatsBadge label="score" value={post.score} />
-      <StatsBadge label="reads" value={post.reads} />
-      <StatsBadge label={pluralize('Reply', post.reply_count)} value={post.reply_count} />
+      <StatsBadge label="score" value={post.score.toString()} />
+      <StatsBadge label="reads" value={post.reads.toString()} />
+      <StatsBadge pluralizeLabel label={'Reply'} value={post.reply_count.toString()} />
     </div>
 
-    <div className={'flex self-end justify-self-end right-0 absolute'}>
-      <StatsBadge icon={<HandThumbUpIcon width={20} />} />
-      <StatsBadge icon={<HandThumbDownIcon width={20} />} />
+    <div className={'absolute right-0 mx-2 flex gap-4 self-end justify-self-end'}>
+      <PrimaryButton resetClasses disabled>
+        <HandThumbUpIcon width={20} />
+      </PrimaryButton>
+
+      <PrimaryButton resetClasses disabled>
+        <HandThumbDownIcon width={20} />
+      </PrimaryButton>
     </div>
   </div>
 )
@@ -208,7 +217,7 @@ const PostHeader = ({ post, replyToPostRef, postRefs }) => (
             }
           }}
         >
-          <StatsBadge value={post.reply_to_post_number} />
+          <StatsBadge value={post.reply_to_post_number?.toString()} />
         </button>
       </div>
     ) : (
@@ -218,9 +227,9 @@ const PostHeader = ({ post, replyToPostRef, postRefs }) => (
     {post.replies.length > 0 && (
       <div className="flex items-center gap-2 justify-self-end ">
         Replies:
-        {post.replies.map((reply, replyIndex) => (
+        {post.replies.map(reply => (
           <button
-            key={replyIndex}
+            key={`${post.id}-${reply.id}`}
             className="rounded-full border text-xs  hover:bg-gray-700 hover:text-white"
             onClick={() => {
               postRefs.current[reply.post_number]?.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
@@ -241,7 +250,7 @@ const PostHeader = ({ post, replyToPostRef, postRefs }) => (
               }
             }}
           >
-            <StatsBadge value={reply.post_number} />
+            <StatsBadge value={reply.post_number?.toString()} />
           </button>
         ))}
       </div>
@@ -265,5 +274,10 @@ function Avatar({ post, size }: { post: Topic['post_stream']['posts'][0]; size?:
 }
 
 function Cooked(props: { post: any }) {
-  return <p className="cooked text-base leading-normal">{parse(props.post.cooked)}</p>
+  return <span className="cooked text-base leading-normal">{parse(props.post.cooked)}</span>
 }
+
+
+
+
+export default TopicPosts

@@ -7,15 +7,23 @@ import { useTheme } from 'next-themes'
 
 import { motion } from 'framer-motion'
 
-export const Logo = (props: any) => {
+export const Logo = ({ invertTheme = false }) => {
   const { resolvedTheme } = useTheme()
-  return <Image src={resolvedTheme === 'dark' ? logoLight : logo} width={200} alt={logo} {...props} />
+  return (
+    <Image
+      priority={true}
+      unoptimized={true}
+      src={(resolvedTheme === 'dark' || invertTheme) ? logoLight : logo}
+      width={200}
+      alt={logo}
+    />
+  )
 }
 export const LogoDynamic = (props: any) => {
   return <DynamicLogo {...props} />
 }
 export const MobileLogo = (props: any) => {
-  return <Image src={mobileLogo} className={'w-8'} alt={logo} {...props} />
+  return <Image unoptimized src={mobileLogo} className={'w-8'} alt={logo} {...props} />
 }
 
 const purpleAnimation = {
