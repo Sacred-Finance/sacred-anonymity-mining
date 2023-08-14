@@ -53,7 +53,6 @@ export const DynamicLogo = ({ purple = '#721BEF', black = '#000', className }) =
   if (!isMounted) return null
   return (
     <motion.svg
-      width="2993"
       height="220"
       viewBox="0 0 2993 560"
       fill="none"

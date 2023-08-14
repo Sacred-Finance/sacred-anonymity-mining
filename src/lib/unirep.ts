@@ -16,12 +16,14 @@ import prover from './prover'
 export class UnirepUser {
   public identityCommitment: null | unknown = null
   public latestTransitionedEpoch: number | null = null
-  public reputation = {
+  public reputationLoaded = false
+  public static reputation = {
     posRep: 0,
     negRep: 0,
     graffiti: 0,
     timestamp: 0,
   }
+
   public provableReputation = {
     posRep: 0,
     negRep: 0,
@@ -73,29 +75,20 @@ export class UnirepUser {
    * Load user state and sign up if necessary.
    */
   async load(): Promise<void> {
-    console.time('time-initial-load')
-    console.time('time-initial-load-identity')
     const userState = new UserState(
       {
         provider: this.provider,
         prover,
-        unirepAddress: unirepAddress,
+        unirepAddress,
         attesterId: BigInt(attesterAddress),
         _id: this.identity,
       },
       this.identity
     )
-    console.timeEnd('time-initial-load-identity')
-
-    console.time('time-initial-load-sync')
     await userState.sync.start()
     UnirepUser.user.userState = userState
     await userState.waitForSync()
-    console.timeEnd('time-initial-load-sync')
-
-    console.time('time-initial-load-identity-commitment')
     this.latestTransitionedEpoch = await UnirepUser.user.userState.latestTransitionedEpoch()
-    console.timeEnd('time-initial-load-identity-commitment')
 
     UnirepUser.user.identity = this.identity
     UnirepUser.hasSignedUp = await userState.hasSignedUp(BigInt(attesterAddress))
@@ -107,11 +100,9 @@ export class UnirepUser {
     }
 
     const reputation = await this.fetchReputation()
-
     if (reputation?.posRep !== undefined) {
-      this.reputation = reputation
+      UnirepUser.reputation = reputation
     }
-    console.timeEnd('time-initial-load')
   }
 
   /**
@@ -220,6 +211,10 @@ export class UnirepUser {
     console.timeEnd('signup')
   }
 
+  hasReputationLoaded(): boolean {
+    return this.reputationLoaded
+  }
+
   /**
    * Update the user state.
    */
@@ -236,10 +231,27 @@ export class UnirepUser {
    * Fetch the user reputation.
    * @returns Reputation data.
    */
-  async fetchReputation() {
-    console.log('Fetching reputation...')
+  async fetchReputation(): Promise<Record<string, number>> {
     const repuation = await UnirepUser?.user?.userState?.getData?.()
+
+    if (!repuation) {
+      console.error('User state not found')
+      return UnirepUser.reputation
+    }
+
+    const [posRep, negRep, graffiti, timestamp, somethingElse] = repuation
+
+    const response = {
+      posRep: Number(posRep),
+      negRep: Number(negRep),
+      graffiti: Number(graffiti),
+      timestamp: Number(timestamp),
+    }
+
+    UnirepUser.reputation = response
+    this.reputationLoaded = true
+
     if (!repuation) return console.error('User state not found')
-    return this.reputation
+    return response
   }
 }

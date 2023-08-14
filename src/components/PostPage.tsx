@@ -408,17 +408,15 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
   const sortedCommentsData = useItemsSortedByVote(tempComments, comments, commentsSortBy)
   const [isFormOpen, setIsFormOpen] = useState(false)
 
-  const user = useUserIfJoined(groupId as string)
-  const unirepUser = useUnirepSignUp({ groupId: groupId, name: (user as User)?.name })
+
   return (
     <div
       className={clsx(
         'mx-auto h-screen w-full max-w-screen-2xl space-y-4 overflow-y-auto !text-gray-900 sm:p-8 md:p-24'
       )}
     >
-      <ReputationCard unirepUser={unirepUser} />
+      <ReputationCard/>
       <CommunityCard community={community} index={0} isAdmin={false} variant={'banner'} />
-
       {kind < 2 ? (
           <PostItem
               post={post}
@@ -447,6 +445,9 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
                       itemType={'post'}
                       handlerType={'edit'}
                       formVariant={'default'}
+                        submitButtonText={t('button.save')}
+                        placeholder={t('placeholder.enterPost') as string}
+                        openFormButtonText={t('button.edit')}
                   />
               }
           />
