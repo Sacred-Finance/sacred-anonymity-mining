@@ -27,6 +27,18 @@ export function getGroupWithPostAndCommentData(
   return !isNaN(groupId) ? `/api/groupWithPostAndCommentData?groupId=${groupId}&postId=${postId}` : null
 }
 
-export function getDiscourseData(groupId: number | string | string[] | undefined) {
-  return !isNaN(groupId) ? `/api/discourse/${groupId}` : null
+export function getDiscourseData(groupId: number | string | string[] | undefined, post_ids?: number[] | null) {
+  if (!isNaN(Number(groupId))) {
+    let url = `/api/discourse/${groupId}`;
+    if (post_ids && post_ids.length > 0) {
+      // Format the post_ids as query parameters
+      const postIdsQuery = post_ids.map((id) => `post_ids[]=${id}`).join('&');
+      url += `?${postIdsQuery}`;
+    }
+    return url;
+  }
+  return null;
 }
+
+
+

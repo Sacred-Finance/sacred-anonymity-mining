@@ -37,6 +37,10 @@ const ReplyToPost = ({
       })
       toast.success(t('alert.postCreateSuccess'))
       await mutate(getDiscourseData(post.topic_id))
+      // @ts-ignore
+      editorReference.current.clear()
+      setDescription(null)
+
     } catch (error) {
       toast.error(t('alert.postCreateFailed'))
       console.error(error)
@@ -55,6 +59,7 @@ const ReplyToPost = ({
       resetForm={() => {
         // @ts-ignore
         editorReference.current.clear()
+        setDescription(null)
       }}
       isReadOnly={false}
       isEditable={true}
@@ -65,8 +70,10 @@ const ReplyToPost = ({
       {...formProps}
       classes={{
         openFormButton: 'border-gray-300 bg-gray-600 text-white hover:bg-gray-700 transition-colors duration-150 ',
-        formContainer: ' bg-white p-4 border border-gray-300 rounded shadow-lg absolute z-20 left-0 ',
+        formContainer: 'bg-white p-4 border border-gray-300 rounded shadow-lg absolute z-20  ',
+        formContainerOpen: 'w-full max-w-3xl mx-auto z-50 -top-1/2 right-0 sticky bottom-0',
         cancelButton: 'text-gray-500 hover:text-gray-700',
+        root: '!z-50 relative',
         ...formProps.classes,
       }}
     />

@@ -1,42 +1,65 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import WithStandardLayout from '@components/HOC/WithStandardLayout'
 import { useRouter } from 'next/router'
-import TopicCommunityCard from '@components/Discourse/TopicCommunityCard'
-import clsx from 'clsx'
 import TopicPosts from '@components/Discourse/TopicPosts'
-import { Topic } from '@components/Discourse/types'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
-import useSWR from 'swr'
-import fetcher, { getDiscourseData, getGroupWithPostData } from '@/lib/fetcher'
+import fetcher from '@/lib/fetcher'
 import PostToTopic from '@components/Discourse/PostToTopic'
+import { Pagination } from '@components/Pagination'
+import useSWR from 'swr'
+import { Topic } from '@components/Discourse/types'
 
-const Index = ({ topic }: { topic: Topic }) => {
+const PAGE_SIZE = 20 // Matches the chunk_size from your API
+
+const Index = () => {
   const router = useRouter()
   const { groupId } = router.query
-  const { data, error, isValidating, isLoading } = useSWR<Topic>(getDiscourseData(groupId), fetcher)
   const { dispatch } = useCommunityContext()
+  const [currentPage, setCurrentPage] = useState(1) // Initialize current page to 1
 
+  // Initial request to get the topic data
+  const { data: initialData } = useSWR(groupId ? `/api/discourse/${groupId}` : null, fetcher)
+
+  // Based on current page, calculate post_ids and fetch posts
+  const startIdx = (currentPage - 1) * PAGE_SIZE
+  const post_ids = initialData?.post_stream.stream.slice(startIdx, startIdx + PAGE_SIZE) || []
+  const { data: pageData, error } = useSWR(
+    post_ids.length ? `/api/discourse/${groupId}/posts/${post_ids.join(',')}` : null,
+    fetcher
+  )
+
+  // Concatenating all the posts
+
+  const posts = pageData ? pageData.post_stream.posts : []
+  const topic = pageData
+
+  console.log('initial topic', initialData)
   useEffect(() => {
-    if (data && !isValidating && !error) {
-      console.log('data', data)
+    if (initialData) {
       dispatch({
         type: 'SET_ACTIVE_COMMUNITY',
         payload: {
-          community: data,
+          community: initialData,
         },
       })
     }
-  }, [data, isValidating])
+  }, [initialData])
 
+  const handlePageChange = newPage => {
+    setCurrentPage(newPage + 1) // Update the current page state
+  }
 
-  if (isLoading) return <div>Loading...</div>
+  if (!initialData || !pageData) return <div>Loading...</div>
+  if (error) return <div>An error occurred</div>
+
+  const totalPages = Math.ceil(initialData.post_stream.stream.length / PAGE_SIZE)
+
   return (
-    <div className={clsx('mx-auto mb-64 w-full max-w-screen-xl  sm:p-8 md:p-24 ')}>
-      <div className="flex flex-col space-y-4">
-        {data && <TopicCommunityCard topic={data} variant={'banner'} />}
-        {data && <PostToTopic topic={data} />}
-        <div className={'flex items-center justify-between'}>{data && <TopicPosts topic={data} />}</div>
-
+    <div className="relative mb-10 flex flex-col content-center items-center justify-center gap-4 space-y-8">
+      <PostToTopic topic={topic as Topic} />
+      <Pagination currentPage={currentPage - 1} totalPages={totalPages} onPageChange={handlePageChange} />
+      <div className="relative z-0 mx-auto flex md:w-3/4 lg:w-1/2 sm:w-full justify-center px-4">
+        {topic && <TopicPosts topic={{ ...topic, post_stream: { ...topic.post_stream, posts } } as Topic} />}
       </div>
     </div>
   )

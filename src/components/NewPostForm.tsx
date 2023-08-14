@@ -21,13 +21,14 @@ interface ToggleButtonProps {
   onClick: () => void
   isPreview: boolean
   showText?: boolean
+  disabled?: boolean
 }
 
-function TogglePreview({ onClick, isPreview, showText = true }: ToggleButtonProps) {
+function TogglePreview({ onClick, isPreview, showText = true, disabled }: ToggleButtonProps) {
   return (
     <div className="mb-2 flex items-center justify-between text-sm ">
       {isPreview ? 'Preview' : 'Editor'}
-      <PrimaryButton onClick={onClick} className={'bg-gray-500/20 hover:bg-gray-500/40'}>
+      <PrimaryButton disabled={disabled} onClick={onClick} className={'bg-gray-500/20 hover:bg-gray-500/40'}>
         {showText && (isPreview ? 'Show Editor' : 'Show Preview')}
         {isPreview ? <PencilIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
       </PrimaryButton>
@@ -58,13 +59,20 @@ export interface NewPostFormProps {
   showButtonWhenFormOpen?: boolean
   classes: {
     root?: string
+    rootOpen?: string
+    rootClosed?: string
     editor?: string
     title?: string
     description?: string
     openFormButton?: string
+    openFormButtonOpen?: string
+    openFormButtonClosed?: string
     submitButton?: string
     cancelButton?: string
     formContainer?: string
+    formContainerOpen?: string
+    formContainerClosed?: string
+    input?: string
   }
 }
 
@@ -107,16 +115,20 @@ export const NewPostForm = ({
   return (
     <div
       className={clsx(
-        'flex justify-stretch ',
+        'flex flex-col space-y-4 sm:w-full ',
         formVariant === 'default' ? 'mt-6 h-auto rounded-lg  bg-white/10 p-6' : '',
-        c?.root
+        isFormOpen ? 'border-gray-500 border' : 'items-center',
+        c?.root,
+        isFormOpen ? c?.rootOpen : c?.rootClosed
       )}
     >
       {isEditable && !(isFormOpen && !showButtonWhenFormOpen) && (
         <PrimaryButton
           className={clsx(
+            'w-fit',
             'border-gray-500 border text-sm text-gray-500 transition-colors duration-150 hover:bg-gray-500 hover:text-white',
-            c?.openFormButton
+            c?.openFormButton,
+            isFormOpen ? c?.openFormButtonOpen : c?.openFormButtonClosed
           )}
           onClick={() => {
             setIsFormOpen(true)
@@ -128,18 +140,27 @@ export const NewPostForm = ({
       )}
 
       {isFormOpen && (
-        <div className={clsx(c?.formContainer, ' min-w-[600px]')}>
+        <div
+          className={clsx(
+            'min-w-[400px] p-2',
+            c?.formContainer,
+            isFormOpen ? c?.formContainerOpen : c?.formContainerClosed
+          )}
+        >
           {itemType === 'post' && title !== false && (
             <input
               ref={inputRef}
-              className="mb-4 w-full rounded border-gray-200 p-1 text-base transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className={clsx(
+                'mb-4 w-full rounded border-gray-200 p-1 text-base transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500',
+                c?.input
+              )}
               placeholder={t(itemType !== 'post' ? 'placeholder.enterComment' : 'placeholder.enterPostTitle') as string}
               value={title}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
             />
           )}
           <div>
-            <TogglePreview onClick={() => setIsPreview(!isPreview)} isPreview={isPreview} />
+            <TogglePreview onClick={() => setIsPreview(!isPreview)} isPreview={isPreview} disabled={!description} />
             <div className="rounded border-gray-200">
               <>
                 <div className={isPreview ? '' : 'hidden'}>

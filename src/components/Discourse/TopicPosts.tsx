@@ -6,8 +6,8 @@ import { formatDistanceToNow } from '@/lib/utils'
 import _ from 'lodash'
 import ReplyToPost from '@components/Discourse/ReplyToPost'
 import pluralize from 'pluralize'
-import clsx from 'clsx'
 import { motion, useAnimation } from 'framer-motion'
+import { FingerPrintIcon, HandThumbDownIcon, HandThumbUpIcon } from '@heroicons/react/20/solid'
 
 const TopicPosts = ({ topic }: { topic: Topic }) => {
   const postRefs = useRef<{ [key: number]: React.RefObject<HTMLDivElement> }>({})
@@ -47,16 +47,18 @@ const TopicPosts = ({ topic }: { topic: Topic }) => {
         className="grid w-full gap-4"
       >
         <div className="relative col-span-4 flex w-full flex-col ">
-          <div className="flex items-center rounded-t z-10  bg-primary-500 py-1 text-center text-xs text-white">
-            <StatsBadge label="#" value={post.post_number} />
+          <div className="z-10 flex items-center justify-between  rounded-t bg-primary-500 py-1 text-center text-white">
+            <StatsBadge label="#" value={post.post_number} icon={<FingerPrintIcon width={20} />} />
+            <div className="me-4 flex items-center text-base text-white">
+              {_.startCase(formatDistanceToNow(new Date(post.created_at).getTime()))}
+            </div>
           </div>
           <div
             id={`post-${post.post_number}`}
             ref={postRef}
-            className="relative flex flex-col border-x  border-primary-500 bg-white p-4 shadow-lg"
+            className="relative flex flex-col  border-primary-500 bg-white py-4 shadow-lg"
           >
             <PostHeader post={post} replyToPostRef={replyToPostRef} postRefs={postRefs} />
-            {/*<UserInfo post={post} />*/}
             <PostContent post={post} />
             <div className={'mt-4 flex w-full justify-between'}>
               <div />
@@ -87,10 +89,21 @@ const TopicPosts = ({ topic }: { topic: Topic }) => {
   )
 }
 
-const StatsBadge = ({ label, value, onClick }: { label?: string; value?: string | number; onClick?: () => void }) => (
+const StatsBadge = ({
+  label,
+  value,
+  onClick,
+  icon,
+}: {
+  label?: string
+  value?: string | number
+  onClick?: () => void
+  icon?: any
+}) => (
   <>
     <div className="flex h-full cursor-auto  items-center space-x-2 px-2 text-sm " onClick={onClick}>
       {label && <span>{_.startCase(label)}</span>}
+      {icon}
       {value && <span>{value}</span>}
     </div>
   </>
@@ -126,13 +139,18 @@ const prepareNestedPosts = posts => {
 const UserInfo = ({ post }) => (
   <div className="mb-4 flex items-center space-x-4">
     <Avatar post={post} size={80} />
-    <PostMetaData post={post} />
+    <div className="flex-1">
+      <div className="text-lg font-semibold text-gray-500">{_.startCase(post.username)}</div>
+      <div className="text-sm text-gray-500">
+        {_.startCase(formatDistanceToNow(new Date(post.created_at).getTime()))}
+      </div>
+    </div>
   </div>
 )
 
 const PostContent = ({ post }) => (
   <div className="mt-4 rounded border border-gray-200 bg-gray-100 p-4 transition-colors duration-1000">
-    <Cooked post={post} className="cooked text-base leading-normal" />
+    <Cooked post={post} />
 
     {post?.link_counts?.length > 0 && (
       <div className="mt-4">
@@ -153,10 +171,18 @@ const PostContent = ({ post }) => (
 )
 
 const PostFooter = ({ post }) => (
-  <div className="flex items-center justify-center rounded-b z-10 bg-primary-500 px-3 py-1 text-white">
-    <StatsBadge label="score" value={post.score} />
-    <StatsBadge label="reads" value={post.reads} />
-    <StatsBadge label={pluralize('Reply', post.reply_count)} value={post.reply_count} />
+  <div className="z-10 flex items-center md:justify-center sm:justify-start rounded-b bg-primary-500 px-3 py-1 text-white w-full">
+
+    <div className="flex items-center space-x-2">
+      <StatsBadge label="score" value={post.score} />
+      <StatsBadge label="reads" value={post.reads} />
+      <StatsBadge label={pluralize('Reply', post.reply_count)} value={post.reply_count} />
+    </div>
+
+    <div className={'flex self-end justify-self-end right-0 absolute'}>
+      <StatsBadge icon={<HandThumbUpIcon width={20} />} />
+      <StatsBadge icon={<HandThumbDownIcon width={20} />} />
+    </div>
   </div>
 )
 
@@ -241,48 +267,6 @@ function Avatar({ post, size }: { post: Topic['post_stream']['posts'][0]; size?:
   )
 }
 
-function PostMetaData({ post }: { post: Topic['post_stream']['posts'][0] }) {
-  return (
-    <div className="flex-1">
-      <div className="text-lg font-semibold text-gray-500">{_.startCase(post.username)}</div>
-      <div className="text-sm text-gray-500">
-        {_.startCase(formatDistanceToNow(new Date(post.created_at).getTime()))}
-      </div>
-    </div>
-  )
-}
-
 function Cooked(props: { post: any }) {
   return <p className="cooked text-base leading-normal">{parse(props.post.cooked)}</p>
-}
-
-function Timeline({ posts, postsInView }) {
-  return (
-    <div className="flex flex-col gap-4">
-      {posts.map((post, index) => (
-        <div
-          key={index}
-          className={clsx(
-            'flex flex-col gap-4',
-            postsInView.includes(post.post_number) ? 'bg-gray-100' : 'bg-gray-200'
-          )}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Avatar post={post} size={80} />
-              <PostMetaData post={post} />
-            </div>
-            <div className="flex items-center space-x-4">
-              <StatsBadge label="score" value={post.score} />
-              <StatsBadge label="reads" value={post.reads} />
-              <StatsBadge label={pluralize('Reply', post.reply_count)} value={post.reply_count || '0'} />
-            </div>
-          </div>
-          <div className="mt-4 rounded border border-gray-200 bg-gray-100 p-4 transition-colors duration-1000">
-            <Cooked post={post} className="cooked text-base leading-normal" />
-          </div>
-        </div>
-      ))}
-    </div>
-  )
 }
