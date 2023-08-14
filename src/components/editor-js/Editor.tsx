@@ -2,6 +2,8 @@
 import React, { memo, useEffect, useImperativeHandle, useRef } from 'react'
 import EditorJS, { OutputData } from '@editorjs/editorjs'
 import { EDITOR_TOOLS } from './editor-tool'
+import clsx from 'clsx'
+import { CircularLoader } from '@components/JoinCommunityButton'
 
 //props
 type Props = {
@@ -39,33 +41,32 @@ const EditorBlock = ({ data, onChange, holder, className, divProps = {}, editorR
   }))
 
   useEffect(() => {
-    if (!ref.current) return;
-    ref?.current?.readOnly?.toggle?.();
+    if (!ref.current) return
+    ref?.current?.readOnly?.toggle?.()
 
     if (!readOnly) {
       console.log('re-rendering for non-readonly')
 
-        setTimeout(() => {
-            if (ref?.current?.focus) ref.current.focus(true);
-        }, 200)
-
+      setTimeout(() => {
+        if (ref?.current?.focus) ref.current.focus(true)
+      }, 200)
     } else {
       console.log('re-rendering for readonly')
-        setTimeout(() => {
-            if (ref?.current?.render && data?.blocks) ref.current.render(data);
-        }, 0)
+      setTimeout(() => {
+        if (ref?.current?.render && data?.blocks) ref.current.render(data)
+      }, 0)
     }
     if (!data?.blocks) {
-        setTimeout(() => {
-            if (ref?.current?.clear) ref.current.clear();
-        }, 200)
+      setTimeout(() => {
+        if (ref?.current?.clear) ref.current.clear()
+      }, 200)
     }
-}, [readOnly])
+  }, [readOnly])
   //initialize editorjs
   useEffect(() => {
     //initialize editor if we don't have a reference
     if (!ref.current) {
-      if (!holder) return;
+      if (!holder) return
       const editor = new EditorJS({
         holder: holder,
         tools: EDITOR_TOOLS,
@@ -73,7 +74,7 @@ const EditorBlock = ({ data, onChange, holder, className, divProps = {}, editorR
         placeholder: placeholder || 'Start writing your post...',
         data,
         async onChange(api, event) {
-          if (readOnly) return;
+          if (readOnly) return
           const data = await api.saver.save()
           onChange(data)
         },
@@ -117,7 +118,12 @@ const EditorBlock = ({ data, onChange, holder, className, divProps = {}, editorR
 
   return (
     <>
-      <div className={isReady ? 'h-full w-full text-black dark:text-white' : 'hidden'} id={holder} {...divProps} />
+      <div
+        {...divProps}
+        className={clsx(isReady ? 'h-full w-full text-black dark:text-white' : 'hidden', divProps.className)}
+        id={holder}
+      ></div>
+      {!isReady && <CircularLoader className={'h-12'} />}
     </>
   )
 }

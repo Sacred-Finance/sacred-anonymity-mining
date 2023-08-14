@@ -14,6 +14,7 @@
     "enterComment": "Enter Comment *",
     "editPost": "Edit Post Description *",
     "editComment": "Edit Comment *",
+    "comment": "Comment *",
 
     "newComment": "New Comment *",
 
@@ -44,6 +45,10 @@
   "home": "Home",
   "button": {
     "edit": "Edit",
+    "clear": "Clear",
+    "clearForm": "Clear Form",
+    "closeForm": "Close Form",
+    "submit": "Submit",
     "confirm-edit": "Confirm Edit",
     "delete": "Delete",
     "add": "Add",
@@ -65,7 +70,13 @@
     "comment": "Comment",
     "join_one": "Join",
     "join_other": "Joined",
-    "addComment": "Add Comment"
+    "addComment": "Add Comment",
+    "addReply": "Add Reply",
+    "addPost": "Add Post",
+    "addCommunity": "Add Community",
+    "addCommunityTags": "Add Community Tags",
+    "addCommunityDescription": "Add Community Description",
+    "addCommunityName": "Add Community Name"
   },
   "members": "Members",
   "alert": {
@@ -77,6 +88,23 @@
     "postEditSuccess": "Post edited successfully",
     "editFailed": "Edit Failed, Try Again!",
     "commentEditSuccess": "Comment edited successfully",
+    "commentDeleteSuccess": "Comment deleted successfully",
+    "commentDeleteFailed": "Comment Delete Failed, Try Again!",
+    "postDeleteSuccess": "Post deleted successfully",
+    "postDeleteFailed": "Post Delete Failed, Try Again!",
+    "postCreateSuccess": "Post created successfully",
+    "postCreateFailed": "Post Create Failed, Try Again!",
+    "communityCreateSuccess": "Community created successfully",
+    "communityCreateFailed": "Community Create Failed, Try Again!",
+    "communityEditSuccess": "Community edited successfully",
+    "communityEditFailed": "Community Edit Failed, Try Again!",
+    "communityDeleteSuccess": "Community deleted successfully",
+    "communityDeleteFailed": "Community Delete Failed, Try Again!",
+    "communityJoinSuccess": "Community joined successfully",
+    "communityJoinFailed": "Community Join Failed, Try Again!",
+    "communityLeaveSuccess": "Community left successfully",
+    "communityLeaveFailed": "Community Leave Failed, Try Again!",
+
     "voteSuccess": "Voted successfully",
     "voteFailed": "Vote Failed, Try Again!",
     "noChange": "No change detected",

@@ -53,8 +53,8 @@ const CreatePollUI = ({ groupId }: CreatePollUIProps) => {
         pollType == PollType.NUMERIC_RATING ? rateScaleTo : 0,
         () => {
           toast.success('Poll created successfully')
-          setLoading(false);
-          setShowModal(false);
+          setLoading(false)
+          setShowModal(false)
         },
         err => {
           toast.error(err)
@@ -75,13 +75,16 @@ const CreatePollUI = ({ groupId }: CreatePollUIProps) => {
   }
   return (
     <>
-      <button
-        className="mb-1 mr-1 rounded bg-green-500 px-6 py-3 text-sm font-bold uppercase text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-green-600"
+      <PrimaryButton
+        className={clsx(
+          'w-fit',
+          'border-gray-500 border text-sm text-gray-500 transition-colors duration-150 hover:bg-gray-500 hover:text-white'
+        )}
         type="button"
         onClick={() => setShowModal(true)}
       >
         Create Poll
-      </button>
+      </PrimaryButton>
       {showModal ? (
         <>
           <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden outline-none focus:outline-none">

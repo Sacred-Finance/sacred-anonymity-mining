@@ -1,11 +1,11 @@
 .topic-post {
   // Add vertical spacing between elements
-  & > *:not(:last-child) {
+  .cooked & > *:not(:last-child) {
     margin-bottom: 1rem; // Change as needed
   }
 
   // Add horizontal spacing between elements
-  *:not(:last-child) {
+  .cooked *:not(:last-child) {
     margin-block: 0.5rem; // Change as needed
   }
 

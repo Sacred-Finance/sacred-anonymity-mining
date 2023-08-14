@@ -20,8 +20,8 @@ export const PostList = ({ posts, voteForPost, handleSortChange, editor = undefi
       {showFilter && <SortBy onSortChange={handleSortChange} targetType="posts" />}
       {posts.map((p, i) => (
         <React.Fragment key={p.id}>
-          {
-            p?.kind == 0 || p?.kind == 1 && <PostItem
+          {p?.kind < 2 && (
+            <PostItem
               post={p}
               key={p.id}
               voteForPost={voteForPost}
@@ -29,15 +29,8 @@ export const PostList = ({ posts, voteForPost, handleSortChange, editor = undefi
               address={address}
               showDescription={true}
             />
-          }
-          {
-            p?.kind == 2 && <PollItem
-              key={p.id}
-              voteForPost={voteForPost}
-              address={address}
-              post={p}
-            />
-          }
+          )}
+          {p?.kind == 2 && <PollItem key={p.id} voteForPost={voteForPost} address={address} post={p} />}
         </React.Fragment>
       ))}
     </div>
@@ -96,7 +89,6 @@ export const PostItem = ({
     const voteResponse = await voteForPost(BigNumber.from(id).toNumber(), val)
     if (voteResponse) {
       console.log('voteResponse', voteResponse)
-
     }
     setIsLoading(false)
   }
@@ -135,8 +127,7 @@ export const PostItem = ({
               )
             : ''}
 
-          <div className={'text-gray-900 text-sm'}>{editor && isPostEditable && editor}</div>
-
+          <div className={'text-sm text-gray-900'}>{editor && isPostEditable && editor}</div>
         </div>
       </div>
 

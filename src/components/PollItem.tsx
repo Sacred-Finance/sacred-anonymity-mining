@@ -12,6 +12,7 @@ import { BigNumber } from 'ethers'
 import { usePoll } from '@/hooks/usePoll'
 import { toast } from 'react-toastify'
 import { CircularLoader } from './JoinCommunityButton'
+import clsx from 'clsx'
 
 interface PollItemProps {
   post: Item
@@ -143,7 +144,7 @@ const PollItem = ({ post, address, voteForPost }: PollItemProps) => {
             <EditorJsRenderer data={post.description} onlyPreview={isPreview} />
           )} */}
           {isFetching ? (
-            <CircularLoader className='text-black w-4 mt-3 m-auto'/>
+            <CircularLoader className="m-auto mt-3 w-4 text-black" />
           ) : (
             <div className="justify-left flex flex-col justify-items-center">
               {pollType == PollType.SINGLE_ANSWER &&
@@ -221,7 +222,10 @@ const PollItem = ({ post, address, voteForPost }: PollItemProps) => {
                 ))}
               {!pollExpired && (
                 <PrimaryButton
-                  className="mr-1 mt-3 w-fit rounded bg-green-500 px-4 py-2 text-xs font-bold uppercase text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-md focus:outline-none active:bg-green-600"
+                  className={clsx(
+                    'w-fit',
+                    'border-gray-500 border text-sm text-gray-500 transition-colors duration-150 hover:bg-gray-500 hover:text-white'
+                  )}
                   type="button"
                   isLoading={isLoading}
                   onClick={onSubmitPoll}

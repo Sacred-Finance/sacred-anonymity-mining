@@ -15,19 +15,18 @@ export type PrimaryButtonProps = {
     needsConnected?: boolean
     needsJoined?: boolean
   }
+  resetClasses?: boolean
 } & ButtonHTMLAttributes<HTMLButtonElement>
 
 export function PrimaryButton({
   children,
   isLoading,
-
   requirements,
   isConnected,
   isJoined,
-
+  resetClasses,
   ...rest
 }: PrimaryButtonProps & ButtonHTMLAttributes<HTMLButtonElement>): JSX.Element {
-
   const { t } = useTranslation()
   const wrappedOnClick = e => {
     if (requirements?.needsConnected) {
@@ -49,9 +48,10 @@ export function PrimaryButton({
       {...rest}
       disabled={rest.disabled || isLoading}
       className={clsx(
-        primaryButtonStyle,
-        rest.className,
-        'flex cursor-pointer items-center gap-3 disabled:cursor-not-allowed disabled:opacity-50'
+        !resetClasses && primaryButtonStyle,
+        !resetClasses && 'flex items-center gap-3  disabled:opacity-50',
+        'cursor-pointer disabled:cursor-not-allowed',
+        rest.className
       )}
       onClick={wrappedOnClick}
     >

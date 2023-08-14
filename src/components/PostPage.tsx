@@ -417,41 +417,41 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
     >
       <CommunityCard community={community} index={0} isAdmin={false} variant={'banner'} />
 
-      {isPostEditable ? 'yes' : 'no'}
-      {+kind == 0 || +kind == 1 ? (
-        <PostItem
-          post={post}
-          address={address as string}
-          isPostEditable={isPostEditable}
-          setIsFormOpen={setIsFormOpen}
-          isFormOpen={isFormOpen}
-          voteForPost={voteForPost}
-          showDescription={true}
-          editor={
-            <NewPostForm
-              editorId={postInstance.specificPostId(postId)}
-              description={tempPostDescription || post?.description}
-              setDescription={setTempPostDescription}
-              handleSubmit={saveEditedPost}
-              editorReference={postEditorRef}
-              setTitle={setTempPostTitle}
-              resetForm={() => {
-                setTempPostDescription(null)
-                setTempPostTitle('')
-              }}
-              isEditable={isPostEditable}
-              isReadOnly={false}
-              isSubmitting={isLoading}
-              title={tempPostTitle || post?.title}
-              itemType={'post'}
-              handlerType={'edit'}
-              formVariant={'default'}
-            />
-          }
-        />
+      {kind < 2 ? (
+          <PostItem
+              post={post}
+              address={address as string}
+              isPostEditable={isPostEditable}
+              setIsFormOpen={setIsFormOpen}
+              isFormOpen={isFormOpen}
+              voteForPost={voteForPost}
+              showDescription={true}
+              editor={
+                  <NewPostForm
+                      editorId={postInstance.specificPostId(postId)}
+                      description={tempPostDescription || post?.description}
+                      setDescription={setTempPostDescription}
+                      handleSubmit={saveEditedPost}
+                      editorReference={postEditorRef}
+                      setTitle={setTempPostTitle}
+                      resetForm={() => {
+                          setTempPostDescription(null)
+                          setTempPostTitle('')
+                      }}
+                      isEditable={isPostEditable}
+                      isReadOnly={false}
+                      isSubmitting={isLoading}
+                      title={tempPostTitle || post?.title}
+                      itemType={'post'}
+                      handlerType={'edit'}
+                      formVariant={'default'}
+                  />
+              }
+          />
       ) : (
         <PollItem key={post.id} voteForPost={voteForPost} address={address} post={post} />
       )}
+
 
       <NewPostForm
         editorId={`post_comment${groupId}`}
@@ -468,6 +468,9 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
         itemType={'comment'}
         handlerType={'new'}
         formVariant={'default'}
+        submitButtonText={t('button.comment')}
+        placeholder={t('placeholder.comment')}
+        openFormButtonText={t('button.comment')}
       />
 
       {sortedCommentsData.length === 0 && <NoComments />}

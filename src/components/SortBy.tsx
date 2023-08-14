@@ -6,7 +6,7 @@ export type SortByOption = 'highest' | 'lowest' | 'controversial' | 'newest' | '
 
 interface SortByProps {
   onSortChange: (sortBy: SortByOption) => void
-  targetType: 'comments' | 'posts'
+  targetType: 'comments' | 'posts' | 'polls'
 }
 
 const SortBy: React.FC<SortByProps> = ({ onSortChange, targetType }) => {

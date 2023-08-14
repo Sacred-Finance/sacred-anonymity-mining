@@ -9,14 +9,14 @@ type PostData = {
     created_at: string,
 };
 
-const DiscoursePost = ({ postId }: { postId: number }) => {
+export const DiscoursePostContent = ({ postId }: { postId: number }) => {
     const [postData, setPostData] = useState<PostData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchPost = async () => {
             try {
-                const response = await axios.get(`http://localhost:3000/api/discourse/${postId}`);
+                const response = await axios.get(`/api/discourse/${postId}`);
                 setPostData(response.data.post_stream.posts[0]);
                 setIsLoading(false);
             } catch (error) {
@@ -46,4 +46,3 @@ const DiscoursePost = ({ postId }: { postId: number }) => {
     );
 };
 
-export default DiscoursePost;
