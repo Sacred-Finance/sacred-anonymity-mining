@@ -1,7 +1,7 @@
 import { useActiveUser, useUsers } from '@/contexts/CommunityProvider'
 import { createPost, votePoll } from '@/lib/api'
 import { getGroupWithPostData } from '@/lib/fetcher'
-import { ItemCreationRequest, PollRequestStruct, ReputationProofStruct } from '@/lib/model'
+import { ItemCreationRequest, PollRequestStruct, PostContent, ReputationProofStruct } from '@/lib/model'
 import { UnirepUser } from '@/lib/unirep'
 import { createNote, getBytes32FromIpfsHash, hashBytes, hashBytes2, uploadIPFS } from '@/lib/utils'
 import { Group } from '@semaphore-protocol/group'
@@ -16,7 +16,7 @@ export const usePoll = ({ groupId }) => {
   const users = useUsers()
   const activeUser = useActiveUser({ groupId })
   const createPoll = async (
-    message: string,
+    content: PostContent,
     pollType: number,
     duration: number, //Hour
     answers: string[],
@@ -27,7 +27,7 @@ export const usePoll = ({ groupId }) => {
   ): Promise<any> => {
     try {
       let currentDate = new Date()
-      const _message = currentDate.getTime() + '#' + message
+      const _message = currentDate.getTime() + '#' + JSON.stringify(content)
   
       const cid = await uploadIPFS(_message)
       if (!cid) {
