@@ -6,6 +6,10 @@ import { PollType } from '@/lib/model'
 import { usePoll } from '@/hooks/usePoll'
 import { toast } from 'react-toastify'
 import { PrimaryButton } from './buttons'
+import dynamic from 'next/dynamic'
+const Editor = dynamic(() => import('./editor-js/Editor'), {
+  ssr: false,
+})
 
 interface CreatePollUIProps {
   groupId: string
@@ -14,6 +18,7 @@ interface CreatePollUIProps {
 const CreatePollUI = ({ groupId }: CreatePollUIProps) => {
   const [showModal, setShowModal] = React.useState(false)
   const [title, setTitle] = React.useState('Do you like this poll?')
+  const [description, setDescription] = React.useState(null)
   const [pollType, setPollType] = React.useState(0)
   const [duration, setDuration] = React.useState(168)
   const [rateScaleFrom, setRateScaleFrom] = React.useState(0)
@@ -45,7 +50,10 @@ const CreatePollUI = ({ groupId }: CreatePollUIProps) => {
     setLoading(true)
     try {
       await createPoll(
-        title,
+        {
+          title,
+          description,
+        },
         pollType,
         duration,
         options,
@@ -132,6 +140,20 @@ const CreatePollUI = ({ groupId }: CreatePollUIProps) => {
                       type="text"
                       value={title}
                       onChange={e => setTitle(e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <Editor
+                      divProps={{
+                        className: clsx('z-50',),
+                      }}
+                      data={description}
+                      // editorRef={editorReference}
+                      onChange={setDescription}
+                      readOnly={false}
+                      placeholder={'Poll Description'}
+                      holder={`create-poll`}
                     />
                   </div>
 

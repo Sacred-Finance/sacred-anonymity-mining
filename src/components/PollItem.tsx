@@ -13,6 +13,7 @@ import { usePoll } from '@/hooks/usePoll'
 import { toast } from 'react-toastify'
 import { CircularLoader } from './JoinCommunityButton'
 import clsx from 'clsx'
+import EditorJsRenderer from './editor-js/EditorJSRenderer'
 
 interface PollItemProps {
   post: Item
@@ -140,9 +141,9 @@ const PollItem = ({ post, address, voteForPost }: PollItemProps) => {
           </div>
         </div>
         <div className="border-t bg-gray-100 px-4 py-2 text-black">
-          {/* {showDescription && !isFormOpen && postId && (
+          { postId && (
             <EditorJsRenderer data={post.description} onlyPreview={isPreview} />
-          )} */}
+          )}
           {isFetching ? (
             <CircularLoader className="m-auto mt-3 w-4 text-black" />
           ) : (
