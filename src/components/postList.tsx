@@ -12,6 +12,8 @@ import _ from 'lodash'
 import { useTranslation } from 'react-i18next'
 import { Item } from '@/types/contract/ForumInterface'
 import PollItem from './PollItem'
+import SummaryButton from "@components/buttons/AIPostSummaryButton";
+import {OutputDataToMarkDown} from "@components/Discourse/OutputDataToMarkDown";
 
 export const PostList = ({ posts, voteForPost, handleSortChange, editor = undefined, showFilter }) => {
   const { address } = useAccount()
@@ -153,6 +155,8 @@ export const PostItem = ({
           <span className="font-bold text-gray-700">{downvote}</span>
         </div>
       </div>
+
+      <SummaryButton postData={post.description} />
     </div>
   )
 }

@@ -9,6 +9,8 @@ declare module 'editorjs-html' {
         parse(data: OutputData): Array<string | JSX.Element>;
     }
 
+
+
     const editorJsHtml: (options?: EditorJsHtmlOptions) => EditorJsHtml;
     export default editorJsHtml;
 }

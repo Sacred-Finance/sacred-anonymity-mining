@@ -44,6 +44,8 @@ export const postHandler = (res: NextApiResponse) => async (url: string, body: a
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
         'Accept': '*/*',
         'X-Requested-With': 'XMLHttpRequest',
+        // 'Access-Control-Allow-Origin': '*',
+        // 'Origin': 'http://localhost:3000',
       },
     })
 
