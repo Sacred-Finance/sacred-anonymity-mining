@@ -180,7 +180,7 @@ export const NewPostForm = ({
               </>
             </div>
 
-            <div className="mt-4 flex justify-between">
+            <div className="mt-8 flex justify-between">
               <CancelButton
                 className={clsx(c?.cancelButton)}
                 onClick={() => {

@@ -10,6 +10,8 @@ import { motion, useAnimation } from 'framer-motion'
 import { FingerPrintIcon, HandThumbDownIcon, HandThumbUpIcon } from '@heroicons/react/20/solid'
 import { PrimaryButton } from '@components/buttons'
 import { useFetchReplies } from '@/hooks/useFetchReplies'
+import SummaryButton from "@components/buttons/AIPostSummaryButton";
+import {OutputDataToHTML} from "@components/Discourse/OutputDataToMarkDown";
 
 const TopicPosts = ({ topic, onPageChange }: { topic: Topic; onPageChange: (newPage: number) => void }) => {
   const postRefs = useRef<{ [key: number]: React.RefObject<HTMLDivElement> }>({})
@@ -169,6 +171,8 @@ const RenderPost = ({ post, postRefs, setPostsInView, controls, onPageChange, se
             onPageChange={onPageChange}
             setTargetPostNumber={setTargetPostNumber}
           />
+          <SummaryButton postData={post.cooked} />
+
           <PostContent post={post} />
           <div className={'mt-4 flex w-full justify-between'}>
             <div />

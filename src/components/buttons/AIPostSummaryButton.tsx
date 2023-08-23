@@ -1,18 +1,18 @@
 import React, { useState } from 'react'
 import axios from 'axios'
 import { CircularLoader } from '@components/JoinCommunityButton'
-import { EyeIcon, SparklesIcon } from '@heroicons/react/20/solid'
+import { SparklesIcon } from '@heroicons/react/20/solid'
 import EditorJsRenderer from '@components/editor-js/EditorJSRenderer'
-import { OutputData } from '@editorjs/editorjs'
-const editorJsHtml = require('editorjs-html')
-const EditorJsToHtml = editorJsHtml()
+import clsx from 'clsx'
 interface SummaryButtonProps {
   postData: string
+  postTitle?: string
 }
 
-const SummaryButton: React.FC<SummaryButtonProps> = ({ postData }) => {
+const SummaryButton: React.FC<SummaryButtonProps> = ({ postData, postTitle }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [summary, setSummary] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const [showModal, setShowModal] = useState(false)
 
   const fetchSummary = async () => {
@@ -21,10 +21,9 @@ const SummaryButton: React.FC<SummaryButtonProps> = ({ postData }) => {
 
     try {
       const response = await axios.post('/api/gpt-server/summary', { text: postData })
-      setSummary(response.data.summary)
+      setSummary(response.data.html)
     } catch (error) {
-      console.error('Error fetching summary:', error)
-      setSummary('Error fetching summary')
+      setError('Error fetching summary')
     } finally {
       setIsLoading(false)
       setShowModal(true) // Show modal once fetched
@@ -47,13 +46,21 @@ const SummaryButton: React.FC<SummaryButtonProps> = ({ postData }) => {
       <button
         onClick={summary ? toggleModal : fetchSummary}
         disabled={isLoading}
-        className="m-1 flex items-center gap-2 rounded px-2 py-1 text-blue-500 outline outline-2  outline-blue-500 hover:bg-blue-600 hover:text-white focus:outline-none"
+        className={clsx(
+          'm-1 flex items-center gap-2 rounded px-2 py-1 text-blue-500 outline outline-2  outline-blue-500 hover:bg-blue-600 hover:text-white focus:outline-none',
+          summary ? 'bg-blue-300 text-white' : ''
+        )}
       >
-        Summary {isLoading ? <CircularLoader /> : <SparklesIcon height={20} />}
+        Summary{' '}
+        {isLoading ? (
+          <CircularLoader />
+        ) : (
+          <SparklesIcon className={clsx('h-5 w-5', summary ? 'text-white' : 'text-blue-500')} height={20} />
+        )}
       </button>
 
       {showModal && (
-        <div className="fixed inset-0  z-50 flex justify-center  bg-black  bg-opacity-50">
+        <div className="fixed inset-0 z-50  flex items-center justify-center  bg-black  bg-opacity-50">
           <div
             className="relative w-1/2  overflow-y-auto rounded-lg bg-white p-8 text-center"
             onClick={e => {
@@ -63,8 +70,17 @@ const SummaryButton: React.FC<SummaryButtonProps> = ({ postData }) => {
             <button onClick={toggleModal} className="absolute right-2 top-2 text-gray-400 hover:text-gray-600">
               Close
             </button>
-            <h4 className="mb-4 text-lg font-semibold">Summary:</h4>
-            <EditorJsRenderer data={summary} onlyPreview={false} />
+            <span className={'text-xl font-bold '}>{!postTitle ? 'Summary' : postTitle}</span>
+            <br />
+            <br />
+            {error && (
+              <>
+                <div className="text-red-500">{error}</div>
+                <div className="text-gray-500">Please try again later.</div>
+              </>
+            )}
+
+            <EditorJsRenderer data={summary ? summary : 'Loading summary...'} isHtml={true} />
           </div>
         </div>
       )}

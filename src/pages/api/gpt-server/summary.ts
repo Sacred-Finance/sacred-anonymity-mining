@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import {postHandler} from "@pages/api/discourse/helper";
+import { postHandler } from '@pages/api/discourse/helper'
 
 export enum Template {
   Chat = 'Chat',
@@ -22,16 +22,17 @@ export enum Template {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
-    const {text} = req.body
+    console.log('request received', req.body)
+    const { text } = req.body
     if (!text) {
-      return res.status(400).json({error: 'Text is required'})
+      console.log('no post data')
+      return res.status(400).json({ error: 'Text is required' })
     }
 
     const url = `${process.env.NEXT_LOGOS_AI_API_URL}/analysis`
-    const response = await postHandler(res)(url, {summary: text, mode: Template.Summarize})
+    return await postHandler(res)(url, { input: text, mode: Template.Summarize })
 
     // return response
-
   } else {
     // Handle methods other than POST
     res.setHeader('Allow', ['POST'])

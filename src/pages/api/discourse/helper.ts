@@ -37,18 +37,15 @@ export const getHandler =
 
 export const postHandler = (res: NextApiResponse) => async (url: string, body: any) => {
   try {
-    const formattedBody = qs.stringify(body)
-    const response = await axios.post(url, formattedBody, {
+    const response = await axios.post(url, body, {
       headers: {
         ...discourseAuthenticationHeaders().headers,
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        'Accept': '*/*',
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Accept': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
-        // 'Access-Control-Allow-Origin': '*',
-        // 'Origin': 'http://localhost:3000',
+        'Origin': 'http://localhost:3000',
       },
     })
-
     res.status(200).json(response.data)
   } catch (error) {
     res.status(500).json({ error: error.message })
