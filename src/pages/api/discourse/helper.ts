@@ -37,7 +37,7 @@ export const getHandler =
 
 export const postHandler = (res: NextApiResponse) => async (url: string, body: any) => {
   try {
-    const response = await axios.post(url, body, {
+    const response = await axios.post(url, JSON.stringify(body), {
       headers: {
         ...discourseAuthenticationHeaders().headers,
         'Content-Type': 'application/json; charset=UTF-8',

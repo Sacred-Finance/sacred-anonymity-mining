@@ -10,8 +10,8 @@ import { motion, useAnimation } from 'framer-motion'
 import { FingerPrintIcon, HandThumbDownIcon, HandThumbUpIcon } from '@heroicons/react/20/solid'
 import { PrimaryButton } from '@components/buttons'
 import { useFetchReplies } from '@/hooks/useFetchReplies'
-import SummaryButton from "@components/buttons/AIPostSummaryButton";
-import {OutputDataToHTML} from "@components/Discourse/OutputDataToMarkDown";
+import SummaryButton from '@components/buttons/AIPostSummaryButton'
+import { OutputDataToHTML } from '@components/Discourse/OutputDataToMarkDown'
 
 const TopicPosts = ({ topic, onPageChange }: { topic: Topic; onPageChange: (newPage: number) => void }) => {
   const postRefs = useRef<{ [key: number]: React.RefObject<HTMLDivElement> }>({})
@@ -24,7 +24,6 @@ const TopicPosts = ({ topic, onPageChange }: { topic: Topic; onPageChange: (newP
     const filteredPosts = topic.post_stream.posts.filter(post => !post.hidden && !post.deleted_at)
     setPosts(filteredPosts)
   }, [topic])
-
 
   const addReplyToPosts = (newPost: Topic['post_stream']['posts'][0]) => {
     setPosts(posts => [...posts, newPost])
@@ -52,7 +51,6 @@ const TopicPosts = ({ topic, onPageChange }: { topic: Topic; onPageChange: (newP
   return (
     <div className="relative flex w-full">
       <div className="topic-post relative flex w-full flex-col gap-4">
-
         {postsWithReplies?.map(post => (
           <RenderPost
             key={post.id}
@@ -124,7 +122,15 @@ const PostContent = ({ post }) => (
     )}
   </div>
 )
-const RenderPost = ({ post, postRefs, setPostsInView, controls, onPageChange, setTargetPostNumber, addReplyToPosts: addReplyToPosts }) => {
+const RenderPost = ({
+  post,
+  postRefs,
+  setPostsInView,
+  controls,
+  onPageChange,
+  setTargetPostNumber,
+  addReplyToPosts: addReplyToPosts,
+}) => {
   if (!postRefs.current[post.post_number]) {
     postRefs.current[post.post_number] = React.createRef<HTMLDivElement>()
   }
@@ -171,14 +177,16 @@ const RenderPost = ({ post, postRefs, setPostsInView, controls, onPageChange, se
             onPageChange={onPageChange}
             setTargetPostNumber={setTargetPostNumber}
           />
-          <SummaryButton postData={post.cooked} />
 
           <PostContent post={post} />
-          <div className={'mt-4 flex w-full justify-between'}>
-            <div />
-            <ReplyToPost post={post} addReplyToPosts={addReplyToPosts} />
+          <div className={' mt-4 mx-4 flex w-full justify-between'}>
+            <SummaryButton postData={post.cooked} />
+          </div>
+          <div className={'wrap mt-4 flex w-full justify-between'}>
+            <ReplyToPost post={post} addReplyToPosts={addReplyToPosts} /> &nbsp;
           </div>
         </div>
+
         <PostFooter post={post} />
       </div>
     </motion.div>
@@ -204,7 +212,6 @@ const PostFooter = ({ post }) => (
     </div>
   </div>
 )
-
 
 const LinkedPostButton = ({ postNumber, onPageChange, setTargetPostNumber }) => (
   <button

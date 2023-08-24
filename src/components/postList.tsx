@@ -156,7 +156,9 @@ export const PostItem = ({
         </div>
       </div>
 
-      <SummaryButton postData={OutputDataToHTML(post.description)} postTitle={title} />
+      <div className={'m-1'}>
+        <SummaryButton postData={OutputDataToHTML(post.description)} postTitle={title} />
+      </div>
     </div>
   )
 }
