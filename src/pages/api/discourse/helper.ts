@@ -43,7 +43,6 @@ export const postHandler = (res: NextApiResponse) => async (url: string, body: a
         'Content-Type': 'application/json; charset=UTF-8',
         'Accept': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
-        'Origin': 'http://localhost:3000',
       },
     })
     res.status(200).json(response.data)
