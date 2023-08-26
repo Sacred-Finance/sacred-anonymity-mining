@@ -71,7 +71,7 @@ export const CommunityCard = ({
               <CommunityCardBody />
             </Link>
             <div className={'flex-1'}/>
-            {!user && <CommunityCardFooter />}
+            {<CommunityCardFooter />}
           </div>
         </CommunityContext.Provider>
       </div>

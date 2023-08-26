@@ -20,7 +20,6 @@ export const CommunityCardHeader = ({
 
   // Validate banner
   useEffect(() => {
-    console.log(community?.groupDetails)
     if (!community?.groupDetails.bannerCID) return
     const image = new Image()
     image.src = community?.groupDetails.bannerCID
