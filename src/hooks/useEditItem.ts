@@ -39,7 +39,7 @@ export const useEditItem = (postId, groupId, isAdminOrModerator, setIsLoading) =
     if (itemType !== 0 && itemType !== 1 && itemType !== 2) return toast.error(t('alert.deleteFailed'))
     if (validateRequirements() !== true) return
 
-    if (isAdminOrModerator || true) {
+    if (isAdminOrModerator) {
       let currentDate = new Date()
       const post = JSON.stringify(content)
       const message = currentDate.getTime().toString() + '#' + post
