@@ -1,20 +1,24 @@
-import { useAccount, useContract, useContractWrite, useProvider } from 'wagmi'
+import { useAccount, useContractWrite, useProvider } from 'wagmi'
 import { ForumContractAddress } from '../constant/const'
 import ForumABI from '../constant/abi/Forum.json'
 import { polygonMumbai } from 'wagmi/chains'
-import { getBytes32FromIpfsHash, uploadIPFS } from '../lib/utils'
+import { generateGroth16Proof, getBytes32FromIpfsHash, uploadIPFS } from '../lib/utils'
+import { toast } from 'react-toastify'
+import { useTranslation } from 'react-i18next'
+import { useUserIfJoined } from '@/contexts/CommunityProvider'
+import { Post } from '@/lib/post'
+import { CommentClass } from '@/lib/comment'
+import { User } from '@/lib/model'
+import { Identity } from '@semaphore-protocol/identity';
+import { mutate } from 'swr'
+import { getGroupWithPostAndCommentData } from '@/lib/fetcher'
 
-// TODO: when we need to implement edit item by admin / moderator
-
-const useEditItemAsAdminOrModerator = (itemId, itemType, content) => {
-  const provider = useProvider({ chainId: polygonMumbai.id })
+export const useEditItem = (postId, groupId, isAdminOrModerator, setIsLoading) => {
   const { address } = useAccount()
-  const forumContract = useContract({
-    address: ForumContractAddress,
-    abi: ForumABI.abi,
-    signerOrProvider: provider,
-  })
-  const editItem = useContractWrite({
+  const member = useUserIfJoined(groupId)
+  const postInstance = new Post(postId, groupId)
+  const commentInstance = new CommentClass(groupId, postId, null)
+  const { writeAsync } = useContractWrite({
     address: ForumContractAddress as `0x${string}`,
     abi: ForumABI.abi,
     functionName: 'editItem',
@@ -22,26 +26,66 @@ const useEditItemAsAdminOrModerator = (itemId, itemType, content) => {
     onSettled: (data, error) => {},
     onSuccess: async (data, variables) => {},
   })
-  const sendEditPostTransaction = async postContent => {
-    const item = forumContract.itemAt(itemId)
-    let currentDate = new Date()
-    const post = JSON.stringify(postContent)
-    const message = currentDate.getTime().toString() + '#' + post
-    console.log(`Editing your anonymous post...`)
-    let cid
-    try {
-      cid = await uploadIPFS(message)
-      if (!cid) {
-        throw Error('Upload to IPFS failed')
-      }
+  const { t } = useTranslation();
 
-      console.log(`IPFS CID: ${cid}`)
-      const signal = getBytes32FromIpfsHash(cid)
-    } catch (error) {
-      // this.undoNewPost(groupId, cid);
-      throw error
-    }
-    editItem.write()
+  const validateRequirements = () => {
+    if (!address) return toast.error(t('toast.error.notLoggedIn'), { type: 'error', toastId: 'min' })
+    if (!member) return toast.error(t('toast.error.notJoined'), { type: 'error', toastId: 'min' })
+
+    return true
   }
-  return { ...editItem }
+
+  const editItem = async (content, itemId, itemType, note) => {
+    if (itemType !== 0 && itemType !== 1 && itemType !== 2) return toast.error(t('alert.deleteFailed'))
+    if (validateRequirements() !== true) return
+
+    if (isAdminOrModerator || true) {
+      let currentDate = new Date()
+      const post = JSON.stringify(content)
+      const message = currentDate.getTime().toString() + '#' + post
+      console.log(`Editing your anonymous post...`)
+      let cid
+      try {
+        cid = await uploadIPFS(message)
+        if (!cid) {
+          throw Error('Upload to IPFS failed')
+        }
+        console.log(`IPFS CID: ${cid}`)
+        const signal = getBytes32FromIpfsHash(cid);
+        const userPosting = new Identity(`${address}_${groupId}_${member?.name}`)
+        let input = {
+          trapdoor: userPosting.getTrapdoor(),
+          note: BigInt(note),
+          nullifier: userPosting.getNullifier(),
+        }
+    
+        const { a, b, c } = await generateGroth16Proof(
+          input,
+          '/circuits/VerifyOwner__prod.wasm',
+          '/circuits/VerifyOwner__prod.0.zkey'
+        )
+        return writeAsync({
+          recklesslySetUnpreparedArgs: [a, b, c, itemId, signal],
+        }).then(async (value) => {
+          return await value.wait().then(async() => {
+            await mutate(getGroupWithPostAndCommentData(groupId, postId))
+          })
+        })
+      } catch (error) {
+        // this.undoNewPost(groupId, cid);
+        throw error
+      }
+    } else {
+      return itemType === 0 ?? itemType === 2
+        ? postInstance?.edit(        
+          content,
+          address,
+          itemId,
+          member as User,
+          groupId,
+          setIsLoading)
+        : commentInstance?.edit(content, address, itemId, member as User, groupId, setIsLoading)
+    }
+  }
+  return { editItem }
 }

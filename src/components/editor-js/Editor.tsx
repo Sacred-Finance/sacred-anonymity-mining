@@ -74,7 +74,7 @@ const EditorBlock = ({ data, onChange, holder, className, divProps = {}, editorR
         placeholder: placeholder || 'Start writing your post...',
         data,
         async onChange(api, event) {
-          if (readOnly) return
+          // if (readOnly) return
           const data = await api.saver.save()
           onChange(data)
         },
