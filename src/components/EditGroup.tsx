@@ -28,9 +28,8 @@ import { CommunityId } from '@/contexts/CommunityProvider'
 
 interface EditGroupProps {
   group: Group
-  isAdmin: boolean
 }
-export function EditGroup({ group, isAdmin }: EditGroupProps) {
+export function EditGroup({ group }: EditGroupProps) {
   const router = useRouter()
   const { address } = useAccount()
   const {} = useProvider()
@@ -165,8 +164,11 @@ export function EditGroup({ group, isAdmin }: EditGroupProps) {
       className={clsx('relative mx-auto mb-64 grid h-screen w-full max-w-screen-2xl  grid-cols-1 gap-8 sm:p-8 md:p-24')}
     >
       <div className="flex flex-col space-y-4 sm:col-span-full md:col-span-6 lg:col-span-6">
-        <div className="flex items-center justify-between py-4">
-          <h1 className="text-2xl font-semibold text-gray-700">{t('editCommunity')}</h1>
+        <div className="flex flex-row items-center justify-between py-4">
+          <h1 className="flex text-2xl font-semibold text-gray-700">{t('editCommunity')}</h1>
+          <div>
+            <RemoveGroup groupId={group.id} hidden={false} />
+          </div>
         </div>
 
         <div className="flex flex-col space-y-4">
@@ -296,16 +298,6 @@ export function EditGroup({ group, isAdmin }: EditGroupProps) {
             >
               {t('button.confirm-edit')}
             </PrimaryButton>
-          </div>
-        </div>
-      )}
-
-      {/* clarify what admins can do */}
-      {isAdmin && (
-        <div className="flex flex-col space-y-4 sm:col-span-full md:col-span-6 lg:col-span-6">
-          <div className="flex flex-col space-y-4">
-            <label className="text-lg text-gray-700">Delete Community</label>
-            <RemoveGroup onClick={() => write?.({ recklesslySetUnpreparedArgs: [group.id] })} hidden={false} />
           </div>
         </div>
       )}

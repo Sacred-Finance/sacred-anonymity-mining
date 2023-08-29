@@ -1,6 +1,7 @@
 import { JoinCommunityButton } from '../JoinCommunityButton'
 import React from 'react'
 import { useLocalCommunity } from './CommunityCard'
+import RemoveGroup from '../RemoveGroup'
 
 export const CommunityCardFooter = () => {
   const community = useLocalCommunity()
@@ -10,6 +11,9 @@ export const CommunityCardFooter = () => {
 
   return (
     <div className="flex items-center justify-end rounded-b-lg bg-white p-4 dark:bg-gray-900 ">
+      <div className='mr-auto'>
+        <RemoveGroup groupId={community.id}  hidden={false} />
+      </div>
       <div>
       {community ? (
         <JoinCommunityButton community={community} hideIfJoined={community.variant === 'banner'}  />
