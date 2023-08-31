@@ -5,11 +5,14 @@ import { useLoaderContext } from '../contexts/LoaderContext'
 import { setCacheAtSpecificPath } from '../lib/redis'
 import { CommunityId, useCommunityContext } from '../contexts/CommunityProvider'
 import { toast } from 'react-toastify'
+import { useRouter } from 'next/router'
 
 export const useRemoveGroup = (groupId: CommunityId) => {
   const { dispatch, state } = useCommunityContext()
 
   const { isLoading, setIsLoading } = useLoaderContext()
+
+  const router = useRouter();
 
   return useContractWrite({
     address: ForumContractAddress as `0x${string}`,
@@ -45,7 +48,12 @@ export const useRemoveGroup = (groupId: CommunityId) => {
         draggable: true,
         progress: undefined,
       })
-      setIsLoading(false)
+      setIsLoading(false);
+      if (router.pathname === '/') {
+        router.reload();
+      } else {
+        router.push('/');
+      }
     },
   })
 }

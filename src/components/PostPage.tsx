@@ -2,8 +2,6 @@ import { useActiveUser, useCommunityContext, useUserIfJoined } from '@/contexts/
 import { useAccount } from 'wagmi'
 import { useLoaderContext } from '@/contexts/LoaderContext'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
-import { forumContract, ForumContractAddress } from '@/constant/const'
-import ForumABI from '@/constant/abi/Forum.json'
 import { useTranslation } from 'next-i18next'
 import React, { useEffect, useRef, useState } from 'react'
 import { OutputData } from '@editorjs/editorjs'
@@ -17,17 +15,15 @@ import { useItemsSortedByVote } from '@/hooks/useItemsSortedByVote'
 import { NewPostForm } from '@components/NewPostForm'
 import { motion } from 'framer-motion'
 import dynamic from 'next/dynamic'
-import { useRemoveItemFromForumContract } from '@/hooks/useRemoveItemFromForumContract'
 import { CommunityCard } from '@components/CommunityCard/CommunityCard'
 import { PostItem } from './postList'
 import { NoComments } from './NoPosts'
-import { useUnirepSignUp } from '@/hooks/useUnirepSignup'
-import { User } from '@/lib/model'
 
 import clsx from 'clsx'
 import { CancelButton, PrimaryButton } from '@components/buttons'
-import PollItem from './PollItem'
 import ReputationCard from "@components/ReputationCard";
+import DeleteItemButton from './buttons/DeleteItemButton'
+import { useEditItem } from '@/hooks/useEditItem'
 
 const Editor = dynamic(() => import('@/components/editor-js/Editor'), {
   ssr: false,
@@ -62,21 +58,16 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
   const { isLoading, setIsLoading } = useLoaderContext()
 
   const { isAdmin, isModerator, fetchIsAdmin, fetchIsModerator } = useCheckIfUserIsAdminOrModerator(address)
+  const { editItem } = useEditItem(postId, groupId, isAdmin || isModerator, setIsLoading)
 
   const canDelete = isAdmin || isModerator
   //
   useEffect(() => {
     fetchIsAdmin()
-  }, [groupId, postId])
+    fetchIsModerator()
+  }, [groupId, postId, address])
 
-  const { data, write } = useRemoveItemFromForumContract(
-    ForumContractAddress,
-    ForumABI,
-    forumContract,
-    postInstance,
-    commentInstance,
-    setIsLoading
-  )
+
 
   const { t } = useTranslation()
 
@@ -95,20 +86,25 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
 
   const identityCommitment = member ? BigInt(member?.identityCommitment?.toString()) : null
 
+  const { validationResult, checkUserBalance } = useValidateUserBalance(community, address)
+
+
   useEffect(() => {
     if (member && identityCommitment && comments) {
       checkIfCommentsAreEditable()
+    } else {
+      setIsPostEditable(canDelete)
     }
-  }, [member, comments, identityCommitment])
+  }, [member, comments, identityCommitment, canDelete])
 
   useEffect(() => {
     // check if checkIfPostIsEditable
     if (member && identityCommitment && post) {
       checkIfPostIsEditable(post.note, post.contentCID)
+    } else {
+      setIsPostEditable(canDelete)
     }
-  }, [member, post, identityCommitment])
-
-  const { validationResult, checkUserBalance } = useValidateUserBalance(community, address)
+  }, [member, post, identityCommitment, canDelete])
 
   const checkIfPostIsEditable = async (note, contentCID) => {
     const userPosting = new Identity(`${address}_${groupId}_${member?.name}`)
@@ -116,46 +112,13 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
     const generatedNoteAsBigNumber = BigNumber.from(generatedNote).toString()
     const noteBigNumber = BigNumber.from(note).toString()
 
-    setIsPostEditable(noteBigNumber === generatedNoteAsBigNumber)
+    setIsPostEditable(noteBigNumber === generatedNoteAsBigNumber || canDelete)
   }
 
-  const onClickEditPost = async () => {
-    const hasSufficientBalance = await checkUserBalance()
-    if (!hasSufficientBalance) return
-  }
-
-  const deleteItem = async (itemId, itemType: number) => {
-    if (itemType !== 0 && itemType !== 1) return toast.error(t('alert.deleteFailed'))
-    if (validateRequirements() !== true) return
-    setIsLoading(true)
-    await fetchIsAdmin()
-    if (canDelete) {
-      write({
-        recklesslySetUnpreparedArgs: [+itemId],
-      })
-    } else {
-      try {
-        const { status } =
-          itemType === 0
-            ? await postInstance?.delete(address, itemId, users, member, groupId, setIsLoading)
-            : await commentInstance?.delete(address, itemId, users, member, groupId, setIsLoading)
-        if (status === 200) {
-          toast.success(t('alert.deleteSuccess'))
-          if (itemType === 0) {
-            // navigate('../../', { relative: 'path' })
-          }
-          setIsLoading(false)
-        }
-      } catch (error) {
-        console.log(error)
-        toast.error(t('alert.deleteFailed'))
-        if (itemType === 0) {
-          // navigate('../../', { relative: 'path' })
-        }
-        setIsLoading(false)
-      }
-    }
-  }
+  // const onClickEditPost = async () => {
+  //   const hasSufficientBalance = await checkUserBalance()
+  //   if (!hasSufficientBalance) return
+  // }
 
   const clearInput = () => {
     setComment({
@@ -255,7 +218,7 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
         const generatedNote = await createNote(userPosting)
         const generatedNoteAsBigNumber = BigNumber.from(generatedNote).toString()
 
-        if (generatedNoteAsBigNumber === noteBigNumber) {
+        if (generatedNoteAsBigNumber === noteBigNumber || canDelete) {
           setEditableComments(prev => [...prev, c.id])
           updateCommentMap(c.id, {
             comment: { ...(commentsMap[c.id]?.comment || c) },
@@ -275,7 +238,7 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
 
   const setOnEditCommentContent = (comment, content) => {
     updateCommentMap(comment.id, {
-      comment: { ...comment, content },
+      comment: { ...comment, ...content },
     })
   }
 
@@ -290,19 +253,14 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
     setIsLoading(true)
 
     try {
-      const { status } = await postInstance.edit(
+      await editItem(
         { title: tempPostTitle, description: tempPostDescription },
-        address,
         post.id,
-        member,
-        groupId,
-        setIsLoading
+        +post.kind,
+        post.note
       )
-
-      if (status === 200) {
-        toast.success(t('alert.postEditSuccess'))
-        setIsLoading(false)
-      }
+      toast.success(t('alert.postEditSuccess'))
+      setIsLoading(false)
     } catch (error) {
       console.log(error)
       toast.error(t('alert.editFailed'))
@@ -319,23 +277,14 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
     setIsLoading(true)
 
     try {
-      const { status } = await commentInstance.edit(
-        commentsMap[comment.id]?.comment,
-        address,
-        comment.id,
-        member,
-        groupId,
-        setIsLoading
-      )
-
-      if (status === 200) {
-        toast.success(t('alert.commentEditSuccess'))
-        setIsLoading(false)
-        updateCommentMap(comment.id, {
-          isSaving: false,
-          isEditing: false,
-        })
-      }
+      const commentData = commentsMap[comment.id]?.comment;
+      await editItem(commentData, comment.id, 1, commentData.note)
+      toast.success(t('alert.commentEditSuccess'))
+      setIsLoading(false)
+      updateCommentMap(comment.id, {
+        isSaving: false,
+        isEditing: false,
+      })
     } catch (error) {
       console.log(error)
       toast.error(t('alert.editFailed'))
@@ -379,12 +328,12 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
     const isEditable = editableComments.includes(comment.id)
     const currentCommentMap = commentsMap[comment.id]
     const isEditing = currentCommentMap?.isEditing
-    const commentContent = currentCommentMap?.comment?.content
+    const commentContent = currentCommentMap?.comment
 
     return (
       <div className="mt-3 flex flex-row gap-4">
         {comment.id}
-        {isEditable && !isEditing && <button onClick={() => onClickEditComment(comment)}>{t('button.edit')}</button>}
+        {isEditable && !isEditing && <PrimaryButton className='w-fit text-sm bg-blue-500 hover:bg-blue-600 text-white' onClick={() => onClickEditComment(comment)}>{t('button.edit')}</PrimaryButton>}
         {isEditing && (
           <>
             <CancelButton onClick={() => onClickCancelComment(comment)}>{t('button.cancel')}</CancelButton>
@@ -396,10 +345,8 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
             </PrimaryButton>
           </>
         )}
-        {(currentCommentMap?.isEditable || canDelete) && !isEditing && (
-          <button className="text-small color-[red.500]" onClick={() => deleteItem(comment.id, 1)}>
-            {t('button.delete')}
-          </button>
+        {(isEditable || canDelete) && !isEditing && (
+          <DeleteItemButton itemId={comment.id} itemType={1} groupId={groupId} postId={postId} isAdminOrModerator={canDelete} />
         )}
       </div>
     )
@@ -417,11 +364,9 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
     >
       <ReputationCard/>
       <CommunityCard community={community} index={0} isAdmin={false} variant={'banner'} />
-      {kind < 2 ? (
+      {+kind < 3 && (
           <PostItem
               post={post}
-              address={address as string}
-              isPostEditable={isPostEditable}
               setIsFormOpen={setIsFormOpen}
               isFormOpen={isFormOpen}
               voteForPost={voteForPost}
@@ -450,9 +395,8 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
                         openFormButtonText={t('button.edit')}
                   />
               }
+              isAdminOrModerator={canDelete}
           />
-      ) : (
-        <PollItem key={post.id} voteForPost={voteForPost} address={address} post={post} />
       )}
 
 
