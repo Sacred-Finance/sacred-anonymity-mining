@@ -359,7 +359,7 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
   return (
     <div
       className={clsx(
-        'mx-auto h-screen w-full max-w-screen-2xl space-y-4 overflow-y-auto !text-gray-900 sm:p-8 md:p-24'
+        'mx-auto  w-full max-w-screen-2xl space-y-4  !text-gray-900 sm:p-8 md:p-24'
       )}
     >
       <ReputationCard/>
