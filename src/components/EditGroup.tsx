@@ -74,6 +74,7 @@ export function EditGroup({ group }: EditGroupProps) {
   useEffect(() => {
     if (group.groupDetails.bannerCID) fetchImage(group.groupDetails.bannerCID, 'banner')
     if (group.groupDetails.logoCID) fetchImage(group.groupDetails.logoCID, 'logo')
+    if (group.groupDetails.tags) setTags(group.groupDetails.tags.map(tag => ethers.utils.parseBytes32String(tag)))
     setGroupName(group.name)
     setGroupDescriptionState(group?.groupDetails?.description)
   }, [])
@@ -251,56 +252,57 @@ export function EditGroup({ group }: EditGroupProps) {
         </div>
       </div>
 
-      {previewCard && <div className="fixed inset-0 m-0 h-screen w-screen bg-gray-900/60 " />}
+      {previewCard && <div className="fixed inset-0 m-0 bg-gray-900/60 " />}
       {previewCard && (
-        <div className="absolute inset-0 flex h-fit flex-col items-center justify-center  space-y-8 rounded bg-blue-500 p-10">
-          <h1 className="text-[40px] text-white">Double check your changes!</h1>
-          <div className="flex w-3/4 justify-evenly gap-64">
-            <CommunityContext.Provider value={group}>
-              <div className="w-1/2 shadow-2xl   ">
-                <h4 className="text-[20px] text-white">Before</h4>
-                <CommunityCardHeader />
-                <CommunityCardBody />
-              </div>
-            </CommunityContext.Provider>
+          <div className="absolute inset-0  flex flex-col items-center space-y-8 p-10 rounded">
+            <h1 className="text-4xl font-semibold text-white">Double check your changes!</h1>
+            <div className="flex w-3/4 justify-between space-x-16">
+              <CommunityContext.Provider value={group}>
+                <div className="w-1/2 bg-white p-4 rounded shadow-lg">
+                  <h4 className="text-xl font-medium text-gray-700">Before</h4>
+                  <CommunityCardHeader />
+                  <CommunityCardBody />
+                </div>
+              </CommunityContext.Provider>
 
-            <CommunityContext.Provider
-              value={{
-                ...group,
-                groupDetails: {
-                  ...group?.groupDetails,
-                  logoCID: logoUrl as string,
-                  bannerCID: bannerUrl as string,
-                  description: groupDescriptionState,
-                },
-              }}
-            >
-              <div className="w-1/2 shadow-2xl">
-                <h4 className="text-[20px] text-white">After</h4>
+              <CommunityContext.Provider
+                  value={{
+                    ...group,
+                    groupDetails: {
+                      ...group?.groupDetails,
+                      logoCID: logoUrl as string,
+                      bannerCID: bannerUrl as string,
+                      description: groupDescriptionState,
+                    },
+                  }}
+              >
+                <div className="w-1/2 bg-white p-4 rounded shadow-lg">
+                  <h4 className="text-xl font-medium text-gray-700">After</h4>
+                  <CommunityCardHeader srcBannerOverride={bannerUrl} srcLogoOverride={logoUrl} />
+                  <CommunityCardBody />
+                </div>
+              </CommunityContext.Provider>
+            </div>
+            <div className="flex w-3/4 justify-between">
+              <button
+                  onClick={hidePreview}
+                  className="text-white bg-red-400 hover:bg-red-500 rounded px-4 py-2"
+              >
+                Cancel
+              </button>
+              <PrimaryButton
+                  className={clsx(buttonVariants.solid, 'z-50 border px-4')}
 
-                <CommunityCardHeader srcBannerOverride={bannerUrl} srcLogoOverride={logoUrl} />
-                <CommunityCardBody />
-              </div>
-            </CommunityContext.Provider>
+                  // disabled={isSubmitDisabled}
+                  onClick={submitAllGroupDetails}
+                  isLoading={isSubmitting}
+              >
+                {t('button.confirm-edit')}
+              </PrimaryButton>
+            </div>
           </div>
-          <div className="flex w-3/4 justify-between">
-            <button
-              onClick={hidePreview}
-              className="mb-2 rounded-lg bg-red-400 p-2 text-white hover:bg-red-500 md:mb-0 md:px-4"
-            >
-              Cancel
-            </button>
-            <PrimaryButton
-              className={clsx(buttonVariants.solid, 'z-50 border px-4')}
-              // disabled={isSubmitDisabled}
-              onClick={submitAllGroupDetails}
-              isLoading={isSubmitting}
-            >
-              {t('button.confirm-edit')}
-            </PrimaryButton>
-          </div>
-        </div>
       )}
+
     </div>
   )
 }

@@ -45,6 +45,13 @@ export const CommunityCardBody = () => {
       <CommunityTags community={community} />
       <CommunityChainId community={community} />
       <CommunityRequirements community={community} />
+
+      {community?.variant === 'banner' && (
+        <ItemContainer>
+          <p className="mb-1 font-semibold">Community Description</p>
+          <p className="col-span-auto text-sm">{community?.groupDetails?.description} </p>
+        </ItemContainer>
+      )}
     </div>
   )
 }
