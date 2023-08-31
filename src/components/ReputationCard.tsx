@@ -6,8 +6,8 @@ import { useRouter } from 'next/router'
 import { CircularLoader } from '@components/JoinCommunityButton'
 
 // Tailwind CSS for simplicity
-const CardStyle = 'border border-blue-500 shadow rounded-md p-4 bg-white w-fit'
-const DataTitleStyle = 'text-blue-500 text-left font-bold text-lg flex gap-1 items-center'
+const cardClass = 'border border-blue-500 shadow rounded-md p-4 bg-white w-fit'
+const cardTitleClass = 'text-blue-500 text-left font-bold text-lg flex gap-1 items-center'
 
 const ReputationCard = () => {
   const router = useRouter()
@@ -17,7 +17,8 @@ const ReputationCard = () => {
   const [reputation, setReputation] = useState({
     posRep: 0,
   })
-  const [isLoading, setIsLoading] = useState(true)
+
+  const [isLoading, setIsLoading] = useState(!!user)
 
   const asyncGetReputation = async () => {
     return unirepUser?.fetchReputation?.()
@@ -25,6 +26,7 @@ const ReputationCard = () => {
 
   useEffect(() => {
     if (unirepUser) {
+      setIsLoading(true)
       const interval = setInterval(async () => {
         const reputation = await asyncGetReputation()
         setReputation(reputation)
@@ -48,8 +50,8 @@ const ReputationCard = () => {
 
   if (!reputation) return <div></div>
   return (
-    <div className={CardStyle}>
-      <h2 className={DataTitleStyle}>
+    <div className={cardClass}>
+      <h2 className={cardTitleClass}>
         Your Reputation: {isLoading ? <CircularLoader /> : reputation.posRep || 0} Points{' '}
       </h2>
     </div>
