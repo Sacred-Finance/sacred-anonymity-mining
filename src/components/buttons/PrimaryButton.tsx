@@ -16,6 +16,9 @@ export type PrimaryButtonProps = {
     needsJoined?: boolean
   }
   resetClasses?: boolean
+  endIcon?: React.ReactNode
+  startIcon?: React.ReactNode
+  loadingPosition?: 'start' | 'end'
 } & ButtonHTMLAttributes<HTMLButtonElement>
 
 export function PrimaryButton({
@@ -25,6 +28,7 @@ export function PrimaryButton({
   isConnected,
   isJoined,
   resetClasses,
+  loadingPosition = 'end',
   ...rest
 }: PrimaryButtonProps & ButtonHTMLAttributes<HTMLButtonElement>): JSX.Element {
   const { t } = useTranslation()
@@ -55,7 +59,11 @@ export function PrimaryButton({
       )}
       onClick={wrappedOnClick}
     >
-      {children} {isLoading && <CircularLoader />}
+      {isLoading && loadingPosition === 'start' && <CircularLoader />}
+      {rest.startIcon && !isLoading && loadingPosition === 'start' && rest.startIcon}
+      {children}
+      {rest.endIcon && !isLoading && loadingPosition === 'end' && rest.endIcon}
+      {isLoading && loadingPosition === 'end' && <CircularLoader />}
     </button>
   )
 }

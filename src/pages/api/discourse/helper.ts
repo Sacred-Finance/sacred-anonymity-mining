@@ -37,21 +37,35 @@ export const getHandler =
 
 export const postHandler = (res: NextApiResponse) => async (url: string, body: any) => {
   try {
-    const formattedBody = qs.stringify(body)
-    const response = await axios.post(url, formattedBody, {
+    const response = await axios.post(url, JSON.stringify(body), {
       headers: {
         ...discourseAuthenticationHeaders().headers,
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        'Accept': '*/*',
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Accept': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
       },
-    })
-
-    res.status(200).json(response.data)
+    });
+    res.status(200).json(response.data);
   } catch (error) {
-    res.status(500).json({ error: error.message })
+    res.status(500).json({ error: error.message });
   }
-}
+};
+
+export const gptPostHandler = (res: NextApiResponse) => async (url: string, body: any) => {
+  try {
+    const response = await axios.post(url, JSON.stringify(body), {
+      headers: {
+        'origin': 'https://app.sacredprotocol.com',
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+    });
+    res.status(200).json(response.data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 export function discourseAuthenticationHeaders() {
   return {

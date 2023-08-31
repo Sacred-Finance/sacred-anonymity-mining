@@ -16,6 +16,8 @@ import DeleteItemButton from './buttons/DeleteItemButton'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
 import { Identity } from '@semaphore-protocol/identity'
 import { createNote } from '@/lib/utils'
+import SummaryButton from '@components/buttons/AIPostSummaryButton'
+import { OutputDataToHTML, OutputDataToMarkDown } from '@components/Discourse/OutputDataToMarkDown'
 
 export const PostList = ({ posts, voteForPost, handleSortChange, editor = undefined, showFilter }) => {
   const { address } = useAccount();
@@ -155,7 +157,7 @@ export const PostItem = ({
                   <span className="text-gray-600">0 comments</span>
                 )
               : ''}
-            {(isPostEditable && onPostPage) && <DeleteItemButton isAdminOrModerator={isAdminOrModerator} itemId={post.id} itemType={+post.kind} groupId={groupId} postId={postId} /> } 
+            {(isPostEditable && onPostPage) && <DeleteItemButton isAdminOrModerator={isAdminOrModerator} itemId={post.id} itemType={+post.kind} groupId={groupId} postId={postId} /> }
           </div>
         </div>
       </div>
@@ -181,6 +183,10 @@ export const PostItem = ({
           />
           <span className="font-bold text-gray-700">{downvote}</span>
         </div>
+      </div>
+
+      <div className={'m-1'}>
+        <SummaryButton postData={OutputDataToHTML(post.description)} postTitle={title} />
       </div>
     </div>
   )
