@@ -65,7 +65,7 @@ const Index = () => {
     <div className="relative mb-10 flex flex-col content-center items-center justify-center gap-4 space-y-8">
       <PostToTopic topic={topic as Topic} />
       <Pagination currentPage={currentPage - 1} totalPages={totalPages} onPageChange={handlePageChange} />
-      <div className="relative z-0 mx-auto flex justify-center px-4 sm:w-full md:w-3/4 lg:w-1/2">
+      <div className="relative mx-auto  min-h-screen flex justify-center px-4 sm:w-full md:w-3/4 lg:w-1/2">
         <TopicPosts
           topic={{ ...topic, post_stream: { ...topic?.post_stream, posts } } as Topic}
           onPageChange={handlePageChange}
