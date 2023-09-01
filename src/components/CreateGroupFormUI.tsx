@@ -119,9 +119,11 @@ function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
       requirements: reqMandatory ? tokenRequirements : [],
       bannerFile: bannerFile,
       logoFile: logoFile,
+      tags: tags,
       chainId: reqMandatory ? selectedChain.id : polygonMumbai.id,
       groupDescription,
       note: BigInt(0).toString(),
+
     })
   }
 

@@ -68,18 +68,30 @@ function CreateGroupFormUI({ onCreate }) {
   const [bannerUrl, setBannerUrl] = useState<string | null>(null)
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
 
+  const [tags, setTags] = useState<string[]>([])
+
   const handleNameChange = e => {
     setGroupName(e.target.value)
   }
   const handleDescriptionChange = e => {
     setGroupDescription(e.target.value)
   }
-
+  const handleTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // validate tags
+    try {
+      // spaces should be allowed
+      if (e.target.value.match(/^[a-zA-Z0-9, ]*$/)) {
+        setTags(e.target.value.split(','))
+      }
+    } catch (e) {
+      console.log(e)
+    }
+  }
   const handleSetImage = ({ file, imageType }: HandleSetImage) => {
     const setImage = imageType === 'logo' ? setLogoFile : setBannerFile
     const setUrl = imageType === 'logo' ? setLogoUrl : setBannerUrl
-      setImage(file)
-      setUrl(file ? URL.createObjectURL(file): "")
+    setImage(file)
+    setUrl(file ? URL.createObjectURL(file) : '')
   }
 
   const [selectedChain, setSelectedChain] = useState<Chain>(supportedChains[polygonMumbai.id])
@@ -160,6 +172,7 @@ function CreateGroupFormUI({ onCreate }) {
       bannerFile: bannerFile,
       logoFile: logoFile,
       chainId: reqMandatory ? selectedChain.id : polygonMumbai.id,
+      tags: tags,
       groupDescription,
       note: BigInt(0).toString(),
     })
@@ -197,7 +210,30 @@ function CreateGroupFormUI({ onCreate }) {
           onChange={handleNameChange}
         />
       </div>
-
+      <div className="flex flex-col space-y-4">
+        <label className="text-lg text-gray-700">{t('placeholder.communityTags')}</label>
+        <div className={'flex gap-2'}>
+          {tags.map((tag, index) => (
+            <div key={index}>
+              {tag.trim() && (
+                <span
+                  key={index}
+                  className="rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
+                >
+                  {tag}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+        <input
+          className="rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
+          placeholder={'tag1, tag2, tag3'}
+          type="text"
+          value={tags}
+          onChange={handleTagsChange}
+        />
+      </div>
       <div className="flex flex-col space-y-4">
         <label className="text-lg text-gray-700">{t('placeholder.communityDescription')}</label>
         <textarea
