@@ -213,7 +213,7 @@ export async function editContent(
     return await edit(itemId, signal, note, a, b, c)
       .then(async data => {
         console.log('data', data, this.groupId, itemId)
-        await mutate(getGroupWithPostAndCommentData(this.groupId, itemId))
+        await mutate(getGroupWithPostAndCommentData(this.groupId, this.postId ?? itemId))
         return data
       })
       .catch(err => {

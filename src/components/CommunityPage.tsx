@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { Post } from '@/lib/post'
 import { useActiveUser, useUserIfJoined, useUsers } from '@/contexts/CommunityProvider'
 import { useAccount } from 'wagmi'
@@ -15,9 +15,6 @@ import clsx from 'clsx'
 import { NewPostForm } from '@components/NewPostForm'
 import { PostItem, PostList } from '@components/postList'
 import { NoPosts } from '@components/NoPosts'
-import { BigNumber } from 'ethers'
-import { createNote } from '@/lib/utils'
-import { Identity } from '@semaphore-protocol/identity'
 import { Group, Item } from '@/types/contract/ForumInterface'
 import { CommunityCard } from '@components/CommunityCard/CommunityCard'
 import CreatePollUI from './CreatePollUI'
@@ -51,39 +48,12 @@ export function CommunityPage({
   const [sortBy, setSortBy] = useState<SortByOption>('highest')
   const [tempPosts, setTempPosts] = useState([])
 
-  // these can be ignored if more than one post is returned.
-  const [isPostEditable, setIsPostEditable] = useState(false)
-  const [isPostEditing, setPostEditing] = useState(false)
-  const [isFormOpen, setIsFormOpen] = useState(false)
+  // const [isPostEditing, setPostEditing] = useState(false)
+  // const [isFormOpen, setIsFormOpen] = useState(false)
 
   const { checkUserBalance } = useValidateUserBalance(community, address)
   const { setIsLoading, isLoading: isContextLoading } = useLoaderContext()
   const postEditorRef = useRef<any>()
-
-  const checkIfPostIsEditable = async (note, contentCID) => {
-    if (!user || !user.identityCommitment) return setIsPostEditable(false)
-
-    const userPosting = new Identity(`${address}_${groupId}_${user?.name}`)
-    const generatedNote = await createNote(userPosting)
-    const noteBigNumber = BigNumber.from(note).toString()
-    const generatedNoteAsBigNumber = BigNumber.from(generatedNote).toString()
-    setIsPostEditable(noteBigNumber === generatedNoteAsBigNumber)
-  }
-
-  useEffect(() => {
-    if (!user || isNaN(postId)) return setIsPostEditable(false)
-    if (!post) {
-      setIsPostEditable(false)
-      return
-    }
-    const note = post.note
-    const contentCID = post.contentCID
-    if (user && BigInt(user?.identityCommitment?.toString()) && contentCID && note) {
-      checkIfPostIsEditable(note, contentCID)
-    } else {
-      setIsPostEditable(false)
-    }
-  }, [user, post, postId])
 
   const validateRequirements = () => {
     if (!address) return toast.error(t('alert.connectWallet'), { toastId: 'connectWallet' })
@@ -193,17 +163,17 @@ export function CommunityPage({
     [user, address, groupId, users, activeUser, postInstance]
   )
 
-  const onClickEditPost = async () => {
-    const hasSufficientBalance = await checkUserBalance()
-    if (!hasSufficientBalance) return
-    setPostEditing(true)
-    setPostTitle(post?.title)
-    setPostDescription(post?.description)
-  }
+  // const onClickEditPost = async () => {
+  //   const hasSufficientBalance = await checkUserBalance()
+  //   if (!hasSufficientBalance) return
+  //   setPostEditing(true)
+  //   setPostTitle(post?.title)
+  //   setPostDescription(post?.description)
+  // }
 
   const clearInput = isEdit => {
     if (isEdit) {
-      setPostEditing(false)
+      // setPostEditing(false)
       setPostTitle(post?.title)
       setPostDescription(post?.description)
       return
@@ -216,7 +186,7 @@ export function CommunityPage({
 
   function renderItemList() {
     if (post) {
-      return <PostItem post={post} voteForPost={voteForPost} address={address} isPostEditable={isPostEditable} />
+      return <PostItem post={post} voteForPost={voteForPost} />
     } else if (sortedData?.length > 0) {
       return <PostList posts={sortedData} voteForPost={voteForPost} handleSortChange={handleSortChange} showFilter />
     } else {
@@ -256,6 +226,8 @@ export function CommunityPage({
           formVariant={'default'}
         />
       </div>
+
+
 
       {!postId && renderItemList()}
 

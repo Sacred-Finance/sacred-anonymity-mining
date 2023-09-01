@@ -112,6 +112,15 @@ export const NewPostForm = ({
     }
   }, [isFormOpen, inputRef])
 
+  const handleSubmitAction = async () => {
+    try {
+      await handleSubmit()
+      setIsFormOpen(false);
+    } catch (error) {
+      setIsFormOpen(false)
+    }
+  }
+
   return (
     <div
       className={clsx(
@@ -180,7 +189,7 @@ export const NewPostForm = ({
               </>
             </div>
 
-            <div className="mt-4 flex justify-between">
+            <div className="mt-8 flex justify-between">
               <CancelButton
                 className={clsx(c?.cancelButton)}
                 onClick={() => {
@@ -195,10 +204,7 @@ export const NewPostForm = ({
               </CancelButton>
               <PrimaryButton
                 className={clsx('bg-gray-500/20 hover:bg-gray-500/40', c?.submitButton)}
-                onClick={() => {
-                  handleSubmit()
-                  setIsFormOpen(false)
-                }}
+                onClick={handleSubmitAction}
                 isLoading={isSubmitting}
                 disabled={isSubmitting}
               >

@@ -1,5 +1,5 @@
-import { PrimaryButton, VoteDownButton, VoteUpButton } from './buttons'
-import React from 'react'
+import { VoteDownButton, VoteUpButton } from './buttons'
+import React, { useEffect, useState } from 'react'
 import SortBy from './SortBy'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -11,27 +11,37 @@ import { useUserIfJoined } from '@/contexts/CommunityProvider'
 import _ from 'lodash'
 import { useTranslation } from 'react-i18next'
 import { Item } from '@/types/contract/ForumInterface'
-import PollItem from './PollItem'
+import { PollUI } from './PollIUI'
+import DeleteItemButton from './buttons/DeleteItemButton'
+import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
+import { Identity } from '@semaphore-protocol/identity'
+import { createNote } from '@/lib/utils'
+import SummaryButton from '@components/buttons/AIPostSummaryButton'
+import { OutputDataToHTML, OutputDataToMarkDown } from '@components/Discourse/OutputDataToMarkDown'
 
 export const PostList = ({ posts, voteForPost, handleSortChange, editor = undefined, showFilter }) => {
-  const { address } = useAccount()
+  const { address } = useAccount();
+  const { isAdmin, isModerator, fetchIsAdmin, fetchIsModerator } = useCheckIfUserIsAdminOrModerator(address);
+
+  useEffect(() => {
+    fetchIsAdmin();
+    fetchIsModerator();
+  }, [address]);
+
   return (
     <div className="mt-6 flex flex-col space-y-4 ">
       {showFilter && <SortBy onSortChange={handleSortChange} targetType="posts" />}
       {posts.map((p, i) => (
-        <React.Fragment key={p.id}>
-          {p?.kind < 2 && (
-            <PostItem
-              post={p}
-              key={p.id}
-              voteForPost={voteForPost}
-              editor={editor}
-              address={address}
-              showDescription={true}
-            />
-          )}
-          {p?.kind == 2 && <PollItem key={p.id} voteForPost={voteForPost} address={address} post={p} />}
-        </React.Fragment>
+        [0, 1, 2].includes(+p?.kind) && (
+          <PostItem
+            post={p}
+            key={p.id}
+            voteForPost={voteForPost}
+            editor={editor}
+            showDescription={true}
+            isAdminOrModerator={isAdmin || isModerator}
+          />
+        )
       ))}
     </div>
   )
@@ -44,10 +54,9 @@ const classes = {
 
 interface PostItem {
   voteForPost: (postId: number, vote: number) => Promise<void>
+  isAdminOrModerator?: boolean
   post: Item
   editor?: any
-  address: string
-  isPostEditable?: boolean
 
   showDescription?: boolean
   isFormOpen?: boolean
@@ -57,25 +66,44 @@ interface PostItem {
 export const PostItem = ({
   voteForPost,
   post,
-  address,
-  isPostEditable,
   showDescription,
   isFormOpen,
   setIsFormOpen,
   editor = undefined,
+  isAdminOrModerator,
 }: PostItem) => {
   const router = useRouter()
   const { postId, groupId } = router.query
-
+  const member = useUserIfJoined(post.groupId)
   const { t } = useTranslation()
 
   const { id, title, upvote, downvote, createdAt } = post
+  const [isPostEditable, setIsPostEditable] = useState(false)
 
   const onPostPage = !isNaN(postId)
   const classy = { [classes.postItem]: true, [classes.postItemPostPage]: onPostPage }
 
   const [isLoading, setIsLoading] = React.useState(false)
-  const isJoined = useUserIfJoined(groupId as string)
+  const isJoined = useUserIfJoined(groupId as string);
+  const { address } = useAccount();
+
+  useEffect(() => {
+    // check if checkIfPostIsEditable
+    if (member && post) {
+      checkIfPostIsEditable(post.note, post.contentCID)
+    } else {
+      setIsPostEditable(isAdminOrModerator)
+    }
+  }, [member, post, isAdminOrModerator, address])
+
+  const checkIfPostIsEditable = async (note, contentCID) => {
+    const userPosting = new Identity(`${address}_${groupId}_${member?.name}`)
+    const generatedNote = await createNote(userPosting)
+    const generatedNoteAsBigNumber = BigNumber.from(generatedNote).toString()
+    const noteBigNumber = BigNumber.from(note).toString()
+
+    setIsPostEditable(noteBigNumber === generatedNoteAsBigNumber || isAdminOrModerator)
+  }
 
   const handleVote = async (e, vote: 'upvote' | 'downvote') => {
     e.stopPropagation()
@@ -120,14 +148,17 @@ export const PostItem = ({
           {showDescription && !isFormOpen && postId && (
             <EditorJsRenderer data={post.description} onlyPreview={isPreview} />
           )}
-          <br />
-          {isPreview
-            ? (post?.childIds?.length && <span className="text-gray-600">{post?.childIds?.length} comments</span>) || (
-                <span className="text-gray-600">0 comments</span>
-              )
-            : ''}
-
           <div className={'text-sm text-gray-900'}>{editor && isPostEditable && editor}</div>
+          {post.kind == 2 && <PollUI id={post.id} groupId={post.groupId} post={post}></PollUI> }
+          <br />
+          <div className='flex flex-row items-center gap-3'>
+            {isPreview
+              ? (post?.childIds?.length && <span className="text-gray-600">{post?.childIds?.length} comments</span>) || (
+                  <span className="text-gray-600">0 comments</span>
+                )
+              : ''}
+            {(isPostEditable && onPostPage) && <DeleteItemButton isAdminOrModerator={isAdminOrModerator} itemId={post.id} itemType={+post.kind} groupId={groupId} postId={postId} /> }
+          </div>
         </div>
       </div>
 
@@ -152,6 +183,10 @@ export const PostItem = ({
           />
           <span className="font-bold text-gray-700">{downvote}</span>
         </div>
+      </div>
+
+      <div className={'m-1'}>
+        <SummaryButton postData={OutputDataToHTML(post.description)} postTitle={title} />
       </div>
     </div>
   )
