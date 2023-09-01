@@ -21,15 +21,15 @@ export default async function handler(
       post => post.contentCID && post.contentCID !== ethers.constants.HashZero && !post.removed
     )
 
-    const users = await forumContract.queryFilter(forumContract.filters.NewUser())
+    const usersWithCommitment = await forumContract.groupUsers(groupId)
 
     res.status(200).json({
       group,
       posts: filteredPosts,
-      users: users.map(({ args }) => ({
-        name: parseBytes32String(args.username),
-        groupId: +args.groupId.toString(),
-        identityCommitment: args.identityCommitment.toString(),
+      users: usersWithCommitment.map((c, i) => ({
+        name: 'anon',
+        groupId: groupId.toString(),
+        identityCommitment: c.toString(),
       })) as unknown as User[],
     })
   } catch (err) {

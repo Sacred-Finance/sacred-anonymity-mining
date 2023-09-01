@@ -1,4 +1,4 @@
-import { JoinCommunityButton } from '../JoinCommunityButton'
+import { CircularLoader, JoinCommunityButton } from '../JoinCommunityButton'
 import React from 'react'
 import { useLocalCommunity } from './CommunityCard'
 import { LeaveCommunityButton } from '../LeaveCommunityButton'
@@ -7,19 +7,21 @@ import { useUserIfJoined } from '@/contexts/CommunityProvider'
 export const CommunityCardFooter = () => {
   const community = useLocalCommunity()
 
-  
-  if (!community) return null
   const hasUserJoined = useUserIfJoined(community.groupId as string)
+
+  if (!community) return null
 
   return (
     <div className="flex items-center justify-end rounded-b-lg bg-white p-4 dark:bg-gray-900 ">
       <div>
         {community ? (
           <React.Fragment>
-            {!hasUserJoined ? (
-              <JoinCommunityButton community={community} hideIfJoined={community.variant === 'banner'} />
+            {hasUserJoined ? (
+              <LeaveCommunityButton community={community} />
             ) : (
-              <LeaveCommunityButton community={community} showIfJoined={community.variant === 'banner'} />
+              <React.Fragment>
+                {hasUserJoined == null ? <CircularLoader /> : <JoinCommunityButton community={community} hideIfJoined={community.variant === 'banner'} />}
+              </React.Fragment>
             )}
           </React.Fragment>
         ) : (

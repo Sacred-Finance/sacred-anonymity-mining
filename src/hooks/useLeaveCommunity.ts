@@ -5,11 +5,12 @@ import { createNote, generateGroth16Proof } from '@/lib/utils'
 import { Group } from '@semaphore-protocol/group'
 import { Identity } from '@semaphore-protocol/identity'
 import { useAccount } from 'wagmi'
+import { useFetchUsers } from './useFetchUsers'
 
 const username = 'anon';
 
 export const useLeaveCommunity = ({ id }) => {
-  const users = useUsers()
+  const { fetchUsersFromContract } = useFetchUsers(id, false)
   const activeUser = useActiveUser({ groupId: id })
   const { address } = useAccount()
   const { dispatch } = useCommunityContext() // Use the context hook to access the required context values
@@ -17,12 +18,14 @@ export const useLeaveCommunity = ({ id }) => {
   const leaveCommunity = async () => {
     console.log('Leaving group...')
 
-    const userIdentity = new Identity(`${address}_${id}_${activeUser.name}`)
-    let group = new Group(id)
-    const u = users.filter(u => u?.groupId === +id)
-    group.addMembers(u.map(u => u?.identityCommitment))
+    const userIdentity = new Identity(`${address}_${id}_anon`)
+    let group = new Group(id);
+    const users = await fetchUsersFromContract();
+    users.forEach(u => group.addMember(BigInt(u)))
+    const index = group.indexOf(BigInt(userIdentity.commitment));
+    // group.removeMember(index);
 
-    const { siblings, pathIndices, root } = group.generateMerkleProof(+id)
+    const { siblings, pathIndices, root } = group.generateMerkleProof(index)
 
     const note = await createNote(userIdentity)
     let input = {
@@ -37,7 +40,7 @@ export const useLeaveCommunity = ({ id }) => {
       '/circuits/VerifyOwner__prod.0.zkey'
     )
 
-    return await leaveGroup(id, activeUser.identityCommitment.toString(), a, b, c, siblings.map(s => s.toString()), pathIndices).then(() => {
+    return await leaveGroup(id, userIdentity.commitment.toString(), a, b, c, siblings.map(s => s.toString()), pathIndices).then(() => {
       console.log('Left group')
       dispatch({
         type: 'REMOVE_USER',

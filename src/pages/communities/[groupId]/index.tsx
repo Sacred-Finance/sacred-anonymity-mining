@@ -25,6 +25,10 @@ function Group() {
           posts: data.posts,
         },
       })
+      dispatch({
+        type: 'SET_USERS',
+        payload: data?.users
+      })
     }
   }, [data?.group, data?.posts, data?.users, isValidating])
 

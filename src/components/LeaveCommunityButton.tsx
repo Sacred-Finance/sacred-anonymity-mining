@@ -33,18 +33,25 @@ export const LeaveCommunityButton = memo(({ community }: JoinButtonProps) => {
     }
     return true
   }
-  const join = async () => {
+  const leave = async () => {
     if (isLoading) return
     setIsLoading(true)
     const result = await validateBeforeOpen()
     if (!result) return
-    if (hasUserJoined) await leaveCommunity()
+    if (hasUserJoined) {
+      try {
+        await leaveCommunity()
+      } catch (error) {
+        console.error(error)
+        toast.error(error?.message ?? error)
+      }
+    }
     setIsLoading(false)
   }
   const leaveButton = (
     <PrimaryButton
       isLoading={isLoading}
-      onClick={join}
+      onClick={leave}
       className={clsx(
         `flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold text-white transition-colors duration-200 `,
         'bg-red-500 hover:bg-red-600',
@@ -56,17 +63,7 @@ export const LeaveCommunityButton = memo(({ community }: JoinButtonProps) => {
   )
   return (
     <>
-      {hasUserJoined ? (
-        leaveButton
-      ) : (
-        <TosConfirmationWrapper
-          buttonElement={leaveButton}
-          headerText={t('termsOfService.header')}
-          descriptionText={t('termsOfService.description')}
-          onAgree={join}
-          validationBeforeOpen={validateBeforeOpen}
-        />
-      )}
+      {leaveButton}
     </>
   )
 })

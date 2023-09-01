@@ -24,13 +24,13 @@ export default function WithStandardLayout(WrappedComponent, additionalProps = {
 
       useEffect(() => {
           if (!data) return
-          const { communitiesData, users } = data
+          const { communitiesData } = data
           // convert id back to bignumber
           dispatch({ type: 'SET_COMMUNITIES', payload: communitiesData.map(c => ({ ...c, id: BigNumber.from(c.id) })) })
-          dispatch({
-              type: 'SET_USERS',
-              payload: users,
-          })
+          // dispatch({
+          //     type: 'SET_USERS',
+          //     payload: users,
+          // })
       }, [data])
 
       if (error) {

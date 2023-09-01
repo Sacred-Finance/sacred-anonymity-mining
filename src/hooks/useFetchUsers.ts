@@ -7,7 +7,7 @@ import { User } from '../lib/model'
 import { useEffect, useRef } from 'react'
 import { parseBytes32String } from 'ethers/lib/utils'
 
-export const useFetchUsers = (loadOnInit = true) => {
+export const useFetchUsers = (groupId, loadOnInit = true,) => {
   const { dispatch } = useCommunityContext()
 
 
@@ -19,23 +19,33 @@ export const useFetchUsers = (loadOnInit = true) => {
     signerOrProvider: provider,
   })
 
+  const fetchUsersFromContract = async () => {
+    return await forumContract?.groupUsers(groupId)
+  }
+
   const fetchUsers = async () => {
     if (!forumContract || !provider) {
       console.error('Forum contract not found or provider not found')
       return
     }
 
+    if (!groupId) {
+      console.error('Group id not found')
+      return
+    }
+
     try {
-      const users = await forumContract?.queryFilter(forumContract.filters.NewUser())
+
+      const users = await fetchUsersFromContract();
 
       dispatch({
         type: 'SET_USERS',
         payload: users.map(
-          user =>
+          u =>
             ({
-              name: parseBytes32String(user['args'].username),
-              groupId: +user['args'].groupId.toString(),
-              identityCommitment: user['args'].identityCommitment.toString(),
+              name: 'anon',
+              groupId: +groupId,
+              identityCommitment: u.toString(),
             } as User)
         ),
       })
@@ -49,7 +59,7 @@ export const useFetchUsers = (loadOnInit = true) => {
     if (didLoadRef.current) return
     didLoadRef.current = true
     if (loadOnInit) fetchUsers()
-  }, [])
+  }, [groupId])
 
-  return fetchUsers
+  return { fetchUsers, fetchUsersFromContract }
 }
