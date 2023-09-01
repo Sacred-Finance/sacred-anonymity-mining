@@ -75,13 +75,11 @@ export const PostItem = ({
   const router = useRouter()
   const { postId, groupId } = router.query
   const member = useUserIfJoined(post.groupId)
-  const { t } = useTranslation()
 
   const { id, title, upvote, downvote, createdAt } = post
   const [isPostEditable, setIsPostEditable] = useState(false)
 
   const onPostPage = !isNaN(postId)
-  const classy = { [classes.postItem]: true, [classes.postItemPostPage]: onPostPage }
 
   const [isLoading, setIsLoading] = React.useState(false)
   const isJoined = useUserIfJoined(groupId as string);
@@ -186,7 +184,7 @@ export const PostItem = ({
       </div>
 
       <div className={'m-1'}>
-        <SummaryButton postData={OutputDataToHTML(post.description)} postTitle={title} />
+        <SummaryButton postData={OutputDataToHTML(post?.description)} postTitle={title} />
       </div>
     </div>
   )

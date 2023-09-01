@@ -1,7 +1,7 @@
 import { OutputData } from '@editorjs/editorjs'
 
 export function OutputDataToMarkDown(description: OutputData) {
-  return description.blocks.reduce((acc, block, idx) => {
+  return description?.blocks?.reduce((acc, block, idx) => {
     let content = ''
     if (idx !== 0) {
       acc += '\n'
@@ -58,7 +58,7 @@ export function OutputDataToMarkDown(description: OutputData) {
 
 export const OutputDataToHTML = (description: OutputData) => {
   var convertedHtml = ''
-  description.blocks.map(block => {
+  description?.blocks?.map(block => {
     switch (block.type) {
       case 'header':
         convertedHtml += `<h${block.data.level}>${block.data.text}</h${block.data.level}>`
