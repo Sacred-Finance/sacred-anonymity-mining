@@ -47,7 +47,7 @@ export const CommunityCardHeader = ({
           <img
             className={clsx(
               'col-span-full  h-36 w-full rounded-t-lg object-cover',
-              isBanner ? 'max-full bottom-0 left-0 top-0 z-0 h-max opacity-90 rounded-b-lg' : ''
+              isBanner ? 'max-full bottom-0 left-0 top-0 z-0 h-max rounded-b-lg opacity-90' : ''
             )}
             src={srcBannerOverride ?? bannerSrc}
             alt={mobileLogo}
@@ -69,9 +69,12 @@ export const CommunityCardHeader = ({
         <MobileLogo className="relative col-span-2 -mt-10 h-24 w-24 rounded-full  border-4 border-white bg-white/80 p-4 shadow-lg" />
       )}
 
-
-      {community?.groupDetails?.description && community.groupDetails.description !== community.name && (
-        <div className="col-span-6 w-full">
+      {community?.groupDetails?.description && community.groupDetails.description !== community.name && !isBanner && (
+        <div
+          className={clsx(
+            'absolute bottom-0 left-[25%] col-span-6 me-2 max-h-[30px] w-fit overflow-y-hidden rounded border bg-gray-50 p-1  hover:z-50 hover:max-h-full hover:w-auto'
+          )}
+        >
           <p className="text-sm">{community?.groupDetails?.description}</p>
         </div>
       )}

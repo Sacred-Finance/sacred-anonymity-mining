@@ -14,12 +14,12 @@ function CommunityTags({
   community: Group & { variant?: 'default' | 'banner'; user: User | false | undefined }
 }) {
   return community?.groupDetails?.tags?.length ? (
-    <ItemContainer>
+    <ItemContainer variant={'singleItem'}>
       <p className="mb-1 font-semibold">Tags</p>
       {community?.groupDetails?.tags
         .filter(tag => tag !== ethers.constants.HashZero)
         ?.map(tag => (
-          <p className="w-fit flex-wrap rounded bg-blue-500 px-2 py-1 text-xs text-white" key={tag}>
+          <p className="w-min rounded bg-blue-500 px-2 py-1 text-xs text-white" key={tag}>
             {getStringFromBytes32(tag)}
           </p>
         ))}
@@ -45,6 +45,13 @@ export const CommunityCardBody = () => {
       <CommunityTags community={community} />
       <CommunityChainId community={community} />
       <CommunityRequirements community={community} />
+
+      {community?.variant === 'banner' && (
+        <ItemContainer>
+          <p className="mb-1 font-semibold">Community Description</p>
+          <p className="col-span-auto text-sm">{community?.groupDetails?.description} </p>
+        </ItemContainer>
+      )}
     </div>
   )
 }
@@ -68,9 +75,23 @@ const CommunityChainId = ({ community }: { community: Group }) => {
   )
 }
 
-export const ItemContainer = ({ children }: { children: React.ReactNode }) => (
-  <div className=" rounded-md p-1 ring-1 ring-gray-900/30"> {children} </div>
-)
+interface ItemContainerVariants {
+  default: string
+  singleItem: string
+}
+
+const itemContainerVariants: ItemContainerVariants = {
+  default: 'rounded-md p-1 ring-1 ring-gray-900/30',
+  singleItem: 'rounded-md p-1 ring-1 ring-gray-900/30 flex items-center gap-3 flex-wrap',
+}
+
+export const ItemContainer = ({
+  children,
+  variant = 'default',
+}: {
+  children: React.ReactNode
+  variant?: keyof ItemContainerVariants
+}) => <div className={clsx(itemContainerVariants[variant])}> {children} </div>
 
 const CommunityRequirements = ({ community }: { community: Group }) => {
   const renderRequirements = () =>

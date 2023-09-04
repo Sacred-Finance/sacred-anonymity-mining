@@ -199,7 +199,7 @@ export function CommunityPage({
   }
 
   return (
-    <div className={clsx('mx-auto h-screen w-full max-w-screen-2xl space-y-12 overflow-y-auto !text-gray-900 sm:p-8 md:p-24')}>
+    <div className={clsx('mx-auto w-full max-w-screen-2xl space-y-12 !text-gray-900 sm:p-8 md:p-24')}>
       <CommunityCard community={community} index={0} isAdmin={false} variant={'banner'} />
       <ReputationCard />
       <div className={'flex items-center gap-3'}>

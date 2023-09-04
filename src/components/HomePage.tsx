@@ -18,6 +18,7 @@ import { Group } from '@/types/contract/ForumInterface'
 import { User } from '@/lib/model'
 import AllTopics from '@components/Discourse/AllTopics'
 import { Tab } from '@headlessui/react'
+import { useLocalStorage } from '@/hooks/useLocalStorage'
 
 interface HomeProps {
   isAdmin: boolean
@@ -45,9 +46,15 @@ const FilterButton = ({ filterKey, iconTrue, iconFalse, applyFilter, currentFilt
     </button>
   )
 }
+
 function HomePage({ isAdmin = false, communities }: HomeProps) {
+
   const [localCommunities, setLocalCommunities] = useState<Group[]>(communities)
   const [searchTerm, setSearchTerm] = useState('')
+  const [currentFilter, setCurrentFilter] = useState('Alphabetical')
+  const [selectedIndex, setSelectedIndex] = useLocalStorage('communityTab', 0)
+
+  // hooks
   const { t, i18n, ready } = useTranslation()
 
   useEffect(() => {
@@ -76,7 +83,6 @@ function HomePage({ isAdmin = false, communities }: HomeProps) {
     return debounce(handleSearchChange, 400)
   }, [communities])
 
-  const [currentFilter, setCurrentFilter] = useState('Alphabetical')
   const applyFilter = filter => {
     let filteredCommunities = [...localCommunities]
 
@@ -165,7 +171,7 @@ function HomePage({ isAdmin = false, communities }: HomeProps) {
         {currentFilter}
       </div>
 
-      <Tab.Group>
+      <Tab.Group selectedIndex={selectedIndex} onChange={setSelectedIndex}>
         <Tab.List className="flex space-x-1 rounded-xl bg-blue-900/20 p-1">
           <Tab className={({ selected }) => tabClass(selected)}>Logos</Tab>
           <Tab className={({ selected }) => tabClass(selected)}>Logos Discourse</Tab>
