@@ -1,4 +1,4 @@
-import { ForumContractAddress } from '../constant/const'
+import { ForumContractAddress, semaphoreContract } from '../constant/const'
 import ForumABI from '../constant/abi/Forum.json'
 import { polygonMumbai } from 'wagmi/chains'
 import { useCommunityContext } from '../contexts/CommunityProvider'
@@ -21,6 +21,10 @@ export const useFetchUsers = (groupId, loadOnInit = true,) => {
 
   const fetchUsersFromContract = async () => {
     return await forumContract?.groupUsers(groupId)
+  }
+
+  const fetchUsersFromSemaphoreContract = async () => {
+    return await semaphoreContract?.getGroupMembers(groupId?.toString())
   }
 
   const fetchUsers = async () => {
@@ -61,5 +65,5 @@ export const useFetchUsers = (groupId, loadOnInit = true,) => {
     if (loadOnInit) fetchUsers()
   }, [groupId])
 
-  return { fetchUsers, fetchUsersFromContract }
+  return { fetchUsers, fetchUsersFromContract, fetchUsersFromSemaphoreContract }
 }

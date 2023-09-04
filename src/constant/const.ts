@@ -1,9 +1,11 @@
 import { Contract, ethers } from 'ethers'
 import { avalancheFuji, Chain, goerli, polygonMumbai, sepolia } from 'wagmi/chains'
 import ForumABI from '../constant/abi/Forum.json'
-import { Forum } from '@/types/contract/Forum'
+import { Forum } from '@/types/contract/Forum';
+import { SemaphoreEthers } from "@semaphore-protocol/data"
 
 export const ForumContractAddress: `0x${string}` = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`
+export const SemaphoreContractAddress = process.env.NEXT_PUBLIC_SEMAPHORE_CONTRACT_ADDRESS as `0x${string}`;
 export const unirepAddress = process.env.NEXT_PUBLIC_UNIREP_ADDRESS
 
 export const attesterAddress = process.env.NEXT_PUBLIC_ATTESTER_ADDRESS
@@ -796,3 +798,7 @@ export const jsonRPCProvider = new ethers.providers.JsonRpcProvider(process.env.
 const abiInterface = new ethers.utils.Interface(ForumABI.abi).functions
 
 export const forumContract = new Contract(ForumContractAddress, ForumABI.abi, jsonRPCProvider) as Forum
+
+export const semaphoreContract = new SemaphoreEthers(process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL, {
+  address: SemaphoreContractAddress
+})
