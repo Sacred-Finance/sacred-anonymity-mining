@@ -52,6 +52,7 @@ export function PrimaryButton({
       {...rest}
       disabled={rest.disabled || isLoading}
       className={clsx(
+        'hover:bg-opacity-90',
         !resetClasses && primaryButtonStyle,
         !resetClasses && 'flex items-center gap-3  disabled:opacity-50',
         'cursor-pointer disabled:cursor-not-allowed',

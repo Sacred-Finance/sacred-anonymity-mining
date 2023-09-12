@@ -38,8 +38,11 @@ const ReplyToPost = ({
         category: 4,
       })
       toast.success(t('alert.postCreateSuccess'))
-      addReplyToPosts(newPost.data.post)
-
+      if (addReplyToPosts) {
+        addReplyToPosts(newPost.data.post as Topic['post_stream']['posts'][0])
+      }
+      // await mutate(`/api/discourse/${post.topic_id}`)
+      await mutate(`/api/discourse/${post.topic_id}/posts/${newPost.data.post.post_number}`) // load in post
     } catch (error) {
       toast.error(t('alert.postCreateFailed'))
       console.error(error)

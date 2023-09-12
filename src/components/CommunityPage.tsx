@@ -48,9 +48,6 @@ export function CommunityPage({
   const [sortBy, setSortBy] = useState<SortByOption>('highest')
   const [tempPosts, setTempPosts] = useState([])
 
-  // const [isPostEditing, setPostEditing] = useState(false)
-  // const [isFormOpen, setIsFormOpen] = useState(false)
-
   const { checkUserBalance } = useValidateUserBalance(community, address)
   const { setIsLoading, isLoading: isContextLoading } = useLoaderContext()
   const postEditorRef = useRef<any>()
@@ -163,13 +160,6 @@ export function CommunityPage({
     [user, address, groupId, users, activeUser, postInstance]
   )
 
-  // const onClickEditPost = async () => {
-  //   const hasSufficientBalance = await checkUserBalance()
-  //   if (!hasSufficientBalance) return
-  //   setPostEditing(true)
-  //   setPostTitle(post?.title)
-  //   setPostDescription(post?.description)
-  // }
 
   const clearInput = isEdit => {
     if (isEdit) {
@@ -226,8 +216,6 @@ export function CommunityPage({
           formVariant={'default'}
         />
       </div>
-
-
 
       {!postId && renderItemList()}
 

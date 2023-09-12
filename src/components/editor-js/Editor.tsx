@@ -17,7 +17,7 @@ type Props = {
   divProps?: any
 }
 
-const EditorBlock = ({ data, onChange, holder, className, divProps = {}, editorRef, placeholder, readOnly }: Props) => {
+const EditorBlock = ({ data, onChange, holder, divProps = {}, editorRef, placeholder, readOnly }: Props) => {
   const [isReady, setIsReady] = React.useState(false)
   //add a reference to editor
   const ref = useRef<EditorJS>()
@@ -79,15 +79,6 @@ const EditorBlock = ({ data, onChange, holder, className, divProps = {}, editorR
           onChange(data)
         },
         onReady() {
-          // todo: make it work only for editor
-          // const links = document.getElementsByTagName('a')
-          // for (let i = 0; i < links.length; i++) {
-          //   const link = links[i]
-          //   link.setAttribute('target', '_blank')
-          //   link.setAttribute('rel', 'noopener')
-          //   link.setAttribute('aria-label', 'External link (opens in new tab)')
-          // }
-          // If readonly set the editor to readonly
           if (readOnly) {
             const el = document.getElementById(holder)
             if (el) {
@@ -122,7 +113,7 @@ const EditorBlock = ({ data, onChange, holder, className, divProps = {}, editorR
         {...divProps}
         className={clsx(isReady ? 'h-full w-full text-black dark:text-white' : 'hidden', divProps.className)}
         id={holder}
-      ></div>
+      />
       {!isReady && <CircularLoader className={'h-12'} />}
     </>
   )
