@@ -8,12 +8,19 @@ import ConnectWallet from './Connect/ConnectWallet'
 import { buttonVariants, primaryButtonStyle } from '../styles/classes'
 import clsx from 'clsx'
 import Link from 'next/link'
+import { useConnectModal } from '@rainbow-me/rainbowkit'
+import { useAccount } from 'wagmi'
 
 const Header = () => {
   const { t } = useTranslation()
+  const { openConnectModal } = useConnectModal()
+  const { isConnected } = useAccount()
 
   return (
-    <nav id={'header'} className="my-1 grid grid-cols-1 items-center justify-items-center gap-1 p-2 dark:bg-gray-900  md:grid-cols-6">
+    <nav
+      id={'header'}
+      className="my-1 grid grid-cols-1 items-center justify-items-center gap-1 p-2 dark:bg-gray-900  md:grid-cols-6"
+    >
       <div className="flex h-full items-center justify-start justify-items-center">
         <NavBarButton href="/" className="h-full">
           <div className="h-full md:hidden">
@@ -26,7 +33,19 @@ const Header = () => {
       </div>
 
       <div className="col-span-2 flex items-center gap-8">
-        <Link href={'/create-group'} className={clsx(primaryButtonStyle, buttonVariants.primarySolid)}>
+        <Link
+          onClick={e => {
+            if (!isConnected) {
+              if (openConnectModal) {
+                openConnectModal()
+              }
+              e.preventDefault()
+              return
+            }
+          }}
+          href={'/create-group'}
+          className={clsx(primaryButtonStyle, buttonVariants.primarySolid)}
+        >
           <div className="flex gap-2 ">
             <PlusCircleIcon className="h-6 w-6" /> {t('toolTip.createCommunity')}
           </div>
