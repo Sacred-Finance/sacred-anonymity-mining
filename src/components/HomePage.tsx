@@ -22,7 +22,6 @@ import { useLocalStorage } from '@/hooks/useLocalStorage'
 
 interface HomeProps {
   isAdmin: boolean
-  users: User[]
   communities: Group[]
 }
 const filterButtonClass = 'rounded-md p-2 text-white transition-colors duration-200 ease-in-out dark:bg-gray-900 '
@@ -47,8 +46,9 @@ const FilterButton = ({ filterKey, iconTrue, iconFalse, applyFilter, currentFilt
     </button>
   )
 }
-function HomePage({ isAdmin = false, users, communities }: HomeProps) {
-  // state
+
+function HomePage({ isAdmin = false, communities }: HomeProps) {
+
   const [localCommunities, setLocalCommunities] = useState<Group[]>(communities)
   const [searchTerm, setSearchTerm] = useState('')
   const [currentFilter, setCurrentFilter] = useState('Alphabetical')

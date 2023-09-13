@@ -235,10 +235,17 @@ export const addRequirementDetails = async (community: Group): Promise<Awaited<R
   // get symbol and name of token
   return (await Promise.all(
     community.requirements.map(async requirement => {
-      const token = await new ethers.Contract(requirement.tokenAddress, erc20dummyABI, jsonRPCProvider)
-      const symbol = await token.symbol()
-      const name = await token.name()
-      const decimals = await token.decimals()
+      const token = new ethers.Contract(requirement.tokenAddress, erc20dummyABI, jsonRPCProvider)
+      let symbol = '';  
+      let name = '';
+      let decimals = 0;
+      try {
+        symbol = await token?.symbol();
+        name = await token?.name()
+        decimals = await toke?.decimals()
+      } catch (error) {
+        console.log(error)
+      }
       const minAmount = requirement.minAmount.toString()
 
       return {

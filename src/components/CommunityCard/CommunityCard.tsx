@@ -10,6 +10,7 @@ import { Group } from '@/types/contract/ForumInterface'
 import { CommunityId, useUserIfJoined } from '@/contexts/CommunityProvider'
 import clsx from 'clsx'
 import { User } from '@/lib/model'
+import { useFetchUsers } from '@/hooks/useFetchUsers'
 
 export const CommunityContext = React.createContext<
   (Group & { variant?: 'default' | 'banner'; user: User | false | undefined }) | null
@@ -34,7 +35,8 @@ export const CommunityCard = ({
 }) => {
   const [isEditGroupVisible, setIsEditGroupVisible] = React.useState(false)
   const [isDeleteGroupVisible, setIsDeleteGroupVisible] = React.useState(false)
-  const user = useUserIfJoined(community.groupId as string)
+  const user = useUserIfJoined(community.groupId as string);
+  useFetchUsers(community.groupId as string);
 
   // new ref for modal
   const cardRef = useRef<HTMLDivElement | null>(null)

@@ -4,8 +4,9 @@ import { create, IPFSHTTPClient } from 'ipfs-http-client'
 import { toBufferBE, toBufferLE } from 'bigint-buffer'
 import { buildBabyjub, buildPedersenHash } from 'circomlibjs'
 import { Identity } from '@semaphore-protocol/identity'
+import { forumContract } from '@/constant/const'
 
-const groth16 = require('snarkjs').groth16
+const { groth16 } = require('snarkjs')
 
 let ipfs: IPFSHTTPClient
 let babyJub, pedersen
@@ -345,4 +346,13 @@ export function formatDistanceToNow(date) {
   }
 
   return `${prefix} ${value} ${suffix}`.trim()
+}
+
+export const hasUserJoined = async (group, identityCommitment) => {
+  try {
+    return await forumContract.isMemberJoined(group, identityCommitment);
+  } catch (error) {
+    console.log(error);
+    return false
+  }
 }
