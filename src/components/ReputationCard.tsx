@@ -6,8 +6,8 @@ import { useRouter } from 'next/router'
 import { CircularLoader } from '@components/JoinCommunityButton'
 
 // Tailwind CSS for simplicity
-const cardClass = 'border border-blue-500 shadow rounded-md p-4 bg-white w-fit'
-const cardTitleClass = 'text-blue-500 text-left font-bold text-lg flex gap-1 items-center'
+const cardClass = 'border border-blue-500 shadow rounded p-4 bg-white w-fit'
+const cardTitleClass = 'text-blue-500 text-left font-bold text-lg flex gap-4 items-center'
 
 const ReputationCard = () => {
   const router = useRouter()

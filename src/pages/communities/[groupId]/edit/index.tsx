@@ -1,7 +1,6 @@
 import React from 'react'
 import { useCommunityById } from '@/contexts/CommunityProvider'
 import { useRouter } from 'next/router'
-import WithStandardLayout from '@components/HOC/WithStandardLayout'
 import { EditGroup } from '@components/EditGroup'
 // todo: figure out when/if it's beneficial to make calls to individual contract updates vs editing the entire group at once
 
@@ -23,4 +22,4 @@ function CreateGroupForm() {
   return <EditGroup group={community} />
 }
 
-export default WithStandardLayout(CreateGroupForm)
+export default (CreateGroupForm)

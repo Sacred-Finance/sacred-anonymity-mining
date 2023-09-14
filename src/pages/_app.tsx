@@ -23,6 +23,7 @@ import LoadingPage from '../components/LoadingComponent'
 import ErrorBoundary from '../components/ErrorBoundary'
 import { useMounted } from '@/hooks/useMounted'
 import { SWRConfig } from 'swr'
+import StandardLayout from '@components/HOC/StandardLayout'
 
 function App({ Component, pageProps }: AppProps) {
   return (
@@ -40,7 +41,9 @@ function App({ Component, pageProps }: AppProps) {
               }),
           }}
         >
-          <Component {...pageProps} />
+          <StandardLayout>
+            <Component {...pageProps} />
+          </StandardLayout>
         </SWRConfig>
         <ToastContainer />
       </Web3Wrapper>

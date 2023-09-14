@@ -10,7 +10,7 @@ interface VoteButton {
   className?: string
 }
 
-const voteButtonClass = 'h-8 w-8 hover:border !gap-0 relative text-xl  m-1 !p-1 hover:bg-gray-50  bg-white'
+const voteButtonClass = 'h-8 w-8 hover:border !gap-0 relative text-xl  !p-1 hover:bg-gray-50  bg-white'
 export const VoteUpButton = ({ ...props }: { props?: VoteButton } & PrimaryButtonProps) => (
   <PrimaryButton
     aria-label={'upvote'}

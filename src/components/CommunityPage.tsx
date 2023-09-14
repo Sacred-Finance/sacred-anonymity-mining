@@ -191,7 +191,7 @@ export function CommunityPage({
       return <PostList posts={sortedData} voteForPost={voteForPost} handleSortChange={handleSortChange} showFilter />
     } else {
       return (
-        <div className="rounded-lg bg-white/10 p-6 shadow-lg">
+        <div className="rounded bg-white/10 p-6 shadow-lg">
           <NoPosts />
         </div>
       )
@@ -199,10 +199,10 @@ export function CommunityPage({
   }
 
   return (
-    <div className={clsx('mx-auto w-full max-w-screen-2xl space-y-12 !text-gray-900 sm:p-8 md:p-24')}>
+    <div className={clsx(' w-full max-w-screen-2xl space-y-12 !text-gray-900 sm:p-8 md:p-24')}>
       <CommunityCard community={community} index={0} isAdmin={false} variant={'banner'} />
       <ReputationCard />
-      <div className={'flex items-center gap-3'}>
+      <div className={'flex items-center gap-4'}>
         <CreatePollUI groupId={groupId} />
         <NewPostForm
           editorId={`${groupId}_post`}
@@ -221,7 +221,7 @@ export function CommunityPage({
           itemType={'post'}
           handlerType={'new'}
           classes={{
-            rootClosed: '!w-fit !m-0 !p-0',
+            rootClosed: '!w-fit !p-0',
           }}
           formVariant={'default'}
         />

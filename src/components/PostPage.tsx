@@ -331,7 +331,7 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
     const commentContent = currentCommentMap?.comment
 
     return (
-      <div className="mt-3 flex flex-row gap-4">
+      <div className="flex flex-row gap-4">
         {comment.id}
         {isEditable && !isEditing && <PrimaryButton className='w-fit text-sm bg-blue-500 hover:bg-blue-600 text-white' onClick={() => onClickEditComment(comment)}>{t('button.edit')}</PrimaryButton>}
         {isEditing && (
@@ -359,7 +359,7 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
   return (
     <div
       className={clsx(
-        'mx-auto  w-full max-w-screen-2xl space-y-4  !text-gray-900 sm:p-8 md:p-24'
+        '  w-full max-w-screen-2xl space-y-4  !text-gray-900 sm:p-8 md:p-24'
       )}
     >
       <ReputationCard/>
@@ -431,7 +431,7 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
         >
           <div key={c.id} className=" flex flex-col">
             <div
-              className={`rounded-md bg-gray-100 p-4 dark:bg-transparent ${
+              className={`rounded bg-gray-100 p-4 dark:bg-transparent ${
                 commentIsConfirmed(c.id) || commentsMap[c?.id]?.isSaving
                   ? 'border border-green-400'
                   : 'border border-red-400'
@@ -439,8 +439,8 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
             >
               {c && (
                 <div
-                  className={`mt-4 ${
-                    commentsMap[c?.id]?.isEditing ? 'min-h-[150px] rounded-md border border-solid pl-4' : ''
+                  className={`${
+                    commentsMap[c?.id]?.isEditing ? 'min-h-[150px] rounded border border-solid pl-4' : ''
                   }`}
                 >
                   <Editor
@@ -457,12 +457,12 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
             </div>
             <div className="pt-3 text-gray-500">
               <div
-                className="flex gap-3"
+                className="flex gap-4"
                 style={{
                   visibility: commentIsConfirmed(c.id) ? 'visible' : 'hidden',
                 }}
               >
-                <p className="my-auto inline-block text-sm">
+                <p className=" inline-block text-sm">
                   🕛 {c?.time ? formatDistanceToNow(new Date(c?.time).getTime()) : '-'}
                 </p>
               </div>

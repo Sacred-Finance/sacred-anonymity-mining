@@ -41,7 +41,7 @@ interface SummaryButtonProps {
             endIcon={<SparklesIcon className={clsx('h-5 w-5', data ? 'text-white' : 'text-blue-500')} height={20} />}
             isLoading={isLoading}
             className={clsx(
-                'flex items-center gap-2 rounded px-2 py-1 text-blue-500 outline outline-2  outline-blue-500 hover:bg-blue-600 hover:text-white focus:outline-none',
+                'flex items-center gap-4 rounded px-2 py-1 text-blue-500 outline outline-2  outline-blue-500 hover:bg-blue-600 hover:text-white focus:outline-none',
                 data ? 'bg-blue-500 text-white' : '',
             )}
         >
@@ -51,7 +51,7 @@ interface SummaryButtonProps {
         {showModal && (
             <div className="fixed inset-0 z-[51] flex items-center justify-center bg-black bg-opacity-50">
               <div
-                  className="relative w-1/2 overflow-y-auto rounded-lg bg-white p-8 text-center"
+                  className="relative w-1/2 overflow-y-auto rounded bg-white p-8 text-center"
                   onClick={e => {
                     e.stopPropagation();
                   }}

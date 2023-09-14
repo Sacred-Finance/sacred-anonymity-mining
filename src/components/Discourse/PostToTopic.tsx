@@ -48,13 +48,13 @@ const PostToTopic = ({ topic }: { topic: Topic }) => {
         classes={{
           // root open needs to have content centered perfectly
           // we need to gray out the background
-          rootClosed: '!m-0 !p-0 !h-0',
+          rootClosed: 'p-0 !h-0',
           rootOpen:
-            'fixed inset-0 z-50 mt-0 !bg-black/60 !w-full !h-full bg-opacity-50 left-0 top-0 right-0 bottom-0 inset-0  ' +
+            'fixed inset-0 z-50  !bg-black/60 !w-full !h-full bg-opacity-50 left-0 top-0 right-0 bottom-0 inset-0  ' +
             'flex flex-col justify-center items-center' +
             ' overflow-y-auto ',
-          formContainerOpen: 'bg-white  rounded-lg shadow-lg p-6 w-full max-w-3xl mx-auto',
-          openFormButton: 'text-white z-60 !bg-gray-900 fixed bottom-4 right-4 z-50',
+          formContainerOpen: 'bg-white  rounded shadow-lg p-6 w-full max-w-3xl ',
+          openFormButton: 'text-white z-60 !bg-gray-900 fixed bottoright-4 z-50',
         }}
         editorId={`${topic?.id}_post`}
         description={description}

@@ -59,6 +59,10 @@ module.exports = {
         '8xl': ['6rem', { lineHeight: '1' }],
         '9xl': ['8rem', { lineHeight: '1' }],
       },
+      maxWidth:{
+        'xss': '16rem',
+      },
+
       animation: {
         'fade-in': 'fade-in 0.5s linear forwards',
         'marquee': 'marquee var(--marquee-duration) linear infinite',

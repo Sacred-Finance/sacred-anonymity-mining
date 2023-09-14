@@ -54,8 +54,8 @@ export function LoaderComponent() {
               leaveFrom="scale-100"
               leaveTo="scale-95"
           >
-            <div className="relative bg-white rounded-lg w-64 h-64 p-4">
-              <div className="w-full h-screen flex items-center justify-center bg-pink-400">
+            <div className="relative bg-white rounded w-64 h-64 p-4">
+              <div className="w-full  flex items-center justify-center bg-pink-400">
                 <motion.div
                     className="text-white"
                     initial={{ scale: 1 }}

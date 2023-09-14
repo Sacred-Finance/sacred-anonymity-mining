@@ -26,7 +26,7 @@ interface ToggleButtonProps {
 
 function TogglePreview({ onClick, isPreview, showText = true, disabled }: ToggleButtonProps) {
   return (
-    <div className="mb-2 flex items-center justify-between text-sm ">
+    <div className=" flex items-center justify-between text-sm ">
       {isPreview ? 'Preview' : 'Editor'}
       <PrimaryButton disabled={disabled} onClick={onClick} className={'bg-gray-500/20 hover:bg-gray-500/40'}>
         {showText && (isPreview ? 'Show Editor' : 'Show Preview')}
@@ -125,7 +125,7 @@ export const NewPostForm = ({
     <div
       className={clsx(
         'flex flex-col space-y-4 sm:w-full ',
-        formVariant === 'default' ? 'mt-6 h-auto rounded-lg  bg-white/10 p-6' : '',
+        formVariant === 'default' ? 'h-auto rounded  bg-white/10 p-6' : '',
         isFormOpen ? 'border-gray-500 border' : 'items-center',
         c?.root,
         isFormOpen ? c?.rootOpen : c?.rootClosed
@@ -160,7 +160,7 @@ export const NewPostForm = ({
             <input
               ref={inputRef}
               className={clsx(
-                'mb-4 w-full rounded border-gray-200 p-1 text-base transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500',
+                ' w-full rounded border-gray-200 p-1 text-base transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500',
                 c?.input
               )}
               placeholder={t(itemType !== 'post' ? 'placeholder.enterComment' : 'placeholder.enterPostTitle') as string}
@@ -189,7 +189,7 @@ export const NewPostForm = ({
               </>
             </div>
 
-            <div className="mt-8 flex justify-between">
+            <div className="flex justify-between">
               <CancelButton
                 className={clsx(c?.cancelButton)}
                 onClick={() => {

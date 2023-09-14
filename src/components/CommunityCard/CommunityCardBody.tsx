@@ -1,54 +1,68 @@
 import React from 'react'
 import { useLocalCommunity } from './CommunityCard'
-import { supportedChains } from '../../constant/const'
+import { chainLogos, supportedChains } from '../../constant/const'
 import clsx from 'clsx'
 import { classes } from '../../styles/classes'
 import { getStringFromBytes32 } from '@/lib/utils'
 import { Group } from '@/types/contract/ForumInterface'
 import { User } from '@/lib/model'
 import { ethers } from 'ethers'
+import Image from 'next/image'
+import { CommunityLogo } from '@components/CommunityCard/CommunityCardHeader'
+interface CommunityTagsProps {
+    community: Group & {
+        variant?: 'default' | 'banner';
+        user: User | false | undefined;
+    };
+}
+function CommunityTags({ community }: CommunityTagsProps) {
+    return community?.groupDetails?.tags?.length ? (
+        <div className="flex-grow-0 grid grid-cols-2 grid-rows-3 gap-2 overflow-y-scroll">
+            {/* Sticky Label */}
+            <div className="col-span-1 row-span-1 font-semibold sticky top-0 bg-white z-10">
+                Tags
+            </div>
+            {/* Empty cell next to the label */}
+            <div className="col-span-1 row-span-1"></div>
 
-function CommunityTags({
-  community,
-}: {
-  community: Group & { variant?: 'default' | 'banner'; user: User | false | undefined }
-}) {
-  return community?.groupDetails?.tags?.length ? (
-    <ItemContainer variant={'singleItem'}>
-      <p className="mb-1 font-semibold">Tags</p>
-      {community?.groupDetails?.tags
-        .filter(tag => tag !== ethers.constants.HashZero)
-        ?.map(tag => (
-          <p className="w-min rounded bg-blue-500 px-2 py-1 text-xs text-white" key={tag}>
-            {getStringFromBytes32(tag)}
-          </p>
-        ))}
-    </ItemContainer>
-  ) : (
-    <></>
-  )
+            {/* Tags List */}
+            {community?.groupDetails?.tags
+                .filter((tag) => tag !== ethers.constants.HashZero)
+                ?.map((tag, index) => (
+                    <div
+                        className="col-span-1 row-span-1 w-min rounded bg-primary-500 p-0.5 text-xs text-white"
+                        key={tag}
+                    >
+                        {getStringFromBytes32(tag)} {/* Replace getStringFromBytes32 with your conversion function */}
+                    </div>
+                ))}
+        </div>
+    ) : (
+        <></>
+    );
 }
 
-export const CommunityCardBody = () => {
+export const CommunityCardBody = ({ logoSrc }) => {
   const community = useLocalCommunity()
 
   const isBanner = community?.variant === 'banner'
+
   return (
     <div
       className={clsx(
-        ' grid grid-cols-2  gap-4  p-4 ',
-        !community.user && ' rounded-b-lg',
-        isBanner ? 'relative mx-2 w-fit ' : ''
+        ' flex flex-grow flex-wrap items-start justify-start gap-2 p-2',
+        !community.user && 'rounded-b',
+        isBanner ? 'relative w-fit' : ''
       )}
     >
+      <CommunityLogo logoSrc={logoSrc} />
       <CommunityInfo community={community} />
       <CommunityTags community={community} />
       <CommunityChainId community={community} />
       <CommunityRequirements community={community} />
-
       {community?.variant === 'banner' && (
         <ItemContainer>
-          <p className="mb-1 font-semibold">Community Description</p>
+          <p className=" font-semibold">Community Description</p>
           <p className="col-span-auto text-sm">{community?.groupDetails?.description} </p>
         </ItemContainer>
       )}
@@ -58,20 +72,20 @@ export const CommunityCardBody = () => {
 
 const CommunityInfo = ({ community }: { community: Group }) => {
   return (
-    <ItemContainer>
-      <p className="mb-1 font-semibold">Community Info</p>
+    <div className={'flex flex-col'}>
+      <p className=" font-semibold">Community Info</p>
       <p className="text-xs">{`${community.userCount ?? 0} Members`}</p>
       <p className="text-xs">{community.posts?.length > 0 ? `${community.posts.length} Posts` : 'No posts yet'}</p>
-    </ItemContainer>
+    </div>
   )
 }
 
 const CommunityChainId = ({ community }: { community: Group }) => {
   return (
-    <ItemContainer>
-      <p className="mb-1 font-semibold">Blockchain</p>
-      <p className="text-xs">{supportedChains[community.chainId]?.name}</p>
-    </ItemContainer>
+    <div className={'flex flex-col'}>
+      <p className=" font-semibold">Block Chain</p>
+      <Image src={chainLogos[community.chainId]} alt={chainLogos[137]} width={25} height={25} />
+    </div>
   )
 }
 
@@ -81,8 +95,8 @@ interface ItemContainerVariants {
 }
 
 const itemContainerVariants: ItemContainerVariants = {
-  default: 'rounded-md p-1 ring-1 ring-gray-900/30',
-  singleItem: 'rounded-md p-1 ring-1 ring-gray-900/30 flex items-center gap-3 flex-wrap',
+  default: 'rounded ring-1 ring-gray-900/30 h-full ',
+  singleItem: 'grid grid-cols-2 gap-1 items-center rounded h-full ',
 }
 
 export const ItemContainer = ({
@@ -102,7 +116,7 @@ const CommunityRequirements = ({ community }: { community: Group }) => {
     ))
   return community?.requirements?.length > 0 ? (
     <ItemContainer>
-      <p className="mb-1 font-semibold">Requirements</p>
+      <p className=" font-semibold">Requirements</p>
       {renderRequirements()}
     </ItemContainer>
   ) : (

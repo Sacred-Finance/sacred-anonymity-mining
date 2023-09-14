@@ -36,9 +36,9 @@ export const DiscoursePostContent = ({ postId }: { postId: number }) => {
     }
 
     return (
-        <div className=" mx-auto p-4 mt-6 bg-white rounded shadow-md">
-            <div className="mb-4">
-                <div className="font-bold text-xl mb-2">Author: {postData.name} (@{postData.username})</div>
+        <div className="  p-4 bg-white rounded shadow-md">
+            <div className="">
+                <div className="font-bold text-xl ">Author: {postData.name} (@{postData.username})</div>
                 <p className="text-gray-700 text-base">Posted at: {new Date(postData.created_at).toLocaleString()}</p>
             </div>
             <div className="prose" dangerouslySetInnerHTML={{ __html: postData.cooked }} />

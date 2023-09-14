@@ -24,7 +24,7 @@ const SortBy: React.FC<SortByProps> = ({ onSortChange, targetType }) => {
       <CogIcon width={12} className="text-gray-500 dark:text-gray-200" />
       <select
         value={selectedOption}
-        className="rounded-md bg-white text-gray-900 shadow-sm hover:shadow-md dark:bg-gray-800 dark:text-gray-100"
+        className="rounded bg-white text-gray-900 shadow-sm hover:shadow-md dark:bg-gray-800 dark:text-gray-100"
         onChange={handleChange}
       >
         <option value="highest">{t('filter.highestUpVotes')}</option>

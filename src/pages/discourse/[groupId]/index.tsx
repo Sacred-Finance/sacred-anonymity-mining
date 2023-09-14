@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import WithStandardLayout from '@components/HOC/WithStandardLayout'
 import { useRouter } from 'next/router'
 import TopicPosts from '@components/Discourse/TopicPosts'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
@@ -55,24 +54,22 @@ const Index = () => {
     // scroll to top of page
     const header = document.getElementById('header')
     if (header && newPage) {
-        header.scrollIntoView({ behavior: 'auto' })
+      header.scrollIntoView({ behavior: 'auto' })
     }
   }
 
   const totalPages = Math.ceil(initialData?.post_stream?.stream.length / PAGE_SIZE)
 
   return (
-    <div className="relative mb-10 flex flex-col content-center items-center justify-center gap-4 space-y-8">
+    <div >
       <PostToTopic topic={topic as Topic} />
       <Pagination currentPage={currentPage - 1} totalPages={totalPages} onPageChange={handlePageChange} />
-      <div className="relative mx-auto  min-h-screen flex justify-center px-4 sm:w-full md:w-3/4 lg:w-1/2">
-        <TopicPosts
-          topic={{ ...topic, post_stream: { ...topic?.post_stream, posts } } as Topic}
-          onPageChange={handlePageChange}
-        />
-      </div>
+      <TopicPosts
+        topic={{ ...topic, post_stream: { ...topic?.post_stream, posts } } as Topic}
+        onPageChange={handlePageChange}
+      />
     </div>
   )
 }
 
-export default WithStandardLayout(Index)
+export default Index

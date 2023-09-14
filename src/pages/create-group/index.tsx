@@ -1,9 +1,9 @@
 import React, { useMemo, useState } from 'react'
 import { ethers, utils } from 'ethers'
-import { erc20dummyABI, jsonRPCProvider, supportedChains, supportedChainsArray } from '../../constant/const'
+import { erc20dummyABI, jsonRPCProvider, supportedChains, supportedChainsArray } from '@/constant/const'
 import { FieldArray, FormikProvider, useFormik } from 'formik'
 import { Chain } from 'wagmi'
-import { ToolTip } from '@components/HOC/ToolTip'
+import ToolTip from '@components/HOC/ToolTip'
 import { PrimaryButton } from '@components/buttons'
 import { useTranslation } from 'next-i18next'
 import { polygonMumbai } from 'wagmi/chains'
@@ -13,12 +13,7 @@ import { buttonVariants } from '@styles/classes'
 import { ChevronRightIcon, QuestionMarkCircleIcon } from '@heroicons/react/20/solid'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useCreateCommunity } from '@/hooks/useCreateCommunity'
-import Header from '@components/Header'
-import { Breadcrumbs } from '@components/Breadcrumbs'
-import Footer from '@components/Footer'
 import Link from 'next/link'
-import WithStandardLayout from '@components/HOC/WithStandardLayout'
-import { isImageFile } from '@pages/communities/[groupId]/edit'
 
 export interface HandleSetImage {
   file: File | null
@@ -31,7 +26,7 @@ function RemoveIcon() {
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
-      className="m-auto h-5 w-5"
+      className="h-5 w-5"
     >
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 12H6" />
     </svg>
@@ -195,7 +190,7 @@ function CreateGroupFormUI({ onCreate }) {
         )))
 
   return (
-    <div className={clsx('mx-auto mb-64 h-screen w-full max-w-screen-xl space-y-6 sm:p-8 md:p-24')}>
+    <div className={clsx(' w-full max-w-screen-xl space-y-6 sm:p-8 md:p-24')}>
       <div className="flex items-center justify-between py-4">
         <h1 className="text-2xl font-semibold text-gray-700">{t('createCommunity')}</h1>
       </div>
@@ -203,7 +198,7 @@ function CreateGroupFormUI({ onCreate }) {
       <div className="flex flex-col space-y-4">
         <label className="text-lg text-gray-700">{t('placeholder.communityName')}</label>
         <input
-          className="rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
+          className="rounded border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
           placeholder={'An awesome community name'}
           type="text"
           value={groupName}
@@ -212,13 +207,13 @@ function CreateGroupFormUI({ onCreate }) {
       </div>
       <div className="flex flex-col space-y-4">
         <label className="text-lg text-gray-700">{t('placeholder.communityTags')}</label>
-        <div className={'flex gap-2'}>
+        <div className={'flex gap-4'}>
           {tags.map((tag, index) => (
             <div key={index}>
               {tag.trim() && (
                 <span
                   key={index}
-                  className="rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
+                  className="rounded border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
                 >
                   {tag}
                 </span>
@@ -227,7 +222,7 @@ function CreateGroupFormUI({ onCreate }) {
           ))}
         </div>
         <input
-          className="rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
+          className="rounded border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
           placeholder={'tag1, tag2, tag3'}
           type="text"
           value={tags}
@@ -237,14 +232,14 @@ function CreateGroupFormUI({ onCreate }) {
       <div className="flex flex-col space-y-4">
         <label className="text-lg text-gray-700">{t('placeholder.communityDescription')}</label>
         <textarea
-          className="h-20 rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
+          className="h-20 rounded border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
           placeholder={t('placeholder.communityDescriptionContent') || ''}
           value={groupDescription}
           onChange={handleDescriptionChange}
         />
       </div>
 
-      <div className={'flex items-start gap-10'}>
+      <div className={'flex items-start gap-4'}>
         <PictureUpload
           uploadedImageUrl={bannerUrl}
           displayName={t('banner')}
@@ -261,11 +256,7 @@ function CreateGroupFormUI({ onCreate }) {
 
       <div className="flex items-center justify-between space-x-4">
         <div className="flex items-center space-x-4">
-          <ToolTip
-            type="primary"
-            title={t('toolTip.tokenGating.title')}
-            message={t('toolTip.tokenGating.message') || ''}
-          >
+          <ToolTip toolTip={t('toolTip.tokenGating.message') || ''}>
             <QuestionMarkCircleIcon className="h-6 w-6 text-gray-700" />
           </ToolTip>
 
@@ -289,11 +280,11 @@ function CreateGroupFormUI({ onCreate }) {
           />
         </div>
 
-        <div className=" relative inline-flex w-[200px] gap-2">
+        <div className=" relative inline-flex w-[200px] gap-4">
           <div className="group relative w-60">
             <button
               disabled={!reqMandatory}
-              className="flex w-full items-center justify-between rounded-md border border-gray-300 bg-white px-2 py-1 text-gray-700 focus:outline-none"
+              className="flex w-full items-center justify-between rounded border border-gray-300 bg-white px-2 py-1 text-gray-700 focus:outline-none"
             >
               {selectedChain.name}
               <ChevronRightIcon
@@ -302,7 +293,7 @@ function CreateGroupFormUI({ onCreate }) {
               />
             </button>
 
-            <div className="absolute left-0 z-50 hidden w-48 overflow-hidden rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 group-hover:block">
+            <div className="absolute left-0 z-50 hidden w-48 overflow-hidden rounded bg-white shadow-lg ring-1 ring-black ring-opacity-5 group-hover:block">
               <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
                 {supportedChainsArray.map((k, i) => (
                   <button
@@ -326,12 +317,12 @@ function CreateGroupFormUI({ onCreate }) {
           </button>
         </div>
       </div>
-      <hr className="my-4 border-border-on-dark" />
+      <hr className="border-border-on-dark" />
       <FormikProvider value={formik}>
         <AnimatePresence>
           <motion.form onSubmit={submit}>
             {formik.values.tokenRequirements.length === 0 && (
-              <div className="flex flex-col items-center justify-center space-y-4 rounded-md border border-gray-200 bg-gray-100 p-4">
+              <div className="flex flex-col items-center justify-center space-y-4 rounded border border-gray-200 bg-gray-100 p-4">
                 <p className="text-sm font-semibold text-gray-700">{t('placeholder.noTokenRequirements')}</p>
               </div>
             )}
@@ -354,7 +345,7 @@ function CreateGroupFormUI({ onCreate }) {
                       <div className="relative flex-grow">
                         <input
                           disabled={!reqMandatory}
-                          className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
+                          className="w-full rounded border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
                           value={r.tokenAddress}
                           onChange={e => handleReqInput(e, i)}
                           name={`tokenRequirements.${i}.tokenAddress`}
@@ -369,7 +360,7 @@ function CreateGroupFormUI({ onCreate }) {
                       <div className="w-32">
                         <input
                           disabled={!reqMandatory}
-                          className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
+                          className="w-full rounded border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
                           type="number"
                           min={0}
                           defaultValue={r.minAmount}
@@ -406,7 +397,7 @@ function CreateGroupFormUI({ onCreate }) {
       <div className={'flex flex-col justify-between space-x-0 py-2 md:flex-row md:space-x-2 md:py-4'}>
         <Link
           href="/"
-          className="mb-2 rounded-lg border-2 border-red-400 p-2 text-red-500 hover:bg-red-500 hover:text-white md:mb-0 md:px-4"
+          className="rounded border-2 border-red-400 p-2 text-red-500 hover:bg-red-500 hover:text-white md:px-4"
         >
           Close
         </Link>
@@ -427,4 +418,4 @@ function CreateGroupForm() {
   return <CreateGroupFormUI onCreate={createCommunity} />
 }
 
-export default WithStandardLayout(CreateGroupForm)
+export default CreateGroupForm

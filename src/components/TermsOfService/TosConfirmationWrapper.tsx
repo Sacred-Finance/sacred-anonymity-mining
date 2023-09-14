@@ -51,8 +51,8 @@ export const TosConfirmationWrapper: React.FC<TosConfirmationWrapperProps> = ({
         >
           <Dialog.Overlay className="fixed inset-0 bg-black opacity-30" />
 
-          <div className="z-50 inline-block w-full max-w-md transform overflow-hidden rounded-lg bg-white text-left align-middle shadow-xl transition-all">
-            <Dialog.Title className="flex items-center justify-between rounded-t-lg bg-gray-50 p-6 font-semibold text-gray-900">
+          <div className="z-50 inline-block w-full max-w-md transform overflow-hidden rounded bg-white text-left align-middle shadow-xl transition-all">
+            <Dialog.Title className="flex items-center justify-between rounded-t bg-gray-50 p-6 font-semibold text-gray-900">
               <span>{headerText}</span>
               <button onClick={() => setIsOpen(false)} className="focus:outline-none">
                 <svg
@@ -68,7 +68,7 @@ export const TosConfirmationWrapper: React.FC<TosConfirmationWrapperProps> = ({
             </Dialog.Title>
 
             <Dialog.Description className="px-6 py-4 text-gray-600">
-              <div className="mb-4">{descriptionText}</div>
+              <div className="">{descriptionText}</div>
               <a
                 className="text-purple-600 underline hover:text-purple-900"
                 href="https://sacred-finance.github.io/Sacred_Terms_of_Service.pdf"
@@ -78,7 +78,7 @@ export const TosConfirmationWrapper: React.FC<TosConfirmationWrapperProps> = ({
                 {t('termsOfService.viewTermsOfService')}
               </a>
 
-              <div className="mt-4">
+              <div className="">
                 <label className="flex items-center">
                   <input
                     type="checkbox"
@@ -86,12 +86,12 @@ export const TosConfirmationWrapper: React.FC<TosConfirmationWrapperProps> = ({
                     onChange={e => setIsChecked(e.target.checked)}
                     className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-0"
                   />
-                  <span className="ml-2">{t('termsOfService.agreeCheckBox')}</span>
+                  <span className="">{t('termsOfService.agreeCheckBox')}</span>
                 </label>
               </div>
             </Dialog.Description>
 
-            <div className="rounded-b-lg bg-gray-50 px-6 py-4">
+            <div className="rounded-b bg-gray-50 px-6 py-4">
               <button
                 onClick={handleAgree}
                 className={`rounded bg-blue-500 px-4 py-2 font-semibold text-white hover:bg-blue-700 focus:outline-none ${

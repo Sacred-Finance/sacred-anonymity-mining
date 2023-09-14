@@ -46,11 +46,7 @@ export const DynamicLogo = ({ purple = '#721BEF', black = '#000', className }) =
     black = '#fff'
   }
 
-  const [isMounted, setIsMounted] = React.useState(false)
-  React.useEffect(() => {
-    setIsMounted(true)
-  }, [])
-  if (!isMounted) return null
+
   return (
     <motion.svg
       height="220"

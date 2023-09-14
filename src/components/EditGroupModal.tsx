@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { ToolTip } from './HOC/ToolTip'
 import { useTranslation } from 'next-i18next'
 
 import { createNote } from '@/lib/utils'
 import { Identity } from '@semaphore-protocol/identity'
 import { useAccount } from 'wagmi'
 import Link from 'next/link'
+import ToolTip from '@components/HOC/ToolTip'
 
 function EditGroupModal({ community, hidden = false }) {
   const { address } = useAccount()
@@ -28,13 +28,10 @@ function EditGroupModal({ community, hidden = false }) {
   if (hidden) return null
   return (
     <>
-      <ToolTip
-        type="primary"
-        title={t('toolTip.editCommunity.title')}
-      >
+      <ToolTip tooltip={t('toolTip.editCommunity.title')}>
         <Link
           id="edit-community-button"
-          className={`absolute right-0 mr-2 mt-2 rounded-full bg-gray-100 p-2 ring-1 ring-white transition duration-100 hover:bg-purple-600 hover:text-white ${
+          className={`absolute right-0  rounded-full bg-gray-100 p-2 ring-1 ring-white transition duration-100 hover:bg-purple-600 hover:text-white ${
             !isOwner || hidden ? 'hidden' : ''
           }`}
           aria-label="edit community"

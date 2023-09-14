@@ -129,7 +129,7 @@ const Access: React.FC = () => {
     const [value, setValue] = useState('')
     const patternError = value && !/^0x[a-fA-F0-9]{40}$/g.test(value)
     return (
-      <div className="flex flex-row gap-3">
+      <div className="flex flex-row gap-4">
         {/* <FormControl isInvalid={patternError}> */}
         <input
           type="text"
@@ -189,8 +189,8 @@ const Access: React.FC = () => {
     )
   }
   return (
-    <div className='m-10'>
-      <div className="flex flex-col gap-5">
+    <div className=''>
+      <div className="flex flex-col gap-4">
         <h1 className="text-left font-bold text-[22px]" color={'primary.500'}>
           Admins
         </h1>

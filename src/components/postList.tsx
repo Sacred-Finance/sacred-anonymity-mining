@@ -29,7 +29,7 @@ export const PostList = ({ posts, voteForPost, handleSortChange, editor = undefi
   }, [address]);
 
   return (
-    <div className="mt-6 flex flex-col space-y-4 ">
+    <div className="flex flex-col space-y-4 ">
       {showFilter && <SortBy onSortChange={handleSortChange} targetType="posts" />}
       {posts.map((p, i) => (
         [0, 1, 2].includes(+p?.kind) && (
@@ -48,8 +48,8 @@ export const PostList = ({ posts, voteForPost, handleSortChange, editor = undefi
 }
 
 const classes = {
-  postItem: 'flex items-start space-x-4 rounded-lg border-2 border-gray-200',
-  postItemPostPage: 'cursor-auto flex items-start space-x-4 rounded-lg border-2 border-gray-200 p-4',
+  postItem: 'flex items-start space-x-4 rounded border-2 border-gray-200',
+  postItemPostPage: 'cursor-auto flex items-start space-x-4 rounded border-2 border-gray-200 p-4',
 }
 
 interface PostItem {
@@ -68,7 +68,6 @@ export const PostItem = ({
   post,
   showDescription,
   isFormOpen,
-  setIsFormOpen,
   editor = undefined,
   isAdminOrModerator,
 }: PostItem) => {
@@ -121,7 +120,7 @@ export const PostItem = ({
 
   const isPreview = isNaN(postId)
   return (
-    <div className="relative mx-auto flex w-full items-stretch justify-between overflow-hidden rounded border  bg-gray-100 ">
+    <div className="relative  flex w-full items-stretch justify-between overflow-hidden rounded border  bg-gray-100 ">
       <div className="w-full bg-gray-50">
         <div className="border-r px-4 py-2">
           <div>
@@ -149,7 +148,7 @@ export const PostItem = ({
           <div className={'text-sm text-gray-900'}>{editor && isPostEditable && editor}</div>
           {post.kind == 2 && <PollUI id={post.id} groupId={post.groupId} post={post}></PollUI> }
           <br />
-          <div className='flex flex-row items-center gap-3'>
+          <div className='flex flex-row items-center gap-4'>
             {isPreview
               ? (post?.childIds?.length && <span className="text-gray-600">{post?.childIds?.length} comments</span>) || (
                   <span className="text-gray-600">0 comments</span>
@@ -160,8 +159,8 @@ export const PostItem = ({
         </div>
       </div>
 
-      <div className={'sticky top-0 mx-5  flex items-center justify-around self-start'}>
-        <div className={'flex items-center gap-1 pe-2'}>
+      <div className={'sticky top-0   flex items-center justify-around self-start'}>
+        <div className={'flex items-center gap-4 pe-2'}>
           <VoteUpButton
             isConnected={!!address}
             isJoined={!!isJoined}
@@ -171,7 +170,7 @@ export const PostItem = ({
           />
           <span className=" font-bold text-gray-700">{upvote}</span>
         </div>
-        <div className={'mb-1 flex items-center gap-1 pe-2'}>
+        <div className={'flex items-center gap-4 pe-2'}>
           <VoteDownButton
             isConnected={!!address}
             isJoined={!!isJoined}
@@ -183,7 +182,7 @@ export const PostItem = ({
         </div>
       </div>
 
-      <div className={'m-1'}>
+      <div className={''}>
         <SummaryButton postData={OutputDataToHTML(post?.description)} postTitle={title} />
       </div>
     </div>

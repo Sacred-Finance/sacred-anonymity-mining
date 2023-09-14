@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react'
 import { Post } from '@/lib/post'
-import WithStandardLayout from '@components/HOC/WithStandardLayout'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { PostPage } from '@components/PostPage'
 import { ethers } from 'ethers'
@@ -59,4 +58,4 @@ function PostIndex() {
   )
 }
 
-export default WithStandardLayout(PostIndex)
+export default (PostIndex)

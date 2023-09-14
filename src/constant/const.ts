@@ -786,6 +786,14 @@ export const supportedChains: { [key: string]: Chain } = {
   [avalancheFuji.id]: avalancheFuji,
 }
 
+export const chainLogos: { [key: string]: string } = {
+    [polygonMumbai.id]: '/poly.png',
+    [goerli.id]: '/goerli.svg',
+    [sepolia.id]: '/sepolia.svg',
+    [avalancheFuji.id]: '/avax.png',
+    // [ethereum.id]: '/eth.svg',
+}
+
 export const supportedChainsArray = Object.keys(supportedChains).map(k => supportedChains[k])
 
 export const jsonRPCProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL, {

@@ -90,7 +90,7 @@ const StatsBadge = memo(
 StatsBadge.displayName = 'StatsBadge'
 
 const UserInfo = ({ post }) => (
-  <div className="mb-4 flex items-center space-x-4">
+  <div className=" flex items-center space-x-4">
     <Avatar post={post} size={80} />
     <div className="flex-1">
       <div className="text-lg font-semibold text-gray-500">{_.startCase(post.username)}</div>
@@ -102,11 +102,11 @@ const UserInfo = ({ post }) => (
 )
 
 const PostContent = ({ post }) => (
-  <div className="mt-4 rounded border border-gray-200 bg-gray-100 p-4 transition-colors duration-1000">
+  <div className="rounded border border-gray-200 bg-gray-100 p-4 transition-colors duration-1000">
     <Cooked post={post} />
 
     {post?.link_counts?.length > 0 && (
-      <div className="mt-4">
+      <div className="">
         <h3 className="text-lg font-semibold">Links:</h3>
         <ul className="list-inside list-disc space-y-1 text-blue-500">
           {post.link_counts.map((link, linkIndex) => (
@@ -156,7 +156,7 @@ const RenderPost = ({
       viewport={{
         amount: 0.5,
       }}
-      className="mb-16 grid w-full gap-4"
+      className=" grid w-full gap-4"
     >
       <div className="relative col-span-4 flex w-full flex-col ">
         <div className="z-10 flex items-center justify-between  rounded-t bg-primary-500 py-1 text-center text-white">
@@ -179,10 +179,10 @@ const RenderPost = ({
           />
 
           <PostContent post={post} />
-          <div className={' mt-4 mx-4 flex w-full justify-between'}>
+          <div className={'  flex w-full justify-between'}>
             <SummaryButton postData={post.cooked} />
           </div>
-          <div className={'wrap mt-4 flex w-full justify-between'}>
+          <div className={'wrap flex w-full justify-between'}>
             <ReplyToPost post={post} addReplyToPosts={addReplyToPosts} /> &nbsp;
           </div>
         </div>
@@ -201,7 +201,7 @@ const PostFooter = ({ post }) => (
       <StatsBadge pluralizeLabel label={'Reply'} value={post.reply_count.toString()} />
     </div>
 
-    <div className={'absolute right-0 mx-2 flex gap-4 self-end justify-self-end'}>
+    <div className={'absolute right-0  flex gap-4 self-end justify-self-end'}>
       <PrimaryButton resetClasses disabled>
         <HandThumbUpIcon width={20} />
       </PrimaryButton>
@@ -227,9 +227,9 @@ const LinkedPostButton = ({ postNumber, onPageChange, setTargetPostNumber }) => 
 )
 
 const PostHeader = ({ post, replyToPostRef, postRefs, onPageChange, setTargetPostNumber }) => (
-  <header className="mb-4 flex w-full justify-between">
+  <header className=" flex w-full justify-between">
     {post.reply_to_post_number ? (
-      <div className="flex gap-2">
+      <div className="flex gap-4">
         Reply to:
         <LinkedPostButton
           postNumber={post.reply_to_post_number}
@@ -243,7 +243,7 @@ const PostHeader = ({ post, replyToPostRef, postRefs, onPageChange, setTargetPos
     )}
 
     {post?.replies?.length > 0 && (
-      <div className="flex items-center gap-2 justify-self-end ">
+      <div className="flex items-center gap-4 justify-self-end ">
         Replies:
         {post.replies.map(reply => (
           <LinkedPostButton

@@ -6,17 +6,13 @@ import RemoveGroup from '../RemoveGroup'
 export const CommunityCardFooter = () => {
   const community = useLocalCommunity()
 
-
   if (!community) return null
 
   return (
-    <div className="flex items-center justify-end rounded-b-lg bg-white p-4 dark:bg-gray-900 ">
-      <div className='mr-auto'>
-        <RemoveGroup groupId={community.id}  hidden={false} />
-      </div>
-      <div>
+    <div className="flex items-center justify-end p-4">
+      <RemoveGroup groupId={community.id} hidden={false} />
       {community ? (
-        <JoinCommunityButton community={community} hideIfJoined={community.variant === 'banner'}  />
+        <JoinCommunityButton community={community} hideIfJoined={community.variant === 'banner'} />
       ) : (
         <svg className="h-5 w-5 animate-spin text-blue-600" viewBox="0 0 24 24">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -27,7 +23,6 @@ export const CommunityCardFooter = () => {
           ></path>
         </svg>
       )}
-      </div>
     </div>
   )
 }

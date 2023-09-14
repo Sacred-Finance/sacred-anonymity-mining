@@ -162,7 +162,7 @@ export function EditGroup({ group }: EditGroupProps) {
 
   return (
     <div
-      className={clsx('relative mx-auto mb-64 grid h-screen w-full max-w-screen-2xl  grid-cols-1 gap-8 sm:p-8 md:p-24')}
+      className={clsx('relative   grid  w-full max-w-screen-2xl  grid-cols-1 gap-4 sm:p-8 md:p-24')}
     >
       <div className="flex flex-col space-y-4 sm:col-span-full md:col-span-6 lg:col-span-6">
         <div className="flex flex-row items-center justify-between py-4">
@@ -175,7 +175,7 @@ export function EditGroup({ group }: EditGroupProps) {
         <div className="flex flex-col space-y-4">
           <label className="text-lg text-gray-700">{t('placeholder.communityName')}</label>
           <input
-            className="rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
+            className="rounded border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
             placeholder={'An awesome community name'}
             type="text"
             value={groupName}
@@ -185,13 +185,13 @@ export function EditGroup({ group }: EditGroupProps) {
 
         <div className="flex flex-col space-y-4">
           <label className="text-lg text-gray-700">{t('placeholder.communityTags')}</label>
-          <div className={'flex gap-2'}>
+          <div className={'flex gap-4'}>
             {tags.map((tag, index) => (
               <div key={index}>
                 {tag.trim() && (
                   <span
                     key={index}
-                    className="rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
+                    className="rounded border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
                   >
                     {tag}
                   </span>
@@ -200,7 +200,7 @@ export function EditGroup({ group }: EditGroupProps) {
             ))}
           </div>
           <input
-            className="rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
+            className="rounded border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
             placeholder={'tag1, tag2, tag3'}
             type="text"
             value={tags}
@@ -211,14 +211,14 @@ export function EditGroup({ group }: EditGroupProps) {
         <div className="flex flex-col space-y-4">
           <label className="text-lg text-gray-700">{t('placeholder.communityDescription')}</label>
           <textarea
-            className="h-20 rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
+            className="h-20 rounded border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
             placeholder={t('placeholder.communityDescriptionContent') || ''}
             value={groupDescriptionState}
             onChange={handleDescriptionChange}
           />
         </div>
 
-        <div className="flex gap-3 ">
+        <div className="flex gap-4 ">
           <PictureUpload
             uploadedImageUrl={bannerUrl}
             displayName={t('banner')}
@@ -237,7 +237,7 @@ export function EditGroup({ group }: EditGroupProps) {
         <div className={'flex flex-col justify-between space-x-0 py-2 md:flex-row md:space-x-2 md:py-4'}>
           <Link
             href="/"
-            className="mb-2 rounded-lg border-2 border-red-400 p-2 text-red-500 hover:bg-red-500 hover:text-white md:mb-0 md:px-4"
+            className=" rounded border-2 border-red-400 p-2 text-red-500 hover:bg-red-500 hover:text-white  md:px-4"
           >
             Back
           </Link>
@@ -252,7 +252,7 @@ export function EditGroup({ group }: EditGroupProps) {
         </div>
       </div>
 
-      {previewCard && <div className="fixed inset-0 m-0 bg-gray-900/60 " />}
+      {previewCard && <div className="fixed inset-0  bg-gray-900/60 " />}
       {previewCard && (
           <div className="absolute inset-0  flex flex-col items-center space-y-8 p-10 rounded">
             <h1 className="text-4xl font-semibold text-white">Double check your changes!</h1>

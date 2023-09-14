@@ -25,14 +25,14 @@ export const Breadcrumbs = ({ backdrop = false }): JSX.Element => {
 
   return (
     <nav
-      className="flex justify-between gap-2 rounded-lg border border-gray-200 bg-gray-50 px-5 py-3 text-gray-700 dark:border-gray-700 dark:bg-gray-800"
+      className="flex justify-between gap-4 rounded border border-gray-200 bg-gray-50 px-5 py-3 text-gray-700 dark:border-gray-700 dark:bg-gray-800"
       aria-label="Breadcrumb"
     >
-      <ol className="flex items-center gap-5">
+      <ol className="flex items-center gap-4">
         {breadcrumbItems?.map((item, index) => {
           if (!item) return null
           return (
-            <li key={index} className="inline-flex items-center gap-5">
+            <li key={index} className="inline-flex items-center gap-4">
               <Link
                 href={item.href}
                 className={` inline-flex items-center rounded border px-3 py-1 text-sm font-medium text-gray-700 dark:text-gray-400 dark:hover:text-white ${

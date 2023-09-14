@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
 
 const ListHeader = ({ children }) => {
-  return <p className="mb-2 text-lg font-semibold text-gray-200 dark:text-gray-200">{children}</p>
+  return <p className=" text-lg font-semibold text-gray-200 dark:text-gray-200">{children}</p>
 }
 
 export default function Footer(): JSX.Element {
@@ -13,7 +13,7 @@ export default function Footer(): JSX.Element {
 
   return (
     <footer className="w-full border-t border-gray-700 bg-gray-800 py-4 dark:bg-gray-900">
-      <div className="container mx-auto grid grid-cols-1 gap-8 px-4 sm:px-6 md:grid-cols-2 lg:px-8">
+      <div className="container  grid grid-cols-1 gap-4 px-4 sm:px-6 md:grid-cols-2 lg:px-8">
         <div className="flex flex-col items-center space-y-3">
           <ListHeader>{t('footer.followUs')}</ListHeader>
           <a href="http://discord.gg/43spxvqqmJ" className="text-gray-300 hover:text-purple-500">
@@ -45,7 +45,7 @@ export default function Footer(): JSX.Element {
           </a>
         </div>
       </div>
-      <div className="container mx-auto mt-8 border-t border-gray-700 px-4 pt-10 sm:px-6 lg:px-8">
+      <div className="container  border-t border-gray-700 px-4 pt-10 sm:px-6 lg:px-8">
         <div className="flex justify-center">
           <Logo invertTheme={true}  />
         </div>
