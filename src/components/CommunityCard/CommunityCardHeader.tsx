@@ -6,19 +6,28 @@ import { MobileLogo } from '@components/Logo'
 import Image from 'next/image'
 import { User } from '@/lib/model'
 import { Group } from '@/types/contract/ForumInterface'
+import { useValidatedImage } from '@components/CommunityCard/UseValidatedImage'
 
 interface CommunityCardHeaderProps {
-  logoSrc?: string
-  bannerSrc?: string
+  showDescription?: boolean
 }
 
-export function CommunityLogo(props: { logoSrc: string }) {
+export function CommunityLogo() {
+  const community = useLocalCommunity()
   const logoClasses = '-h-24 relative col-span-2 w-24 rounded-full border-4 border-white shadow-lg'
 
+  const logoSrc = useValidatedImage(community?.groupDetails?.logoCID)
   return (
     <>
-      {props.logoSrc ? (
-        <Image className={logoClasses} src={props.logoSrc ?? mobileLogo} alt={"community logo"} width={100} height={100} unoptimized />
+      {logoSrc ? (
+        <Image
+          className={logoClasses}
+          src={logoSrc ?? mobileLogo}
+          alt={'community logo'}
+          width={100}
+          height={100}
+          unoptimized
+        />
       ) : (
         <MobileLogo className={logoClasses} />
       )}
@@ -61,8 +70,14 @@ function CommunityBanner(props: {
   )
 }
 
-export const CommunityCardHeader: React.FC<CommunityCardHeaderProps> = ({ bannerSrc, logoSrc }) => {
+export const CommunityCardHeader: React.FC<CommunityCardHeaderProps> = ({
+  showDescription = true,
+}: {
+  showDescription: boolean
+}) => {
   const community = useLocalCommunity()
+
+  const bannerSrc = useValidatedImage(community?.groupDetails?.bannerCID)
 
   const isBanner = community?.variant === 'banner'
 
@@ -78,9 +93,7 @@ export const CommunityCardHeader: React.FC<CommunityCardHeaderProps> = ({ banner
         community={community}
       />
 
-      {/*<CommunityLogo srcLogoOverride={logoSrc} logoSrc={logoSrc} />*/}
-
-      {community?.groupDetails?.description && community.groupDetails.description !== community.name && !isBanner && (
+      {community?.groupDetails?.description && showDescription && community.groupDetails.description !== community.name && !isBanner && (
         <div
           className={clsx(
             'absolute bottom-0 left-[25%] col-span-6 me-2 max-h-[30px] w-fit overflow-y-hidden rounded border bg-gray-50 p-1 hover:z-50 hover:max-h-full hover:w-auto'

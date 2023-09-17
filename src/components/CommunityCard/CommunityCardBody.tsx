@@ -9,43 +9,39 @@ import { User } from '@/lib/model'
 import { ethers } from 'ethers'
 import Image from 'next/image'
 import { CommunityLogo } from '@components/CommunityCard/CommunityCardHeader'
+import { useValidatedImage } from '@components/CommunityCard/UseValidatedImage'
 interface CommunityTagsProps {
-    community: Group & {
-        variant?: 'default' | 'banner';
-        user: User | false | undefined;
-    };
+  community: Group & {
+    variant?: 'default' | 'banner'
+    user: User | false | undefined
+  }
 }
 function CommunityTags({ community }: CommunityTagsProps) {
-    return community?.groupDetails?.tags?.length ? (
-        <div className="flex-grow-0 grid grid-cols-2 grid-rows-3 gap-2 overflow-y-scroll">
-            {/* Sticky Label */}
-            <div className="col-span-1 row-span-1 font-semibold sticky top-0 bg-white z-10">
-                Tags
-            </div>
-            {/* Empty cell next to the label */}
-            <div className="col-span-1 row-span-1"></div>
+  return community?.groupDetails?.tags?.length ? (
+    <div className="grid flex-grow-0 grid-cols-2 grid-rows-3 gap-2 overflow-y-scroll">
+      <div className="sticky top-0 z-10 col-span-1 row-span-1 bg-white font-semibold">Tags</div>
+      <div className="col-span-1 row-span-1"></div>
 
-            {/* Tags List */}
-            {community?.groupDetails?.tags
-                .filter((tag) => tag !== ethers.constants.HashZero)
-                ?.map((tag, index) => (
-                    <div
-                        className="col-span-1 row-span-1 w-min rounded bg-primary-500 p-0.5 text-xs text-white"
-                        key={tag}
-                    >
-                        {getStringFromBytes32(tag)} {/* Replace getStringFromBytes32 with your conversion function */}
-                    </div>
-                ))}
-        </div>
-    ) : (
-        <></>
-    );
+      {/* Tags List */}
+      {community?.groupDetails?.tags
+        .filter(tag => tag !== ethers.constants.HashZero)
+        ?.map((tag, index) => (
+          <div className="col-span-1 row-span-1 w-min rounded bg-primary-500 p-0.5 text-xs text-white" key={tag}>
+            {getStringFromBytes32(tag)} {/* Replace getStringFromBytes32 with your conversion function */}
+          </div>
+        ))}
+    </div>
+  ) : (
+    <></>
+  )
 }
 
-export const CommunityCardBody = ({ logoSrc }) => {
+export const CommunityCardBody = () => {
   const community = useLocalCommunity()
 
   const isBanner = community?.variant === 'banner'
+
+  const logoSrc = useValidatedImage(community?.groupDetails?.logoCID)
 
   return (
     <div
@@ -55,7 +51,7 @@ export const CommunityCardBody = ({ logoSrc }) => {
         isBanner ? 'relative w-fit' : ''
       )}
     >
-      <CommunityLogo logoSrc={logoSrc} />
+      <CommunityLogo />
       <CommunityInfo community={community} />
       <CommunityTags community={community} />
       <CommunityChainId community={community} />

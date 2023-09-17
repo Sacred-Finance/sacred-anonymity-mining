@@ -215,6 +215,7 @@ export class UnirepUser {
     return this.reputationLoaded
   }
 
+
   /**
    * Update the user state.
    */

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import { CommunityCardFooter } from './CommunityCardFooter'
-import EditGroupModal from '../EditGroupModal'
+import EditGroupNavigationButton, { useCheckIsOwner } from '../EditGroupNavigationButton'
 import RemoveGroup from '../RemoveGroup'
 import { useRemoveGroup } from '../../hooks/useRemoveGroup'
 import { CommunityCardHeader } from './CommunityCardHeader'
@@ -12,28 +12,66 @@ import clsx from 'clsx'
 import { User } from '@/lib/model'
 import { motion } from 'framer-motion'
 import { useValidatedImage } from '@components/CommunityCard/UseValidatedImage'
+import { useAccount } from 'wagmi'
 
-export const CommunityContext = React.createContext<
+export const CommunityCardContext = React.createContext<
   (Group & { variant?: 'default' | 'banner'; user: User | false | undefined }) | null
 >(null)
 
 export const useLocalCommunity = () => {
-  const community = React.useContext(CommunityContext)
+  const community = React.useContext(CommunityCardContext)
   if (!community) throw new Error('CommunityContext not found')
   return community
 }
 export const CommunityCard = ({
   community,
-  index,
   isAdmin = false,
   variant = 'default',
   ...props
 }: {
   community: Group & { variant?: 'default' | 'banner' }
-  index: number
   isAdmin?: boolean
   variant?: 'default' | 'banner'
 }) => {
+
+  const user = useUserIfJoined(community.groupId as string)
+
+  // new ref for modal
+  const cardRef = useRef<HTMLDivElement | null>(null)
+
+  if (!community || !community?.id) return <div className={'community-card-container'}></div>
+
+  if (community)
+    return (
+      <motion.div
+        className={clsx(
+          'hover:border-opacity-50  hover:ring-opacity-60 hover:ring-offset-2',
+          variant === 'banner'
+            ? 'pointer-events-auto'
+            : 'hover-peer:-z-[1] peer h-fit max-w-xl flex-grow items-center overflow-hidden rounded border border-gray-900 bg-white transition-all duration-300 ease-in-out hover:z-[150] sm:w-full md:w-auto '
+        )}
+        ref={cardRef}
+      >
+        <CommunityCardContext.Provider value={{ ...community, variant, user }}>
+          <EditGroupNavigationButton community={community} />
+          <Link
+            href={`/communities/${community?.groupId}`}
+            className={clsx(variant !== 'banner' ? 'pointer-events-auto ' : 'pointer-events-none')}
+          >
+            <CommunityCardHeader />
+            <CommunityCardBody />
+          </Link>
+
+          <div className={'flex-grow'} />
+          <CommunityCardFooter />
+        </CommunityCardContext.Provider>
+      </motion.div>
+    )
+
+  return null
+}
+
+const useCommunityEdit = (community: Group) => {
   const [isEditGroupVisible, setIsEditGroupVisible] = React.useState(false)
   const [isDeleteGroupVisible, setIsDeleteGroupVisible] = React.useState(false)
   const user = useUserIfJoined(community.groupId as string)
@@ -58,37 +96,5 @@ export const CommunityCard = ({
     }
   }, [cardRef])
 
-  const bannerSrc = useValidatedImage(community?.groupDetails?.bannerCID)
-  const logoSrc = useValidatedImage(community?.groupDetails?.logoCID)
-
-  if (!community || !community?.id) return <div className={'community-card-container'}></div>
-
-  if (community)
-    return (
-      <motion.div
-        className={clsx(
-          'hover:border-opacity-50 hover:shadow-lg hover:ring-2 hover:ring-primary-500 hover:ring-opacity-60 hover:ring-offset-2',
-          variant === 'banner'
-            ? 'pointer-events-auto'
-            : 'hover-peer:-z-[1] peer h-fit max-w-xl flex-grow items-center overflow-hidden rounded border border-gray-900 bg-white transition-all duration-300 ease-in-out hover:z-[150] sm:w-full md:w-auto '
-        )}
-        ref={cardRef}
-      >
-        <CommunityContext.Provider value={{ ...community, variant, user }}>
-          <EditGroupModal community={community} hidden={!isEditGroupVisible} />
-          <Link
-            href={`/communities/${community?.groupId}`}
-            className={clsx(variant !== 'banner' ? 'pointer-events-auto ' : 'pointer-events-none')}
-          >
-            <CommunityCardHeader logoSrc={logoSrc} bannerSrc={bannerSrc} />
-            <CommunityCardBody logoSrc={logoSrc} />
-          </Link>
-
-          <div className={'flex-grow'} />
-          <CommunityCardFooter />
-        </CommunityContext.Provider>
-      </motion.div>
-    )
-
-  return null
+  return { isEditGroupVisible, isDeleteGroupVisible, user, cardRef }
 }

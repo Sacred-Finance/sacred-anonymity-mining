@@ -6,11 +6,7 @@ import { Identity } from '@semaphore-protocol/identity'
 import { useAccount } from 'wagmi'
 import Link from 'next/link'
 import ToolTip from '@components/HOC/ToolTip'
-
-function EditGroupModal({ community, hidden = false }) {
-  const { address } = useAccount()
-  const { t } = useTranslation()
-
+export const useCheckIsOwner = (community, address) => {
   const [isOwner, setIsOwner] = useState(false)
 
   useEffect(() => {
@@ -24,15 +20,23 @@ function EditGroupModal({ community, hidden = false }) {
     const note = await createNote(user)
     return community.note.toString() === note.toString()
   }
+  return { isOwner }
+}
 
-  if (hidden) return null
+function EditGroupNavigationButton({ community }) {
+  const { address } = useAccount()
+  const { t } = useTranslation()
+
+  const { isOwner } = useCheckIsOwner(community, address)
+
+  if (!isOwner) return null
   return (
     <>
       <ToolTip tooltip={t('toolTip.editCommunity.title')}>
         <Link
           id="edit-community-button"
           className={`absolute right-0  rounded-full bg-gray-100 p-2 ring-1 ring-white transition duration-100 hover:bg-purple-600 hover:text-white ${
-            !isOwner || hidden ? 'hidden' : ''
+            !isOwner ? 'hidden' : ''
           }`}
           aria-label="edit community"
           href={`/communities/${community.groupId}/edit`}
@@ -58,4 +62,4 @@ function EditGroupModal({ community, hidden = false }) {
   )
 }
 
-export default EditGroupModal
+export default EditGroupNavigationButton

@@ -25,7 +25,6 @@ function Group() {
       })
     }
   }, [data?.group, data?.posts, data?.users, isValidating])
-
   if (error) return <div>Error: {error.message}</div>
   if (!data) return <LoadingPage />
 
@@ -38,4 +37,4 @@ function Group() {
   return <CommunityPage community={group} posts={posts} postId={postId as string} postInstance={postInstance as Post} />
 }
 
-export default (Group)
+export default Group

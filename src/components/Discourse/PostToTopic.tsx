@@ -66,7 +66,6 @@ const PostToTopic = ({ topic }: { topic: Topic }) => {
           editorReference.current.clear()
           setDescription(null)
         }}
-        isSubmitting={false}
         title={false}
         isEditable={true}
         itemType={'post'}

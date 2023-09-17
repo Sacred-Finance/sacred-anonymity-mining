@@ -272,7 +272,7 @@ function HomePage({ isAdmin = false, users, communities }: HomeProps) {
                   className="flex flex-wrap gap-4 sm:justify-stretch"
                 >
                   {localCommunities.map((community, index) => (
-                    <CommunityCard key={community.groupId} community={community} index={index} />
+                    <CommunityCard key={community.groupId} community={community}/>
                   ))}
                   {/*<NoCommunities groups={localCommunities} searchTerm={searchTerm} />*/}
                 </motion.div>

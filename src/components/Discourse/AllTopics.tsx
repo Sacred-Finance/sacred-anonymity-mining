@@ -21,9 +21,9 @@ const AllTopics = () => {
 
   return (
     <>
-        {topicList?.topics?.map(topic => (
-          <TopicCommunityCard key={topic.id} topic={topic} variant={'default'} />
-        ))}
+      {topicList?.topics?.map(topic => (
+        <TopicCommunityCard key={topic.id} topic={topic} variant={'default'} />
+      ))}
     </>
   )
 }

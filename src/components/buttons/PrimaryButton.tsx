@@ -53,7 +53,7 @@ export function PrimaryButton({
       disabled={rest.disabled || isLoading}
       className={clsx(
         !resetClasses && primaryButtonStyle,
-        !resetClasses && 'flex items-center gap-4  disabled:opacity-50',
+        !resetClasses && 'flex items-center gap-2  disabled:opacity-50',
         'cursor-pointer disabled:cursor-not-allowed',
         rest.className
       )}

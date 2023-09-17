@@ -202,23 +202,33 @@ export function useActiveUser({ groupId }): User | undefined {
   )
 }
 
-export function useUserIfJoined(communityId: string | number): User | false {
+export function useUserIfJoined(communityId: string | number): (User & { avatar: string }) | false {
   const { state } = useCommunityContext()
+  console.log('state', state)
+  useCommunityById(communityId)
   const { address: userAddress } = useAccount()
 
-  // return useMemo(() => {
   if (!userAddress) return false
   if (!state.usersGrouped) throw new Error('hasUserJoined - usersGrouped is undefined')
   if (!state.usersGrouped[communityId]) {
     return false
   }
 
-  return (
-    (state.usersGrouped[communityId]?.find(u => {
-      const generatedIdentity = new Identity(`${userAddress}_${communityId}_${u.name}`)
-      const userCommitment = generatedIdentity.getCommitment().toString()
+  const foundUser = state.usersGrouped[communityId]?.find(u => {
+    const generatedIdentity = new Identity(`${userAddress}_${communityId}_${u.name}`)
+    const userCommitment = generatedIdentity.getCommitment().toString()
 
-      return _.toNumber(+u?.groupId) === _.toNumber(communityId) && u?.identityCommitment === userCommitment
-    }) as User) || false
-  )
+    return _.toNumber(+u?.groupId) === _.toNumber(communityId) && u?.identityCommitment === userCommitment
+  }) as User
+
+  const community = state.activeCommunity?.community
+
+
+  if (foundUser) {
+    // Adding avatar to the found user
+    const avatar = `https://robohash.org/${foundUser.identityCommitment}`
+    return { ...foundUser, avatar }
+  }
+
+  return false
 }

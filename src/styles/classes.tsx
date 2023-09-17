@@ -13,7 +13,7 @@ const secondaryButton =
   'bg-secondary-200 text-white hover:bg-secondary-200  dark:hover:bg-secondary-200 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-secondary-200'
 
 const input =
-  'rounded border-0 bg-background-dark  p-2  text-white focus:outline-none focus:ring-2 focus:ring-primary-dark ring-1 ring-white placeholder-white/40'
+  'rounded p-4  text-black focus:outline-none focus:ring-2 focus:ring-primary-dark ring-1 ring-white placeholder-white/40'
 
 // Sidebars
 const sidebar = 'dark:bg-background-900 text-white dark:text-white border-r-2'
@@ -115,8 +115,9 @@ export const buttonVariants = {
     'text-primary-500 dark:text-primary-500 hover:text-primary-600 dark:hover:text-primary-600 focus:text-primary-600 dark:focus:text-primary-600 active:text-primary-600 dark:active:text-primary-600 selected:text-primary-600 dark:selected:text-primary-600 ' +
     'border-primary-500 dark:border-primary-500 hover:border-primary-600 dark:hover:border-primary-600 ',
   primarySolid:
-      'text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-700 active:bg-primary-700',
-  solid:'text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-700 active:bg-primary-700',
+    'text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-700 active:bg-primary-700',
+  solid:
+    'text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-700 active:bg-primary-700',
 
   primarySolidOutline:
     'text-primary-500 dark:text-primary-500 hover:text-primary-600 dark:hover:text-primary-600 focus:text-primary-600 dark:focus:text-primary-600 active:text-primary-600 dark:active:text-primary-600 selected:text-primary-600 dark:selected:text-primary-600 ' +

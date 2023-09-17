@@ -12,7 +12,10 @@ function useBreadcrumbs(): BreadCrumbItem[] {
   const post = state.activePost.post
 
   useEffect(() => {
-    if (!community || !post) return
+    if (!community || !post) {
+        setBreadcrumbItems([])
+        return
+    }
     const items = generateBreadcrumbItems(community, post, location)
     setBreadcrumbItems(items)
   }, [community, post])

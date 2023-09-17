@@ -3,8 +3,7 @@ import { Post } from '@/lib/post'
 import { useActiveUser, useUserIfJoined, useUsers } from '@/contexts/CommunityProvider'
 import { useAccount } from 'wagmi'
 import { useTranslation } from 'react-i18next'
-import { OutputData } from '@editorjs/editorjs'
-import { SortByOption } from '@components/SortBy'
+import SortBy, { SortByOption } from '@components/SortBy'
 import { useUnirepSignUp } from '@/hooks/useUnirepSignup'
 import { User } from '@/lib/model'
 import { useValidateUserBalance } from '@/utils/useValidateUserBalance'
@@ -13,12 +12,18 @@ import { toast } from 'react-toastify'
 import { useItemsSortedByVote } from '@/hooks/useItemsSortedByVote'
 import clsx from 'clsx'
 import { NewPostForm } from '@components/NewPostForm'
-import { PostItem, PostList } from '@components/postList'
-import { NoPosts } from '@components/NoPosts'
+import { PostList } from '@components/Post/postList'
+import { NoPosts } from '@components/Post/NoPosts'
 import { Group, Item } from '@/types/contract/ForumInterface'
-import { CommunityCard } from '@components/CommunityCard/CommunityCard'
 import CreatePollUI from './CreatePollUI'
 import ReputationCard from '@components/ReputationCard'
+import { useContentManagement } from '@/hooks/useContentManagement'
+import { CommunityActionTabs } from '@components/CommunityActionTabs'
+import { CommunityCardHeader, CommunityLogo } from '@components/CommunityCard/CommunityCardHeader'
+import { CommunityCardContext } from '@components/CommunityCard/CommunityCard'
+import { useEditItem } from '@/hooks/useEditItem'
+import EditGroupNavigationButton, { useCheckIsOwner } from '@components/EditGroupNavigationButton'
+import { PostItem } from '@components/Post/postItem'
 
 export function CommunityPage({
   children,
@@ -43,13 +48,13 @@ export function CommunityPage({
   const users = useUsers()
   const { t } = useTranslation()
 
-  const [postDescription, setPostDescription] = useState<OutputData>(null)
-  const [postTitle, setPostTitle] = useState<string | null>(null)
   const [sortBy, setSortBy] = useState<SortByOption>('highest')
-  const [tempPosts, setTempPosts] = useState([])
-
-  // const [isPostEditing, setPostEditing] = useState(false)
-  // const [isFormOpen, setIsFormOpen] = useState(false)
+  const { editItem } = useEditItem({
+    postId,
+    groupId,
+    isAdminOrModerator: false,
+    setIsLoading: () => {},
+  })
 
   const { checkUserBalance } = useValidateUserBalance(community, address)
   const { setIsLoading, isLoading: isContextLoading } = useLoaderContext()
@@ -62,10 +67,17 @@ export function CommunityPage({
     return true
   }
 
+  const { contentDescription, setContentDescription, tempContents, contentTitle, setTempContents, setContentTitle } =
+    useContentManagement({
+      isPost: true,
+      defaultContentDescription: post?.description,
+      defaultContentTitle: post?.title,
+    })
+
   const addPost: () => Promise<void> = async () => {
     if (validateRequirements() !== true) return
 
-    if (!postTitle || !postDescription) {
+    if (!contentTitle || !contentDescription) {
       console.log('Please enter a title and description')
       toast.error('Please enter a title and description', { toastId: 'missingTitleOrDesc' })
       return
@@ -81,8 +93,8 @@ export function CommunityPage({
     try {
       const { status } = await postInstance?.create(
         {
-          title: postTitle,
-          description: postDescription,
+          title: contentTitle,
+          description: contentDescription,
         },
         address,
         users,
@@ -91,12 +103,12 @@ export function CommunityPage({
         setIsLoading,
         (post, cid) => {
           ipfsHash = cid
-          setTempPosts([
+          setTempContents([
             {
               id: cid,
               ...post,
             },
-            ...tempPosts,
+            ...tempContents,
           ])
         }
       )
@@ -115,7 +127,7 @@ export function CommunityPage({
       // toast({
     } finally {
       // setLoading.off()
-      setTempPosts(prevPosts => {
+      setTempContents(prevPosts => {
         const tempPostIndex = prevPosts.findIndex(t => t.id === ipfsHash)
         if (tempPostIndex > -1) {
           const tempPostsCopy = [...prevPosts]
@@ -130,7 +142,7 @@ export function CommunityPage({
     setSortBy(newSortBy)
   }
 
-  const sortedData = useItemsSortedByVote(tempPosts, posts, sortBy)
+  const sortedData = useItemsSortedByVote(tempContents, posts, sortBy)
 
   const voteForPost = React.useCallback(
     async (postId, voteType: 0 | 1) => {
@@ -163,75 +175,95 @@ export function CommunityPage({
     [user, address, groupId, users, activeUser, postInstance]
   )
 
-  // const onClickEditPost = async () => {
-  //   const hasSufficientBalance = await checkUserBalance()
-  //   if (!hasSufficientBalance) return
-  //   setPostEditing(true)
-  //   setPostTitle(post?.title)
-  //   setPostDescription(post?.description)
-  // }
-
   const clearInput = isEdit => {
     if (isEdit) {
       // setPostEditing(false)
-      setPostTitle(post?.title)
-      setPostDescription(post?.description)
+      setContentTitle(post?.title)
+      setContentDescription(post?.description)
       return
     } else {
-      setPostTitle('')
-      setPostDescription(null)
+      setContentTitle('')
+      setContentDescription(undefined)
       postEditorRef?.current?.clear?.()
     }
   }
 
-  function renderItemList() {
-    if (post) {
-      return <PostItem post={post} voteForPost={voteForPost} />
-    } else if (sortedData?.length > 0) {
-      return <PostList posts={sortedData} voteForPost={voteForPost} handleSortChange={handleSortChange} showFilter />
-    } else {
-      return (
-        <div className="rounded bg-white/10 p-6 shadow-lg">
-          <NoPosts />
-        </div>
-      )
-    }
-  }
-
   return (
-    <div className={clsx(' w-full max-w-screen-2xl space-y-12 !text-gray-900 sm:p-8 md:p-24')}>
-      <CommunityCard community={community} index={0} isAdmin={false} variant={'banner'} />
-      <ReputationCard />
-      <div className={'flex items-center gap-4'}>
-        <CreatePollUI groupId={groupId} />
-        <NewPostForm
-          editorId={`${groupId}_post`}
-          submitButtonText={t('button.submit') as string}
-          openFormButtonText={t('button.newPost') as string}
-          description={postDescription}
-          setDescription={setPostDescription}
-          handleSubmit={addPost}
-          editorReference={postEditorRef}
-          setTitle={setPostTitle}
-          resetForm={() => clearInput(true)}
-          isReadOnly={false}
-          isSubmitting={isContextLoading}
-          title={postTitle as string}
-          isEditable={true}
-          itemType={'post'}
-          handlerType={'new'}
-          classes={{
-            rootClosed: '!w-fit !p-0',
-          }}
-          formVariant={'default'}
-        />
+    <div className={clsx('min-h-screen !text-gray-900 h-fit')}>
+      <div className={'group relative flex flex-col gap-4 overflow-x-clip '}>
+        <CommunityCardContext.Provider value={community}>
+          <div className={'relative z-50'}>
+            <EditGroupNavigationButton community={community} />
+          </div>
+          <CommunityCardHeader showDescription={false} />
+          <div className={'flex items-center gap-4'}>
+            <CommunityLogo />
+            <span className={' p-4'}>{community.groupDetails.description}</span>
+          </div>
+
+          <CommunityActionTabs
+            defaultTab={'chat'}
+            tabs={{
+              chat: {
+                hidden: false,
+                onClick: () => {},
+                panel: (
+                  <div>
+                    <div className={'relative flex items-center gap-4  px-3'}>
+                      <CreatePollUI groupId={groupId} />
+                      <NewPostForm
+                        editorId={`${groupId}_post`}
+                        submitButtonText={t('button.submit') as string}
+                        openFormButtonText={t('button.newPost') as string}
+                        description={contentDescription}
+                        setDescription={setContentDescription}
+                        handleSubmit={addPost}
+                        editorReference={postEditorRef}
+                        showButtonWhenFormOpen={true}
+                        setTitle={setContentTitle}
+                        resetForm={() => clearInput(true)}
+                        isReadOnly={false}
+                        isSubmitting={isContextLoading}
+                        title={contentTitle as string}
+                        isEditable={true}
+                        itemType={'post'}
+                        handlerType={'new'}
+                        classes={{
+                          rootClosed: '!w-fit !p-0',
+                          openFormButtonOpen: 'bg-red-500 text-white border-none rounded-sm',
+                        }}
+                      />
+                      <div className={'flex-grow'} />
+                      <SortBy onSortChange={handleSortChange} targetType="posts" />
+                    </div>
+                    <PostList posts={sortedData} />
+                    {sortedData?.length === 0 && <NoPosts />}
+                  </div>
+                ),
+              },
+              exclamation: {
+                hidden: true,
+                onClick: () => {},
+                panel: <div className={'w-1/2'}>Not needed on community page</div>,
+              },
+              gas: {
+                hidden: false,
+                onClick: () => {},
+                panel: (
+                  <div className={'flex w-1/2'}>
+                    <ReputationCard />
+
+                  </div>
+                ),
+              },
+            }}
+          />
+        </CommunityCardContext.Provider>
+
+        {children}
       </div>
-
-
-
-      {!postId && renderItemList()}
-
-      {children}
     </div>
   )
 }
+import { motion, AnimatePresence } from 'framer-motion'
+

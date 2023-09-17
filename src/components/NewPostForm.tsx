@@ -115,17 +115,16 @@ export const NewPostForm = ({
   const handleSubmitAction = async () => {
     try {
       await handleSubmit()
-      setIsFormOpen(false);
+      setIsFormOpen(false)
     } catch (error) {
       setIsFormOpen(false)
     }
   }
-
   return (
     <div
       className={clsx(
         'flex flex-col space-y-4 sm:w-full ',
-        formVariant === 'default' ? 'h-auto rounded  bg-white/10 p-6' : '',
+        formVariant === 'default' ? 'h-auto rounded  bg-white/10 p-1' : '',
         isFormOpen ? 'border-gray-500 border' : 'items-center',
         c?.root,
         isFormOpen ? c?.rootOpen : c?.rootClosed
@@ -140,11 +139,15 @@ export const NewPostForm = ({
             isFormOpen ? c?.openFormButtonOpen : c?.openFormButtonClosed
           )}
           onClick={() => {
+            if (isFormOpen) {
+              setIsFormOpen(false)
+              return resetForm(handlerType)
+            }
             setIsFormOpen(true)
             onOpen && onOpen()
           }}
         >
-          {openFormButtonText}
+          {isFormOpen ? 'Close' : openFormButtonText}
         </PrimaryButton>
       )}
 
@@ -220,3 +223,4 @@ export const NewPostForm = ({
     </div>
   )
 }
+

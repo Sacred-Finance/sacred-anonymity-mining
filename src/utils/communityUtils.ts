@@ -2,12 +2,13 @@ import { ethers } from 'ethers'
 import { erc20dummyABI, forumContract, jsonRPCProvider } from '@/constant/const'
 import { setCache } from '@/lib/redis'
 import { getContent, getIpfsHashFromBytes32, parseComment, parsePost, uploadImageToIPFS } from '@/lib/utils'
-import { CommunityDetails, Requirement } from '@/lib/model'
+import { CommunityDetails, ContentType, Requirement, User } from '@/lib/model'
 
 import pica from 'pica'
 import { useCallback } from 'react'
 import { Group, Item, RawGroupData, RawItemData } from '@/types/contract/ForumInterface'
 import { Event } from '@ethersproject/contracts'
+import { UnirepUser } from '@/lib/unirep'
 
 type GroupId = number
 
@@ -317,7 +318,12 @@ export async function augmentItemData(rawItemData: RawItemData): Promise<Item> {
         removed: true,
       }
     }
-    const content = normalizedItemData.kind === 1 ? parseComment(stringifiedContent) : parsePost(stringifiedContent)
+    let content: any
+    if (normalizedItemData.kind === ContentType.COMMENT) {
+      content = parseComment(stringifiedContent)
+    } else {
+      content = parsePost(stringifiedContent)
+    }
 
     return {
       ...normalizedItemData,
@@ -327,3 +333,5 @@ export async function augmentItemData(rawItemData: RawItemData): Promise<Item> {
     console.error('augmentItemData', e)
   }
 }
+
+export async function serializeUserData(uniRepUser: UnirepUser) {}

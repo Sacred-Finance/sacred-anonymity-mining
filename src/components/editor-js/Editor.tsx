@@ -4,6 +4,7 @@ import EditorJS, { OutputData } from '@editorjs/editorjs'
 import { EDITOR_TOOLS } from './editor-tool'
 import clsx from 'clsx'
 import { CircularLoader } from '@components/JoinCommunityButton'
+import { EDITOR_JS_TOOLS } from '@components/editor-js/tools'
 
 //props
 type Props = {
@@ -69,12 +70,19 @@ const EditorBlock = ({ data, onChange, holder, className, divProps = {}, editorR
       if (!holder) return
       const editor = new EditorJS({
         holder: holder,
-        tools: EDITOR_TOOLS,
+        inlineToolbar: true,
+        hideToolbar: false,
+
+
+        tools: {
+          ...EDITOR_TOOLS,
+
+        },
         readOnly,
         placeholder: placeholder || 'Start writing your post...',
         data,
         async onChange(api, event) {
-          // if (readOnly) return
+          if (readOnly) return
           const data = await api.saver.save()
           onChange(data)
         },

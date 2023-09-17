@@ -7,7 +7,7 @@ import HeadGlobal from '@/components/HeadGlobal'
 import '../../i18n'
 import { alchemyProvider } from 'wagmi/providers/alchemy'
 
-import { connectorsForWallets, darkTheme, lightTheme, RainbowKitProvider } from '@rainbow-me/rainbowkit'
+import {connectorsForWallets, darkTheme, lightTheme, RainbowKitProvider, Theme} from '@rainbow-me/rainbowkit'
 import { braveWallet, coinbaseWallet, injectedWallet, metaMaskWallet } from '@rainbow-me/rainbowkit/wallets'
 import { avalancheFuji, goerli, localhost, mainnet, polygonMumbai, sepolia } from 'wagmi/chains'
 import { configureChains, createClient, WagmiConfig } from 'wagmi'
@@ -24,6 +24,7 @@ import ErrorBoundary from '../components/ErrorBoundary'
 import { useMounted } from '@/hooks/useMounted'
 import { SWRConfig } from 'swr'
 import StandardLayout from '@components/HOC/StandardLayout'
+import {merge} from "lodash";
 
 function App({ Component, pageProps }: AppProps) {
   return (
@@ -137,6 +138,12 @@ const client = createClient({
   },
 })
 
+const myTheme = merge(darkTheme(), {
+  colors: {
+    accentColor: '#07296d',
+  },
+} as Theme);
+
 // Web3Wrapper
 export function Web3Wrapper({ children }) {
   const { resolvedTheme } = useTheme()
@@ -159,7 +166,7 @@ export function Web3Wrapper({ children }) {
         chains={chains}
         initialChain={polygonMumbai.id} // Optional, initialChain={1}, initialChain={chain.mainnet}, initialChain={gnosisChain}
         showRecentTransactions={false}
-        theme={resolvedTheme === 'dark' ? darkTheme() : lightTheme()}
+        theme={myTheme}
         id={'rainbowkit'}
       >
         <CommunityProvider>

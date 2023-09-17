@@ -17,7 +17,7 @@ import { PictureUpload } from '@components/PictureUpload'
 import Link from 'next/link'
 import { PrimaryButton } from '@components/buttons'
 import { buttonVariants } from '@styles/classes'
-import { CommunityContext } from '@components/CommunityCard/CommunityCard'
+import { CommunityCardContext } from '@components/CommunityCard/CommunityCard'
 import { CommunityCardHeader } from '@components/CommunityCard/CommunityCardHeader'
 import { CommunityCardBody } from '@components/CommunityCard/CommunityCardBody'
 import { HandleSetImage, isImageFile } from '@pages/communities/[groupId]/edit'
@@ -34,10 +34,6 @@ export function EditGroup({ group }: EditGroupProps) {
   const { address } = useAccount()
   const {} = useProvider()
   const { t } = useTranslation()
-
-  const { data: signer } = useSigner()
-
-  const { write } = useRemoveGroup(group.groupId as CommunityId)
 
   const handleUpdateStateAfterEdit = useFetchCommunitiesByIds([Number(group.groupId)], false)
 
@@ -257,15 +253,15 @@ export function EditGroup({ group }: EditGroupProps) {
           <div className="absolute inset-0  flex flex-col items-center space-y-8 p-10 rounded">
             <h1 className="text-4xl font-semibold text-white">Double check your changes!</h1>
             <div className="flex w-3/4 justify-between space-x-16">
-              <CommunityContext.Provider value={group}>
+              <CommunityCardContext.Provider value={group}>
                 <div className="w-1/2 bg-white p-4 rounded shadow-lg">
                   <h4 className="text-xl font-medium text-gray-700">Before</h4>
                   <CommunityCardHeader />
                   <CommunityCardBody />
                 </div>
-              </CommunityContext.Provider>
+              </CommunityCardContext.Provider>
 
-              <CommunityContext.Provider
+              <CommunityCardContext.Provider
                   value={{
                     ...group,
                     groupDetails: {
@@ -281,7 +277,7 @@ export function EditGroup({ group }: EditGroupProps) {
                   <CommunityCardHeader srcBannerOverride={bannerUrl} srcLogoOverride={logoUrl} />
                   <CommunityCardBody />
                 </div>
-              </CommunityContext.Provider>
+              </CommunityCardContext.Provider>
             </div>
             <div className="flex w-3/4 justify-between">
               <button
