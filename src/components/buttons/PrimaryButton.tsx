@@ -5,6 +5,7 @@ import { CircularProgress } from '@components/CircularProgress'
 import { CircularLoader } from '@components/JoinCommunityButton'
 import { toast } from 'react-toastify'
 import { useTranslation } from 'next-i18next'
+import ToolTip from '@components/HOC/ToolTip'
 
 export type PrimaryButtonProps = {
   children?: React.ReactNode
@@ -19,6 +20,7 @@ export type PrimaryButtonProps = {
   endIcon?: React.ReactNode
   startIcon?: React.ReactNode
   loadingPosition?: 'start' | 'end'
+  toolTip?: string | boolean
 } & ButtonHTMLAttributes<HTMLButtonElement>
 
 export function PrimaryButton({
@@ -48,22 +50,24 @@ export function PrimaryButton({
     }
   }
   return (
-    <button
-      {...rest}
-      disabled={rest.disabled || isLoading}
-      className={clsx(
-        !resetClasses && primaryButtonStyle,
-        !resetClasses && 'flex items-center gap-2  disabled:opacity-50',
-        'cursor-pointer disabled:cursor-not-allowed',
-        rest.className
-      )}
-      onClick={wrappedOnClick}
-    >
-      {isLoading && loadingPosition === 'start' && <CircularLoader />}
-      {rest.startIcon && !isLoading && loadingPosition === 'start' && rest.startIcon}
-      {children}
-      {rest.endIcon && !isLoading && loadingPosition === 'end' && rest.endIcon}
-      {isLoading && loadingPosition === 'end' && <CircularLoader />}
-    </button>
+    <ToolTip tooltip={rest?.toolTip || false}>
+      <button
+        {...rest}
+        disabled={rest.disabled || isLoading}
+        className={clsx(
+          !resetClasses && primaryButtonStyle,
+          !resetClasses && 'flex items-center gap-2  disabled:opacity-50',
+          'cursor-pointer disabled:cursor-not-allowed',
+          rest.className
+        )}
+        onClick={wrappedOnClick}
+      >
+        {isLoading && loadingPosition === 'start' && <CircularLoader />}
+        {rest.startIcon && !isLoading && loadingPosition === 'start' && rest.startIcon}
+        {children}
+        {rest.endIcon && !isLoading && loadingPosition === 'end' && rest.endIcon}
+        {isLoading && loadingPosition === 'end' && <CircularLoader />}
+      </button>
+    </ToolTip>
   )
 }

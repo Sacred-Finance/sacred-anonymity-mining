@@ -25,6 +25,7 @@ import { Group } from '@/types/contract/ForumInterface'
 import RemoveGroup from '@components/RemoveGroup'
 import { useRemoveGroup } from '@/hooks/useRemoveGroup'
 import { CommunityId } from '@/contexts/CommunityProvider'
+import DeleteItemButton from '@components/buttons/DeleteItemButton'
 
 interface EditGroupProps {
   group: Group
@@ -157,9 +158,7 @@ export function EditGroup({ group }: EditGroupProps) {
   }, [bannerFile, logoFile, group.id, forumContract, groupDescriptionState, groupName])
 
   return (
-    <div
-      className={clsx('relative   grid  w-full max-w-screen-2xl  grid-cols-1 gap-4 sm:p-8 md:p-24')}
-    >
+    <div className={clsx('relative   grid  w-full max-w-screen-2xl  grid-cols-1 gap-4 sm:p-8 md:p-24')}>
       <div className="flex flex-col space-y-4 sm:col-span-full md:col-span-6 lg:col-span-6">
         <div className="flex flex-row items-center justify-between py-4">
           <h1 className="flex text-2xl font-semibold text-gray-700">{t('editCommunity')}</h1>
@@ -238,6 +237,8 @@ export function EditGroup({ group }: EditGroupProps) {
             Back
           </Link>
 
+          <DeleteItemButton isAdminOrModerator={true} groupId={group.id} itemId={group.id} itemType={'group'} />
+
           <PrimaryButton
             className={clsx(buttonVariants.primarySolid, ' border')}
             // disabled={isSubmitDisabled}
@@ -250,55 +251,50 @@ export function EditGroup({ group }: EditGroupProps) {
 
       {previewCard && <div className="fixed inset-0  bg-gray-900/60 " />}
       {previewCard && (
-          <div className="absolute inset-0  flex flex-col items-center space-y-8 p-10 rounded">
-            <h1 className="text-4xl font-semibold text-white">Double check your changes!</h1>
-            <div className="flex w-3/4 justify-between space-x-16">
-              <CommunityCardContext.Provider value={group}>
-                <div className="w-1/2 bg-white p-4 rounded shadow-lg">
-                  <h4 className="text-xl font-medium text-gray-700">Before</h4>
-                  <CommunityCardHeader />
-                  <CommunityCardBody />
-                </div>
-              </CommunityCardContext.Provider>
+        <div className="absolute inset-0  flex flex-col items-center space-y-8 rounded p-10">
+          <h1 className="text-4xl font-semibold text-white">Double check your changes!</h1>
+          <div className="flex w-3/4 justify-between space-x-16">
+            <CommunityCardContext.Provider value={group}>
+              <div className="w-1/2 rounded bg-white p-4 shadow-lg">
+                <h4 className="text-xl font-medium text-gray-700">Before</h4>
+                <CommunityCardHeader />
+                <CommunityCardBody />
+              </div>
+            </CommunityCardContext.Provider>
 
-              <CommunityCardContext.Provider
-                  value={{
-                    ...group,
-                    groupDetails: {
-                      ...group?.groupDetails,
-                      logoCID: logoUrl as string,
-                      bannerCID: bannerUrl as string,
-                      description: groupDescriptionState,
-                    },
-                  }}
-              >
-                <div className="w-1/2 bg-white p-4 rounded shadow-lg">
-                  <h4 className="text-xl font-medium text-gray-700">After</h4>
-                  <CommunityCardHeader srcBannerOverride={bannerUrl} srcLogoOverride={logoUrl} />
-                  <CommunityCardBody />
-                </div>
-              </CommunityCardContext.Provider>
-            </div>
-            <div className="flex w-3/4 justify-between">
-              <button
-                  onClick={hidePreview}
-                  className="text-white bg-red-400 hover:bg-red-500 rounded px-4 py-2"
-              >
-                Cancel
-              </button>
-              <PrimaryButton
-                  className={clsx(buttonVariants.solid, 'z-50 border px-4')}
-
-                  // disabled={isSubmitDisabled}
-                  onClick={submitAllGroupDetails}
-                  isLoading={isSubmitting}
-              >
-                {t('button.confirm-edit')}
-              </PrimaryButton>
-            </div>
+            <CommunityCardContext.Provider
+              value={{
+                ...group,
+                groupDetails: {
+                  ...group?.groupDetails,
+                  logoCID: logoUrl as string,
+                  bannerCID: bannerUrl as string,
+                  description: groupDescriptionState,
+                },
+              }}
+            >
+              <div className="w-1/2 rounded bg-white p-4 shadow-lg">
+                <h4 className="text-xl font-medium text-gray-700">After</h4>
+                <CommunityCardHeader srcBannerOverride={bannerUrl} srcLogoOverride={logoUrl} />
+                <CommunityCardBody />
+              </div>
+            </CommunityCardContext.Provider>
           </div>
+          <div className="flex w-3/4 justify-between">
+            <button onClick={hidePreview} className="rounded bg-red-400 px-4 py-2 text-white hover:bg-red-500">
+              Cancel
+            </button>
+            <PrimaryButton
+              className={clsx(buttonVariants.solid, 'z-50 border px-4')}
+              // disabled={isSubmitDisabled}
+              onClick={submitAllGroupDetails}
+              isLoading={isSubmitting}
+            >
+              {t('button.confirm-edit')}
+            </PrimaryButton>
+          </div>
+        </div>
       )}
-
     </div>
   )
 }

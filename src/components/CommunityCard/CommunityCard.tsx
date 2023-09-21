@@ -33,7 +33,6 @@ export const CommunityCard = ({
   isAdmin?: boolean
   variant?: 'default' | 'banner'
 }) => {
-
   const user = useUserIfJoined(community.groupId as string)
 
   // new ref for modal
@@ -48,7 +47,7 @@ export const CommunityCard = ({
           'hover:border-opacity-50  hover:ring-opacity-60 hover:ring-offset-2',
           variant === 'banner'
             ? 'pointer-events-auto'
-            : 'hover-peer:-z-[1] peer h-fit max-w-xl flex-grow items-center overflow-hidden rounded border border-gray-900 bg-white transition-all duration-300 ease-in-out hover:z-[150] sm:w-full md:w-auto '
+            : 'h-fit max-w-xl flex-grow items-center  rounded border border-gray-900  transition-all duration-300 ease-in-out sm:w-full md:w-auto '
         )}
         ref={cardRef}
       >

@@ -21,13 +21,7 @@ export interface HandleSetImage {
 }
 function RemoveIcon() {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      className="h-5 w-5"
-    >
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="h-5 w-5">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 12H6" />
     </svg>
   )
@@ -168,7 +162,7 @@ function CreateGroupFormUI({ onCreate }) {
       logoFile: logoFile,
       chainId: reqMandatory ? selectedChain.id : polygonMumbai.id,
       tags: tags,
-      groupDescription,
+      description: groupDescription,
       note: BigInt(0).toString(),
     })
     setIsSubmitting(false)
@@ -211,10 +205,7 @@ function CreateGroupFormUI({ onCreate }) {
           {tags.map((tag, index) => (
             <div key={index}>
               {tag.trim() && (
-                <span
-                  key={index}
-                  className="rounded border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
-                >
+                <span key={index} className="rounded border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none">
                   {tag}
                 </span>
               )}
@@ -280,7 +271,7 @@ function CreateGroupFormUI({ onCreate }) {
           />
         </div>
 
-        <div className=" relative inline-flex w-[200px] gap-4">
+        <div className=" relative inline-flex w-[200px] items-center gap-4">
           <div className="group relative w-60">
             <button
               disabled={!reqMandatory}
@@ -312,7 +303,7 @@ function CreateGroupFormUI({ onCreate }) {
             </div>
           </div>
 
-          <button className={clsx(buttonVariants.success, 'w-[38.54px] border', 'hover:scale-[100%]')} onClick={addReq}>
+          <button className={clsx('flex justify-center aspect-1 h-10 w-10 items-center border p-3 text-xl')} onClick={addReq}>
             +
           </button>
         </div>
@@ -381,7 +372,7 @@ function CreateGroupFormUI({ onCreate }) {
                             remove(i)
                           }
                         }}
-                        className="border-red-500 aspect-1 h-11 w-11 rounded border text-red-500 transition-colors hover:bg-red-500 hover:text-white focus:outline-none"
+                        className="border-red-500 flex aspect-1 h-11 w-11 items-center justify-center rounded border text-red-500 transition-colors hover:bg-red-500 hover:text-white focus:outline-none"
                       >
                         <RemoveIcon />
                       </button>
@@ -405,6 +396,7 @@ function CreateGroupFormUI({ onCreate }) {
           className={clsx(buttonVariants.primarySolid, 'border')}
           disabled={isSubmitDisabled}
           onClick={submit}
+          isLoading={isSubmitting}
         >
           {t('button.create')}
         </PrimaryButton>
