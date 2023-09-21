@@ -29,7 +29,7 @@ const RemoveGroup: React.FC<RemoveGroupProps> = ({ groupId, hidden }) => {
   const onClick = () => {
     setIsLoading(true)
     writeAsync?.({ recklesslySetUnpreparedArgs: [groupId] }).finally(() => {
-      setIsLoading(false);
+      setIsLoading(false)
     })
   }
 
@@ -40,9 +40,7 @@ const RemoveGroup: React.FC<RemoveGroupProps> = ({ groupId, hidden }) => {
   return (
     <>
       {isAdmin && (
-        <ToolTip
-          toolTip={t('toolTip.removeCommunity.message') as string}
-        >
+        <ToolTip toolTip={t('toolTip.removeCommunity.message') as string}>
           <button
             id="edit-community-button"
             className={`${

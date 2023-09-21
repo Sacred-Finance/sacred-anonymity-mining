@@ -71,33 +71,24 @@ export function PostPage({ kind, postInstance, postId, groupId, comments, post, 
     }
   }
 
-  const [isFormOpen, setIsFormOpen] = useState(false)
-
   return (
     <div className={clsx('h-full min-h-screen w-full space-y-4 !text-gray-900')}>
       <div className={'grid h-full grid-cols-12'}>
         <div className={'col-span-12 bg-gray-50 md:col-span-6'}>
-          <PostItem
-            post={post}
-            setIsFormOpen={setIsFormOpen}
-            isFormOpen={isFormOpen}
-            voteForPost={voteForPost}
-            showDescription={true}
-            isAdminOrModerator={!!canDelete}
-          />
+          <PostItem post={post} />
         </div>
 
-        <div className={'col-span-12 md:col-span-6'}>
+        <div className={'col-span-12 max-h-full overflow-y-scroll md:col-span-6'}>
           <CommunityActionTabs
             defaultTab={'chat'}
             tabs={{
-              exclamation: {
+              community: {
                 hidden: false,
                 onClick: () => {},
                 panel: (
-                  <>
-                    <div className={' sticky top-0 float-right flex'}>
-                      <div className={'flex items-center gap-4 pe-2'}>
+                  <div className={'flex w-full flex-col'}>
+                    <div className={'flex justify-between pb-2'}>
+                      <div className={'flex items-center'}>
                         <VoteUpButton
                           isConnected={!!address}
                           isJoined={!!user}
@@ -112,10 +103,10 @@ export function PostPage({ kind, postInstance, postId, groupId, comments, post, 
                             })
                           }
                           disabled={isLoading || !address}
-                        />
-                        <span className=" font-bold text-gray-700">{post.upvote}</span>
-                      </div>
-                      <div className={'flex items-center gap-4 pe-2'}>
+                        >
+                          <span className="font-bold text-gray-700">{post.upvote}</span>
+                        </VoteUpButton>
+
                         <VoteDownButton
                           isConnected={!!address}
                           isJoined={!!user}
@@ -130,14 +121,16 @@ export function PostPage({ kind, postInstance, postId, groupId, comments, post, 
                             })
                           }
                           disabled={isLoading || !address}
-                        />
-                        <span className="font-bold text-gray-700">{post.downvote}</span>
+                        >
+                          <span className="font-bold text-gray-700">{post.downvote}</span>
+                        </VoteDownButton>
                       </div>
+
                       <SummaryButton postData={OutputDataToHTML(post?.description)} postTitle={post.title} />
                     </div>
 
                     <CommunityCard community={community} isAdmin={false} variant={'banner'} />
-                  </>
+                  </div>
                 ),
               },
               chat: {

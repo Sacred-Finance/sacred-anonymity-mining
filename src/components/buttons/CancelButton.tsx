@@ -14,8 +14,6 @@ export function CancelButton({
   return (
     // @ts-ignore
     <MotionButton
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.9 }}
       {...rest}
       className={clsx(rest.className, primaryButtonStyle, buttonVariants.error)}
     >

@@ -204,7 +204,6 @@ export function useActiveUser({ groupId }): User | undefined {
 
 export function useUserIfJoined(communityId: string | number): (User & { avatar: string }) | false {
   const { state } = useCommunityContext()
-  console.log('state', state)
   useCommunityById(communityId)
   const { address: userAddress } = useAccount()
 
@@ -221,14 +220,19 @@ export function useUserIfJoined(communityId: string | number): (User & { avatar:
     return _.toNumber(+u?.groupId) === _.toNumber(communityId) && u?.identityCommitment === userCommitment
   }) as User
 
-  const community = state.activeCommunity?.community
-
-
   if (foundUser) {
     // Adding avatar to the found user
-    const avatar = `https://robohash.org/${foundUser.identityCommitment}`
-    return { ...foundUser, avatar }
+    return addAvatarToUser(foundUser)
   }
 
   return false
+}
+
+export const addAvatarToUser = (user: User) => {
+  const avatar = getAvatarUrl(user?.identityCommitment?.toString());
+  return { ...user, avatar }
+}
+
+export const getAvatarUrl = (hash: string) => {
+  return `https://robohash.org/${hash}`
 }

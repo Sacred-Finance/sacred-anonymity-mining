@@ -69,8 +69,7 @@ const PostToTopic = ({ topic }: { topic: Topic }) => {
         title={false}
         isEditable={true}
         itemType={'post'}
-        handlerType={'new'}
-        formVariant={'default'}
+        actionType={'new'}
         submitButtonText={t('button.post') as string}
         openFormButtonText={t('button.newPost') as string}
       />

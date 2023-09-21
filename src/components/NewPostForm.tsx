@@ -1,10 +1,11 @@
 import { useTranslation } from 'react-i18next'
-import React, { ChangeEvent, RefObject, useEffect, useRef, useState } from 'react'
+import React, { ChangeEvent, RefObject, useCallback, useEffect, useRef, useState } from 'react'
 import EditorJsRenderer from './editor-js/EditorJSRenderer'
 import { CancelButton, PrimaryButton } from './buttons'
 import { EyeIcon, PencilIcon } from '@heroicons/react/20/solid'
 import dynamic from 'next/dynamic'
 import clsx from 'clsx'
+import { Tab } from '@headlessui/react'
 
 export interface EditorJsType {
   blocks: {
@@ -18,20 +19,33 @@ const Editor = dynamic(() => import('./editor-js/Editor'), {
 })
 
 interface ToggleButtonProps {
-  onClick: () => void
+  setIsPreview: (isPreview: boolean) => void
   isPreview: boolean
   showText?: boolean
   disabled?: boolean
 }
 
-function TogglePreview({ onClick, isPreview, showText = true, disabled }: ToggleButtonProps) {
+function EditorTabs({ setIsPreview }: ToggleButtonProps) {
   return (
-    <div className=" flex items-center justify-between text-sm ">
-      {isPreview ? 'Preview' : 'Editor'}
-      <PrimaryButton disabled={disabled} onClick={onClick} className={'bg-gray-500/20 hover:bg-gray-500/40'}>
-        {showText && (isPreview ? 'Show Editor' : 'Show Preview')}
-        {isPreview ? <PencilIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
-      </PrimaryButton>
+    <div>
+      <Tab.List className="flex items-center gap-4 text-sm">
+        <Tab onClick={() => setIsPreview(false)} className={clsx('flex items-center gap-1 border p-2')}>
+          {({ selected }) => (
+            <div className={clsx('contents', selected && 'text-primary-600')}>
+              <PencilIcon className="h-4 w-4" />
+              Edit
+            </div>
+          )}
+        </Tab>
+        <Tab onClick={() => setIsPreview(true)} className={clsx('flex items-center gap-1 border  p-2')}>
+          {({ selected }) => (
+            <div className={clsx('contents', selected && 'text-primary-600')}>
+              <EyeIcon className="h-4 w-4" />
+              Preview
+            </div>
+          )}
+        </Tab>
+      </Tab.List>
     </div>
   )
 }
@@ -48,8 +62,7 @@ export interface NewPostFormProps {
   isEditable: boolean
   handleSubmit: () => void
   itemType?: 'comment' | 'post'
-  handlerType?: 'edit' | 'new'
-  formVariant?: 'default' | 'icon'
+  actionType?: 'edit' | 'new'
   onOpen?: () => void
   isSubmitting?: boolean
   isSubmitted?: boolean
@@ -69,11 +82,58 @@ export interface NewPostFormProps {
     openFormButtonClosed?: string
     submitButton?: string
     cancelButton?: string
-    formContainer?: string
     formContainerOpen?: string
+    formBody?: string
     formContainerClosed?: string
     input?: string
   }
+}
+
+const getClassNames = (base, customClassNames, condition) => {
+  return clsx(base, condition ? customClassNames?.true : customClassNames?.false)
+}
+
+const commonButtonClasses = 'border-gray-500 border text-sm text-gray-500 transition-colors duration-150'
+
+function ContentSection({
+  data,
+  inputs,
+  editorRef,
+  onChange,
+  readOnly,
+  placeholder,
+  holder,
+}: {
+  preview: boolean
+  data: EditorJsType
+  inputs: string | undefined
+  editorRef: React.RefObject<EditorJsType>
+  onChange: (value: EditorJsType) => void
+  readOnly: boolean
+  placeholder: string | undefined
+  holder: string
+}) {
+  return (
+    <>
+      <Tab.Panel className="rounded border-gray-200">
+        <Editor
+          divProps={{
+            className: clsx('z-50'),
+          }}
+          data={data}
+          editorRef={editorRef}
+          onChange={onChange}
+          readOnly={readOnly}
+          placeholder={placeholder}
+          holder={holder}
+        />
+      </Tab.Panel>
+      <Tab.Panel className="rounded border-gray-200">
+        <div className={clsx('text-sm text-gray-400', inputs)}>Nothing to preview yet</div>
+        <EditorJsRenderer data={data} />
+      </Tab.Panel>
+    </>
+  )
 }
 
 export const NewPostForm = ({
@@ -88,9 +148,8 @@ export const NewPostForm = ({
   handleSubmit,
   isSubmitting,
   isSubmitted,
-  formVariant = 'default',
   itemType = 'post',
-  handlerType = 'new',
+  actionType = 'new',
   onOpen,
   isEditable,
   submitButtonText,
@@ -103,49 +162,73 @@ export const NewPostForm = ({
   const [isPreview, setIsPreview] = useState(false)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const inputRef = useRef(null)
-
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (isFormOpen) {
-      inputRef?.current?.focus()
-    }
-  }, [isFormOpen, inputRef])
-
-  const handleSubmitAction = async () => {
+  const handleSubmitAction = useCallback(async () => {
     try {
+      if (!description?.blocks?.length) {
+        setError('Please enter content')
+        return
+      }
       await handleSubmit()
       setIsFormOpen(false)
     } catch (error) {
+      setError(error.message)
       setIsFormOpen(false)
     }
+  }, [description, handleSubmit])
+
+  const handleOpen = () => {
+    if (isFormOpen) {
+      setIsFormOpen(false)
+      return resetForm(actionType)
+    }
+    setIsFormOpen(true)
+    onOpen && onOpen()
   }
+
+  const handleClose = () => {
+    resetForm(false)
+    setIsFormOpen(false)
+  }
+
+
+  const descriptionLength = React.useMemo(() => {
+    return description?.blocks?.reduce((acc, block) => {
+      try {
+        return acc + block.data.text.length
+      } catch (error) {
+        return acc
+      }
+    }, 0)
+  }, [description])
+
+  const disableSubmit = React.useMemo(() => {
+    return descriptionLength > 100000 || descriptionLength < 1
+  }, [descriptionLength])
+
   return (
     <div
-      className={clsx(
-        'flex flex-col space-y-4 sm:w-full ',
-        formVariant === 'default' ? 'h-auto rounded  bg-white/10 p-1' : '',
-        isFormOpen ? 'border-gray-500 border' : 'items-center',
-        c?.root,
-        isFormOpen ? c?.rootOpen : c?.rootClosed
+      className={getClassNames(
+        'flex flex-col space-y-4 sm:w-full',
+        {
+          true: [c?.rootOpen, 'border-gray-500 border'],
+          false: [c?.rootClosed, 'items-center'],
+        },
+        isFormOpen
       )}
     >
       {isEditable && !(isFormOpen && !showButtonWhenFormOpen) && (
         <PrimaryButton
-          className={clsx(
-            'w-fit',
-            'border-gray-500 border text-sm text-gray-500 transition-colors duration-150 hover:bg-gray-500 hover:text-white',
-            c?.openFormButton,
-            isFormOpen ? c?.openFormButtonOpen : c?.openFormButtonClosed
+          className={getClassNames(
+            commonButtonClasses,
+            {
+              true: [c?.openFormButtonOpen],
+              false: [c?.openFormButtonClosed],
+            },
+            isFormOpen
           )}
-          onClick={() => {
-            if (isFormOpen) {
-              setIsFormOpen(false)
-              return resetForm(handlerType)
-            }
-            setIsFormOpen(true)
-            onOpen && onOpen()
-          }}
+          onClick={handleOpen}
         >
           {isFormOpen ? 'Close' : openFormButtonText}
         </PrimaryButton>
@@ -153,70 +236,64 @@ export const NewPostForm = ({
 
       {isFormOpen && (
         <div
-          className={clsx(
+          className={getClassNames(
             'min-w-[400px] p-2',
-            c?.formContainer,
-            isFormOpen ? c?.formContainerOpen : c?.formContainerClosed
+            {
+              true: c?.formContainerOpen,
+              false: c?.formContainerClosed,
+            },
+            isFormOpen
           )}
         >
-          {itemType === 'post' && title !== false && (
-            <input
-              ref={inputRef}
-              className={clsx(
-                ' w-full rounded border-gray-200 p-1 text-base transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500',
-                c?.input
+          <div className={clsx(c.formBody)}>
+            <Tab.Group>
+              {/*<EditorTabs setIsPreview={setIsPreview} isPreview={isPreview} disabled={!description} />*/}
+              <div className="text-md">Title (Max 60)</div>
+              {itemType === 'post' && title !== false && (
+                <input
+                  autoFocus={true}
+                  disabled={isPreview}
+                  className={clsx(
+                    ' w-full rounded border-gray-200 p-1 text-base transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500'
+                  )}
+                  ref={inputRef}
+                  placeholder={
+                    t(itemType !== 'post' ? 'placeholder.enterComment' : 'placeholder.enterPostTitle') as string
+                  }
+                  value={title}
+                  onChange={e => setTitle(e.target.value)}
+                />
               )}
-              placeholder={t(itemType !== 'post' ? 'placeholder.enterComment' : 'placeholder.enterPostTitle') as string}
-              value={title}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
-            />
-          )}
-          <div>
-            <TogglePreview onClick={() => setIsPreview(!isPreview)} isPreview={isPreview} disabled={!description} />
-            <div className="rounded border-gray-200">
-              <>
-                <div className={isPreview ? '' : 'hidden'}>
-                  <EditorJsRenderer data={description} />
-                </div>
-                <Editor
-                  divProps={{
-                    className: clsx('z-50', c?.editor, isPreview ? 'hidden' : ''),
-                  }}
+              <Tab.Panels>
+                <div className="text-md">Content</div>
+                <ContentSection
+                  preview={isPreview}
                   data={description}
+                  inputs={c?.editor}
                   editorRef={editorReference}
-                  onChange={setDescription}
+                  onChange={(value: EditorJsType) => {
+                    setDescription(value)
+                    setError(null)
+                  }}
                   readOnly={isReadOnly}
                   placeholder={placeholder}
                   holder={editorId}
                 />
-              </>
-            </div>
-
-            <div className="flex justify-between">
-              <CancelButton
-                className={clsx(c?.cancelButton)}
-                onClick={() => {
-                  if (description?.blocks?.length > 0) {
-                    resetForm(handlerType)
-                  } else {
-                    setIsFormOpen(false)
-                  }
-                }}
-              >
-                {description?.blocks?.length > 0 ? t('button.clearForm') : t('button.closeForm')}
-              </CancelButton>
-              <PrimaryButton
-                className={clsx('bg-gray-500/20 hover:bg-gray-500/40', c?.submitButton)}
-                onClick={handleSubmitAction}
-                isLoading={isSubmitting}
-                disabled={isSubmitting}
-              >
-                {submitButtonText}
-              </PrimaryButton>
-            </div>
+              </Tab.Panels>
+            </Tab.Group>
+            {error && <p className={clsx('text-red-500')}>{error}</p>}
+            <FormButtons
+              disableSubmit={disableSubmit}
+              handleClose={handleClose}
+              handleSubmitAction={handleSubmitAction}
+              isSubmitting={isSubmitting}
+              submitButtonText={submitButtonText}
+              t={t}
+              description={description}
+              c={c}
+            />
 
             {isSubmitted && <p>Form submitted successfully!</p>}
-            {error && <p>Error submitting form.</p>}
           </div>
         </div>
       )}
@@ -224,3 +301,30 @@ export const NewPostForm = ({
   )
 }
 
+const FormButtons = ({
+  handleClose,
+  handleSubmitAction,
+  isSubmitting,
+  submitButtonText,
+  t,
+  description,
+  c,
+  disableSubmit,
+}) => (
+  <div className="flex justify-between">
+    <CancelButton
+      className={clsx(c?.cancelButton, 'bg-red-400 text-white hover:bg-opacity-80 hover:text-white')}
+      onClick={handleClose}
+    >
+      {description?.blocks?.length > 0 ? t('button.clearForm') : t('button.closeForm')}
+    </CancelButton>
+    <PrimaryButton
+      className={clsx(c?.submitButton, 'hover:bg-opacity-80')}
+      onClick={handleSubmitAction}
+      isLoading={isSubmitting}
+      disabled={isSubmitting || disableSubmit}
+    >
+      {submitButtonText}
+    </PrimaryButton>
+  </div>
+)

@@ -10,6 +10,12 @@ import { useValidatedImage } from '@components/CommunityCard/UseValidatedImage'
 
 interface CommunityCardHeaderProps {
   showDescription?: boolean
+  c?: {
+    root?: string
+    banner?: CommunityBannerClasses
+    description?: string
+    descriptionContainer?: string
+  }
 }
 
 export function CommunityLogo() {
@@ -35,20 +41,29 @@ export function CommunityLogo() {
   )
 }
 
-function CommunityBanner(props: {
+interface CommunityBannerClasses {
+  banner: string
+  name: string
+}
+
+interface CommunityBannerParams {
   srcBannerOverride: string | undefined
   bannerSrc: string | undefined
   inputs: string
   banner: boolean
   community: Group & { variant?: 'default' | 'banner'; user: User | false | undefined }
-}) {
+  c?: CommunityBannerClasses
+}
+
+function CommunityBanner(props: CommunityBannerParams) {
   return (
     <>
       {props.srcBannerOverride || props.bannerSrc ? (
         <Image
           className={clsx(
             props.inputs,
-            props.banner && 'max-full bottom-0 left-0 top-0 z-0 h-max rounded-b object-cover opacity-90'
+            props.banner && 'max-full bottom-0 left-0 top-0 z-0 h-max rounded-b object-cover opacity-90',
+            props?.c?.banner
           )}
           src={props.srcBannerOverride ?? props.bannerSrc}
           alt={'community Banner Image'}
@@ -62,7 +77,12 @@ function CommunityBanner(props: {
           priority
         />
       ) : (
-        <div className="col-span-full flex h-36 w-full items-center justify-center rounded-t bg-primary-500 text-xl font-semibold text-white">
+        <div
+          className={clsx(
+            'col-span-full flex h-36 w-full items-center justify-center rounded-t bg-primary-500 text-xl font-semibold text-white',
+            props?.c?.banner
+          )}
+        >
           {props.community?.name}
         </div>
       )}
@@ -72,8 +92,15 @@ function CommunityBanner(props: {
 
 export const CommunityCardHeader: React.FC<CommunityCardHeaderProps> = ({
   showDescription = true,
+  c,
 }: {
   showDescription: boolean
+  c?: {
+    root?: string
+    banner?: CommunityBannerClasses
+    description?: string
+    descriptionContainer?: string
+  }
 }) => {
   const community = useLocalCommunity()
 
@@ -84,24 +111,29 @@ export const CommunityCardHeader: React.FC<CommunityCardHeaderProps> = ({
   const commonBannerClasses = 'col-span-full h-36 w-full object-cover'
 
   return (
-    <div className="relative grid grid-cols-8 items-center justify-items-center ">
+    <div className={clsx('relative grid grid-cols-8 items-center justify-items-center', c?.root)}>
       <CommunityBanner
         srcBannerOverride={bannerSrc}
         bannerSrc={bannerSrc}
         inputs={commonBannerClasses}
         banner={isBanner}
         community={community}
+        c={c?.banner}
       />
 
-      {community?.groupDetails?.description && showDescription && community.groupDetails.description !== community.name && !isBanner && (
-        <div
-          className={clsx(
-            'absolute bottom-0 left-[25%] col-span-6 me-2 max-h-[30px] w-fit overflow-y-hidden rounded border bg-gray-50 p-1 hover:z-50 hover:max-h-full hover:w-auto'
-          )}
-        >
-          <p className="text-sm">{community?.groupDetails?.description}</p>
-        </div>
-      )}
+      {community?.groupDetails?.description &&
+        showDescription &&
+        community.groupDetails.description !== community.name &&
+        !isBanner && (
+          <div
+            className={clsx(
+              'absolute bottom-0 left-[25%] col-span-6 me-2 max-h-[30px] w-fit overflow-y-hidden rounded border bg-gray-50 p-1 hover:z-50 hover:max-h-full hover:w-auto',
+              c?.descriptionContainer
+            )}
+          >
+            <p className={clsx('text-sm', c?.description)}>{community?.groupDetails?.description}</p>
+          </div>
+        )}
     </div>
   )
 }

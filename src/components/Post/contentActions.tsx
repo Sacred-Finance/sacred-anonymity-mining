@@ -19,6 +19,7 @@ export const ContentActions = ({
   onClickCancel,
   save,
   isLoading,
+  hidden,
 }: {
   isContentEditable: boolean
   onContentPage: boolean
@@ -31,8 +32,10 @@ export const ContentActions = ({
   onClickCancel: () => void
   save: () => void
   isLoading: boolean
+  hidden: boolean
 }) => {
   const { t } = useTranslation()
+  if (hidden) return null
   if (isContentEditable && onContentPage) {
     return (
       <>

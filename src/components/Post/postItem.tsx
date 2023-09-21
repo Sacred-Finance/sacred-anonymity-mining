@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router'
-import { useUserIfJoined } from '@/contexts/CommunityProvider'
+import { useCommunityContext, useUserIfJoined } from '@/contexts/CommunityProvider'
 import React, { useEffect, useRef, useState } from 'react'
 import { useAccount } from 'wagmi'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
@@ -19,10 +19,12 @@ import { Item } from '@/types/contract/ForumInterface'
 import clsx from 'clsx'
 import { mutate } from 'swr'
 import { getGroupWithPostAndCommentData } from '@/lib/fetcher'
+import { Avatar } from '@components/Avatar'
 const Editor = dynamic(() => import('../editor-js/Editor'), {
   ssr: false,
 })
-export const PostItem = ({ post }: { post: Item; isAdminOrModerator: boolean }) => {
+
+export const PostItem = ({ post }: { post: Item }) => {
   const router = useRouter()
   const { postId, groupId } = router.query as { postId: string; groupId: string }
   const user = useUserIfJoined(post.groupId)
@@ -91,6 +93,7 @@ export const PostItem = ({ post }: { post: Item; isAdminOrModerator: boolean }) 
   })
 
   useEffect(() => {
+    if (!user || !post || !address || isNaN(groupId)) return
     updateIsPostEditable({
       post,
       user,
@@ -105,50 +108,45 @@ export const PostItem = ({ post }: { post: Item; isAdminOrModerator: boolean }) 
   const isPostPage = !isNaN(postId)
 
   return (
-    <div className="group/post-item relative p-3">
+    <div className="group/post-item ">
       <div>
         {post.kind === ContentType.POLL && <PollUI id={post.id} groupId={post.groupId} post={post} />}
+        <div className="flex flex-col ">
+          <div className="flex w-full flex-col gap-8 ">
+            <div className="  bottom-24 top-0 flex w-full flex-col gap-1 ">
+              {isContentEditing ? (
+                <input
+                  name="title"
+                  className={clsx(
+                    'rounded p-4  text-black placeholder-white/40 ring-1 ring-white focus:outline-none focus:ring-2 focus:ring-primary-dark'
+                  )}
+                  placeholder={t('placeholder.enterPostTitle') as string}
+                  type="text"
+                  value={contentTitle}
+                  onChange={e => setContentTitle(e.target.value)}
+                />
+              ) : (
+                <PostTitle post={post} id={<Avatar user={post.ownerEpoch} />} onPostPage={isPostPage} router={router} />
+              )}
+            </div>
 
-        <div className="flex w-full flex-col gap-8">
-          <div className="flex w-full flex-col gap-1 ">
-            {isPostPage && (
-              <label htmlFor="title" className={'text-sm text-gray-500'}>
-                Post Title
+            <div className={clsx('flex w-full flex-col gap-1')}>
+              {/*Do not show label on postPage*/}
+              <label htmlFor="content" className={clsx('text-sm text-gray-500', isPostPage && 'hidden')}>
+                Content
               </label>
-            )}
-            {isContentEditing ? (
-              <input
-                name="title"
-                className={clsx(
-                  'rounded p-4  text-black placeholder-white/40 ring-1 ring-white focus:outline-none focus:ring-2 focus:ring-primary-dark'
-                )}
-                placeholder={t('placeholder.enterPostTitle') as string}
-                type="text"
-                value={contentTitle}
-                onChange={e => setContentTitle(e.target.value)}
+
+              <Editor
+                editorRef={contentRef}
+                holder={`${post?.id}_post`}
+                readOnly={!isContentEditing}
+                onChange={val => setContentDescription(val)}
+                placeholder={t('placeholder.enterPostContent') as string}
+                data={post.description}
               />
-            ) : (
-              <PostTitle title={post.title} id={post.id} onPostPage={isPostPage} router={router} />
-            )}
-          </div>
-          <div className={clsx('flex w-full flex-col gap-1')}>
-            {isPostPage && (
-              <label htmlFor="content" className={'text-sm text-gray-500'}>
-                Post
-              </label>
-            )}
+            </div>
 
-            <Editor
-              editorRef={contentRef}
-              holder={`${post?.id}_post`}
-              readOnly={!isContentEditing}
-              onChange={val => setContentDescription(val)}
-              placeholder={t('placeholder.enterPostContent') as string}
-              data={post.description}
-            />
-          </div>
-          <div className={'flex items-center justify-between'}>
-            {isPostPage && (
+            <div className={'flex items-center justify-between'}>
               <ContentActions
                 item={post}
                 contentId={post.id}
@@ -161,9 +159,10 @@ export const PostItem = ({ post }: { post: Item; isAdminOrModerator: boolean }) 
                 setIsContentEditing={setIsContentEditing}
                 onClickCancel={() => setIsContentEditing(false)}
                 isLoading={isLoading}
+                hidden={isPostPage}
               />
-            )}
-            {!isContentEditing && <CommentCount post={post} isPreview={!isPostPage} />}
+              <CommentCount post={post} isContentEditing={isContentEditing} />
+            </div>
           </div>
         </div>
       </div>
@@ -233,6 +232,7 @@ const checkIfPostIsEditable = async ({
   return generatedNoteAsBigNumber === noteBigNumber || canDelete
 }
 
-const CommentCount = ({ post, isPreview }: { post: any; isPreview: boolean }) => (
-  <span className="text-gray-600">{post?.childIds?.length || 0} comments</span>
-)
+const CommentCount = ({ post, isContentEditing }: { post: Item; isContentEditing: boolean }) => {
+  if (!isContentEditing) return null
+  return <span className="text-gray-600">{post?.childIds?.length || 0} comments</span>
+}

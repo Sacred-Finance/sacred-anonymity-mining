@@ -21,9 +21,7 @@ import { useContentManagement } from '@/hooks/useContentManagement'
 import { CommunityActionTabs } from '@components/CommunityActionTabs'
 import { CommunityCardHeader, CommunityLogo } from '@components/CommunityCard/CommunityCardHeader'
 import { CommunityCardContext } from '@components/CommunityCard/CommunityCard'
-import { useEditItem } from '@/hooks/useEditItem'
 import EditGroupNavigationButton, { useCheckIsOwner } from '@components/EditGroupNavigationButton'
-import { PostItem } from '@components/Post/postItem'
 
 export function CommunityPage({
   children,
@@ -31,7 +29,6 @@ export function CommunityPage({
   community,
   posts,
   post,
-  postId,
 }: {
   children?: React.ReactNode
   postId: string | undefined
@@ -42,19 +39,13 @@ export function CommunityPage({
 }) {
   const groupId = postInstance.groupId
   const user = useUserIfJoined(groupId as string)
-  const unirepUser = useUnirepSignUp({ groupId: groupId, name: (user as User)?.name })
+  useUnirepSignUp({ groupId: groupId, name: (user as User)?.name })
   const activeUser = useActiveUser({ groupId })
   const { address } = useAccount()
   const users = useUsers()
   const { t } = useTranslation()
 
   const [sortBy, setSortBy] = useState<SortByOption>('highest')
-  const { editItem } = useEditItem({
-    postId,
-    groupId,
-    isAdminOrModerator: false,
-    setIsLoading: () => {},
-  })
 
   const { checkUserBalance } = useValidateUserBalance(community, address)
   const { setIsLoading, isLoading: isContextLoading } = useLoaderContext()
@@ -144,37 +135,6 @@ export function CommunityPage({
 
   const sortedData = useItemsSortedByVote(tempContents, posts, sortBy)
 
-  const voteForPost = React.useCallback(
-    async (postId, voteType: 0 | 1) => {
-      if (validateRequirements() !== true) return setIsLoading(false)
-      const hasSufficientBalance = await checkUserBalance()
-      if (!hasSufficientBalance) {
-        toast.error(t('toast.error.insufficientBalance'), { toastId: 'insufficientBalance' })
-        setIsLoading(false)
-        return
-      }
-
-      try {
-        const response = await postInstance?.vote(voteType, address, users, activeUser, postId, groupId)
-
-        if (response?.message?.includes('ProveReputation_227')) {
-          toast.error(t('error.notEnoughReputation'), { toastId: 'notEnoughReputation' })
-        }
-        const { status } = response
-
-        if (status === 200) {
-          setIsLoading(false)
-          toast.success(t('toast.success.vote'), { toastId: 'vote' })
-          postInstance?.updatePostsVote(postId, voteType, false).then(() => setIsLoading(false))
-        }
-      } catch (error) {
-        setIsLoading(false)
-        toast(t('toast.error.vote'), { toastId: 'vote' })
-      }
-    },
-    [user, address, groupId, users, activeUser, postInstance]
-  )
-
   const clearInput = isEdit => {
     if (isEdit) {
       // setPostEditing(false)
@@ -189,13 +149,22 @@ export function CommunityPage({
   }
 
   return (
-    <div className={clsx('min-h-screen !text-gray-900 h-fit')}>
-      <div className={'group relative flex flex-col gap-4 overflow-x-clip '}>
+    <div className={clsx('h-fit min-h-screen !text-gray-900 ')}>
+      <div className={'group  flex flex-col gap-4 overflow-x-clip '}>
         <CommunityCardContext.Provider value={community}>
           <div className={'relative z-50'}>
             <EditGroupNavigationButton community={community} />
           </div>
-          <CommunityCardHeader showDescription={false} />
+          <CommunityCardHeader
+            showDescription={false}
+            c={{
+              root: '',
+              banner: {
+                banner: 'bg-cover bg-center bg-no-repeat h-full md:!w-1/2 sm:w-full',
+                name: '',
+              },
+            }}
+          />
           <div className={'flex items-center gap-4'}>
             <CommunityLogo />
             <span className={' p-4'}>{community.groupDetails.description}</span>
@@ -227,10 +196,15 @@ export function CommunityPage({
                         title={contentTitle as string}
                         isEditable={true}
                         itemType={'post'}
-                        handlerType={'new'}
+                        actionType={'new'}
                         classes={{
                           rootClosed: '!w-fit !p-0',
-                          openFormButtonOpen: 'bg-red-500 text-white border-none rounded-sm',
+                          rootOpen: 'fixed z-50 inset-0  p-12 bg-gray-900 bg-opacity-50 flex justify-center items-center ',
+                          formBody: 'w-full h-full  flex flex-col gap-4',
+                          editor: 'border  rounded py-1 px-2 bg-white',
+                          submitButton: 'bg-green-500 text-white border-none rounded',
+                          formContainerOpen: 'bg-white p-4 border border-gray-300 rounded shadow-lg w-full  max-w-3xl ',
+                          openFormButtonOpen: 'self-end bg-primary-500 text-white hidden',
                         }}
                       />
                       <div className={'flex-grow'} />
@@ -241,7 +215,7 @@ export function CommunityPage({
                   </div>
                 ),
               },
-              exclamation: {
+              community: {
                 hidden: true,
                 onClick: () => {},
                 panel: <div className={'w-1/2'}>Not needed on community page</div>,
@@ -252,7 +226,6 @@ export function CommunityPage({
                 panel: (
                   <div className={'flex w-1/2'}>
                     <ReputationCard />
-
                   </div>
                 ),
               },
@@ -265,5 +238,38 @@ export function CommunityPage({
     </div>
   )
 }
-import { motion, AnimatePresence } from 'framer-motion'
 
+export const PostNavigator = ({
+  posts,
+  visiblePostIds,
+  scrollIntoView,
+}: {
+  posts: Item[]
+  visiblePostIds: Item['id'][]
+  scrollIntoView: (id) => void
+}) => {
+  // post navigator lists the posts in the community allowing for easy navigation.
+  // it will be sticky on the right side of the screen and will scroll with the user.
+  // the title will highlight when the user can see the post on the screen.
+  // the title will be clickable and will scroll the user to the start of that post.
+  // the title will also have a enter on the right side that will allow the user to navigate to the post directly.
+
+  return (
+    <div className={'sticky top-24 flex flex-col gap-4'}>
+      {posts.map(post => {
+        return (
+          <div
+            onClick={() => scrollIntoView(post.id)}
+            key={post.id}
+            className={clsx(
+              'flex flex-col gap-4 hover:cursor-pointer hover:text-primary-600',
+              visiblePostIds.includes(post.id) && 'text-primary-600'
+            )}
+          >
+            {post.title}
+          </div>
+        )
+      })}
+    </div>
+  )
+}

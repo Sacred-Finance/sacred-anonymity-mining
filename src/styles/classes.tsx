@@ -135,7 +135,7 @@ export const buttonVariants = {
 }
 
 export const primaryButtonStyle = clsx(
-  ' !focus-none !select-none p-2 text-center content-center align-middle  shadow-none  rounded  focus:outline-none focus:text-bold active:scale-95 transition-transform duration-100 ease-in-out'
+  ' !focus-none disabled:active:!scale-100 disabled:hover:pointer-none !select-none p-2 text-center content-center align-middle  shadow-none  rounded  focus:outline-none focus:text-bold active:scale-95 transition-transform duration-100 ease-in-out'
 )
 
 // The following Tailwind theme aspires to be a reproduction of the

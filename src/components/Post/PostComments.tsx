@@ -67,7 +67,7 @@ export const PostComments = ({
   editItem: (args: EditItemParams) => Promise<void>
   isLoading: boolean
 }) => {
-  const [comment, setComment] = useState<OutputData>(null)
+  const [comment, setComment] = useState<OutputData | null>(null)
   const [commentsMap, setCommentsMap] = useState<CommentsMap>({} as any)
   const [tempComments, setTempComments] = useState<TempComment[]>([])
   const [editableComments, setEditableComments] = useState<string[]>([])
@@ -90,7 +90,6 @@ export const PostComments = ({
     })
     commentEditorRef?.current?.clear()
   }
-
 
   // Helper function for updating the comments map
   const updateCommentMap = (id: string, updates: Partial<CommentsMap[string]>) => {
@@ -294,29 +293,35 @@ export const PostComments = ({
   }
 
   return (
-    <>
-      <div className={'fixed bottom-3 right-3'}>
-        <NewPostForm
-          editorId={`post_comment${groupId}`}
-          description={comment}
-          setDescription={setComment}
-          handleSubmit={addComment}
-          editorReference={postEditorRef}
-          setTitle={() => {}}
-          resetForm={() => setComment(null)}
-          isEditable={true}
-          isReadOnly={false}
-          title={''}
-          itemType={'comment'}
-          handlerType={'new'}
-          formVariant={'default'}
-          classes={{ openFormButton: 'bg-blue-500 text-white hover:bg-blue-600' }}
-          submitButtonText={t('button.comment')}
-          placeholder={t('placeholder.comment')}
-          openFormButtonText={t('button.comment')}
-        />
-      </div>
+    <div className={'flex flex-col sticky top-0'}>
       {sortedCommentsData.length === 0 && <NoComments />}
+
+      <NewPostForm
+        editorId={`post_comment${groupId}`}
+        description={comment}
+        setDescription={setComment}
+        handleSubmit={addComment}
+        editorReference={postEditorRef}
+        setTitle={() => {}}
+        resetForm={() => setComment(null)}
+        isEditable={true}
+        isReadOnly={false}
+        title={''}
+        itemType={'comment'}
+        actionType={'new'}
+        classes={{
+          rootOpen: 'bg-white border border-gray-200 bg-gray-200 rounded-sm h-full',
+          rootClosed: '!h-32 flex flex-col justify-center items-center rounded-sm',
+          formBody: 'w-full h-full  flex flex-col gap-4',
+          editor: 'border  rounded py-1 px-2 bg-white',
+          submitButton: 'bg-green-500 text-white border-none rounded',
+          openFormButtonClosed: 'bg-green-500 text-white border-none rounded',
+        }}
+        submitButtonText={t('button.comment')}
+        placeholder={t('placeholder.comment')}
+        openFormButtonText={t('button.comment')}
+      />
+
       {sortedCommentsData.map((c, i) => (
         <motion.div
           key={i}
@@ -364,6 +369,6 @@ export const PostComments = ({
           </div>
         </motion.div>
       ))}
-    </>
+    </div>
   )
 }

@@ -219,7 +219,7 @@ function HomePage({ isAdmin = false, users, communities }: HomeProps) {
   }
   return (
     <div className={'flex w-full flex-col items-start pb-8 ps-1 pt-0'}>
-      <Tab.Group selectedIndex={selectedIndex} onChange={setSelectedIndex} vertical={false} >
+      <Tab.Group selectedIndex={selectedIndex} onChange={setSelectedIndex} vertical={false}>
         <div className="grid grid-flow-dense gap-4 rounded sm:justify-items-stretch">
           <div
             className={
@@ -234,14 +234,14 @@ function HomePage({ isAdmin = false, users, communities }: HomeProps) {
               </div>
             </div>
 
-            <div className={'group relative flex flex-col text-primary-800'}>
+            <div className={'group  flex flex-col text-primary-800'}>
               <small className={'flex justify-between text-sm'}>Filters</small>
               <div className={'flex items-center justify-start'}>
                 <FilterButtons applyFilter={applyFilter} currentFilter={currentFilter} />
               </div>
               <span
                 className={
-                  'absolute -bottom-4 flex hidden h-fit w-fit items-center gap-1 rounded border bg-gray-900 px-1 text-xss text-white group-hover:block'
+                  'absolute -bottom-4 hidden h-fit w-fit items-center gap-1 rounded border bg-gray-900 px-1 text-xss text-white group-hover:block'
                 }
               >
                 {currentFilter.replace('-', '')}{' '}
@@ -259,8 +259,7 @@ function HomePage({ isAdmin = false, users, communities }: HomeProps) {
             </div>
           </div>
           <AnimatePresence mode={'popLayout'}>
-
-          <Tab.Panels className={'min-h-screen'} >
+            <Tab.Panels className={'min-h-screen'}>
               <Tab.Panel key="panel1">
                 <motion.div
                   initial="initial"
@@ -268,11 +267,10 @@ function HomePage({ isAdmin = false, users, communities }: HomeProps) {
                   exit="exit"
                   variants={panelVariants}
                   transition={{ duration: 0.5 }}
-
                   className="flex flex-wrap gap-4 sm:justify-stretch"
                 >
                   {localCommunities.map((community, index) => (
-                    <CommunityCard key={community.groupId} community={community}/>
+                    <CommunityCard key={community.groupId} community={community} />
                   ))}
                   {/*<NoCommunities groups={localCommunities} searchTerm={searchTerm} />*/}
                 </motion.div>
@@ -290,9 +288,8 @@ function HomePage({ isAdmin = false, users, communities }: HomeProps) {
                   <AllTopics />
                 </motion.div>
               </Tab.Panel>
-          </Tab.Panels>
+            </Tab.Panels>
           </AnimatePresence>
-
         </div>
       </Tab.Group>
     </div>
