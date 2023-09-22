@@ -5,7 +5,7 @@ import { useAccount } from 'wagmi'
 import { useTranslation } from 'react-i18next'
 import { OutputData } from '@editorjs/editorjs'
 import { SortByOption } from '@components/SortBy'
-import { useUnirepSignUp } from '@/hooks/useUnirepSignup'
+// import { useUnirepSignUp } from '@/hooks/useUnirepSignup'
 import { User } from '@/lib/model'
 import { useValidateUserBalance } from '@/utils/useValidateUserBalance'
 import { useLoaderContext } from '@/contexts/LoaderContext'
@@ -37,7 +37,7 @@ export function CommunityPage({
 }) {
   const groupId = postInstance.groupId
   const user = useUserIfJoined(groupId as string)
-  const unirepUser = useUnirepSignUp({ groupId: groupId, name: (user as User)?.name })
+  // const unirepUser = useUnirepSignUp({ groupId: groupId, name: (user as User)?.name })
   const activeUser = useActiveUser({ groupId })
   const { address } = useAccount()
   const users = useUsers()

@@ -200,6 +200,7 @@ export class UnirepUser {
   async signup(): Promise<void> {
     console.time('signup')
     let userState = UnirepUser.user.userState || (await this.genUserState())
+    await this.updateUserState();
     const { publicSignals, proof } = await userState.genUserSignUpProof()
     const { status } = await userUnirepSignUp(publicSignals, proof)
 

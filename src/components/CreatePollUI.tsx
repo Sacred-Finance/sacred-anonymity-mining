@@ -12,10 +12,11 @@ const Editor = dynamic(() => import('./editor-js/Editor'), {
 })
 
 interface CreatePollUIProps {
-  groupId: string
+  groupId: string,
+  asComment?: boolean
 }
 
-const CreatePollUI = ({ groupId }: CreatePollUIProps) => {
+const CreatePollUI = ({ groupId, asComment = false }: CreatePollUIProps) => {
   const [showModal, setShowModal] = React.useState(false)
   const [title, setTitle] = React.useState('Do you like this poll?')
   const [description, setDescription] = React.useState(null)
@@ -59,6 +60,7 @@ const CreatePollUI = ({ groupId }: CreatePollUIProps) => {
         options,
         pollType == PollType.NUMERIC_RATING ? rateScaleFrom : 0,
         pollType == PollType.NUMERIC_RATING ? rateScaleTo : 0,
+        asComment,
         () => {
           toast.success('Poll created successfully')
           setLoading(false)

@@ -1,6 +1,6 @@
 import { useActiveUser, useUsers } from '@/contexts/CommunityProvider'
-import { createPost, votePoll } from '@/lib/api'
-import { getGroupWithPostData } from '@/lib/fetcher'
+import { createComment, createPost, votePoll } from '@/lib/api'
+import { getGroupWithPostAndCommentData, getGroupWithPostData } from '@/lib/fetcher'
 import { ItemCreationRequest, PollRequestStruct, PostContent, ReputationProofStruct } from '@/lib/model'
 import { UnirepUser } from '@/lib/unirep'
 import { createNote, getBytes32FromIpfsHash, hashBytes, hashBytes2, uploadIPFS } from '@/lib/utils'
@@ -8,13 +8,18 @@ import { Group } from '@semaphore-protocol/group'
 import { Identity } from '@semaphore-protocol/identity'
 import { generateProof } from '@semaphore-protocol/proof'
 import { BigNumber } from 'ethers'
+import { useRouter } from 'next/router'
 import { mutate } from 'swr'
 import { useAccount } from 'wagmi'
+import { useFetchUsers } from './useFetchUsers'
 
 export const usePoll = ({ groupId }) => {
   const { address } = useAccount()
-  const users = useUsers()
+  const { fetchUsersFromSemaphoreContract } = useFetchUsers(groupId, false)
   const activeUser = useActiveUser({ groupId })
+  const router = useRouter()
+  const { postId } = router.query
+
   const createPoll = async (
     content: PostContent,
     pollType: number,
@@ -22,24 +27,25 @@ export const usePoll = ({ groupId }) => {
     answers: string[],
     rateScaleFrom: number,
     rateScaleTo: number,
+    asComment: boolean = false,
     onSuccessCallback: () => void,
     onErrorCallback: (err) => void
   ): Promise<any> => {
     try {
       let currentDate = new Date()
       const _message = currentDate.getTime() + '#' + JSON.stringify(content)
-  
+
       const cid = await uploadIPFS(_message)
       if (!cid) {
         throw 'Upload to IPFS failed'
       }
-  
+
       console.log(`IPFS CID: ${cid}`)
       const signal = getBytes32FromIpfsHash(cid)
       const extraNullifier = hashBytes(signal).toString()
       let group = new Group(groupId)
-      const u = users.filter(u => u?.groupId === +groupId)
-      group.addMembers(u.map(u => u?.identityCommitment))
+      const users = await fetchUsersFromSemaphoreContract();
+      users.forEach(u => group.addMember(BigInt(u)))
       const userIdentity = new Identity(`${address}_${groupId}_${activeUser.name}`)
       const unirepUser = new UnirepUser(userIdentity)
       await unirepUser.updateUserState()
@@ -47,10 +53,10 @@ export const usePoll = ({ groupId }) => {
       const note = await createNote(userIdentity)
       let reputationProof = await userState.genProveReputationProof({
         epkNonce: 0,
-        minRep: 0,
+        minRep: asComment ? 0 : 0,
         graffitiPreImage: 0,
       })
-  
+
       let answerCIDs = []
       for (let i = 0; i < answers.length; i++) {
         const cid = await uploadIPFS(answers[i])
@@ -60,7 +66,7 @@ export const usePoll = ({ groupId }) => {
         const answerCID = getBytes32FromIpfsHash(cid)
         answerCIDs.push(answerCID)
       }
-  
+
       const epochData = unirepUser.getEpochData()
       const epoch: ReputationProofStruct = {
         publicSignals: epochData.publicSignals,
@@ -70,7 +76,7 @@ export const usePoll = ({ groupId }) => {
         ownerEpoch: BigNumber.from(epochData.epoch)?.toString(),
         ownerEpochKey: epochData.epochKey,
       }
-  
+
       const fullProof = await generateProof(userIdentity, group, extraNullifier, hashBytes(signal))
       const request: ItemCreationRequest = {
         contentCID: signal,
@@ -78,7 +84,7 @@ export const usePoll = ({ groupId }) => {
         nullifierHash: fullProof.nullifierHash.toString(),
         note: note.toString(),
       }
-  
+
       const pollRequest: PollRequestStruct = {
         pollType,
         duration,
@@ -87,10 +93,16 @@ export const usePoll = ({ groupId }) => {
         rateScaleTo,
         answerCIDs,
       }
-      const { status } = await createPost(groupId, request, fullProof.proof, epoch, true, pollRequest)
+      const { status } = asComment
+        ? await createComment(groupId, postId as string, request, fullProof.proof, epoch, true, pollRequest)
+        : await createPost(groupId, request, fullProof.proof, epoch, true, pollRequest)
       if (status === 200) {
         console.log(`A post posted by user ${address}`)
-        await mutate(getGroupWithPostData(groupId))
+        if (asComment || postId) {
+          await mutate(getGroupWithPostAndCommentData(groupId, postId as string))
+        } else {
+          await mutate(getGroupWithPostData(groupId))
+        }
         onSuccessCallback()
       } else {
         onErrorCallback('Creating a post failed!')
@@ -106,10 +118,10 @@ export const usePoll = ({ groupId }) => {
       const signal = hashBytes2(id, 'votePoll')
       const extraNullifier = signal.toString()
       let group = new Group(groupId)
-      const u = users.filter(u => u?.groupId === +groupId)
-      group.addMembers(u.map(u => u?.identityCommitment))    
+      const users = await fetchUsersFromSemaphoreContract();
+      users.forEach(u => group.addMember(BigInt(u)))
       const userIdentity = new Identity(`${address}_${groupId}_${activeUser.name}`)
-  
+
       const unirepUser = new UnirepUser(userIdentity)
       await unirepUser.updateUserState()
       const userState = await unirepUser.getUserState()
@@ -119,7 +131,7 @@ export const usePoll = ({ groupId }) => {
         minRep: 1,
         graffitiPreImage: 0,
       })
-  
+
       const fullProof = await generateProof(userIdentity, group, extraNullifier, signal)
       let voteProofData: ReputationProofStruct = {
         publicSignals: epochData.publicSignals,
@@ -147,7 +159,6 @@ export const usePoll = ({ groupId }) => {
     } catch (error) {
       onErrorCallback(error)
     }
-
   }
 
   return { createPoll, submitPoll }

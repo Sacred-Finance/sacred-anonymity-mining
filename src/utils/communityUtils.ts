@@ -242,7 +242,7 @@ export const addRequirementDetails = async (community: Group): Promise<Awaited<R
       try {
         symbol = await token?.symbol();
         name = await token?.name()
-        decimals = await toke?.decimals()
+        decimals = await token?.decimals()
       } catch (error) {
         console.log(error)
       }
