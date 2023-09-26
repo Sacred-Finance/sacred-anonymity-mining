@@ -293,7 +293,7 @@ export const PostComments = ({
   }
 
   return (
-    <div className={'flex flex-col sticky top-0'}>
+    <div className={'sticky top-0 flex flex-col'}>
       {sortedCommentsData.length === 0 && <NoComments />}
 
       <NewPostForm
@@ -310,12 +310,12 @@ export const PostComments = ({
         itemType={'comment'}
         actionType={'new'}
         classes={{
-          rootOpen: 'bg-white border border-gray-200 bg-gray-200 rounded-sm h-full',
-          rootClosed: '!h-32 flex flex-col justify-center items-center rounded-sm',
+          rootOpen: 'fixed z-50 inset-0  bg-gray-900 bg-opacity-50  flex justify-center items-center ',
           formBody: 'w-full h-full  flex flex-col gap-4',
           editor: 'border  rounded py-1 px-2 bg-white',
           submitButton: 'bg-green-500 text-white border-none rounded',
-          openFormButtonClosed: 'bg-green-500 text-white border-none rounded',
+          formContainerOpen: 'bg-white p-4 border border-gray-300 rounded shadow-lg w-full  max-w-3xl ',
+          openFormButtonOpen: ' bg-primary-500 text-white opacity-0',
         }}
         submitButtonText={t('button.comment')}
         placeholder={t('placeholder.comment')}

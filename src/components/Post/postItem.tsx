@@ -20,6 +20,7 @@ import clsx from 'clsx'
 import { mutate } from 'swr'
 import { getGroupWithPostAndCommentData } from '@/lib/fetcher'
 import { Avatar } from '@components/Avatar'
+import EditorJsRenderer from '@components/editor-js/EditorJSRenderer'
 const Editor = dynamic(() => import('../editor-js/Editor'), {
   ssr: false,
 })
@@ -108,7 +109,7 @@ export const PostItem = ({ post }: { post: Item }) => {
   const isPostPage = !isNaN(postId)
 
   return (
-    <div className="group/post-item ">
+    <div className="group/post-item">
       <div>
         {post.kind === ContentType.POLL && <PollUI id={post.id} groupId={post.groupId} post={post} />}
         <div className="flex flex-col ">
@@ -130,20 +131,23 @@ export const PostItem = ({ post }: { post: Item }) => {
               )}
             </div>
 
-            <div className={clsx('flex w-full flex-col gap-1')}>
+            <div className={clsx(' flex w-full flex-col gap-1')}>
               {/*Do not show label on postPage*/}
               <label htmlFor="content" className={clsx('text-sm text-gray-500', isPostPage && 'hidden')}>
                 Content
               </label>
 
-              <Editor
-                editorRef={contentRef}
-                holder={`${post?.id}_post`}
-                readOnly={!isContentEditing}
-                onChange={val => setContentDescription(val)}
-                placeholder={t('placeholder.enterPostContent') as string}
-                data={post.description}
-              />
+              {!isContentEditing && <EditorJsRenderer data={post.description} onlyPreview={!postId} />}
+              {isContentEditing && (
+                <Editor
+                  editorRef={contentRef}
+                  holder={`${post?.id}_post`}
+                  readOnly={!isContentEditing}
+                  onChange={val => setContentDescription(val)}
+                  placeholder={t('placeholder.enterPostContent') as string}
+                  data={post.description}
+                />
+              )}
             </div>
 
             <div className={'flex items-center justify-between'}>

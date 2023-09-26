@@ -15,7 +15,7 @@ const Header = () => {
   return (
     <nav
       id={'header'}
-      className="z-[10] flex items-center justify-between bg-gray-100 p-4 text-gray-800 drop-shadow-sm dark:bg-gray-900 dark:text-white "
+      className="flex items-center justify-between p-4 text-gray-800 dark:bg-gray-900 dark:text-white "
     >
 
       <div className="flex items-center space-x-4">

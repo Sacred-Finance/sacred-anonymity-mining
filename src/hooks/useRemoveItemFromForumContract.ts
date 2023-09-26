@@ -35,13 +35,13 @@ export const useRemoveItemFromForumContract = (groupId, postId, isAdminOrModerat
       return toast.error(t('alert.deleteFailed'))
     if (validateRequirements() !== true) return
     if (isAdminOrModerator) {
-      return writeAsync({
+      return writeAsync ? writeAsync({
         recklesslySetUnpreparedArgs: [+itemId],
       }).then(async value => {
         return await value.wait().then(async () => {
           await mutate(getGroupWithPostAndCommentData(groupId, postId))
         })
-      })
+      }) : null
     } else {
       return itemType == ContentType.POST ?? itemType == ContentType.POLL
         ? postInstance?.delete(address, itemId, users, member as User, groupId, setIsLoading)

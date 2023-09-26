@@ -10,12 +10,18 @@ export const NoPosts = () => {
   )
 }
 
-export const NoComments = () => {
+export const NoComments = ({ onClick, children }: { onClick?: () => void; children?: React.ReactNode }) => {
   const { t } = useTranslation()
 
   return (
-    <div className={'bold select-none text-white bg-blueGray-500 flex h-96 flex-col items-center justify-center rounded border p-2 text-center text-xl '}>
+    <div
+      onClick={onClick}
+      className={
+        'bold absolute inset-0 flex h-96 select-none flex-col items-center justify-center rounded border p-2 text-center text-xl '
+      }
+    >
       {t('noCommentsFound')}
+      {children}
     </div>
   )
 }

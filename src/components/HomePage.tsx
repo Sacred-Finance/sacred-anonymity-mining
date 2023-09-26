@@ -265,7 +265,7 @@ function HomePage({ isAdmin = false, users, communities }: HomeProps) {
                   initial="initial"
                   animate="animate"
                   exit="exit"
-                  variants={panelVariants}
+                  // variants={panelVariants}
                   transition={{ duration: 0.5 }}
                   className="flex flex-wrap gap-4 sm:justify-stretch"
                 >
@@ -281,7 +281,7 @@ function HomePage({ isAdmin = false, users, communities }: HomeProps) {
                   initial="initial"
                   animate="animate"
                   exit="exit"
-                  variants={panelVariants}
+                  // variants={panelVariants}
                   transition={{ duration: 0.5 }}
                   className="flex flex-wrap gap-4 sm:justify-stretch"
                 >

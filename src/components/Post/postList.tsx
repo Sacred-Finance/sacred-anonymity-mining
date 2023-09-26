@@ -39,9 +39,9 @@ export const PostList = ({ posts }: { posts: Item[] }) => {
 
   if (!posts) return null
   return (
-    <div className="grid grid-cols-12 ">
+    <div className="grid grid-cols-12 py-4 gap-4">
       <div className="col-span-10 flex flex-col gap-2">
-        <div className="flex flex-grow flex-wrap justify-stretch gap-2 p-3 ">
+        <div className="flex flex-grow flex-wrap justify-stretch gap-2 ">
           {posts.map(p => {
             if (ContentType[p?.kind] === undefined) {
               return null // or <></>
@@ -54,7 +54,7 @@ export const PostList = ({ posts }: { posts: Item[] }) => {
                 onViewportLeave={onViewportLeave}
                 key={p.id}
                 className={
-                  'relative flex  flex-col rounded border border-gray-400 p-3  hover:brightness-110 sm:flex-grow '
+                  'relative flex  flex-col rounded border border-gray-400 p-3  sm:flex-grow '
                 }
               >
                 <MemoizedPostItem post={p} />
@@ -70,7 +70,7 @@ export const PostList = ({ posts }: { posts: Item[] }) => {
           })}
         </div>
       </div>
-      <div className={'col-span-2  p-1'}>
+      <div className={'col-span-2 '}>
         <PostNavigator posts={posts} visiblePostIds={Array.from(visibleIds)} scrollIntoView={scrollIntoView} />
       </div>
     </div>
