@@ -8,13 +8,13 @@ import { BigNumber } from 'ethers'
 import LoadingComponent from '@components/LoadingComponent'
 import SideBar from '@components/SideBar'
 import useSWR, { preload } from 'swr'
-const fetcher = (url) => fetch(url).then((res) => {
-  console.log('fetching data')
+const fetcher = url =>
+  fetch(url).then(res => {
+    console.log('fetching data')
     return res.json()
-})
+  })
 
 preload('/api/data', fetcher)
-
 
 export default function StandardLayout({ children }) {
   const pageRef = useRef(null)
@@ -62,12 +62,14 @@ export default function StandardLayout({ children }) {
     <div className={'flex h-full flex-col '} ref={pageRef}>
       <div className={'flex w-full flex-col '} ref={pageRef}>
         <Header />
-        <Breadcrumbs />
         <div className={'relative flex flex-1 '}>
           <div className={'relative  '}>
             <SideBar isOpen={isOpen} setIsOpen={setIsOpen} />
           </div>
-          <div className="w-full border p-2 h-full">{childrenWithProps}</div>
+          <div className="h-full w-full border p-2">
+            <Breadcrumbs />
+            {childrenWithProps}
+          </div>
         </div>
       </div>
       <Footer />

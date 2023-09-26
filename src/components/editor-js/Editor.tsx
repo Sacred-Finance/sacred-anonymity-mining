@@ -1,139 +1,115 @@
-//./components/Editor
-import React, { memo, useEffect, useImperativeHandle, useRef } from 'react'
-import EditorJS, { OutputData } from '@editorjs/editorjs'
-import { EDITOR_TOOLS } from './editor-tool'
-import clsx from 'clsx'
-import { CircularLoader } from '@components/JoinCommunityButton'
-import { EDITOR_JS_TOOLS } from '@components/editor-js/tools'
+import React, { memo, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import EditorJS, { OutputData } from '@editorjs/editorjs';
+import clsx from 'clsx';
+import { CircularLoader } from '@components/JoinCommunityButton';
+import { EDITOR_TOOLS } from './editor-tool';
 
-//props
 type Props = {
-  data?: OutputData
-  onChange(val: OutputData): void
-  holder: string
-  placeholder?: string
-  className?: string
-  editorRef?: React.MutableRefObject<EditorJS>
-  readOnly?: boolean
-  divProps?: any
-}
+  data?: OutputData;
+  onChange(val: OutputData): void;
+  holder: string;
+  placeholder?: string;
+  className?: string;
+  editorRef?: React.MutableRefObject<EditorJS>;
+  readOnly?: boolean;
+  divProps?: any;
+};
 
-const EditorBlock = ({ data, onChange, holder, className, divProps = {}, editorRef, placeholder, readOnly }: Props) => {
-  const [isReady, setIsReady] = React.useState(false)
-  //add a reference to editor
-  const ref = useRef<EditorJS>()
+const EditorBlock = (props: Props) => {
+  const {
+    data,
+    onChange,
+    holder,
+    divProps = {},
+    editorRef,
+    placeholder,
+    readOnly
+  } = props;
+
+  const [isReady, setIsReady] = useState(false);
+  const ref = useRef<EditorJS>();
+
+  // Imperative handle for external interactions
   useImperativeHandle(editorRef, () => ({
     clear() {
-      ref?.current?.clear?.()
+      ref.current?.clear();
     },
     destroy() {
-      ref?.current?.destroy?.()
+      ref.current?.destroy();
     },
     render(data: OutputData): Promise<void> {
-      if (!ref.current || !data) return Promise.resolve()
-
-      return ref?.current?.render?.(data)
+      return ref.current ? ref.current.render(data) : Promise.resolve();
     },
-    //@ts-ignore
-    async isReady() {
-      if (!ref.current || !data) return Promise.resolve()
-      return (await ref?.current?.isReady) as unknown as Promise<void>
+    isReady() {
+      return ref.current ? (ref.current.isReady as unknown as Promise<void>) : Promise.resolve();
     },
-  }))
+  }));
 
+  // Handle editor read-only and focus status
   useEffect(() => {
-    if (!ref.current) return
-    ref?.current?.readOnly?.toggle?.()
+    if (!ref.current) return;
 
     if (!readOnly) {
-      console.log('re-rendering for non-readonly')
-
-      setTimeout(() => {
-        if (ref?.current?.focus) ref.current.focus(true)
-      }, 200)
+      setTimeout(() => ref.current?.focus(true), 200);
     } else {
-      console.log('re-rendering for readonly')
       setTimeout(() => {
-        if (ref?.current?.render && data?.blocks) ref.current.render(data)
-      }, 0)
+        if (data?.blocks && ref.current?.render) {
+          ref.current.render(data);
+        }
+      }, 0);
     }
+
     if (!data?.blocks) {
-      setTimeout(() => {
-        if (ref?.current?.clear) ref.current.clear()
-      }, 200)
+      setTimeout(() => ref.current?.clear(), 200);
     }
-  }, [readOnly])
-  //initialize editorjs
+  }, [readOnly, data?.blocks, ref.current]);
+
+  // Initialize EditorJS
   useEffect(() => {
-    //initialize editor if we don't have a reference
-    if (!ref.current) {
-      if (!holder) return
+    if (!ref.current && holder) {
       const editor = new EditorJS({
-        holder: holder,
+        holder,
         inlineToolbar: true,
         hideToolbar: false,
-
-
-        tools: {
-          ...EDITOR_TOOLS,
-
-        },
+        tools: { ...EDITOR_TOOLS },
         readOnly,
         placeholder: placeholder || 'Start writing your post...',
         data,
-        async onChange(api, event) {
-          if (readOnly) return
-          const data = await api.saver.save()
-          onChange(data)
+        async onChange(api) {
+          if (!readOnly) {
+            const savedData = await api.saver.save();
+            onChange(savedData);
+          }
         },
         onReady() {
-          // todo: make it work only for editor
-          // const links = document.getElementsByTagName('a')
-          // for (let i = 0; i < links.length; i++) {
-          //   const link = links[i]
-          //   link.setAttribute('target', '_blank')
-          //   link.setAttribute('rel', 'noopener')
-          //   link.setAttribute('aria-label', 'External link (opens in new tab)')
-          // }
-          // If readonly set the editor to readonly
           if (readOnly) {
-            const el = document.getElementById(holder)
-            if (el) {
-              // get any input or textarea elements and set them to readonly
-              const inputs = el.getElementsByTagName('input')
-              const textareas = el.getElementsByTagName('textarea')
-              for (let i = 0; i < inputs.length; i++) {
-                inputs[i].setAttribute('readonly', 'readonly')
-              }
-              for (let i = 0; i < textareas.length; i++) {
-                textareas[i].setAttribute('readonly', 'readonly')
-              }
-            }
+            const el = document.getElementById(holder);
+            const inputs = el?.getElementsByTagName('input') || [];
+            const textareas = el?.getElementsByTagName('textarea') || [];
+
+            [...inputs, ...textareas].forEach(input => input.setAttribute('readonly', 'readonly'));
           }
-          setIsReady(true)
+          setIsReady(true);
         },
-      })
-      ref.current = editor
+      });
+
+      ref.current = editor;
     }
 
-    //add a return function handle cleanup
-    return () => {
-      if (ref.current && ref.current.destroy) {
-        ref.current.destroy()
-      }
-    }
-  }, [])
+
+    // return () => ref?.current?.destroy?.();
+  }, []);
 
   return (
-    <>
-      <div
-        {...divProps}
-        className={clsx(isReady ? 'h-full w-full text-black dark:text-white' : 'hidden', divProps.className)}
-        id={holder}
-      ></div>
-      {!isReady && <CircularLoader className={'h-12'} />}
-    </>
-  )
-}
+      <>
+        <div
+            {...divProps}
+            className={clsx(isReady ? 'h-full w-full text-black dark:text-white prose' : 'hidden', divProps.className)}
+            id={holder}
+        />
+        {!isReady && <CircularLoader className={'h-12'} />}
+      </>
+  );
+};
 
-export default memo(EditorBlock)
+export default memo(EditorBlock);
