@@ -27,7 +27,7 @@ interface SummaryButtonProps {
 
   return (
       <div
-          className="relative"
+          className="relative w-fit"
           onClick={() => {
             if (showModal) {
               toggleModal();

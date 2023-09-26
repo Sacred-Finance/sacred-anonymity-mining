@@ -36,15 +36,18 @@ export function SideItem({
 }) {
   const linkProps = external ? { target: '_blank', rel: 'noopener noreferrer' } : {}
 
+  const active = useRouter().pathname === href
+
   return (
-    <ToolTip tooltip={!isOpen && title}>
-      <div className={clsx('group sticky top-0 w-full rounded bg-white')}>
+    <div className={clsx('group sticky top-0 w-full rounded bg-white')}>
+      <ToolTip tooltip={!isOpen && title}>
         <Link
           href={(!onClick && href) || '/'}
           {...linkProps}
           className={clsx(
             'flex w-full items-center rounded p-3 group-hover:bg-primary-100',
-            isOpen ? 'gap-3' : 'flex-col items-center justify-center'
+            isOpen ? 'gap-3' : 'flex-col gap-1',
+            active && 'bg-primary-100'
           )}
           onClick={onClick}
         >
@@ -54,18 +57,17 @@ export function SideItem({
             {_.startCase(title)}
           </span>
         </Link>
-      </div>
-    </ToolTip>
+      </ToolTip>
+    </div>
   )
 }
 
 export default function Sidebar({ isOpen, setIsOpen }) {
   const router = useRouter()
-
-  const { t } = useTranslation()
   const { groupId } = router.query
-
   const user = useUserIfJoined(groupId as string) as User
+
+  const isMobile = window.innerWidth < 768
 
   return (
     <motion.aside
@@ -73,22 +75,34 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       animate={{ x: 0 }}
       transition={{ duration: 0.5 }}
       exit={{ x: -100 }}
-      className={'sticky top-4 flex h-auto w-full flex-col space-y-5 z-10'}
+      className={'sticky top-4 z-10 flex h-auto w-full flex-col space-y-5'}
     >
+      {/* Toggle Button for Mobile */}
+      <div
+        className={clsx(
+          'flex w-full items-center justify-between rounded bg-gray-200 px-4 py-2 hover:bg-gray-300',
+          isMobile ? 'block' : 'hidden'
+        )}
+      >
+        <button onClick={() => setIsOpen(!isOpen)} className="rounded bg-gray-200 px-4 py-2 hover:bg-gray-300">
+          {isOpen ? 'Close' : 'Menu'}
+        </button>
+      </div>
+
       <div className="flex w-full flex-col items-center">
         <ul className=" flex flex-col items-center gap-4 pt-5">
-          <ToolTip tooltip={isOpen ? 'Collapse' : 'Expand'}>
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className={clsx('flex w-full items-center justify-center text-primary-600 hover:bg-primary-100')}
-            >
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className={clsx('flex w-full items-center justify-center text-primary-600 hover:bg-primary-100')}
+          >
+            <ToolTip tooltip={isOpen ? 'Collapse' : 'Expand'}>
               {!isOpen ? (
                 <ChevronDoubleRightIcon className={'h-8 w-8'} />
               ) : (
                 <ChevronDoubleLeftIcon className={'h-8 w-8'} />
               )}
-            </button>
-          </ToolTip>
+            </ToolTip>
+          </button>
 
           <SideItem
             title={'home'}

@@ -41,8 +41,6 @@ export const CommunityCardBody = () => {
 
   const isBanner = community?.variant === 'banner'
 
-  const logoSrc = useValidatedImage(community?.groupDetails?.logoCID)
-
   return (
     <div
       className={clsx(

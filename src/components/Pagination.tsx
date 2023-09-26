@@ -1,6 +1,5 @@
 import clsx from 'clsx'
 import { PrimaryButton } from '@components/buttons'
-import { CircularProgress } from '@components/CircularProgress'
 import { CircularLoader } from '@components/JoinCommunityButton'
 
 export const Pagination = ({ currentPage = 1, totalPages, onPageChange }) => {

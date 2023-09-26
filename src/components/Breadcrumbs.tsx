@@ -2,10 +2,12 @@ import React, { ReactNode, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { CircularLoader } from '@components/JoinCommunityButton'
+import { useRouter } from 'next/router'
 
 function useBreadcrumbs(): BreadCrumbItem[] {
   const [breadcrumbItems, setBreadcrumbItems] = useState<BreadCrumbItem[]>([])
 
+  const router = useRouter()
   const { state } = useCommunityContext()
 
   const community = state.activeCommunity.community
@@ -13,12 +15,12 @@ function useBreadcrumbs(): BreadCrumbItem[] {
 
   useEffect(() => {
     if (!community || !post) {
-        setBreadcrumbItems([])
-        return
+      setBreadcrumbItems([])
+      return
     }
     const items = generateBreadcrumbItems(community, post, location)
     setBreadcrumbItems(items)
-  }, [community, post])
+  }, [community, post, router])
 
   return breadcrumbItems
 }
@@ -135,13 +137,13 @@ function generateBreadcrumbItems(community, post, location): BreadCrumbItem[] {
     ]
   } else if (location.pathname.includes('discourse')) {
     items = [
-        { label: 'Home', href: '/', isCurrentPage: false },
-        {
-          label: 'Discourse',
-          href: `/discourse/${community.fancy_title}`,
-          isCurrentPage: true,
-        },
-        ]
+      { label: 'Home', href: '/', isCurrentPage: false },
+      {
+        label: 'Discourse',
+        href: `/discourse/${community.fancy_title}`,
+        isCurrentPage: true,
+      },
+    ]
   }
 
   return items

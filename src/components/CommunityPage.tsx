@@ -227,7 +227,7 @@ export function CommunityPage({
                 panel: <div className={'w-1/2'}>Not needed on community page</div>,
               },
               gas: {
-                hidden: false,
+                hidden: true,
                 onClick: () => {},
                 panel: (
                   <div className={'flex w-1/2'}>

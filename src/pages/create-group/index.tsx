@@ -110,6 +110,7 @@ function CreateGroupFormUI({ onCreate }) {
             }
             await formik.setFieldValue(`tokenRequirements.${i}.token`, symbol, false)
             await formik.setFieldValue(`tokenRequirements.${i}.decimals`, decimals, false)
+
             setEr(e => {
               const errors = { ...e }
               delete errors[`tokenRequirements_${i}`]
@@ -303,7 +304,10 @@ function CreateGroupFormUI({ onCreate }) {
             </div>
           </div>
 
-          <button className={clsx('flex justify-center aspect-1 h-10 w-10 items-center border p-3 text-xl')} onClick={addReq}>
+          <button
+            className={clsx('flex aspect-1 h-10 w-10 items-center justify-center border p-3 text-xl')}
+            onClick={addReq}
+          >
             +
           </button>
         </div>

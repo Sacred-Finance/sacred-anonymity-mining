@@ -21,6 +21,7 @@ import AllTopics from '@components/Discourse/AllTopics'
 import { Tab } from '@headlessui/react'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { useRouter } from 'next/router'
+import { router } from 'next/client'
 
 interface HomeProps {
   isAdmin: boolean
@@ -34,7 +35,7 @@ const tabClass = selected =>
     'w-full rounded text-sm font-medium nowrap py-2 px-4 text-center focus:outline-none peer group',
     'ring-white ring-offset-blue-400 focus:outline-none focus:ring-2',
     selected
-      ? 'bg-primary-500 text-white shadow hover:bg-primary-500/90'
+      ? 'bg-primary-500 text-white shadow hover:bg-primary-500/90 '
       : 'text-primary-700 hover:text-white hover:bg-primary-500/25'
   )
 
@@ -53,16 +54,17 @@ const FilterButton = ({ filterKey, iconTrue, iconFalse, applyFilter, currentFilt
 }
 
 function NoCommunities(props: { groups: Group[]; searchTerm: string }) {
+  const router = useRouter()
   return (
     <>
       {props.groups?.length === 0 && (
-        <div className=" flex flex-col items-center justify-center space-y-4">
+        <div className=" col-span-full w-full flex flex-col items-center justify-center space-y-4">
           <motion.h2
             layout
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="text-3xl font-semibold dark:text-gray-200"
+            className="text-3xl font-semibold dark:text-gray-200 "
           >
             Oops, No Results Found
           </motion.h2>
@@ -86,6 +88,10 @@ function NoCommunities(props: { groups: Group[]; searchTerm: string }) {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.4 }}
             className="rounded bg-purple-500 px-4 py-2 font-bold text-white shadow dark:bg-purple-700 dark:text-gray-200"
+            onClick={() => {
+              // link to create community page /create
+              router.push('/create-group')
+            }}
           >
             Create a new community
           </motion.button>
@@ -212,11 +218,6 @@ function HomePage({ isAdmin = false, users, communities }: HomeProps) {
     setLocalCommunities(filteredCommunities)
   }
 
-  const panelVariants = {
-    initial: { x: '-100%' },
-    animate: { x: '0%' },
-    exit: { x: '100%' },
-  }
   return (
     <div className={'flex w-full flex-col items-start pb-8 ps-1 pt-0'}>
       <Tab.Group selectedIndex={selectedIndex} onChange={setSelectedIndex} vertical={false}>
@@ -258,17 +259,21 @@ function HomePage({ isAdmin = false, users, communities }: HomeProps) {
               </Tab.List>
             </div>
           </div>
-          <AnimatePresence mode={'popLayout'}>
+
+          <AnimatePresence mode={'sync'}>
             <Tab.Panels className={'min-h-screen'}>
               <Tab.Panel key="panel1">
+
                 <motion.div
                   initial="initial"
                   animate="animate"
                   exit="exit"
                   // variants={panelVariants}
                   transition={{ duration: 0.5 }}
-                  className="flex flex-wrap gap-4 sm:justify-stretch"
+                  className="flex flex-wrap gap-4 sm:justify-stretch "
                 >
+                  <NoCommunities groups={communities} searchTerm={searchTerm} />
+
                   {localCommunities.map((community, index) => (
                     <CommunityCard key={community.groupId} community={community} />
                   ))}
