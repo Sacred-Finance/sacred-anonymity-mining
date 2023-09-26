@@ -22,6 +22,9 @@ import { CommunityActionTabs } from '@components/CommunityActionTabs'
 import { CommunityCardHeader, CommunityLogo } from '@components/CommunityCard/CommunityCardHeader'
 import { CommunityCardContext } from '@components/CommunityCard/CommunityCard'
 import EditGroupNavigationButton, { useCheckIsOwner } from '@components/EditGroupNavigationButton'
+import { Avatar } from '@components/Avatar'
+import Image from 'next/image'
+import { useValidatedImage } from '@components/CommunityCard/UseValidatedImage'
 
 export function CommunityPage({
   children,
@@ -148,26 +151,28 @@ export function CommunityPage({
     }
   }
 
+  const bannerSrc = useValidatedImage(community?.groupDetails?.bannerCID)
+
   return (
-    <div className={clsx('h-fit min-h-screen !text-gray-900 ')}>
-      <div className={'group  flex flex-col gap-4 overflow-x-clip '}>
-        <CommunityCardContext.Provider value={community}>
+    <CommunityCardContext.Provider value={community}>
+      <Image
+          src={bannerSrc}
+          alt={'community Banner Image'}
+          width={500}
+          height={500}
+          unoptimized
+          priority
+      />
+      <div className={clsx('h-fit min-h-screen !text-gray-900 ')}>
+        <div className={'group relative flex flex-col'}>
+
           <div className={'relative z-50'}>
             <EditGroupNavigationButton community={community} />
           </div>
-          <CommunityCardHeader
-            showDescription={false}
-            c={{
-              root: '',
-              banner: {
-                banner: 'bg-cover bg-center bg-no-repeat h-full md:!w-1/2 sm:w-full',
-                name: '',
-              },
-            }}
-          />
-          <div className={'flex items-center gap-4'}>
+
+          <div className={'relative flex  w-full items-center gap-4'}>
             <CommunityLogo />
-            <span className={' p-4'}>{community.groupDetails.description}</span>
+            {community.groupDetails.description}
           </div>
 
           <CommunityActionTabs
@@ -177,8 +182,8 @@ export function CommunityPage({
                 hidden: false,
                 onClick: () => {},
                 panel: (
-                  <div>
-                    <div className={'relative flex items-center gap-4  px-3'}>
+                  <>
+                    <div className={'relative col-span-10 flex items-center gap-4'}>
                       <CreatePollUI groupId={groupId} />
                       <NewPostForm
                         editorId={`${groupId}_post`}
@@ -199,7 +204,8 @@ export function CommunityPage({
                         actionType={'new'}
                         classes={{
                           rootClosed: '!w-fit !p-0',
-                          rootOpen: 'fixed z-50 inset-0  p-12 bg-gray-900 bg-opacity-50 flex justify-center items-center ',
+                          rootOpen:
+                            'fixed z-50 inset-0  p-12 bg-gray-900 bg-opacity-50 flex justify-center items-center ',
                           formBody: 'w-full h-full  flex flex-col gap-4',
                           editor: 'border  rounded py-1 px-2 bg-white',
                           submitButton: 'bg-green-500 text-white border-none rounded',
@@ -212,7 +218,7 @@ export function CommunityPage({
                     </div>
                     <PostList posts={sortedData} />
                     {sortedData?.length === 0 && <NoPosts />}
-                  </div>
+                  </>
                 ),
               },
               community: {
@@ -231,11 +237,11 @@ export function CommunityPage({
               },
             }}
           />
-        </CommunityCardContext.Provider>
 
-        {children}
+          {children}
+        </div>
       </div>
-    </div>
+    </CommunityCardContext.Provider>
   )
 }
 
@@ -248,28 +254,32 @@ export const PostNavigator = ({
   visiblePostIds: Item['id'][]
   scrollIntoView: (id) => void
 }) => {
-  // post navigator lists the posts in the community allowing for easy navigation.
-  // it will be sticky on the right side of the screen and will scroll with the user.
-  // the title will highlight when the user can see the post on the screen.
-  // the title will be clickable and will scroll the user to the start of that post.
-  // the title will also have a enter on the right side that will allow the user to navigate to the post directly.
-
   return (
-    <div className={'sticky top-24 flex flex-col gap-4'}>
-      {posts.map(post => {
-        return (
-          <div
-            onClick={() => scrollIntoView(post.id)}
-            key={post.id}
-            className={clsx(
-              'flex flex-col gap-4 hover:cursor-pointer hover:text-primary-600',
-              visiblePostIds.includes(post.id) && 'text-primary-600'
-            )}
-          >
-            {post.title}
-          </div>
-        )
-      })}
-    </div>
+    <>
+      <div
+        className={
+          'sticky top-24 flex select-none flex-col gap-4 rounded  '
+        }
+      >
+        <div className={'text-base font-bold '}>Posts</div>
+
+        <ul className={'flex flex-col gap-4'}>
+          {posts.map(post => {
+            return (
+              <button
+                onClick={() => scrollIntoView(post.id)}
+                key={post.id}
+                className={clsx(
+                  'border-b text-left text-sm  font-bold hover:cursor-pointer',
+                  visiblePostIds.includes(post.id) && 'text-primary-600'
+                )}
+              >
+                {post.title}
+              </button>
+            )
+          })}
+        </ul>
+      </div>
+    </>
   )
 }
