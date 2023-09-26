@@ -28,7 +28,7 @@ export const Breadcrumbs = ({ backdrop = false }): JSX.Element => {
 
   return (
     <nav
-      className="flex justify-between gap-4 rounded border border-gray-200 bg-gray-50 px-5 py-3 text-gray-700 dark:border-gray-700 dark:bg-gray-800"
+      className="flex justify-between gap-4 rounded px-5 py-3 text-gray-700 dark:border-gray-700 dark:bg-gray-800"
       aria-label="Breadcrumb"
     >
       <ol className="flex items-center gap-4">
