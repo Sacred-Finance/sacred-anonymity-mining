@@ -5,6 +5,7 @@ import { CancelButton, PrimaryButton } from './buttons'
 import { EyeIcon, PencilIcon } from '@heroicons/react/20/solid'
 import dynamic from 'next/dynamic'
 import clsx from 'clsx'
+import AnonymizeButton from "@components/buttons/AIAnonymiseButton";
 
 export interface EditorJsType {
   blocks: {
@@ -186,6 +187,8 @@ export const NewPostForm = ({
                   placeholder={placeholder}
                   holder={editorId}
                 />
+
+                <AnonymizeButton setDescription={setDescription} refToUpdateOnChange={editorReference} postData={description}  />
               </>
             </div>
 

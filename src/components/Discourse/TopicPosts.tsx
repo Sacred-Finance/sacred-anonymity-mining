@@ -60,7 +60,7 @@ const TopicPosts = ({ topic, onPageChange }: { topic: Topic; onPageChange: (newP
             controls={controls}
             onPageChange={onPageChange}
             setTargetPostNumber={setTargetPostNumber}
-            addToPosts={addReplyToPosts}
+            addReplyToPosts={addReplyToPosts}
           />
         ))}
       </div>
@@ -183,7 +183,7 @@ const RenderPost = ({
             <SummaryButton postData={post.cooked} />
           </div>
           <div className={'wrap mt-4 flex w-full justify-between'}>
-            <ReplyToPost post={post} addReplyToPosts={addReplyToPosts} /> &nbsp;
+            <ReplyToPost post={post} addReplyToPosts={addReplyToPosts} />
           </div>
         </div>
 
