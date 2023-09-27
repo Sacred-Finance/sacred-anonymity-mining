@@ -37,7 +37,6 @@ function App({ Component, pageProps }: AppProps) {
             revalidateOnReconnect: false,
             fetcher: (resource, init) =>
               fetch(resource, init).then(res => {
-                console.log('res', res)
                 return res.json()
               }),
           }}
