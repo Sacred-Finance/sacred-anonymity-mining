@@ -10,7 +10,7 @@ import { mutate } from 'swr'
 import { getDiscourseData } from '@/lib/fetcher'
 import { OutputDataToMarkDown } from '@components/Discourse/OutputDataToMarkDown'
 
-const PostToTopic = ({ topic }: { topic: Topic }) => {
+const PostToTopic = ({ topic, mutate }: { topic: Topic, mutate }) => {
   const { t } = useTranslation()
   const [description, setDescription] = useState<OutputData>(null)
   const editorReference = useRef<EditorJS>()
@@ -46,15 +46,12 @@ const PostToTopic = ({ topic }: { topic: Topic }) => {
       <NewPostForm
         isReadOnly={false}
         classes={{
-          // root open needs to have content centered perfectly
-          // we need to gray out the background
-          rootClosed: 'p-0 !h-0',
           rootOpen:
             'fixed inset-0 z-50  !bg-black/60 !w-full !h-full bg-opacity-50 left-0 top-0 right-0 bottom-0 inset-0  ' +
             'flex flex-col justify-center items-center' +
             ' overflow-y-auto ',
           formContainerOpen: 'bg-white  rounded shadow-lg p-6 w-full max-w-3xl ',
-          openFormButton: 'text-white z-60 !bg-gray-900 fixed bottoright-4 z-50',
+          openFormButton: 'text-white z-60 !bg-gray-900 fixed top-0 right-4 z-50',
         }}
         editorId={`${topic?.id}_post`}
         description={description}

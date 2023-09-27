@@ -1,73 +1,98 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import TopicPosts from '@components/Discourse/TopicPosts'
-import { useCommunityContext } from '@/contexts/CommunityProvider'
 import fetcher from '@/lib/fetcher'
 import PostToTopic from '@components/Discourse/PostToTopic'
-import { Pagination } from '@components/Pagination'
 import useSWR from 'swr'
-import { Topic } from '@components/Discourse/types'
+import { Post, PostStreamObject, Topic } from '@components/Discourse/types'
+import clsx from 'clsx'
+import _ from 'lodash'
+import useSWRInfinite from 'swr/infinite'
+import { motion } from 'framer-motion'
 
 const PAGE_SIZE = 20
 
 const Index = () => {
   const router = useRouter()
   const { groupId } = router.query
-  const { dispatch } = useCommunityContext()
-  const [currentPage, setCurrentPage] = useState(1)
-  const [fetchedPosts, setFetchedPosts] = useState({})
+  const loaderRef = useRef(null)
+  const [postIds, setPostIds] = useState<number[]>([])
 
-  // Initial request to get the topic data
-  const { data: initialData } = useSWR(groupId ? `/api/discourse/${groupId}` : null, fetcher)
-
-  const startIdx: number = (currentPage - 1) * PAGE_SIZE
-  const post_ids: number[] = initialData?.post_stream.stream.slice(startIdx, startIdx + PAGE_SIZE) || []
-
-  const { data: pageData, error } = useSWR(
-    post_ids.length ? `/api/discourse/${groupId}/posts/${post_ids.join(',')}` : null,
+  const { data: initialData } = useSWR<Topic>(
+    groupId
+      ? () => {
+          return `/api/discourse/${groupId}`
+        }
+      : null,
     fetcher
   )
 
   useEffect(() => {
-    if (pageData && !fetchedPosts[currentPage]) {
-      setFetchedPosts({ ...fetchedPosts, [currentPage]: pageData.post_stream.posts })
-    }
-  }, [pageData])
-
-  const posts = fetchedPosts[currentPage] || []
-
-  const topic = pageData as Topic
-
-  useEffect(() => {
     if (initialData) {
-      dispatch({
-        type: 'SET_ACTIVE_COMMUNITY',
-        payload: {
-          community: initialData,
-        },
-      })
+      setPostIds(initialData.post_stream.stream)
     }
   }, [initialData])
 
-  const handlePageChange = newPage => {
-    setCurrentPage(newPage + 1) // Update the current page state
-    // scroll to top of page
-    const header = document.getElementById('header')
-    if (header && newPage) {
-      header.scrollIntoView({ behavior: 'auto' })
+  const { data, mutate, size, setSize, isValidating, isLoading, error } = useSWRInfinite<PostStreamObject>(
+    index => {
+      const postIdChunks = _.chunk(postIds, PAGE_SIZE)
+      return postIds.length && postIdChunks?.[index]?.length
+        ? `/api/discourse/${groupId}/posts/${postIdChunks[index].join(',')}&page=${index}`
+        : null
+    },
+    fetcher,
+    {
+      revalidateFirstPage: false,
     }
+  )
+
+  if (error) {
+    return <>error</>
+  }
+  const mutatePost = (newPost: Post) => {
+    mutate(data => {
+      const newData = [...data]
+      const lastPage = newData[newData.length - 1]
+      const lastPagePosts = lastPage?.post_stream?.posts
+      if (lastPagePosts) {
+        lastPagePosts.push(newPost)
+      }
+      return newData
+    }, true)
   }
 
-  const totalPages = Math.ceil(initialData?.post_stream?.stream.length / PAGE_SIZE)
+  const isLoadingMore = isLoading || (size > 0 && data && typeof data[size - 1] === 'undefined')
+  const isEmpty = data?.[0]?.length === 0
+  const isReachingEnd = isEmpty || (data && data[data.length - 1]?.length < PAGE_SIZE)
+  const isRefreshing = isValidating && data && data.length === size
 
+  const topicData = _.uniqBy(
+    _.merge(_.flatten(data?.map(d => d?.post_stream?.posts)), _.flatten(initialData?.post_stream?.posts)),
+    'id'
+  )
   return (
-    <div >
-      <PostToTopic topic={topic as Topic} />
-      <Pagination currentPage={currentPage - 1} totalPages={totalPages} onPageChange={handlePageChange} />
-      <TopicPosts
-        topic={{ ...topic, post_stream: { ...topic?.post_stream, posts } } as Topic}
-        onPageChange={handlePageChange}
-      />
+    <div className={clsx(' w-full max-w-screen-xl space-y-6 sm:p-8 md:p-24')}>
+
+      <PostToTopic topic={initialData as Topic} />
+      {data?.length && (
+        <TopicPosts
+          topic={{ ...initialData, ...data, post_stream: { ...initialData?.post_stream, posts: topicData } } as Topic}
+          mutate={mutatePost}
+        />
+      )}
+      <motion.div
+        onViewportEnter={() => {
+          setSize(size + 1)
+        }}
+        viewport={{ once: true }}
+        ref={loaderRef}
+      ></motion.div>
+
+      {isReachingEnd && (
+        <div className="flex items-center justify-center">
+          <div className="text-gray-500">You have reached the end of this topic.</div>
+        </div>
+      )}
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, memo, useMemo } from 'react'
-import { Topic } from '@components/Discourse/types'
+import { Post, Topic } from '@components/Discourse/types'
 import parse from 'html-react-parser'
 import './topic-post.scss'
 import { formatDistanceToNow } from '@/lib/utils'
@@ -9,32 +9,21 @@ import pluralize from 'pluralize'
 import { motion, useAnimation } from 'framer-motion'
 import { FingerPrintIcon, HandThumbDownIcon, HandThumbUpIcon } from '@heroicons/react/20/solid'
 import { PrimaryButton } from '@components/buttons'
-import { useFetchReplies } from '@/hooks/useFetchReplies'
+import { useFetchRepliesForPosts } from '@/hooks/useFetchRepliesForPosts'
 import SummaryButton from '@components/buttons/AIPostSummaryButton'
-import { OutputDataToHTML } from '@components/Discourse/OutputDataToMarkDown'
 
-const TopicPosts = ({ topic, onPageChange }: { topic: Topic; onPageChange: (newPage: number) => void }) => {
+const TopicPosts = ({ topic, mutate }: { topic: Topic; mutate: (newPost: Post) => void }) => {
   const postRefs = useRef<{ [key: number]: React.RefObject<HTMLDivElement> }>({})
   const [targetPostNumber, setTargetPostNumber] = useState<number | null>(null)
   const [postsInView, setPostsInView] = useState([])
 
-  const [posts, setPosts] = useState(topic.post_stream.posts)
-
-  useEffect(() => {
-    const filteredPosts = topic.post_stream.posts.filter(post => !post.hidden && !post.deleted_at)
-    setPosts(filteredPosts)
-  }, [topic])
-
-  const addReplyToPosts = (newPost: Topic['post_stream']['posts'][0]) => {
-    setPosts(posts => [...posts, newPost])
-  }
+  const filteredPosts = topic.post_stream.posts.filter(post => !post?.hidden && !post?.deleted_at)
 
   useEffect(() => {
     if (targetPostNumber) {
       const postRef = postRefs.current[targetPostNumber]
       if (postRef && postRef.current) {
         postRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        // handleScrollToPost(targetPostNumber, postRefs)
         setTargetPostNumber(null) // Clear the target post number
       }
     }
@@ -42,25 +31,24 @@ const TopicPosts = ({ topic, onPageChange }: { topic: Topic; onPageChange: (newP
 
   const controls = useAnimation()
 
-  const { postsWithReplies, loading } = useFetchReplies(posts)
-
-  if (!topic || loading) {
+  if (!topic || !filteredPosts) {
     return <div>Loading...</div>
   }
 
   return (
-    <div className="relative flex w-full">
-      <div className="topic-post relative flex w-full flex-col gap-4">
-        {postsWithReplies?.map(post => (
+    <div className="relative flex w-full  ">
+      <div className="topic-post relative flex w-full flex-col gap-4 ">
+        {filteredPosts.length}
+
+        {filteredPosts?.map(post => (
           <RenderPost
             key={post.id}
             post={post}
             postRefs={postRefs}
             setPostsInView={setPostsInView}
             controls={controls}
-            onPageChange={onPageChange}
             setTargetPostNumber={setTargetPostNumber}
-            addToPosts={addReplyToPosts}
+            addReplyToPosts={mutate}
           />
         ))}
       </div>
@@ -122,15 +110,8 @@ const PostContent = ({ post }) => (
     )}
   </div>
 )
-const RenderPost = ({
-  post,
-  postRefs,
-  setPostsInView,
-  controls,
-  onPageChange,
-  setTargetPostNumber,
-  addReplyToPosts: addReplyToPosts,
-}) => {
+
+const RenderPost = ({ post, postRefs, setPostsInView, controls, setTargetPostNumber, addReplyToPosts }) => {
   if (!postRefs.current[post.post_number]) {
     postRefs.current[post.post_number] = React.createRef<HTMLDivElement>()
   }
@@ -174,15 +155,12 @@ const RenderPost = ({
             post={post}
             replyToPostRef={replyToPostRef}
             postRefs={postRefs}
-            onPageChange={onPageChange}
             setTargetPostNumber={setTargetPostNumber}
           />
 
           <PostContent post={post} />
-          <div className={'  flex w-full justify-between'}>
+          <div className={'  flex w-full items-center justify-between'}>
             <SummaryButton postData={post.cooked} />
-          </div>
-          <div className={'wrap flex w-full justify-between'}>
             <ReplyToPost post={post} addReplyToPosts={addReplyToPosts} /> &nbsp;
           </div>
         </div>
@@ -195,30 +173,30 @@ const RenderPost = ({
 
 const PostFooter = ({ post }) => (
   <div className="z-10 flex w-full items-center rounded-b bg-graySlate-800 px-3 py-1 text-white sm:justify-start md:justify-center">
+    <div className={'flex-grow'} />
+
     <div className="flex items-center space-x-2">
       <StatsBadge label="score" value={post.score.toString()} />
       <StatsBadge label="reads" value={post.reads.toString()} />
       <StatsBadge pluralizeLabel label={'Reply'} value={post.reply_count.toString()} />
     </div>
-
-    <div className={'absolute right-0  flex gap-4 self-end justify-self-end'}>
-      <PrimaryButton resetClasses disabled>
+    <div className={'flex-grow'} />
+    <div className={'flex h-full items-center gap-4 justify-self-end'}>
+      <PrimaryButton disabled>
         <HandThumbUpIcon width={20} />
       </PrimaryButton>
 
-      <PrimaryButton resetClasses disabled>
+      <PrimaryButton disabled>
         <HandThumbDownIcon width={20} />
       </PrimaryButton>
     </div>
   </div>
 )
 
-const LinkedPostButton = ({ postNumber, onPageChange, setTargetPostNumber }) => (
+const LinkedPostButton = ({ postNumber, setTargetPostNumber }) => (
   <button
     className="rounded-full border text-xs hover:bg-gray-700 hover:text-white"
     onClick={() => {
-      const page = Math.ceil(postNumber / 20) - 1
-      onPageChange(page)
       setTargetPostNumber(postNumber)
     }}
   >
@@ -226,7 +204,7 @@ const LinkedPostButton = ({ postNumber, onPageChange, setTargetPostNumber }) => 
   </button>
 )
 
-const PostHeader = ({ post, replyToPostRef, postRefs, onPageChange, setTargetPostNumber }) => (
+const PostHeader = ({ post, replyToPostRef, postRefs, setTargetPostNumber }) => (
   <header className=" flex w-full justify-between">
     {post.reply_to_post_number ? (
       <div className="flex gap-4">
@@ -234,7 +212,6 @@ const PostHeader = ({ post, replyToPostRef, postRefs, onPageChange, setTargetPos
         <LinkedPostButton
           postNumber={post.reply_to_post_number}
           postRefs={replyToPostRef || postRefs}
-          onPageChange={onPageChange}
           setTargetPostNumber={setTargetPostNumber}
         />
       </div>
@@ -250,7 +227,6 @@ const PostHeader = ({ post, replyToPostRef, postRefs, onPageChange, setTargetPos
             key={`${post.id}-${reply.id}`}
             postNumber={reply.post_number}
             setTargetPostNumber={setTargetPostNumber}
-            onPageChange={onPageChange}
           />
         ))}
       </div>

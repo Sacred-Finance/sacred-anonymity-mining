@@ -1,5 +1,3 @@
-
-
 // User.ts
 export interface User {
   id: number
@@ -50,7 +48,7 @@ export interface Topic {
   featured_link: string | null
   has_accepted_answer: boolean
   posters: Poster[]
-  post_stream: PostStream
+  post_stream: TopicPostStream
 }
 
 // Poster.ts
@@ -78,139 +76,91 @@ export interface Data {
   topic_list: TopicList
 }
 
-interface PostStream {
-  posts: {
-    flair_color: null
-    moderator: boolean
-    wiki: boolean
-    trust_level: number
-    score: number
-    can_see_hidden_post: boolean
-    can_view_edit_history: boolean
-    reviewable_score_count: number
-    actions_summary: (
-      | { can_act: boolean; id: number }
-    )[]
-    incoming_link_count: number
-    can_delete: boolean
-    post_type: number
-    topic_accepted_answer: boolean
-    id: number
-    mentioned_users: any[]
-    readers_count: number
-    read: boolean
-    edit_reason: null
-    cooked: string
-    can_accept_answer: boolean
-    reply_count: number
-    reply_to_post_number: null
-    version: number
-    deleted_at: null
-    user_id: number
-    can_recover: boolean
-    name: string
-    user_title: null
-    post_number: number
-    can_unaccept_answer: boolean
-    hidden: boolean
-    can_wiki: boolean
-    created_at: string
-    admin: boolean
-    updated_at: string
-    topic_id: number
-    quote_count: number
-    avatar_template: string
-    bookmarked: boolean
-    reads: number
-    can_edit: boolean
-    staff: boolean
-    flair_url: null
-    flair_bg_color: null
-    reviewable_score_pending_count: number
-    user_cakedate: string
-    reviewable_id: number
-    primary_group_name: null
-    accepted_answer: boolean
-    link_counts: (
-      | { internal: boolean; reflection: boolean; clicks: number; title?: string; url: string }
-    )[]
-    flair_group_id: null
-    user_deleted: boolean
-    yours: boolean
-    topic_slug: string
-    flair_name: null
-    username: string
-    display_username: string
-  }[]
+export interface PostStreamObject {
+  post_stream: PostStream
+  id: number
+}
+
+interface TopicPostStream {
+  posts: Post[]
   stream: number[]
+}
+interface PostStream {
+  posts: Post[]
+}
+
+export interface Post {
+  id: number
+  name: string
+  username: string
+  avatar_template: string
+  created_at: string
+  cooked: string
+  post_number: number
+  post_type: number
+  updated_at: string
+  reply_count: number
+  reply_to_post_number: number
+  quote_count: number
+  incoming_link_count: number
+  reads: number
+  readers_count: number
+  score: number
+  yours: boolean
+  topic_id: number
+  topic_slug: string
+  display_username: string
+  primary_group_name?: string
+  flair_name?: string
+  flair_url?: string
+  flair_bg_color?: string
+  flair_color?: string
+  flair_group_id?: number
+  version: number
+  can_edit: boolean
+  can_delete: boolean
+  can_recover: boolean
+  can_see_hidden_post: boolean
+  can_wiki: boolean
+  read: boolean
+  user_title?: string
+  reply_to_user?: ReplyToUser
+  bookmarked: boolean
+  actions_summary: ActionSummary[]
+  moderator: boolean
+  admin: boolean
+  staff: boolean
+  user_id: number
+  hidden: boolean
+  trust_level: number
+  deleted_at?: string
+  user_deleted: boolean
+  edit_reason?: string
+  can_view_edit_history: boolean
+  wiki: boolean
+  mentioned_users: string[]
+  user_cakedate: string
+  can_accept_answer: boolean
+  can_unaccept_answer: boolean
+  accepted_answer: boolean
+  topic_accepted_answer: boolean
+}
+
+interface ReplyToUser {
+  username: string
+  name: string
+  avatar_template: string
+}
+
+interface ActionSummary {
+  id: number
+  can_act: boolean
 }
 
 interface SpecificTopic {
   post_stream: {
     stream: number[]
-    posts: {
-      flair_color: null
-      moderator: boolean
-      wiki: boolean
-      trust_level: number
-      score: number
-      can_see_hidden_post: boolean
-      can_view_edit_history: boolean
-      reviewable_score_count: number
-      actions_summary: (
-        | { can_act: boolean; id: number }
-      )[]
-      incoming_link_count: number
-      can_delete: boolean
-      post_type: number
-      topic_accepted_answer: boolean
-      id: number
-      mentioned_users: any[]
-      readers_count: number
-      read: boolean
-      edit_reason: null
-      cooked: string
-      can_accept_answer: boolean
-      reply_count: number
-      reply_to_post_number: null
-      version: number
-      deleted_at: null
-      user_id: number
-      can_recover: boolean
-      name: string
-      user_title: null
-      post_number: number
-      can_unaccept_answer: boolean
-      hidden: boolean
-      can_wiki: boolean
-      created_at: string
-      admin: boolean
-      updated_at: string
-      topic_id: number
-      quote_count: number
-      avatar_template: string
-      bookmarked: boolean
-      reads: number
-      can_edit: boolean
-      staff: boolean
-      flair_url: null
-      flair_bg_color: null
-      reviewable_score_pending_count: number
-      user_cakedate: string
-      reviewable_id: number
-      primary_group_name: null
-      accepted_answer: boolean
-      link_counts: (
-        | { internal: boolean; reflection: boolean; clicks: number; title?: string; url: string }
-      )[]
-      flair_group_id: null
-      user_deleted: boolean
-      yours: boolean
-      topic_slug: string
-      flair_name: null
-      username: string
-      display_username: string
-    }[]
+    posts: Post[]
   }
   timeline_lookup: number[][]
   suggested_topics: {
@@ -292,9 +242,7 @@ interface SpecificTopic {
   last_read_post_id: number
   deleted_by: null
   has_deleted: boolean
-  actions_summary: (
-    | { hidden: boolean; count: number; can_act: boolean; id: number }
-  )[]
+  actions_summary: { hidden: boolean; count: number; can_act: boolean; id: number }[]
   chunk_size: number
   bookmarked: boolean
   bookmarks: any[]
@@ -347,4 +295,3 @@ interface SpecificTopic {
     }[]
   }
 }
-

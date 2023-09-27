@@ -50,11 +50,11 @@ const EditorBlock = (props: Props) => {
     if (!ref.current) return;
 
     if (!readOnly) {
-      setTimeout(() => ref.current?.focus(true), 200);
+      setTimeout(() => ref.current?.focus?.(true), 200);
     } else {
       setTimeout(() => {
         if (data?.blocks && ref.current?.render) {
-          ref.current.render(data);
+          ref.current?.render?.(data);
         }
       }, 0);
     }

@@ -8,7 +8,6 @@ export const useFetchPosts = posts => {
 
   const post_ids: number[] = posts.map(post => post.id)
 
-  console.log('posts', posts)
   const {
     data: postData,
     error,
