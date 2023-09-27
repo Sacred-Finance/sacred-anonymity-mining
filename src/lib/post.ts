@@ -13,7 +13,7 @@ import { create, editContent, handleDeleteItem, updateContentVote } from '@/lib/
 
 export const MIN_REP_POST = 0
 
-export const MIN_REP_VOTE = 1
+export const MIN_REP_VOTE = 0;
 
 export class Post {
   id: string | undefined

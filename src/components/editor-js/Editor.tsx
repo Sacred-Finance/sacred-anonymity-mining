@@ -75,8 +75,12 @@ const EditorBlock = ({ data, onChange, holder, divProps = {}, editorRef, placeho
         data,
         async onChange(api, event) {
           // if (readOnly) return
-          const data = await api.saver.save()
-          onChange(data)
+          try {
+            const data = await api?.saver?.save()
+            onChange(data)
+          } catch (error) {
+            console.log('Saving failed: ', error)
+          }
         },
         onReady() {
           if (readOnly) {

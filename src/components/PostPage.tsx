@@ -21,9 +21,10 @@ import { NoComments } from './NoPosts'
 
 import clsx from 'clsx'
 import { CancelButton, PrimaryButton } from '@components/buttons'
-import ReputationCard from "@components/ReputationCard";
+import ReputationCard from '@components/ReputationCard'
 import DeleteItemButton from './buttons/DeleteItemButton'
 import { useEditItem } from '@/hooks/useEditItem'
+import CreatePollUI from './CreatePollUI'
 
 const Editor = dynamic(() => import('@/components/editor-js/Editor'), {
   ssr: false,
@@ -48,7 +49,7 @@ interface TempComment {
   content: string
 }
 
-export function PostPage({kind, postInstance, postId, groupId, comments, post, community, commentInstance }) {
+export function PostPage({ kind, postInstance, postId, groupId, comments, post, community, commentInstance }) {
   const member = useUserIfJoined(groupId)
   const activeUser = useActiveUser({ groupId })
   const { state } = useCommunityContext()
@@ -61,13 +62,12 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
   const { editItem } = useEditItem(postId, groupId, isAdmin || isModerator, setIsLoading)
 
   const canDelete = isAdmin || isModerator
+
   //
   useEffect(() => {
     fetchIsAdmin()
     fetchIsModerator()
   }, [groupId, postId, address])
-
-
 
   const { t } = useTranslation()
 
@@ -84,10 +84,9 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
   const commentEditorRef = useRef<any>()
   const postEditorRef = useRef<any>()
 
-  const identityCommitment = member ? BigInt(member?.identityCommitment?.toString()) : null
+  const identityCommitment = member ? member?.identityCommitment?.toString() : null
 
   const { validationResult, checkUserBalance } = useValidateUserBalance(community, address)
-
 
   useEffect(() => {
     if (member && identityCommitment && comments) {
@@ -253,12 +252,7 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
     setIsLoading(true)
 
     try {
-      await editItem(
-        { title: tempPostTitle, description: tempPostDescription },
-        post.id,
-        +post.kind,
-        post.note
-      )
+      await editItem({ title: tempPostTitle, description: tempPostDescription }, post.id, +post.kind, post.note)
       toast.success(t('alert.postEditSuccess'))
       setIsLoading(false)
     } catch (error) {
@@ -277,7 +271,7 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
     setIsLoading(true)
 
     try {
-      const commentData = commentsMap[comment.id]?.comment;
+      const commentData = commentsMap[comment.id]?.comment
       await editItem(commentData, comment.id, 1, commentData.note)
       toast.success(t('alert.commentEditSuccess'))
       setIsLoading(false)
@@ -333,7 +327,14 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
     return (
       <div className="mt-3 flex flex-row gap-4">
         {comment.id}
-        {isEditable && !isEditing && <PrimaryButton className='w-fit text-sm bg-blue-500 hover:bg-blue-600 text-white' onClick={() => onClickEditComment(comment)}>{t('button.edit')}</PrimaryButton>}
+        {isEditable && !isEditing && (
+          <PrimaryButton
+            className="w-fit bg-blue-500 text-sm text-white hover:bg-blue-600"
+            onClick={() => onClickEditComment(comment)}
+          >
+            {t('button.edit')}
+          </PrimaryButton>
+        )}
         {isEditing && (
           <>
             <CancelButton onClick={() => onClickCancelComment(comment)}>{t('button.cancel')}</CancelButton>
@@ -346,7 +347,13 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
           </>
         )}
         {(isEditable || canDelete) && !isEditing && (
-          <DeleteItemButton itemId={comment.id} itemType={1} groupId={groupId} postId={postId} isAdminOrModerator={canDelete} />
+          <DeleteItemButton
+            itemId={comment.id}
+            itemType={1}
+            groupId={groupId}
+            postId={postId}
+            isAdminOrModerator={canDelete}
+          />
         )}
       </div>
     )
@@ -355,50 +362,44 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
   const sortedCommentsData = useItemsSortedByVote(tempComments, comments, commentsSortBy)
   const [isFormOpen, setIsFormOpen] = useState(false)
 
-
   return (
-    <div
-      className={clsx(
-        'mx-auto  w-full max-w-screen-2xl space-y-4  !text-gray-900 sm:p-8 md:p-24'
-      )}
-    >
-      <ReputationCard/>
+    <div className={clsx('mx-auto  w-full max-w-screen-2xl space-y-4  !text-gray-900 sm:p-8 md:p-24')}>
+      <ReputationCard />
       <CommunityCard community={community} index={0} isAdmin={false} variant={'banner'} />
       {+kind < 3 && (
-          <PostItem
-              post={post}
-              setIsFormOpen={setIsFormOpen}
-              isFormOpen={isFormOpen}
-              voteForPost={voteForPost}
-              showDescription={true}
-              editor={
-                  <NewPostForm
-                      editorId={postInstance.specificPostId(postId)}
-                      description={tempPostDescription || post?.description}
-                      setDescription={setTempPostDescription}
-                      handleSubmit={saveEditedPost}
-                      editorReference={postEditorRef}
-                      setTitle={setTempPostTitle}
-                      resetForm={() => {
-                          setTempPostDescription(null)
-                          setTempPostTitle('')
-                      }}
-                      isEditable={isPostEditable}
-                      isReadOnly={false}
-                      isSubmitting={isLoading}
-                      title={tempPostTitle || post?.title}
-                      itemType={'post'}
-                      handlerType={'edit'}
-                      formVariant={'default'}
-                        submitButtonText={t('button.save')}
-                        placeholder={t('placeholder.enterPost') as string}
-                        openFormButtonText={t('button.edit')}
-                  />
-              }
-              isAdminOrModerator={canDelete}
-          />
+        <PostItem
+          post={post}
+          setIsFormOpen={setIsFormOpen}
+          isFormOpen={isFormOpen}
+          voteForPost={voteForPost}
+          showDescription={true}
+          editor={
+            <NewPostForm
+              editorId={postInstance.specificPostId(postId)}
+              description={tempPostDescription || post?.description}
+              setDescription={setTempPostDescription}
+              handleSubmit={saveEditedPost}
+              editorReference={postEditorRef}
+              setTitle={setTempPostTitle}
+              resetForm={() => {
+                setTempPostDescription(null)
+                setTempPostTitle('')
+              }}
+              isEditable={isPostEditable}
+              isReadOnly={false}
+              isSubmitting={isLoading}
+              title={tempPostTitle || post?.title}
+              itemType={'post'}
+              handlerType={'edit'}
+              formVariant={'default'}
+              submitButtonText={t('button.save')}
+              placeholder={t('placeholder.enterPost') as string}
+              openFormButtonText={t('button.edit')}
+            />
+          }
+          isAdminOrModerator={canDelete}
+        />
       )}
-
 
       <NewPostForm
         editorId={`post_comment${groupId}`}
@@ -419,6 +420,7 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
         placeholder={t('placeholder.comment')}
         openFormButtonText={t('button.comment')}
       />
+      <CreatePollUI groupId={groupId} asComment={true} />
 
       {sortedCommentsData.length === 0 && <NoComments />}
       {sortedCommentsData.map((c, i) => (
@@ -429,45 +431,80 @@ export function PostPage({kind, postInstance, postId, groupId, comments, post, c
           transition={{ duration: 0.5 }}
           className="p-4" // Tailwind class for padding
         >
-          <div key={c.id} className=" flex flex-col">
-            <div
-              className={`rounded-md bg-gray-100 p-4 dark:bg-transparent ${
-                commentIsConfirmed(c.id) || commentsMap[c?.id]?.isSaving
-                  ? 'border border-green-400'
-                  : 'border border-red-400'
-              }`}
-            >
-              {c && (
-                <div
-                  className={`mt-4 ${
-                    commentsMap[c?.id]?.isEditing ? 'min-h-[150px] rounded-md border border-solid pl-4' : ''
-                  }`}
-                >
-                  <Editor
-                    editorRef={commentEditorRef}
-                    holder={'comment' + '_' + c?.id}
-                    readOnly={!commentsMap[c?.id]?.isEditing}
-                    onChange={val => setOnEditCommentContent(c, val)}
-                    placeholder={t('placeholder.enterComment') as string}
-                    data={c}
-                  />
-                  {(identityCommitment || canDelete) && <CommentActions comment={c} canDelete={canDelete} />}
-                </div>
-              )}
-            </div>
-            <div className="pt-3 text-gray-500">
+          {c.kind == 2 ? (
+            <PostItem
+              post={c}
+              setIsFormOpen={setIsFormOpen}
+              isFormOpen={isFormOpen}
+              voteForPost={voteForPost}
+              showDescription={true}
+              editor={
+                <NewPostForm
+                  editorId={postInstance.specificPostId(postId)}
+                  description={tempPostDescription || post?.description}
+                  setDescription={setTempPostDescription}
+                  handleSubmit={saveEditedPost}
+                  editorReference={postEditorRef}
+                  setTitle={setTempPostTitle}
+                  resetForm={() => {
+                    setTempPostDescription(null)
+                    setTempPostTitle('')
+                  }}
+                  isEditable={isPostEditable}
+                  isReadOnly={false}
+                  isSubmitting={isLoading}
+                  title={tempPostTitle || post?.title}
+                  itemType={'post'}
+                  handlerType={'edit'}
+                  formVariant={'default'}
+                  submitButtonText={t('button.save')}
+                  placeholder={t('placeholder.enterPost') as string}
+                  openFormButtonText={t('button.edit')}
+                />
+              }
+              isAdminOrModerator={canDelete}
+            />
+          ) : (
+            <div key={c.id} className="flex flex-col">
               <div
-                className="flex gap-3"
-                style={{
-                  visibility: commentIsConfirmed(c.id) ? 'visible' : 'hidden',
-                }}
+                className={`rounded-md bg-gray-100 p-4 dark:bg-transparent ${
+                  commentIsConfirmed(c.id) || commentsMap[c?.id]?.isSaving
+                    ? 'border border-green-400'
+                    : 'border border-red-400'
+                }`}
               >
-                <p className="my-auto inline-block text-sm">
-                  🕛 {c?.time ? formatDistanceToNow(new Date(c?.time).getTime()) : '-'}
-                </p>
+                {c && (
+                  <div
+                    className={`mt-4 ${
+                      commentsMap[c?.id]?.isEditing ? 'min-h-[150px] rounded-md border border-solid pl-4' : ''
+                    }`}
+                  >
+                    <Editor
+                      editorRef={commentEditorRef}
+                      holder={'comment' + '_' + c?.id}
+                      readOnly={!commentsMap[c?.id]?.isEditing}
+                      onChange={val => setOnEditCommentContent(c, val)}
+                      placeholder={t('placeholder.enterComment') as string}
+                      data={c}
+                    />
+                    {(identityCommitment || canDelete) && <CommentActions comment={c} canDelete={canDelete} />}
+                  </div>
+                )}
+              </div>
+              <div className="pt-3 text-gray-500">
+                <div
+                  className="flex gap-3"
+                  style={{
+                    visibility: commentIsConfirmed(c.id) ? 'visible' : 'hidden',
+                  }}
+                >
+                  <p className="my-auto inline-block text-sm">
+                    🕛 {c?.time ? formatDistanceToNow(new Date(c?.time).getTime()) : '-'}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </motion.div>
       ))}
     </div>
