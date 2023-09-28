@@ -128,7 +128,7 @@ export const usePoll = ({ groupId }) => {
       const epochData = unirepUser.getEpochData()
       let reputationProof = await userState.genProveReputationProof({
         epkNonce: 0,
-        minRep: 1,
+        minRep: 0,
         graffitiPreImage: 0,
       })
 
