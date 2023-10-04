@@ -785,7 +785,6 @@ export const supportedChains: { [key: string]: Chain } = {
   [polygonMumbai.id]: polygonMumbai,
   [goerli.id]: goerli,
   [sepolia.id]: sepolia,
-  // [avalancheFuji.id]: avalancheFuji,
 }
 
 export const supportedChainsArray = Object.keys(supportedChains).map(k => supportedChains[k])

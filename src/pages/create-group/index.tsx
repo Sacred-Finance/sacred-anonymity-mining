@@ -104,7 +104,7 @@ function CreateGroupFormUI({ onCreate }) {
       if (utils.isAddress(val)) {
         const p = new providers.JsonRpcProvider(`${selectedChain.rpcUrls['infura'].http[0]}/${process.env.NEXT_PUBLIC_INFURA_API_KEY}`, selectedChain.id)
 
-        let contract = new ethers.Contract(val, erc20dummyABI, p)
+        const contract = new ethers.Contract(val, erc20dummyABI, p)
         const setNameNotFoundError = async () => {
           await formik.setFieldValue(`tokenRequirements.${i}.token`, '-', false)
           setEr(e => {
