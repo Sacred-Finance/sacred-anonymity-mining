@@ -19,7 +19,7 @@ import CreatePollUI from './CreatePollUI'
 import ReputationCard from '@components/ReputationCard'
 import { useContentManagement } from '@/hooks/useContentManagement'
 import { CommunityActionTabs } from '@components/CommunityActionTabs'
-import { CommunityCardHeader, CommunityLogo } from '@components/CommunityCard/CommunityCardHeader'
+import { CommunityBanner, CommunityLogo } from '@components/CommunityCard/CommunityCardHeader'
 import { CommunityCardContext } from '@components/CommunityCard/CommunityCard'
 import EditGroupNavigationButton, { useCheckIsOwner } from '@components/EditGroupNavigationButton'
 import { Avatar } from '@components/Avatar'
@@ -153,28 +153,67 @@ export function CommunityPage({
 
   const bannerSrc = useValidatedImage(community?.groupDetails?.bannerCID)
 
+  const propsForNewPost = {
+    editorId: `${groupId}_post`,
+    submitButtonText: t('button.submit') as string,
+    openFormButtonText: t('button.newPost') as string,
+    description: contentDescription,
+    setDescription: setContentDescription,
+    handleSubmit: addPost,
+    editorReference: postEditorRef,
+    showButtonWhenFormOpen: true,
+    setTitle: setContentTitle,
+    resetForm: () => clearInput(true),
+    isReadOnly: false,
+    isSubmitting: isContextLoading,
+    title: contentTitle as string,
+    isEditable: true,
+    itemType: 'post',
+    actionType: 'new',
+    classes: {
+      rootClosed: '!w-fit !p-0',
+      rootOpen: 'fixed z-50 inset-0 p-12 bg-gray-900 bg-opacity-50 flex justify-center items-center',
+      formBody: 'w-full h-full flex flex-col gap-4',
+      editor: 'border rounded py-1 px-2 bg-white',
+      submitButton: 'bg-green-500 text-white border-none rounded',
+      formContainerOpen: 'bg-white p-4 border border-gray-300 rounded shadow-lg w-full max-w-3xl',
+      openFormButtonOpen: 'self-end bg-primary-500 text-white hidden',
+    },
+  }
+
   return (
     <CommunityCardContext.Provider value={community}>
-      <Image
-          src={bannerSrc}
-          alt={'community Banner Image'}
-          width={500}
-          height={500}
-          unoptimized
-          priority
-      />
+      <div className="flex w-full items-center bg-white p-4">
+        {/* Community Logo */}
+        <div className="relative h-24 w-24 flex-shrink-0">
+          <CommunityLogo />
+        </div>
+
+        {/* Community Name & Description */}
+        <div className="ml-6 flex flex-grow flex-col justify-center">
+          <h1 className="text-4xl font-semibold">{community.name}</h1>
+          <p className="mt-2 text-gray-600">{community.groupDetails.description}</p>
+        </div>
+
+        {/* Community Banner */}
+        <div className="relative ml-6 w-1/2 flex-shrink-0">
+          <Image
+            className={clsx(
+              'rounded-md shadow transition-shadow duration-300 ease-in-out hover:shadow-lg',
+              'border border-gray-300 hover:border-opacity-50 hover:ring-2 hover:ring-gray-300 hover:ring-opacity-60'
+            )}
+            src={bannerSrc}
+            alt="community Banner Image"
+            width={1000}
+            height={1000}
+            unoptimized
+            priority
+          />
+        </div>
+      </div>
+
       <div className={clsx('h-fit min-h-screen !text-gray-900 ')}>
         <div className={'group relative flex flex-col'}>
-
-          <div className={'relative z-50'}>
-            <EditGroupNavigationButton community={community} />
-          </div>
-
-          <div className={'relative flex  w-full items-center gap-4'}>
-            <CommunityLogo />
-            {community.groupDetails.description}
-          </div>
-
           <CommunityActionTabs
             defaultTab={'chat'}
             tabs={{
@@ -183,41 +222,16 @@ export function CommunityPage({
                 onClick: () => {},
                 panel: (
                   <>
-                    <div className={'relative col-span-10 flex items-center gap-4'}>
+                    <div className="flex w-full gap-2 ">
+                      <EditGroupNavigationButton community={community} />
                       <CreatePollUI groupId={groupId} />
-                      <NewPostForm
-                        editorId={`${groupId}_post`}
-                        submitButtonText={t('button.submit') as string}
-                        openFormButtonText={t('button.newPost') as string}
-                        description={contentDescription}
-                        setDescription={setContentDescription}
-                        handleSubmit={addPost}
-                        editorReference={postEditorRef}
-                        showButtonWhenFormOpen={true}
-                        setTitle={setContentTitle}
-                        resetForm={() => clearInput(true)}
-                        isReadOnly={false}
-                        isSubmitting={isContextLoading}
-                        title={contentTitle as string}
-                        isEditable={true}
-                        itemType={'post'}
-                        actionType={'new'}
-                        classes={{
-                          rootClosed: '!w-fit !p-0',
-                          rootOpen:
-                            'fixed z-50 inset-0  p-12 bg-gray-900 bg-opacity-50 flex justify-center items-center ',
-                          formBody: 'w-full h-full  flex flex-col gap-4',
-                          editor: 'border  rounded py-1 px-2 bg-white',
-                          submitButton: 'bg-green-500 text-white border-none rounded',
-                          formContainerOpen: 'bg-white p-4 border border-gray-300 rounded shadow-lg w-full  max-w-3xl ',
-                          openFormButtonOpen: 'self-end bg-primary-500 text-white hidden',
-                        }}
-                      />
-                      <div className={'flex-grow'} />
+                      <NewPostForm {...propsForNewPost} />
                       <SortBy onSortChange={handleSortChange} targetType="posts" />
                     </div>
-                    <PostList posts={sortedData} />
-                    {sortedData?.length === 0 && <NoPosts />}
+                    <div className="flex flex-col gap-4 w-full">
+                      <PostList posts={sortedData} />
+
+                    </div>
                   </>
                 ),
               },
@@ -245,41 +259,25 @@ export function CommunityPage({
   )
 }
 
-export const PostNavigator = ({
-  posts,
-  visiblePostIds,
-  scrollIntoView,
-}: {
-  posts: Item[]
-  visiblePostIds: Item['id'][]
-  scrollIntoView: (id) => void
-}) => {
+export const PostNavigator = ({ posts, visiblePostIds, scrollIntoView }) => {
   return (
-    <>
-      <div
-        className={
-          'sticky top-24 flex select-none flex-col gap-4 rounded  '
-        }
-      >
-        <div className={'text-base font-bold '}>Posts</div>
-
-        <ul className={'flex flex-col gap-4'}>
-          {posts.map(post => {
-            return (
-              <button
-                onClick={() => scrollIntoView(post.id)}
-                key={post.id}
-                className={clsx(
-                  'border-b text-left text-sm  font-bold hover:cursor-pointer',
-                  visiblePostIds.includes(post.id) && 'text-primary-600'
-                )}
-              >
-                {post.title}
-              </button>
-            )
-          })}
-        </ul>
-      </div>
-    </>
+    <div className="sticky top-24 flex flex-col gap-4 rounded  p-4">
+      <h2 className="mb-2 text-base font-bold">Posts</h2>
+      <ul className="flex flex-col gap-2">
+        {posts.map(post => (
+          <li key={post.id}>
+            <button
+              onClick={() => scrollIntoView(post.id)}
+              className={clsx(
+                'text-left text-sm font-bold transition-colors hover:cursor-pointer',
+                visiblePostIds.includes(post.id) ? 'text-primary-600' : 'text-gray-600'
+              )}
+            >
+              {post.title}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
   )
 }

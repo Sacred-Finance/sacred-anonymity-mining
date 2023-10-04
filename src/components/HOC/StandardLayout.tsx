@@ -59,7 +59,7 @@ export default function StandardLayout({ children }) {
   })
 
   return (
-    <div className={'flex h-full flex-col '} ref={pageRef}>
+    <div className={'flex h-full flex-col'} ref={pageRef}>
       <div className={'flex w-full flex-col '} ref={pageRef}>
         <Header />
         <div className={'relative flex flex-1 '}>

@@ -1,5 +1,11 @@
 import { ethers } from 'ethers'
-import { erc20dummyABI, forumContract, jsonRPCProvider } from '@/constant/const'
+import {
+  erc20dummyABI,
+  forumContract,
+  jsonRPCProvider,
+  jsonRPCProviderGoerli,
+  jsonRPCProviderSepolia,
+} from '@/constant/const'
 import { setCache } from '@/lib/redis'
 import { getContent, getIpfsHashFromBytes32, parseComment, parsePost, uploadImageToIPFS } from '@/lib/utils'
 import { CommunityDetails, ContentType, Requirement, User } from '@/lib/model'
@@ -9,6 +15,7 @@ import { useCallback } from 'react'
 import { Group, Item, RawGroupData, RawItemData } from '@/types/contract/ForumInterface'
 import { Event } from '@ethersproject/contracts'
 import { UnirepUser } from '@/lib/unirep'
+import { avalancheFuji, Chain, goerli, polygonMumbai, sepolia } from 'wagmi/chains'
 
 type GroupId = number
 
@@ -231,20 +238,80 @@ export const handleFileImageUpload = (e, setImageFileState) => {
   }
 }
 
+export const getRpcProvider = community => {
+  if (community.chainId === polygonMumbai.id) {
+    return jsonRPCProvider
+  }
+
+  if (community.chainId === avalancheFuji.id) {
+    return
+  }
+
+  if (community.chainId === sepolia.id) {
+    return jsonRPCProviderSepolia
+  }
+
+  // goerli
+  if (community.chainId === goerli.id) {
+    return jsonRPCProviderGoerli
+  }
+}
+
 export const addRequirementDetails = async (community: Group): Promise<Awaited<Requirement[]>> => {
-  // looking at the requirements array, we need to get the details of each requirement from the contract and add it to the community object
-  // get symbol and name of token
   return (await Promise.all(
     community.requirements.map(async requirement => {
-      const token = await new ethers.Contract(requirement.tokenAddress, erc20dummyABI, jsonRPCProvider)
-      const symbol = await token.symbol()
-      const name = await token.name()
-      const decimals = await token.decimals()
+      let token
+      try {
+        token = new ethers.Contract(requirement.tokenAddress, erc20dummyABI, getRpcProvider(community))
+      } catch (e) {
+        console.error('Error creating token contract:', e)
+        return {
+          tokenAddress: requirement.tokenAddress,
+          symbol: '',
+          name: '',
+          decimals: '',
+          minAmount: requirement.minAmount.toString(),
+        }
+      }
+
+      if (!token) {
+        console.warn('Token contract not initialized:', requirement.tokenAddress)
+        return {
+          tokenAddress: requirement.tokenAddress,
+          symbol: '',
+          name: '',
+          decimals: '',
+          minAmount: requirement.minAmount.toString(),
+        }
+      }
+
+      let symbol, name, decimals
+      try {
+        symbol = await token.symbol()
+      } catch (e) {
+        console.error('Error fetching token symbol:', e)
+        symbol = ''
+      }
+
+      try {
+        name = await token.name()
+      } catch (e) {
+        console.error('Error fetching token name:', e)
+        name = ''
+      }
+
+      try {
+        decimals = await token.decimals()
+      } catch (e) {
+        console.error('Error fetching token decimals:', e)
+        decimals = ''
+      }
+
       const minAmount = requirement.minAmount.toString()
 
       return {
         tokenAddress: requirement.tokenAddress,
-        symbol,
+        symbol: symbol ? symbol.toString() : '',
         name,
         decimals,
         minAmount,

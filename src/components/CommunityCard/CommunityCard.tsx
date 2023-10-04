@@ -13,6 +13,7 @@ import { User } from '@/lib/model'
 import { motion } from 'framer-motion'
 import { useValidatedImage } from '@components/CommunityCard/UseValidatedImage'
 import { useAccount } from 'wagmi'
+import { Card } from 'flowbite-react'
 
 export const CommunityCardContext = React.createContext<
   (Group & { variant?: 'default' | 'banner'; user: User | false | undefined }) | null
@@ -38,62 +39,26 @@ export const CommunityCard = ({
   // new ref for modal
   const cardRef = useRef<HTMLDivElement | null>(null)
 
-  if (!community || !community?.id) return <div className={'community-card-container'}></div>
+  if (!community || !community?.id) return <div></div>
+
+  // return <NewCard />
 
   if (community)
     return (
-      <motion.div
-        className={clsx(
-          'hover:border-opacity-50  hover:ring-opacity-60 hover:ring-offset-2',
-          variant === 'banner'
-            ? 'pointer-events-auto'
-            : 'h-fit max-w-xl flex-grow items-center  rounded border border-gray-900  transition-all duration-300 ease-in-out sm:w-full md:w-auto '
-        )}
-        ref={cardRef}
-      >
-        <CommunityCardContext.Provider value={{ ...community, variant, user }}>
-          <EditGroupNavigationButton community={community} />
+      <CommunityCardContext.Provider value={{ ...community, variant, user }}>
+        <Card className="flex min-w-fit flex-nowrap" href="#" renderImage={() => <CommunityCardHeader />}>
+          {/*<EditGroupNavigationButton community={community} />*/}
           <Link
             href={`/communities/${community?.groupId}`}
-            className={clsx(variant !== 'banner' ? 'pointer-events-auto ' : 'pointer-events-none')}
+            className={clsx(' flex flex-grow', variant !== 'banner' ? 'pointer-events-auto ' : 'pointer-events-none')}
           >
-            <CommunityCardHeader />
             <CommunityCardBody />
           </Link>
 
-          <div className={'flex-grow'} />
           <CommunityCardFooter />
-        </CommunityCardContext.Provider>
-      </motion.div>
+        </Card>
+      </CommunityCardContext.Provider>
     )
 
   return null
-}
-
-const useCommunityEdit = (community: Group) => {
-  const [isEditGroupVisible, setIsEditGroupVisible] = React.useState(false)
-  const [isDeleteGroupVisible, setIsDeleteGroupVisible] = React.useState(false)
-  const user = useUserIfJoined(community.groupId as string)
-
-  // new ref for modal
-  const cardRef = useRef<HTMLDivElement | null>(null)
-
-  useEffect(() => {
-    if (!cardRef?.current) return () => {}
-    cardRef.current.addEventListener('mouseenter', () => {
-      setIsEditGroupVisible(true)
-      setIsDeleteGroupVisible(true)
-    })
-    cardRef.current.addEventListener('mouseleave', () => {
-      setIsEditGroupVisible(false)
-      setIsDeleteGroupVisible(false)
-    })
-
-    return () => {
-      cardRef?.current?.removeEventListener?.('mouseenter', () => {})
-      cardRef?.current?.removeEventListener?.('mouseleave', () => {})
-    }
-  }, [cardRef])
-
-  return { isEditGroupVisible, isDeleteGroupVisible, user, cardRef }
 }

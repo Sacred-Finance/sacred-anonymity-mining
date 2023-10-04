@@ -156,7 +156,7 @@ function CreateGroupFormUI({ onCreate }) {
         minAmount: BigInt(v?.minAmount * 10 ** v?.decimals).toString(),
       }
     })
-    onCreate({
+    await onCreate({
       name: groupName,
       requirements: reqMandatory ? tokenRequirements : [],
       bannerFile: bannerFile,
@@ -312,7 +312,7 @@ function CreateGroupFormUI({ onCreate }) {
           </button>
         </div>
       </div>
-      <hr className="border-border-on-dark" />
+      <hr className="" />
       <FormikProvider value={formik}>
         <AnimatePresence>
           <motion.form onSubmit={submit}>
@@ -398,7 +398,7 @@ function CreateGroupFormUI({ onCreate }) {
         </Link>
         <PrimaryButton
           className={clsx(buttonVariants.primarySolid, 'border')}
-          disabled={isSubmitDisabled}
+          disabled={isSubmitDisabled || isSubmitting}
           onClick={submit}
           isLoading={isSubmitting}
         >

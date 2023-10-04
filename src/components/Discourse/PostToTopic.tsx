@@ -1,16 +1,13 @@
 import axios from 'axios'
-import { Topic } from '@components/Discourse/types'
-import dynamic from 'next/dynamic'
+import { Post, Topic } from '@components/Discourse/types'
 import React, { useEffect, useRef, useState } from 'react'
 import EditorJS, { OutputData } from '@editorjs/editorjs'
 import { useTranslation } from 'react-i18next'
 import { NewPostForm } from '@components/NewPostForm'
 import { toast } from 'react-toastify'
-import { mutate } from 'swr'
-import { getDiscourseData } from '@/lib/fetcher'
 import { OutputDataToMarkDown } from '@components/Discourse/OutputDataToMarkDown'
 
-const PostToTopic = ({ topic, mutate }: { topic: Topic, mutate }) => {
+const PostToTopic = ({ topic, mutate }: { topic: Topic; mutate: (newPost: Post) => void }) => {
   const { t } = useTranslation()
   const [description, setDescription] = useState<OutputData>(null)
   const editorReference = useRef<EditorJS>()
@@ -30,9 +27,12 @@ const PostToTopic = ({ topic, mutate }: { topic: Topic, mutate }) => {
         is_warning: false,
         category: 4,
       })
-      toast.success(t('alert.postCreateSuccess'))
+
+      if (newPost.data.post) {
+        toast.success(t('alert.postCreateSuccess'))
+        mutate(newPost.data.post)
+      }
       // mutate where key includes topic_id and post_id
-      await mutate(key => key.includes(newPost.data.topic_id))
     } catch (error) {
       toast.error(t('alert.postCreateFailed'))
       console.error(error)

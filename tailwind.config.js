@@ -30,9 +30,37 @@ module.exports = {
   mode: 'jit',
   purge: ['./src/**/*.{js,jsx,ts,tsx}'],
   darkMode: 'class',
-  content: ['./src/**/*.{js,jsx,ts,tsx}'],
+  content: [
+    "./node_modules/flowbite-react/**/*.js",
+    "./pages/**/*.{ts,tsx}",
+    "./public/**/*.html",
+  ],
   theme: {
+    screens: {
+      sm: '480px',
+      md: '768px',
+      lg: '976px',
+      xl: '1440px',
+    },
+    colors: {
+      gray: colors.coolGray,
+      primary: colors.sky,
+      blue: colors.lightBlue,
+      red: colors.rose,
+      pink: colors.fuchsia,
+    },
+    fontFamily: {
+      sans: ['Graphik', 'sans-serif'],
+      serif: ['Merriweather', 'serif'],
+    },
     extend: {
+      spacing: {
+        128: '32rem',
+        144: '36rem',
+      },
+      borderRadius: {
+        '4xl': '2rem',
+      },
       borderColor: theme => {
         const borderColor = {}
         colors.forEach(({ color }) => {
@@ -59,8 +87,8 @@ module.exports = {
         '8xl': ['6rem', { lineHeight: '1' }],
         '9xl': ['8rem', { lineHeight: '1' }],
       },
-      maxWidth:{
-        'xss': '16rem',
+      maxWidth: {
+        xss: '16rem',
       },
 
       animation: {
@@ -91,66 +119,11 @@ module.exports = {
         'primary-hover': '#6d3cc4',
         'primary-dark': '#b39ddb',
         'primary-light': '#8146e0',
-        'secondary-dark': '#7986cb',
-        'background-dark': '#121212',
-        'on-dark-high-emphasis': '#ffffffe6',
-        'on-dark-medium-emphasis': '#ffffff99',
-        'on-dark-disabled': '#ffffff61',
-        'on-light-high-emphasis': '#000000de',
-        'on-light-medium-emphasis': '#00000099',
-        'on-light-disabled': '#00000061',
-        'border-on-dark': '#ffffff1f',
-        'content-on-dark-disabled': '#ffffff61',
         'error-dark': '#cf6679',
         'error': colors.red,
         'accent-dark': '#c5cae9',
         'gray': { ...colors.zinc },
-        // 'primary': colors.sky,
-        // 'secondary': colors.emerald,
-        // 'tertiary': colors.sky,
-        // 'danger': colors.red,
 
-        'graySlate': {
-          50: 'f8fafc',
-          100: '#f1f5f9',
-          200: '#e2e8f0',
-          300: '#cbd5e1',
-          400: '#94a3b8',
-          500: '#64748b',
-          600: '#475569',
-          700: '#334155',
-          800: '#1e293b',
-          900: '#0f172a',
-        },
-        'grayNew': {
-          100: '#F7F9F8',
-          200: '#D7D8DC',
-          300: '#8B8F98',
-          400: '#62676D',
-          500: '#313236',
-          600: '#2E3540',
-          700: '#222833',
-          800: '#141B26',
-          900: '#090E1A',
-        },
-        'grayLinear': {
-          100: '#F7F9F8',
-          200: '#D7D8DC',
-          300: '#8B8F98',
-          400: '#62676D',
-          500: '#313236',
-          600: '#27282C',
-          700: '#222325',
-          800: '#1F2024',
-          900: '#1C1D1F',
-        },
-
-        'ethereum': '#617FEA',
-        'gnosis': '#00A1B8',
-        'polygon': '#8247E5',
-        'arbitrum': '#28A0F0',
-        'fantom': '#25B6EA',
-        'avalanche': '#E84142',
       }),
       opacity: {
         1: '0.01',
@@ -189,5 +162,6 @@ module.exports = {
     require('@tailwindcss/typography'),
     require('@tailwindcss/forms'),
     require('@tailwindcss/container-queries'),
+    require("flowbite/plugin"),
   ],
 }

@@ -787,11 +787,11 @@ export const supportedChains: { [key: string]: Chain } = {
 }
 
 export const chainLogos: { [key: string]: string } = {
-    [polygonMumbai.id]: '/poly.png',
-    [goerli.id]: '/goerli.svg',
-    [sepolia.id]: '/sepolia.svg',
-    [avalancheFuji.id]: '/avax.png',
-    // [ethereum.id]: '/eth.svg',
+  [polygonMumbai.id]: '/poly.png',
+  [goerli.id]: '/eth.png',
+  [sepolia.id]: '/sepolia.svg',
+  [avalancheFuji.id]: '/avax.png',
+  // [ethereum.id]: '/eth.svg',
 }
 
 export const supportedChainsArray = Object.keys(supportedChains).map(k => supportedChains[k])
@@ -800,6 +800,26 @@ export const jsonRPCProvider = new ethers.providers.JsonRpcProvider(process.env.
   name: polygonMumbai.name,
   chainId: polygonMumbai.id,
 })
+
+export const jsonRPCProviderGoerli = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_GOERLI_URL, {
+  name: goerli.name,
+  chainId: goerli.id,
+} as any)
+
+export const jsonRPCProviderSepolia = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_GOERLI_URL, {
+  name: sepolia.name,
+  chainId: sepolia.id,
+})
+
+export const jsonRPCProviderAvalancheFuji = new ethers.providers.JsonRpcProvider(
+  process.env.NEXT_PUBLIC_AVALANCHE_FUJI_URL,
+  {
+    name: avalancheFuji.name,
+    chainId: avalancheFuji.id,
+  } as any
+)
+
+
 
 const abiInterface = new ethers.utils.Interface(ForumABI.abi).functions
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react'
 import { useRouter } from 'next/router'
-import TopicPosts from '@components/Discourse/TopicPosts'
+import TopicPosts from '@components/Discourse/TopicPosts/TopicPosts'
 import fetcher from '@/lib/fetcher'
 import PostToTopic from '@components/Discourse/PostToTopic'
 import useSWR from 'swr'
@@ -9,6 +9,9 @@ import clsx from 'clsx'
 import _ from 'lodash'
 import useSWRInfinite from 'swr/infinite'
 import { motion } from 'framer-motion'
+import { useFetchRepliesForPosts } from '@/hooks/useFetchRepliesForPosts'
+import { RenderPost } from '@components/Discourse/TopicPosts/RenderPost'
+import { PostContent } from '@components/Discourse/TopicPosts/PostContent'
 
 const PAGE_SIZE = 20
 
@@ -61,36 +64,34 @@ const Index = () => {
     }, true)
   }
 
-  const isLoadingMore = isLoading || (size > 0 && data && typeof data[size - 1] === 'undefined')
-  const isEmpty = data?.[0]?.length === 0
-  const isReachingEnd = isEmpty || (data && data[data.length - 1]?.length < PAGE_SIZE)
-  const isRefreshing = isValidating && data && data.length === size
-
+  const isLoadingMore = isLoading || (isValidating && data && data.length === size)
   const topicData = _.uniqBy(
     _.merge(_.flatten(data?.map(d => d?.post_stream?.posts)), _.flatten(initialData?.post_stream?.posts)),
     'id'
   )
   return (
-    <div className={clsx(' w-full max-w-screen-xl space-y-6 sm:p-8 md:p-24')}>
+    <div className={clsx(' max-w-screen-6xl w-full space-y-6 sm:p-8 md:p-24')}>
+      {initialData && <PostToTopic topic={initialData} mutate={mutatePost} />}
 
-      <PostToTopic topic={initialData as Topic} />
+      {topicData[0].cooked}
+      <PostContent post={topicData[0]} />
       {data?.length && (
         <TopicPosts
           topic={{ ...initialData, ...data, post_stream: { ...initialData?.post_stream, posts: topicData } } as Topic}
           mutate={mutatePost}
         />
       )}
+
       <motion.div
         onViewportEnter={() => {
           setSize(size + 1)
         }}
         viewport={{ once: true }}
         ref={loaderRef}
-      ></motion.div>
-
-      {isReachingEnd && (
+      />
+      {isLoadingMore && (
         <div className="flex items-center justify-center">
-          <div className="text-gray-500">You have reached the end of this topic.</div>
+          <div className="text-gray-500">Loading...</div>
         </div>
       )}
     </div>

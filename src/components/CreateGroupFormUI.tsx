@@ -149,7 +149,7 @@ function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
   }, [logoFile, bannerFile])
 
   return (
-    <div className="scrollbar flex max-h-[80vh] flex-col justify-between space-y-4 overflow-y-scroll rounded border bg-background-dark p-2 text-white md:p-4">
+    <div className="scrollbar flex max-h-[80vh] flex-col justify-between space-y-4 overflow-y-scroll rounded border  p-2 text-white md:p-4">
       <div className="flex items-center justify-between py-2 md:py-4">
         <h1 className="text-xl font-semibold md:text-2xl">{t('createCommunity')}</h1>
       </div>
@@ -172,7 +172,7 @@ function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
           onChange={handleDescriptionChange}
         />
       </div>
-      <hr className=" border-border-on-dark" />
+      <hr className=" " />
 
       <div className="flex w-full flex-col content-center items-center justify-center space-y-4 p-2">
         <PictureUpload
@@ -202,7 +202,7 @@ function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
           <input
             type="checkbox"
             id="isChecked"
-            className=" h-6 w-6 rounded border-border-on-dark bg-primary-500 "
+            className=" h-6 w-6 rounded  bg-primary-500 "
             checked={reqMandatory}
             onChange={e => {
               setReqMandatory(e.target.checked)
@@ -226,13 +226,13 @@ function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
               </span>
             </button>
 
-            <div className="w-100 disabled:group-hover:none absolute left-0 z-50 hidden  rounded bg-black/50 shadow-lg ring-1 ring-background-dark ring-opacity-5 group-hover:block">
+            <div className="w-100 disabled:group-hover:none absolute left-0 z-50 hidden  rounded bg-black/50 shadow-lg ring-1  ring-opacity-5 group-hover:block">
               <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
                 {supportedChainsArray.map((k, i) => (
                   <button
                     key={k.id}
                     className={clsx(
-                      'w-full rounded border border-white/50  bg-primary-bg px-4 py-2 shadow-sm hover:border-white  focus:outline-none focus:ring-2 focus:ring-primary-light focus:ring-offset-2 ',
+                      'w-full rounded border border-white/50  bg-primary-bg px-4 py-2 shadow-sm hover:border-white  focus:outline-none focus:ring-2  focus:ring-offset-2 ',
                       buttonVariants.success,
                       primaryButtonStyle
                     )}
@@ -258,7 +258,7 @@ function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
           </button>
         </div>
       </div>
-      <hr className=" border-border-on-dark" />
+      <hr className=" " />
       <FormikProvider value={formik}>
         <motion.form onSubmit={submit}>
           {formik.values.tokenRequirements.length === 0 && (
@@ -354,7 +354,7 @@ function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
 
       <div className={'flex flex-col justify-between space-x-0 py-2 md:flex-row md:space-x-2 md:py-4'}>
         <CancelButton
-          className=" rounded bg-background-dark px-2 py-2 hover:bg-background-dark md:px-4"
+          className=" rounded  px-2 py-2  md:px-4"
           onClick={onCreateGroupClose}
         >
           Close

@@ -18,16 +18,16 @@ interface CommunityCardHeaderProps {
   }
 }
 
-export function CommunityLogo() {
+export function CommunityLogo({ logoClasses }: { logoClasses?: string }) {
   const community = useLocalCommunity()
-  const logoClasses = '-h-24 relative col-span-2 w-24 rounded-full border-4 border-white shadow-lg'
+  const classes = clsx(logoClasses, 'relative w-24 h-24 rounded-full border-4 border-white shadow-lg')
 
   const logoSrc = useValidatedImage(community?.groupDetails?.logoCID)
   return (
     <>
       {logoSrc ? (
         <Image
-          className={logoClasses}
+          className={classes}
           src={logoSrc ?? mobileLogo}
           alt={'community logo'}
           width={100}
@@ -35,7 +35,7 @@ export function CommunityLogo() {
           unoptimized
         />
       ) : (
-        <MobileLogo className={logoClasses} />
+        <MobileLogo className={classes} />
       )}
     </>
   )
@@ -55,7 +55,7 @@ interface CommunityBannerParams {
   c?: CommunityBannerClasses
 }
 
-function CommunityBanner(props: CommunityBannerParams) {
+export function CommunityBanner(props: CommunityBannerParams) {
   return (
     <>
       {props.srcBannerOverride || props.bannerSrc ? (

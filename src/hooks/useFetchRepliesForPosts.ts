@@ -1,18 +1,23 @@
 import { useEffect, useState } from 'react'
+import { Post } from '@components/Discourse/types'
 
-export const useFetchRepliesForPosts = posts => {
+interface PostWithReplies extends Post {
+  replies: Post[]
+}
+export const useFetchRepliesForPosts = (posts: Post[]) => {
   const [postsWithReplies, setPostsWithReplies] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
     const fetchReplies = async () => {
-      console.log('original posts', posts)
       if (!posts) return
       try {
-        const postsWithReplyCount = posts.filter(post => !post.hidden && !post.deleted_at && post.reply_count > 0)
+        const postsWithReplyCount = posts.filter(
+          post => !post.hidden && !post.deleted_at && post.reply_count > 0
+        )
         const fetchRepliesPromises = postsWithReplyCount.map(post =>
-            fetch(`/api/discourse/${post.id}/replies`).then(res => res.json())
+          fetch(`/api/discourse/${post.id}/replies`).then(res => res.json())
         )
         const repliesArrays = await Promise.all(fetchRepliesPromises)
         repliesArrays.forEach((replies, index) => {

@@ -32,10 +32,10 @@ function EditGroupNavigationButton({ community }) {
   if (!isOwner) return null
   return (
     <>
-      <ToolTip tooltip={t('toolTip.editCommunity.title')}>
+      <ToolTip tooltip={t('toolTip.editCommunity.title')} direction={'left'}>
         <Link
           id="edit-community-button"
-          className={`absolute right-0  rounded-full bg-gray-100 p-2 ring-1 ring-white transition duration-100 hover:bg-purple-600 hover:text-white ${
+          className={`absolute right-0 z-20 rounded-full bg-gray-100 p-2 ring-1 ring-white transition duration-100 hover:bg-purple-600 hover:text-white ${
             !isOwner ? 'hidden' : ''
           }`}
           aria-label="edit community"

@@ -72,16 +72,20 @@ const ReplyToPost = ({
       handleSubmit={onSubmit}
       openFormButtonText={'Reply'}
       actionType={'new'}
+      showButtonWhenFormOpen={true}
       submitButtonText={'Submit'}
       {...formProps}
       classes={{
-        rootOpen: 'fixed z-50 inset-0  bg-gray-900 bg-opacity-50  flex justify-center items-center ',
-        formBody: 'w-full h-full  flex flex-col gap-4',
-        editor: 'border  rounded py-1 px-2 bg-white',
+        formBody: 'flex flex-col gap-4 text-primary-500',
+        editor: 'border  rounded py-1 px-2 bg-white text-primary-500',
         submitButton: 'bg-green-500 text-white border-none rounded',
+        cancelButton: ' text-gray-500 border-none rounded active:bg-gray-100',
         formContainerOpen: 'bg-white p-4 border border-gray-300 rounded shadow-lg w-full  max-w-3xl ',
-
-        openFormButtonOpen: ' bg-primary-500 text-white opacity-0',
+        openFormButtonOpen: 'bg-primary-500 text-white opacity-0',
+        openFormButtonClosed: 'contents text-white ',
+        rootClosed: 'flex h-full !flex-row items-end w-full ',
+        rootOpen:
+          'z-[50] fixed inset-0 bg-gray-900/50 flex justify-center flex l flex-row w-full !flex-row items-center ',
         ...formProps?.classes,
       }}
     />

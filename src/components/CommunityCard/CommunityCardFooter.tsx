@@ -2,15 +2,25 @@ import { JoinCommunityButton } from '../JoinCommunityButton'
 import React from 'react'
 import { useLocalCommunity } from './CommunityCard'
 import RemoveGroup from '../RemoveGroup'
+import { BookOpenIcon, UserIcon } from '@heroicons/react/20/solid'
 
 export const CommunityCardFooter = () => {
   const community = useLocalCommunity()
-
+  const userCount = community?.userCount
+  const posts = community?.posts || []
   if (!community) return null
 
   return (
-    <div className="flex items-center justify-end p-4">
+    <div className="flex items-center justify-between gap-4 text-primary-600">
       <RemoveGroup groupId={community.id} hidden={false} />
+
+      <p className="flex items-center gap-2 text-sm " title={'users'}>
+        {`${userCount ?? 0}`} <UserIcon className={'w-4 '} />
+      </p>
+      <p className="flex items-center gap-2 text-sm" title={'posts'}>
+        {posts.length} <BookOpenIcon className={'w-4'} />
+      </p>
+
       {community ? (
         <JoinCommunityButton community={community} hideIfJoined={community.variant === 'banner'} />
       ) : (

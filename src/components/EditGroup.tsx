@@ -26,6 +26,7 @@ import RemoveGroup from '@components/RemoveGroup'
 import { useRemoveGroup } from '@/hooks/useRemoveGroup'
 import { CommunityId } from '@/contexts/CommunityProvider'
 import DeleteItemButton from '@components/buttons/DeleteItemButton'
+import Image from "next/image";
 
 interface EditGroupProps {
   group: Group
@@ -158,8 +159,8 @@ export function EditGroup({ group }: EditGroupProps) {
   }, [bannerFile, logoFile, group.id, forumContract, groupDescriptionState, groupName])
 
   return (
-    <div className={clsx('relative   grid  w-full max-w-screen-2xl  grid-cols-1 gap-4 sm:p-8 md:p-24')}>
-      <div className="flex flex-col space-y-4 sm:col-span-full md:col-span-6 lg:col-span-6">
+    <div className={clsx('relative  z-50 grid  w-full max-w-screen-2xl grid-cols-1 gap-4 sm:p-8 md:p-24')}>
+      <div className="-z-[1] flex flex-col space-y-4 sm:col-span-full md:col-span-6 lg:col-span-6">
         <div className="flex flex-row items-center justify-between py-4">
           <h1 className="flex text-2xl font-semibold text-gray-700">{t('editCommunity')}</h1>
           <div>
@@ -251,7 +252,7 @@ export function EditGroup({ group }: EditGroupProps) {
 
       {previewCard && <div className="fixed inset-0  bg-gray-900/60 " />}
       {previewCard && (
-        <div className="absolute inset-0  flex flex-col items-center space-y-8 rounded p-10">
+        <div className="absolute inset-0 flex flex-col items-center space-y-8 rounded p-10">
           <h1 className="text-4xl font-semibold text-white">Double check your changes!</h1>
           <div className="flex w-3/4 justify-between space-x-16">
             <CommunityCardContext.Provider value={group}>
@@ -275,7 +276,21 @@ export function EditGroup({ group }: EditGroupProps) {
             >
               <div className="w-1/2 rounded bg-white p-4 shadow-lg">
                 <h4 className="text-xl font-medium text-gray-700">After</h4>
-                <CommunityCardHeader srcBannerOverride={bannerUrl} srcLogoOverride={logoUrl} />
+                <Image
+                    className={clsx(
+                     'max-full bottom-0 left-0 top-0 z-0 h-max rounded-b object-cover opacity-90',
+                    )}
+                    src={bannerUrl}
+                    alt={'community Banner Image'}
+                    sizes="100vw"
+                    style={{
+                      width: '100%',
+                    }}
+                    width={500}
+                    height={500}
+                    unoptimized
+                    priority
+                />
                 <CommunityCardBody />
               </div>
             </CommunityCardContext.Provider>
@@ -285,7 +300,7 @@ export function EditGroup({ group }: EditGroupProps) {
               Cancel
             </button>
             <PrimaryButton
-              className={clsx(buttonVariants.solid, 'z-50 border px-4')}
+              className={clsx(buttonVariants.solid, 'border px-4')}
               // disabled={isSubmitDisabled}
               onClick={submitAllGroupDetails}
               isLoading={isSubmitting}

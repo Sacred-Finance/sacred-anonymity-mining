@@ -72,13 +72,57 @@ export function PostPage({ kind, postInstance, postId, groupId, comments, post, 
   }
 
   return (
-    <div className={clsx('h-full min-h-screen w-full space-y-4 !text-gray-900')}>
-      <div className={'grid h-full grid-cols-12'}>
-        <div className={'col-span-12 bg-gray-50 md:col-span-6'}>
+    <div className="h-screen w-full bg-gray-100 p-6">
+      <div className="grid h-full grid-cols-12 gap-6">
+        <div className="col-span-12 rounded-lg bg-white p-4 shadow-lg md:col-span-6">
           <PostItem post={post} />
         </div>
 
-        <div className={'col-span-12 max-h-full overflow-y-scroll md:col-span-6'}>
+        <div className="col-span-12 overflow-y-auto rounded-lg bg-white p-4 shadow-lg md:col-span-6">
+          <div className="mb-4 flex justify-between border-b pb-4">
+            <div className="flex items-center gap-2">
+              <VoteUpButton
+                isConnected={!!address}
+                isJoined={!!user}
+                isLoading={isLoading}
+                onClick={e =>
+                  handleVote({
+                    e,
+                    vote: 'upvote',
+                    voteForPost,
+                    id: post.id,
+                    setIsLoading,
+                  })
+                }
+                disabled={isLoading || !address}
+              >
+                <span className="font-bold text-gray-700">{post.upvote}</span>
+              </VoteUpButton>
+
+              <VoteDownButton
+                isConnected={!!address}
+                isJoined={!!user}
+                isLoading={isLoading}
+                onClick={e =>
+                  handleVote({
+                    e,
+                    vote: 'downvote',
+                    voteForPost,
+                    id: post.id,
+                    setIsLoading,
+                  })
+                }
+                disabled={isLoading || !address}
+              >
+                <span className="font-bold text-gray-700">{post.downvote}</span>
+              </VoteDownButton>
+            </div>
+
+            <SummaryButton postData={OutputDataToHTML(post?.description)} postTitle={post.title} />
+          </div>
+
+          <CommunityCard community={community} isAdmin={false} variant={'banner'} />
+
           <CommunityActionTabs
             defaultTab={'chat'}
             tabs={{
