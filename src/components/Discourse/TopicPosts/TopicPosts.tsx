@@ -32,18 +32,18 @@ const TopicPosts = ({ topic, mutate }: { topic: Topic; mutate: (newPost: Post) =
   }
 
   return (
-    <div className={'flex flex-col bg-red-500'}>
+    <div className={'flex flex-col'}>
       {nestedPosts.map(post => (
-          <RecursivePostRenderer
-            key={post.id}
-            post={post}
-            postRefs={postRefs}
-            setPostsInView={setPostsInView}
-            controls={controls}
-            setTargetPostNumber={setTargetPostNumber}
-            addReplyToPosts={mutate}
-            depth={0}
-          />
+        <RecursivePostRenderer
+          key={post.id}
+          post={post}
+          postRefs={postRefs}
+          setPostsInView={setPostsInView}
+          controls={controls}
+          setTargetPostNumber={setTargetPostNumber}
+          addReplyToPosts={mutate}
+          depth={0}
+        />
       ))}
     </div>
   )

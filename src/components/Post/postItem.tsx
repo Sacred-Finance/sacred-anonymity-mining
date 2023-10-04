@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router'
-import { useCommunityContext, useUserIfJoined } from '@/contexts/CommunityProvider'
+import { useUserIfJoined } from '@/contexts/CommunityProvider'
 import React, { useEffect, useRef, useState } from 'react'
 import { useAccount } from 'wagmi'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
@@ -16,11 +16,11 @@ import { toast } from 'react-toastify'
 import { useEditItem } from '@/hooks/useEditItem'
 import dynamic from 'next/dynamic'
 import { Item } from '@/types/contract/ForumInterface'
-import clsx from 'clsx'
 import { mutate } from 'swr'
 import { getGroupWithPostAndCommentData } from '@/lib/fetcher'
 import { Avatar } from '@components/Avatar'
 import EditorJsRenderer from '@components/editor-js/EditorJSRenderer'
+
 const Editor = dynamic(() => import('../editor-js/Editor'), {
   ssr: false,
 })
@@ -109,64 +109,65 @@ export const PostItem = ({ post }: { post: Item }) => {
   const isPostPage = !isNaN(postId)
 
   return (
-    <div className="group/post-item">
+    <div className=" mt-6 rounded-lg bg-white p-6 shadow-md transition-colors dark:bg-gray-900">
       <div>
         {post.kind === ContentType.POLL && <PollUI id={post.id} groupId={post.groupId} post={post} />}
-        <div className="flex flex-col ">
-          <div className="flex w-full flex-col gap-8 ">
-            <div className="  bottom-24 top-0 flex w-full flex-col gap-1 ">
-              {isContentEditing ? (
-                <input
-                  name="title"
-                  className={clsx(
-                    'rounded p-4  text-black placeholder-white/40 ring-1 ring-white focus:outline-none focus:ring-2 focus:ring-primary-dark'
-                  )}
-                  placeholder={t('placeholder.enterPostTitle') as string}
-                  type="text"
-                  value={contentTitle}
-                  onChange={e => setContentTitle(e.target.value)}
-                />
-              ) : (
-                <PostTitle post={post} id={<Avatar user={post.ownerEpoch} />} onPostPage={isPostPage} router={router} />
-              )}
-            </div>
 
-            <div className={clsx(' flex w-full flex-col gap-1')}>
-              {/*Do not show label on postPage*/}
-              <label htmlFor="content" className={clsx('text-sm text-gray-500', isPostPage && 'hidden')}>
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-4">
+            {isContentEditing ? (
+              <input
+                name="title"
+                className="focus:ring-primary-dark rounded bg-gray-100 p-4 text-black placeholder-gray-500 focus:outline-none focus:ring-2 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400"
+                placeholder={t('placeholder.enterPostTitle') as string}
+                type="text"
+                value={contentTitle}
+                onChange={e => setContentTitle(e.target.value)}
+              />
+            ) : (
+              <PostTitle post={post} id={<Avatar user={post.ownerEpoch} />} onPostPage={isPostPage} router={router} />
+            )}
+          </div>
+
+          <div className="flex flex-col gap-4">
+            {/* Do not show label on postPage */}
+            {!isPostPage && (
+              <label htmlFor="content" className="text-sm text-gray-600 dark:text-gray-400">
                 Content
               </label>
+            )}
 
-              {!isContentEditing && <EditorJsRenderer data={post.description} onlyPreview={!postId} />}
-              {isContentEditing && (
-                <Editor
-                  editorRef={contentRef}
-                  holder={`${post?.id}_post`}
-                  readOnly={!isContentEditing}
-                  onChange={val => setContentDescription(val)}
-                  placeholder={t('placeholder.enterPostContent') as string}
-                  data={post.description}
-                />
-              )}
-            </div>
-
-            <div className={'flex items-center justify-between'}>
-              <ContentActions
-                item={post}
-                contentId={post.id}
-                isContentEditable={isContentEditable}
-                isEditing={isContentEditing}
-                onContentPage={isPostPage}
-                save={() => saveEditedPost()}
-                groupId={groupId}
-                isAdminOrModerator={isAdminOrModerator}
-                setIsContentEditing={setIsContentEditing}
-                onClickCancel={() => setIsContentEditing(false)}
-                isLoading={isLoading}
-                hidden={isPostPage}
+            {!isContentEditing ? (
+              <EditorJsRenderer data={post.description} onlyPreview={!postId} />
+            ) : (
+              <Editor
+                editorRef={contentRef}
+                holder={`${post?.id}_post`}
+                readOnly={!isContentEditing}
+                onChange={val => setContentDescription(val)}
+                placeholder={t('placeholder.enterPostContent') as string}
+                data={post.description}
+                className="rounded-md bg-gray-100 dark:bg-gray-800"
               />
-              <CommentCount post={post} isContentEditing={isContentEditing} />
-            </div>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between gap-4">
+            <ContentActions
+              item={post}
+              contentId={post.id}
+              isContentEditable={isContentEditable}
+              isEditing={isContentEditing}
+              onContentPage={isPostPage}
+              save={() => saveEditedPost()}
+              groupId={groupId}
+              isAdminOrModerator={isAdminOrModerator}
+              setIsContentEditing={setIsContentEditing}
+              onClickCancel={() => setIsContentEditing(false)}
+              isLoading={isLoading}
+              hidden={isPostPage}
+            />
+            <CommentCount post={post} isContentEditing={isContentEditing} />
           </div>
         </div>
       </div>
@@ -216,7 +217,6 @@ const updateIsPostEditable = async ({
 // Function to check if the post is editable
 const checkIfPostIsEditable = async ({
   note,
-  contentCID,
   address,
   userName,
   groupId,

@@ -8,6 +8,7 @@ import { BigNumber } from 'ethers'
 import LoadingComponent from '@components/LoadingComponent'
 import SideBar from '@components/SideBar'
 import useSWR, { preload } from 'swr'
+
 const fetcher = url =>
   fetch(url).then(res => {
     console.log('fetching data')
@@ -63,10 +64,9 @@ export default function StandardLayout({ children }) {
       <div className={'flex w-full flex-col '} ref={pageRef}>
         <Header />
         <div className={'relative flex flex-1 '}>
-          <div className={'relative  '}>
-            <SideBar isOpen={isOpen} setIsOpen={setIsOpen} />
-          </div>
-          <div className="h-full w-full border p-2">
+          <SideBar isOpen={isOpen} setIsOpen={setIsOpen} />
+
+          <div className="h-full w-full p-2 dark:bg-gray-800">
             <Breadcrumbs />
             {childrenWithProps}
           </div>

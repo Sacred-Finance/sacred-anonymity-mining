@@ -1,9 +1,7 @@
-import React, { useState, useRef, useCallback } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import { PostItem } from '@components/Post/postItem'
 import { ContentType } from '@/lib/model'
 import { Item } from '@/types/contract/ForumInterface'
-import Link from 'next/link'
-import { PrimaryButton } from '@components/buttons'
 import { PostNavigator } from '@components/CommunityPage'
 import { motion } from 'framer-motion'
 import { NoPosts } from '@components/Post/NoPosts'
@@ -50,26 +48,15 @@ export const PostList = ({ posts }: { posts: Item[] }) => {
         onViewportEnter={() => handleViewportEnter(p.id)}
         onViewportLeave={() => handleViewportLeave(p.id)}
         key={p.id}
-        className="relative flex min-w-[300px] max-w-[500px] flex-none flex-col rounded border border-gray-400 p-3
-        shadow-lg   transition-all duration-300 ease-in-out sm:w-full sm:flex-grow md:w-auto
-
-        "
       >
         <MemoizedPostItem post={p} />
-
-        <div className="flex-grow" />
-        <Link href={`/communities/${p.groupId}/post/${p.id}`} className={' w-fit self-end rounded'}>
-          <PrimaryButton >
-            Visit Post <span className={'text-2xl'}> &rarr;</span>
-          </PrimaryButton>
-        </Link>
       </motion.div>
     )
   })
 
   return (
     <div className="flex gap-6 py-6">
-      <div className={'w-3/4'}>
+      <div className={'w-3/4 shadow-2xl'}>
         {renderedPosts === undefined ? (
           <CircularLoader />
         ) : (

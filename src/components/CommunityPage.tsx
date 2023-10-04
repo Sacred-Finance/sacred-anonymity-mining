@@ -3,7 +3,7 @@ import { Post } from '@/lib/post'
 import { useActiveUser, useUserIfJoined, useUsers } from '@/contexts/CommunityProvider'
 import { useAccount } from 'wagmi'
 import { useTranslation } from 'react-i18next'
-import SortBy, { SortByOption } from '@components/SortBy'
+import { SortByOption } from '@components/SortBy'
 import { useUnirepSignUp } from '@/hooks/useUnirepSignup'
 import { User } from '@/lib/model'
 import { useValidateUserBalance } from '@/utils/useValidateUserBalance'
@@ -13,17 +13,10 @@ import { useItemsSortedByVote } from '@/hooks/useItemsSortedByVote'
 import clsx from 'clsx'
 import { NewPostForm } from '@components/NewPostForm'
 import { PostList } from '@components/Post/postList'
-import { NoPosts } from '@components/Post/NoPosts'
 import { Group, Item } from '@/types/contract/ForumInterface'
 import CreatePollUI from './CreatePollUI'
-import ReputationCard from '@components/ReputationCard'
 import { useContentManagement } from '@/hooks/useContentManagement'
-import { CommunityActionTabs } from '@components/CommunityActionTabs'
-import { CommunityBanner, CommunityLogo } from '@components/CommunityCard/CommunityCardHeader'
-import { CommunityCardContext } from '@components/CommunityCard/CommunityCard'
-import EditGroupNavigationButton, { useCheckIsOwner } from '@components/EditGroupNavigationButton'
-import { Avatar } from '@components/Avatar'
-import Image from 'next/image'
+import { CommunityCard } from '@components/CommunityCard/CommunityCard'
 import { useValidatedImage } from '@components/CommunityCard/UseValidatedImage'
 
 export function CommunityPage({
@@ -112,10 +105,8 @@ export function CommunityPage({
         setIsLoading(false)
       } else {
         setIsLoading(false)
-        console.log('Some error occurred, please try again!')
       }
     } catch (error) {
-      console.log('Some error occurred, please try again!', error)
       setIsLoading(false)
 
       // toast({
@@ -172,90 +163,39 @@ export function CommunityPage({
     actionType: 'new',
     classes: {
       rootClosed: '!w-fit !p-0',
-      rootOpen: 'fixed z-50 inset-0 p-12 bg-gray-900 bg-opacity-50 flex justify-center items-center',
-      formBody: 'w-full h-full flex flex-col gap-4',
-      editor: 'border rounded py-1 px-2 bg-white',
-      submitButton: 'bg-green-500 text-white border-none rounded',
-      formContainerOpen: 'bg-white p-4 border border-gray-300 rounded shadow-lg w-full max-w-3xl',
-      openFormButtonOpen: 'self-end bg-primary-500 text-white hidden',
+      rootOpen: 'fixed z-50 inset-0 p-12 bg-gray-900/50 flex justify-center items-center',
+      formBody: 'w-full h-full flex flex-col gap-4 ',
+      editor:
+        'border rounded-md py-2 px-3  transition-shadow focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50',
+      submitButton:
+        'bg-green-500 text-white border-none rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-600',
+      formContainerOpen:
+        'bg-white dark:bg-gray-900 p-6 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg w-full max-w-3xl',
+      openFormButtonOpen: 'self-end hidden',
+      openFormButtonClosed:
+        'h-full bg-primary-500 text-white rounded-md hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600',
     },
   }
 
   return (
-    <CommunityCardContext.Provider value={community}>
-      <div className="flex w-full items-center bg-white p-4">
-        {/* Community Logo */}
-        <div className="relative h-24 w-24 flex-shrink-0">
-          <CommunityLogo />
-        </div>
-
-        {/* Community Name & Description */}
-        <div className="ml-6 flex flex-grow flex-col justify-center">
-          <h1 className="text-4xl font-semibold">{community.name}</h1>
-          <p className="mt-2 text-gray-600">{community.groupDetails.description}</p>
-        </div>
-
-        {/* Community Banner */}
-        <div className="relative ml-6 w-1/2 flex-shrink-0">
-          <Image
-            className={clsx(
-              'rounded-md shadow transition-shadow duration-300 ease-in-out hover:shadow-lg',
-              'border border-gray-300 hover:border-opacity-50 hover:ring-2 hover:ring-gray-300 hover:ring-opacity-60'
-            )}
-            src={bannerSrc}
-            alt="community Banner Image"
-            width={1000}
-            height={1000}
-            unoptimized
-            priority
-          />
-        </div>
+    <div className="relative mt-6 flex min-h-screen gap-6 rounded-lg bg-gray-200 p-6 transition-colors dark:bg-gray-800">
+      <div className="sticky top-0 flex flex-col">
+        <CommunityCard community={community} isAdmin={false} variant={'banner'} />
       </div>
 
-      <div className={clsx('h-fit min-h-screen !text-gray-900 ')}>
-        <div className={'group relative flex flex-col'}>
-          <CommunityActionTabs
-            defaultTab={'chat'}
-            tabs={{
-              chat: {
-                hidden: false,
-                onClick: () => {},
-                panel: (
-                  <>
-                    <div className="flex w-full gap-2 ">
-                      <EditGroupNavigationButton community={community} />
-                      <CreatePollUI groupId={groupId} />
-                      <NewPostForm {...propsForNewPost} />
-                      <SortBy onSortChange={handleSortChange} targetType="posts" />
-                    </div>
-                    <div className="flex flex-col gap-4 w-full">
-                      <PostList posts={sortedData} />
-
-                    </div>
-                  </>
-                ),
-              },
-              community: {
-                hidden: true,
-                onClick: () => {},
-                panel: <div className={'w-1/2'}>Not needed on community page</div>,
-              },
-              gas: {
-                hidden: true,
-                onClick: () => {},
-                panel: (
-                  <div className={'flex w-1/2'}>
-                    <ReputationCard />
-                  </div>
-                ),
-              },
-            }}
-          />
-
-          {children}
+      <div className="group relative flex w-1/2 flex-col gap-4">
+        {/* Pulled out content from the tabs */}
+        <div className="flex w-full gap-4 rounded-lg bg-white p-4 shadow-md dark:bg-gray-900">
+          <CreatePollUI groupId={groupId} />
+          <NewPostForm {...propsForNewPost} />
         </div>
+        <div className="flex w-full flex-col gap-4 rounded-lg bg-white p-4 shadow-md dark:bg-gray-900">
+          <PostList posts={sortedData} />
+        </div>
+
+        <div className="mt-6">{children}</div>
       </div>
-    </CommunityCardContext.Provider>
+    </div>
   )
 }
 

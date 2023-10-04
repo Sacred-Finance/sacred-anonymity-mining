@@ -1,20 +1,26 @@
 import React from 'react'
 import parse from 'html-react-parser'
 
+// PostContent component
 export const PostContent = ({ post }) => (
-  <div className="rounded border border-gray-600 bg-white  p-4 transition-colors duration-1000">
+  <div className="rounded-lg bg-white p-6 shadow-md transition-colors duration-300 dark:bg-gray-900">
     <Cooked post={post} />
 
     {post?.link_counts?.length > 0 && (
-      <div className="">
-        <h3 className="text-lg font-semibold">Links:</h3>
-        <ul className="list-inside list-disc space-y-1 text-blue-500">
+      <div className="mt-4">
+        <h3 className="mb-2 text-lg font-semibold text-gray-700 dark:text-gray-300">Links:</h3>
+        <ul className="mt-2 list-inside list-disc space-y-1 text-blue-500 dark:text-blue-400">
           {post.link_counts.map((link, linkIndex) => (
-            <li key={linkIndex}>
-              <a href={link.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+            <li key={linkIndex} className="flex items-center">
+              <a
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-colors duration-300 hover:text-blue-600 hover:underline dark:hover:text-blue-300"
+              >
                 {link.title || link.url}
               </a>
-              <span className="px-2 text-sm text-gray-500">({link.clicks} clicks)</span>
+              <span className="ml-2 px-2 text-sm text-gray-500 dark:text-gray-400">{link.clicks} clicks</span>
             </li>
           ))}
         </ul>
@@ -23,6 +29,11 @@ export const PostContent = ({ post }) => (
   </div>
 )
 
+// Cooked component
 function Cooked(props: { post: any }) {
-  return <span className="cooked text-base leading-normal">{parse(props.post.cooked)}</span>
+  return (
+    <div className="mb-4 leading-relaxed text-gray-800 dark:text-gray-300">
+      {props?.post?.cooked ? parse(props?.post?.cooked) : null}
+    </div>
+  )
 }

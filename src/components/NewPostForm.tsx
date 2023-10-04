@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import React, { ChangeEvent, RefObject, useCallback, useEffect, useRef, useState } from 'react'
+import React, { RefObject, useCallback, useRef, useState } from 'react'
 import EditorJsRenderer from './editor-js/EditorJSRenderer'
 import { CancelButton, PrimaryButton } from './buttons'
 import { EyeIcon, PencilIcon } from '@heroicons/react/20/solid'
@@ -192,7 +192,6 @@ export const NewPostForm = ({
     setIsFormOpen(false)
   }
 
-
   const descriptionLength = React.useMemo(() => {
     return description?.blocks?.reduce((acc, block) => {
       try {
@@ -245,16 +244,15 @@ export const NewPostForm = ({
             isFormOpen
           )}
         >
-          <div className={clsx(c.formBody)}>
+          <div className={clsx(c?.formBody)}>
             <Tab.Group>
               {/*<EditorTabs setIsPreview={setIsPreview} isPreview={isPreview} disabled={!description} />*/}
               <div className="text-md">Title (Max 60)</div>
               {itemType === 'post' && title !== false && (
                 <input
-                  autoFocus={true}
                   disabled={isPreview}
                   className={clsx(
-                    ' w-full rounded border-gray-200 p-1 text-base transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500'
+                    'w-full rounded border-gray-200 p-1 text-base transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-gray-100'
                   )}
                   ref={inputRef}
                   placeholder={

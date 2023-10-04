@@ -29,25 +29,20 @@ export const Breadcrumbs = ({ backdrop = false }): JSX.Element => {
   const breadcrumbItems = useBreadcrumbs()
 
   return (
-    <nav
-      className="flex justify-between gap-4 rounded px-5 py-3 text-gray-700 dark:border-gray-700 dark:bg-gray-800"
-      aria-label="Breadcrumb"
-    >
-      <ol className="flex items-center gap-4">
+    <nav className="flex justify-between gap-4 rounded-t px-5 py-3 text-gray-700 " aria-label="Breadcrumb">
+      <ol className="flex items-center gap-4 dark:text-white">
         {breadcrumbItems?.map((item, index) => {
           if (!item) return null
           return (
             <li key={index} className="inline-flex items-center gap-4">
               <Link
                 href={item.href}
-                className={` inline-flex items-center rounded border px-3 py-1 text-sm font-medium text-gray-700 dark:text-gray-400 dark:hover:text-white ${
-                  item.isCurrentPage ? 'bg-primary-500 font-bold text-white hover:bg-primary-700 ' : 'hover:bg-white/80'
-                }`}
                 onClick={e => {
                   if (item.isCurrentPage) {
                     e.preventDefault()
                   }
                 }}
+                className={item.isCurrentPage ? '' : 'text-primary-600 hover:text-primary-700'}
               >
                 {item.label}
               </Link>

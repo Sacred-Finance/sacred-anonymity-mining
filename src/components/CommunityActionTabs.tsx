@@ -1,7 +1,6 @@
 import { Tab } from '@headlessui/react'
 import React from 'react'
 import clsx from 'clsx'
-import { ConnectButton } from '@rainbow-me/rainbowkit'
 
 const tabClass = selected => {
   console.log('selected', selected)
@@ -22,7 +21,7 @@ interface TabProperties {
 
 interface CommunityActionTabsProps {
   tabs: {
-    [key in TabTypes]: TabProperties
+    [key in TabTypes]?: TabProperties
   }
   defaultTab?: TabTypes
 }

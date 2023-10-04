@@ -10,7 +10,6 @@ import { commentIsConfirmed, createNote, formatDistanceToNow } from '@/lib/utils
 import { CancelButton, PrimaryButton } from '@components/buttons'
 import DeleteItemButton from '@components/buttons/DeleteItemButton'
 import { NewPostForm } from '@components/NewPostForm'
-import { NoComments } from '@components/Post/NoPosts'
 import { motion } from 'framer-motion'
 import dynamic from 'next/dynamic'
 import { ContentType, User } from '@/lib/model'
@@ -293,9 +292,7 @@ export const PostComments = ({
   }
 
   return (
-    <div className={'sticky top-0 flex flex-col'}>
-      {sortedCommentsData.length === 0 && <NoComments />}
-
+    <div className="flex flex-col gap-4 space-y-4 rounded-lg bg-white p-4 shadow-md transition-colors dark:bg-gray-900">
       <NewPostForm
         editorId={`post_comment${groupId}`}
         description={comment}
@@ -310,12 +307,13 @@ export const PostComments = ({
         itemType={'comment'}
         actionType={'new'}
         classes={{
-          rootOpen: 'fixed z-50 inset-0  bg-gray-900 bg-opacity-50  flex justify-center items-center ',
-          formBody: 'w-full h-full  flex flex-col gap-4',
-          editor: 'border  rounded py-1 px-2 bg-white',
-          submitButton: 'bg-green-500 text-white border-none rounded',
-          formContainerOpen: 'bg-white p-4 border border-gray-300 rounded shadow-lg w-full  max-w-3xl ',
-          openFormButtonOpen: ' bg-primary-500 text-white opacity-0',
+          rootOpen: 'fixed z-50 inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center',
+          formBody: 'w-full h-full flex flex-col gap-4',
+          editor: 'border rounded py-1 px-2 bg-white dark:bg-gray-800',
+          submitButton: 'bg-green-500 text-white border-none rounded hover:bg-green-600',
+          formContainerOpen:
+            'bg-white dark:bg-gray-800 p-4 border border-gray-300 dark:border-gray-700 rounded shadow-lg w-full max-w-3xl',
+          openFormButtonOpen: 'bg-primary-500 text-white opacity-0 hover:bg-primary-600',
         }}
         submitButtonText={t('button.comment')}
         placeholder={t('placeholder.comment')}
@@ -328,14 +326,14 @@ export const PostComments = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="p-4" // Tailwind class for padding
+          className="rounded-lg bg-white p-4 shadow-sm transition-colors dark:bg-gray-800"
         >
-          <div key={c.id} className=" flex flex-col">
+          <div key={c.id} className="flex flex-col">
             <div
-              className={`rounded bg-gray-100 p-4 dark:bg-transparent ${
+              className={`rounded p-4 ${
                 commentIsConfirmed(c.id) || commentsMap[c?.id]?.isSaving
-                  ? 'border border-green-400'
-                  : 'border border-red-400'
+                  ? 'border border-green-400 bg-green-100 dark:bg-green-900'
+                  : 'border border-red-400 bg-red-100 dark:bg-red-900'
               }`}
             >
               {c && (
@@ -354,14 +352,14 @@ export const PostComments = ({
                 </div>
               )}
             </div>
-            <div className="pt-3 text-gray-500">
+            <div className="pt-3 text-gray-600 dark:text-gray-400">
               <div
                 className="flex gap-4"
                 style={{
                   visibility: commentIsConfirmed(c.id) ? 'visible' : 'hidden',
                 }}
               >
-                <p className=" inline-block text-sm">
+                <p className="inline-block text-sm">
                   🕛 {c?.time ? formatDistanceToNow(new Date(c?.time).getTime()) : '-'}
                 </p>
               </div>

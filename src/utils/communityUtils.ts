@@ -1,21 +1,14 @@
 import { ethers } from 'ethers'
-import {
-  erc20dummyABI,
-  forumContract,
-  jsonRPCProvider,
-  jsonRPCProviderGoerli,
-  jsonRPCProviderSepolia,
-} from '@/constant/const'
+import { erc20dummyABI, forumContract, providerMap } from '@/constant/const'
 import { setCache } from '@/lib/redis'
 import { getContent, getIpfsHashFromBytes32, parseComment, parsePost, uploadImageToIPFS } from '@/lib/utils'
-import { CommunityDetails, ContentType, Requirement, User } from '@/lib/model'
+import { CommunityDetails, ContentType, Requirement } from '@/lib/model'
 
 import pica from 'pica'
 import { useCallback } from 'react'
 import { Group, Item, RawGroupData, RawItemData } from '@/types/contract/ForumInterface'
 import { Event } from '@ethersproject/contracts'
 import { UnirepUser } from '@/lib/unirep'
-import { avalancheFuji, Chain, goerli, polygonMumbai, sepolia } from 'wagmi/chains'
 
 type GroupId = number
 
@@ -238,31 +231,12 @@ export const handleFileImageUpload = (e, setImageFileState) => {
   }
 }
 
-export const getRpcProvider = community => {
-  if (community.chainId === polygonMumbai.id) {
-    return jsonRPCProvider
-  }
-
-  if (community.chainId === avalancheFuji.id) {
-    return
-  }
-
-  if (community.chainId === sepolia.id) {
-    return jsonRPCProviderSepolia
-  }
-
-  // goerli
-  if (community.chainId === goerli.id) {
-    return jsonRPCProviderGoerli
-  }
-}
-
 export const addRequirementDetails = async (community: Group): Promise<Awaited<Requirement[]>> => {
   return (await Promise.all(
     community.requirements.map(async requirement => {
       let token
       try {
-        token = new ethers.Contract(requirement.tokenAddress, erc20dummyABI, getRpcProvider(community))
+        token = new ethers.Contract(requirement.tokenAddress, erc20dummyABI, providerMap[community.chainId])
       } catch (e) {
         console.error('Error creating token contract:', e)
         return {

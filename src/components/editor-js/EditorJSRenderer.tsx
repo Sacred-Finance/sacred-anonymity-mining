@@ -22,12 +22,12 @@ const EditorJsRenderer = ({ data, onlyPreview = false, isHtml = false, className
   const html = isHtml ? [data as string] : (EditorJsToHtml.parse(data as OutputData) as ParsedContent[])
 
   return (
-    <div className={clsx("prose max-w-full",
-        onlyPreview && 'prose-sm line-clamp-4',
-        )}>
+    <div
+      className={clsx('dark:prose-dark prose prose-lg max-w-full', onlyPreview && 'prose-sm line-clamp-4', className)}
+    >
       {html.map((item, index) => {
         if (typeof item === 'string') {
-          return <div className={className} dangerouslySetInnerHTML={{ __html: item }} key={index}></div>
+          return <div dangerouslySetInnerHTML={{ __html: item }} key={index}></div>
         }
         if (typeof item === 'object') {
           return <div key={index}>{Object.keys(item)}</div>

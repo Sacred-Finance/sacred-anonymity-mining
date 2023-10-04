@@ -8,7 +8,7 @@ const FilterButtons = ({ filters, onFilter, activeFilter, displayIcon = true, di
         const isActive = activeFilter.includes(filter.name)
 
         return (
-          <ToolTip key={filter.name}toolTip={filter.name}>
+          <ToolTip key={filter.name} toolTip={filter.name}>
             <button
               onClick={() => onFilter(filter.name)}
               className={`${index !== 0 ? 'border-l border-gray-300' : ''} ${

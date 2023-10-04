@@ -1,23 +1,14 @@
-import React, { useState } from 'react'
+import React from 'react'
 import _ from 'lodash'
 import Link from 'next/link'
 import clsx from 'clsx'
-import { AnimatePresence, motion } from 'framer-motion'
-import { useTranslation } from 'next-i18next'
-import {
-  BugAntIcon,
-  ChevronDoubleLeftIcon,
-  ChevronDoubleRightIcon,
-  HomeIcon,
-  PlusCircleIcon,
-} from '@heroicons/react/20/solid'
+import { motion } from 'framer-motion'
+import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, HomeIcon, PlusCircleIcon } from '@heroicons/react/20/solid'
 import ToolTip from '@components/HOC/ToolTip'
 import { Avatar } from '@components/Avatar'
 import { useUserIfJoined } from '@/contexts/CommunityProvider'
 import { useRouter } from 'next/router'
 import { User } from '@/lib/model'
-import { PrimaryButton } from '@components/buttons'
-import { BugModal } from '@components/BugModal'
 
 export function SideItem({
   title,
@@ -39,21 +30,21 @@ export function SideItem({
   const active = useRouter().pathname === href
 
   return (
-    <div className={clsx('group sticky top-0 w-full rounded bg-white')}>
+    <div className={clsx('group sticky top-0 w-full rounded bg-white dark:bg-gray-900')}>
       <ToolTip tooltip={!isOpen && title}>
         <Link
           href={(!onClick && href) || '/'}
           {...linkProps}
           className={clsx(
-            'flex w-full items-center rounded p-3 group-hover:bg-primary-100',
+            'flex w-full items-center rounded p-3 shadow group-hover:bg-gray-200 dark:group-hover:bg-gray-800',
             isOpen ? 'gap-3' : 'flex-col gap-1',
-            active && 'bg-primary-100'
+            active && ' brightness-125'
           )}
           onClick={onClick}
         >
           <span className={clsx('h-6 w-6 rounded')}>{icon}</span>
 
-          <span className={clsx('flex items-center text-sm font-medium', isOpen ? 'text-sm' : 'hidden ')}>
+          <span className={clsx('flex items-center text-sm ', isOpen ? 'text-sm' : 'hidden ')}>
             {_.startCase(title)}
           </span>
         </Link>
@@ -67,59 +58,44 @@ export default function Sidebar({ isOpen, setIsOpen }) {
   const { groupId } = router.query
   const user = useUserIfJoined(groupId as string) as User
 
-  const isMobile = window.innerWidth < 768
-
   return (
-    <motion.aside
-      initial={{ x: -100 }}
-      animate={{ x: 0 }}
-      transition={{ duration: 0.5 }}
-      exit={{ x: -100 }}
-      className={'sticky top-4 z-10 flex h-auto w-full flex-col space-y-5'}
-    >
-      {/* Toggle Button for Mobile */}
-      <div
-        className={clsx(
-          'flex w-full items-center justify-between rounded bg-gray-200 px-4 py-2 hover:bg-gray-300',
-          isMobile ? 'block' : 'hidden'
-        )}
+    <div className={'relative mr-1'}>
+      <motion.aside
+        initial={{ x: -100 }}
+        animate={isOpen ? { x: 0 } : { x: 0 }}
+        exit={{ x: -100 }}
+        className={'sticky top-0 z-10 flex h-auto w-full flex-col dark:bg-gray-800 '}
       >
-        <button onClick={() => setIsOpen(!isOpen)} className="rounded bg-gray-200 px-4 py-2 hover:bg-gray-300">
-          {isOpen ? 'Close' : 'Menu'}
-        </button>
-      </div>
+        {/*<div*/}
+        {/*  className={clsx(*/}
+        {/*    'flex w-full items-center justify-between rounded px-4 py-2 hover:bg-gray-300 dark:hover:bg-gray-700',*/}
+        {/*    isMobile ? 'block' : 'hidden'*/}
+        {/*  )}*/}
+        {/*>*/}
+        {/*  <button onClick={() => setIsOpen(!isOpen)} className="rounded  px-4 py-2 hover:bg-gray-300">*/}
+        {/*    {isOpen ? 'Close' : 'Menu'}*/}
+        {/*  </button>*/}
+        {/*</div>*/}
 
-      <div className="flex w-full flex-col items-center">
-        <ul className=" flex flex-col items-center gap-4 pt-5">
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className={clsx('flex w-full items-center justify-center text-primary-600 hover:bg-primary-100')}
-          >
-            <ToolTip tooltip={isOpen ? 'Collapse' : 'Expand'}>
-              {!isOpen ? (
-                <ChevronDoubleRightIcon className={'h-8 w-8'} />
-              ) : (
-                <ChevronDoubleLeftIcon className={'h-8 w-8'} />
-              )}
-            </ToolTip>
-          </button>
+        <div className="flex w-full flex-col items-center">
+          <ul className=" flex flex-col items-center gap-2 py-4 text-primary-600 ">
+            <button onClick={() => setIsOpen(!isOpen)} className={clsx('flex w-full items-center justify-center')}>
+              <ToolTip tooltip={isOpen ? 'Collapse' : 'Expand'}>
+                {!isOpen ? (
+                  <ChevronDoubleRightIcon className={'h-8 w-8'} />
+                ) : (
+                  <ChevronDoubleLeftIcon className={'h-8 w-8'} />
+                )}
+              </ToolTip>
+            </button>
 
-          <SideItem
-            title={'home'}
-            href={'/'}
-            isOpen={isOpen}
-            icon={<HomeIcon className={clsx('text-primary-600')} />}
-          />
-          <BugModal />
-          <SideItem
-            title={'New Community'}
-            href={'/create-group'}
-            isOpen={isOpen}
-            icon={<PlusCircleIcon className={'text-primary-600'} />}
-          />
-          <Avatar user={user?.identityCommitment?.toString()} />
-        </ul>
-      </div>
-    </motion.aside>
+            <SideItem title={'home'} href={'/'} isOpen={isOpen} icon={<HomeIcon />} />
+            {/*<BugModal />*/}
+            <SideItem title={'New Community'} href={'/create-group'} isOpen={isOpen} icon={<PlusCircleIcon />} />
+            <Avatar user={user?.identityCommitment?.toString()} />
+          </ul>
+        </div>
+      </motion.aside>
+    </div>
   )
 }

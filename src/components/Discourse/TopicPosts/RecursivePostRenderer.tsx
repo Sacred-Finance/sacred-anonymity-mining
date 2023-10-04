@@ -30,7 +30,8 @@ export const RecursivePostRenderer: React.FC<RecursivePostRendererProps> = ({
   depth = 0,
 }) => {
   return (
-    <div>
+    <>
+      <br />
       <RenderPost
         key={post.id}
         post={post}
@@ -39,6 +40,7 @@ export const RecursivePostRenderer: React.FC<RecursivePostRendererProps> = ({
         controls={controls}
         setTargetPostNumber={setTargetPostNumber}
         addReplyToPosts={addReplyToPosts}
+        depth={depth}
       />
 
       <ResponseAccordion>
@@ -55,7 +57,7 @@ export const RecursivePostRenderer: React.FC<RecursivePostRendererProps> = ({
           />
         ))}
       </ResponseAccordion>
-    </div>
+    </>
   )
 }
 

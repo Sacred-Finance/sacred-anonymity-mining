@@ -30,11 +30,8 @@ module.exports = {
   mode: 'jit',
   purge: ['./src/**/*.{js,jsx,ts,tsx}'],
   darkMode: 'class',
-  content: [
-    "./node_modules/flowbite-react/**/*.js",
-    "./pages/**/*.{ts,tsx}",
-    "./public/**/*.html",
-  ],
+  content: ['./node_modules/flowbite-react/**/*.js', './pages/**/*.{ts,tsx}', './public/**/*.html'],
+
   theme: {
     screens: {
       sm: '480px',
@@ -101,29 +98,53 @@ module.exports = {
         'spin-reverse-slower': 'spin-reverse 6s linear infinite',
         'pulse-slow': 'pulse 4s linear infinite',
       },
+
+      // 50
+      // F6F4FE
+      // 100
+      // EEEBFC
+      // 200
+      // DFD9FB
+      // 300
+      // C8BAF8
+      // 400
+      // AC93F2
+      // 500
+      // 9167EB
+      // 600
+      // 8146E0
+      // 700
+      // 7235CC
+      // 800
+      // 5F2CAB
+      // 900
+      // 4F268C
+      // 950
+      // 31165F
       colors: ({ colors }) => ({
         ...colors,
-        'primary-100': '#e6d9ff',
-        'primary-200': '#ccb3ff',
-        'primary-300': '#b38cff',
-        'primary-400': '#9966ff',
-        'primary-500': '#8146e0',
-        'primary-600': '#6d3cc4',
-        'primary-700': '#5e33a9',
-        'primary-800': '#512a8f',
-        'primary-900': '#462177',
-        'primary-1000': '#3b1a5f',
-        'primary-bg': '#8146e0',
-        'primary-text': '#ffffff',
-        'primary-border': '#e6d9ff',
-        'primary-hover': '#6d3cc4',
-        'primary-dark': '#b39ddb',
-        'primary-light': '#8146e0',
-        'error-dark': '#cf6679',
-        'error': colors.red,
-        'accent-dark': '#c5cae9',
-        'gray': { ...colors.zinc },
-
+        'primary-50': '#f6f4fe',
+        'primary-100': '#eeebfc',
+        'primary-200': '#dfd9fb',
+        'primary-300': '#c8baf8',
+        'primary-400': '#ac93f2',
+        'primary-500': '#9167eb',
+        'primary-600': '#8146e0',
+        'primary-700': '#7235cc',
+        'primary-800': '#5f2cab',
+        'primary-900': '#4f268c',
+        'primary-950': '#31165f',
+        'dark:primary-50': '#1f1f1f',
+        'dark:primary-100': '#2f2f2f',
+        'dark:primary-200': '#3f3f3f',
+        'dark:primary-300': '#4f4f4f',
+        'dark:primary-400': '#5f5f5f',
+        'dark:primary-500': '#6f6f6f',
+        'dark:primary-600': '#7f7f7f',
+        'dark:primary-700': '#8f8f8f',
+        'dark:primary-800': '#9f9f9f',
+        'dark:primary-900': '#afafaf',
+        'dark:primary-950': '#bfbfbf',
       }),
       opacity: {
         1: '0.01',
@@ -162,6 +183,6 @@ module.exports = {
     require('@tailwindcss/typography'),
     require('@tailwindcss/forms'),
     require('@tailwindcss/container-queries'),
-    require("flowbite/plugin"),
+    require('flowbite/plugin'),
   ],
 }

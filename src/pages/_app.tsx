@@ -1,13 +1,13 @@
 import '@styles/style.scss'
 import type { AppProps } from 'next/app'
-import { useTheme } from 'next-themes'
+import { ThemeProvider, useTheme } from 'next-themes'
 import { app } from '@/appConfig'
 import { useEffect, useRef } from 'react'
 import HeadGlobal from '@/components/HeadGlobal'
 import '../../i18n'
 import { alchemyProvider } from 'wagmi/providers/alchemy'
 
-import {connectorsForWallets, darkTheme, lightTheme, RainbowKitProvider, Theme} from '@rainbow-me/rainbowkit'
+import { connectorsForWallets, darkTheme, RainbowKitProvider, Theme } from '@rainbow-me/rainbowkit'
 import { braveWallet, coinbaseWallet, injectedWallet, metaMaskWallet } from '@rainbow-me/rainbowkit/wallets'
 import { avalancheFuji, goerli, localhost, mainnet, polygonMumbai, sepolia } from 'wagmi/chains'
 import { configureChains, createClient, WagmiConfig } from 'wagmi'
@@ -16,15 +16,12 @@ import { jsonRpcProvider } from 'wagmi/providers/jsonRpc'
 import { LoaderProvider } from '../contexts/LoaderContext'
 import { CommunityProvider } from '../contexts/CommunityProvider'
 import { startIPFS } from '../lib/utils'
-import { useFetchUsers } from '../hooks/useFetchUsers'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import LoadingPage from '../components/LoadingComponent'
 import ErrorBoundary from '../components/ErrorBoundary'
-import { useMounted } from '@/hooks/useMounted'
 import { SWRConfig } from 'swr'
 import StandardLayout from '@components/HOC/StandardLayout'
-import {merge} from "lodash";
+import { merge } from 'lodash'
 
 function App({ Component, pageProps }: AppProps) {
   return (
@@ -41,9 +38,11 @@ function App({ Component, pageProps }: AppProps) {
               }),
           }}
         >
-          <StandardLayout>
-            <Component {...pageProps} />
-          </StandardLayout>
+          <ThemeProvider enableSystem={true} attribute={'class'} disableTransitionOnChange defaultTheme={'dark'}>
+            <StandardLayout>
+              <Component {...pageProps} />
+            </StandardLayout>
+          </ThemeProvider>
         </SWRConfig>
         <ToastContainer />
       </Web3Wrapper>
@@ -141,7 +140,7 @@ const myTheme = merge(darkTheme(), {
   colors: {
     accentColor: '#07296d',
   },
-} as Theme);
+} as Theme)
 
 // Web3Wrapper
 export function Web3Wrapper({ children }) {

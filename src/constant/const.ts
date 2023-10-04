@@ -788,8 +788,8 @@ export const supportedChains: { [key: string]: Chain } = {
 
 export const chainLogos: { [key: string]: string } = {
   [polygonMumbai.id]: '/poly.png',
-  [goerli.id]: '/eth.png',
-  [sepolia.id]: '/sepolia.svg',
+  [goerli.id]: '/goerli.png',
+  [sepolia.id]: '/eth.png',
   [avalancheFuji.id]: '/avax.png',
   // [ethereum.id]: '/eth.svg',
 }
@@ -819,7 +819,12 @@ export const jsonRPCProviderAvalancheFuji = new ethers.providers.JsonRpcProvider
   } as any
 )
 
-
+export const providerMap = {
+  [polygonMumbai.id]: jsonRPCProvider,
+  [avalancheFuji.id]: undefined,
+  [sepolia.id]: jsonRPCProviderSepolia,
+  [goerli.id]: jsonRPCProviderGoerli,
+}
 
 const abiInterface = new ethers.utils.Interface(ForumABI.abi).functions
 

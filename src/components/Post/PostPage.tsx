@@ -3,17 +3,13 @@ import { useAccount } from 'wagmi'
 import { useLoaderContext } from '@/contexts/LoaderContext'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
 import { useTranslation } from 'next-i18next'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useValidateUserBalance } from '@/utils/useValidateUserBalance'
 import { BigNumber } from 'ethers'
 import { toast } from 'react-toastify'
 import { CommunityCard } from '@components/CommunityCard/CommunityCard'
-
-import clsx from 'clsx'
 import { VoteDownButton, VoteUpButton } from '@components/buttons'
-import ReputationCard from '@components/ReputationCard'
 import { useEditItem } from '@/hooks/useEditItem'
-import { CommunityActionTabs } from '@components/CommunityActionTabs'
 import SummaryButton from '@components/buttons/AIPostSummaryButton'
 import { OutputDataToHTML } from '@components/Discourse/OutputDataToMarkDown'
 import { PostItem } from '@components/Post/postItem'
@@ -70,17 +66,16 @@ export function PostPage({ kind, postInstance, postId, groupId, comments, post, 
       setIsLoading(false)
     }
   }
-
   return (
-    <div className="h-screen w-full bg-gray-100 p-6">
-      <div className="grid h-full grid-cols-12 gap-6">
-        <div className="col-span-12 rounded-lg bg-white p-4 shadow-lg md:col-span-6">
-          <PostItem post={post} />
-        </div>
+    <div className="h-screen w-full  transition-colors ">
+      <div className="grid grid-cols-12 gap-6">
+        {/* Post Item */}
+        <div className="col-span-12 h-fit rounded-lg bg-white p-6 shadow-md transition-shadow dark:bg-gray-700 md:col-span-6">
+          <CommunityCard community={community} isAdmin={false} variant={'banner'} />
 
-        <div className="col-span-12 overflow-y-auto rounded-lg bg-white p-4 shadow-lg md:col-span-6">
-          <div className="mb-4 flex justify-between border-b pb-4">
-            <div className="flex items-center gap-2">
+          <PostItem post={post} />
+          <div className="mb-4 flex justify-between border-b pb-4 dark:border-gray-700">
+            <div className="flex items-center gap-4">
               <VoteUpButton
                 isConnected={!!address}
                 isJoined={!!user}
@@ -96,7 +91,7 @@ export function PostPage({ kind, postInstance, postId, groupId, comments, post, 
                 }
                 disabled={isLoading || !address}
               >
-                <span className="font-bold text-gray-700">{post.upvote}</span>
+                <span className="font-bold text-gray-800 dark:text-gray-300">{post.upvote}</span>
               </VoteUpButton>
 
               <VoteDownButton
@@ -114,97 +109,32 @@ export function PostPage({ kind, postInstance, postId, groupId, comments, post, 
                 }
                 disabled={isLoading || !address}
               >
-                <span className="font-bold text-gray-700">{post.downvote}</span>
+                <span className="font-bold text-gray-800 dark:text-gray-300">{post.downvote}</span>
               </VoteDownButton>
             </div>
-
             <SummaryButton postData={OutputDataToHTML(post?.description)} postTitle={post.title} />
           </div>
+        </div>
 
-          <CommunityCard community={community} isAdmin={false} variant={'banner'} />
+        {/* Sidebar Content */}
+        <div className="col-span-12 overflow-y-auto rounded-lg bg-white p-6 shadow-md transition-shadow dark:bg-gray-900 md:col-span-6">
+          {/* Voting Buttons */}
 
-          <CommunityActionTabs
-            defaultTab={'chat'}
-            tabs={{
-              community: {
-                hidden: false,
-                onClick: () => {},
-                panel: (
-                  <div className={'flex w-full flex-col'}>
-                    <div className={'flex justify-between pb-2'}>
-                      <div className={'flex items-center'}>
-                        <VoteUpButton
-                          isConnected={!!address}
-                          isJoined={!!user}
-                          isLoading={isLoading}
-                          onClick={e =>
-                            handleVote({
-                              e: e,
-                              vote: 'upvote',
-                              voteForPost,
-                              id: post.id,
-                              setIsLoading,
-                            })
-                          }
-                          disabled={isLoading || !address}
-                        >
-                          <span className="font-bold text-gray-700">{post.upvote}</span>
-                        </VoteUpButton>
-
-                        <VoteDownButton
-                          isConnected={!!address}
-                          isJoined={!!user}
-                          isLoading={isLoading}
-                          onClick={e =>
-                            handleVote({
-                              e: e,
-                              vote: 'downvote',
-                              voteForPost,
-                              id: post.id,
-                              setIsLoading,
-                            })
-                          }
-                          disabled={isLoading || !address}
-                        >
-                          <span className="font-bold text-gray-700">{post.downvote}</span>
-                        </VoteDownButton>
-                      </div>
-
-                      <SummaryButton postData={OutputDataToHTML(post?.description)} postTitle={post.title} />
-                    </div>
-
-                    <CommunityCard community={community} isAdmin={false} variant={'banner'} />
-                  </div>
-                ),
-              },
-              chat: {
-                hidden: false,
-                onClick: () => {},
-                panel: (
-                  <PostComments
-                    users={users}
-                    comments={comments}
-                    groupId={groupId}
-                    postId={postId}
-                    commentInstance={commentInstance}
-                    postEditorRef={postEditorRef}
-                    canDelete={canDelete}
-                    checkUserBalance={checkUserBalance}
-                    address={address}
-                    user={user}
-                    setIsLoading={setIsLoading}
-                    identityCommitment={identityCommitment}
-                    editItem={editItem}
-                    isLoading={isLoading}
-                  />
-                ),
-              },
-              gas: {
-                hidden: false,
-                onClick: () => {},
-                panel: <ReputationCard />,
-              },
-            }}
+          <PostComments
+            users={users}
+            comments={comments}
+            groupId={groupId}
+            postId={postId}
+            commentInstance={commentInstance}
+            postEditorRef={postEditorRef}
+            canDelete={canDelete}
+            checkUserBalance={checkUserBalance}
+            address={address}
+            user={user}
+            setIsLoading={setIsLoading}
+            identityCommitment={identityCommitment}
+            editItem={editItem}
+            isLoading={isLoading}
           />
         </div>
       </div>

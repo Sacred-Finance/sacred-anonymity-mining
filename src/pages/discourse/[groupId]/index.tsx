@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useMemo } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
 import TopicPosts from '@components/Discourse/TopicPosts/TopicPosts'
 import fetcher from '@/lib/fetcher'
@@ -9,8 +9,6 @@ import clsx from 'clsx'
 import _ from 'lodash'
 import useSWRInfinite from 'swr/infinite'
 import { motion } from 'framer-motion'
-import { useFetchRepliesForPosts } from '@/hooks/useFetchRepliesForPosts'
-import { RenderPost } from '@components/Discourse/TopicPosts/RenderPost'
 import { PostContent } from '@components/Discourse/TopicPosts/PostContent'
 
 const PAGE_SIZE = 20
@@ -73,7 +71,6 @@ const Index = () => {
     <div className={clsx(' max-w-screen-6xl w-full space-y-6 sm:p-8 md:p-24')}>
       {initialData && <PostToTopic topic={initialData} mutate={mutatePost} />}
 
-      {topicData[0].cooked}
       <PostContent post={topicData[0]} />
       {data?.length && (
         <TopicPosts
