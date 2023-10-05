@@ -19,6 +19,7 @@ import Footer from '@components/Footer'
 import Link from 'next/link'
 import WithStandardLayout from '@components/HOC/WithStandardLayout'
 import { isImageFile } from '@pages/communities/[groupId]/edit'
+import Dropdown from '@/components/buttons/Dropdown/Dropdown'
 
 export interface HandleSetImage {
   file: File | null
@@ -291,36 +292,18 @@ function CreateGroupFormUI({ onCreate }) {
           />
         </div>
 
-        <div className=" relative inline-flex w-[200px] gap-2">
+        <div className="relative inline-flex w-[200px] gap-2">
           <div className="group relative w-60">
-            <button
+            <Dropdown 
+              options={supportedChainsArray.map(c => ({key: c.name, value: c}))} 
+              selected={{key: selectedChain.name, value: selectedChain}}
+              onSelect={(v) => {
+                selectChain(v)
+                formik.setFieldValue('tokenRequirements', [initialValues])
+                if (!reqMandatory) setReqMandatory(true)
+              }}
               disabled={!reqMandatory}
-              className="flex w-full items-center justify-between rounded-md border border-gray-300 bg-white px-2 py-1 text-gray-700 focus:outline-none"
-            >
-              {selectedChain.name}
-              <ChevronRightIcon
-                className="h-5 w-5 transform transition-transform duration-200 group-hover:rotate-90"
-                aria-hidden="true"
-              />
-            </button>
-
-            <div className="absolute left-0 z-50 hidden w-48 overflow-hidden rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 group-hover:block">
-              <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                {supportedChainsArray.map((k, i) => (
-                  <button
-                    key={k.id}
-                    className="w-full px-3 py-2 text-left text-gray-700 hover:bg-gray-200 focus:outline-none"
-                    onClick={e => {
-                      selectChain(k)
-                      formik.setFieldValue('tokenRequirements', [initialValues])
-                      if (!reqMandatory) setReqMandatory(true)
-                    }}
-                  >
-                    {k.name}
-                  </button>
-                ))}
-              </div>
-            </div>
+            />
           </div>
 
           <button className={clsx(buttonVariants.success, 'w-[38.54px] border', 'hover:scale-[100%]')} onClick={addReq}>

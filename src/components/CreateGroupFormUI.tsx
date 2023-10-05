@@ -12,6 +12,7 @@ import clsx from 'clsx'
 import { classes, buttonVariants, primaryButtonStyle } from '../styles/classes'
 import { ChevronRightIcon, QuestionMarkCircleIcon } from '@heroicons/react/20/solid'
 import { AnimatePresence, motion } from 'framer-motion'
+import Dropdown from './buttons/Dropdown/Dropdown'
 function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
   const { t } = useTranslation()
 
@@ -219,41 +220,15 @@ function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
           />
         </div>
         <div className=" w-100 relative inline-flex gap-2">
-          <div className={'w-100 group'}>
-            <button disabled={!reqMandatory} className={clsx(primaryButtonStyle, buttonVariants.primarySolid, ' ')}>
-              <span className="flex w-full items-center justify-between">
-                {selectedChain.name}
-                <ChevronRightIcon
-                  className={clsx('-mr-1 ml-2 h-5 w-5 align-middle group-hover:rotate-90 ')}
-                  aria-hidden="true"
-                />
-              </span>
-            </button>
-
-            <div className="w-100 disabled:group-hover:none absolute left-0 z-50 hidden  rounded-md bg-black/50 shadow-lg ring-1 ring-background-dark ring-opacity-5 group-hover:block">
-              <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                {supportedChainsArray.map((k, i) => (
-                  <button
-                    key={k.id}
-                    className={clsx(
-                      'mt-2 w-full rounded-md border border-white/50  bg-primary-bg px-4 py-2 shadow-sm hover:border-white  focus:outline-none focus:ring-2 focus:ring-primary-light focus:ring-offset-2 ',
-                      buttonVariants.success,
-                      primaryButtonStyle
-                    )}
-                    onClick={e => {
-                      selectChain(k)
-                      formik.setFieldValue('tokenRequirements', [initialValues])
-                      if (!reqMandatory) setReqMandatory(true)
-                      // hide for half second
-                    }}
-                  >
-                    {k.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
+          <Dropdown 
+            options={supportedChainsArray.map(c => ({key: c.name, value: c}))} 
+            selected={{key: selectedChain.name, value: selectedChain}}
+            onSelect={(v) => {
+              selectChain(v)
+              formik.setFieldValue('tokenRequirements', [initialValues])
+              if (!reqMandatory) setReqMandatory(true)
+            }}
+            disabled={!reqMandatory} />
           <button
             className={clsx(primaryButtonStyle, buttonVariants.success, 'w-[38.54px] border', 'hover:scale-[100%]')}
             onClick={addReq}
