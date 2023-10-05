@@ -27,12 +27,7 @@ export const VoteUpButton = ({
     isJoined={props.isJoined}
   >
     <div className={'flex items-center gap-2 '}>
-      <HandThumbUpIcon
-        className={clsx(
-          'border-1  w-6 rounded bg-primary-400 fill-white  stroke-primary-500  p-1 ring-1 ring-primary-500 hover:fill-green-300'
-        )}
-        stroke={'#a49f9f'}
-      />
+      <HandThumbUpIcon className={clsx('border-1  w-6 p-1 group-hover:fill-green-300')} stroke={'#a49f9f'} />
       {children}
     </div>
   </PrimaryButton>
@@ -52,13 +47,8 @@ export const VoteDownButton = ({
     isJoined={props.isJoined}
     className={clsx(props.className)}
   >
-    <div className={'flex items-center gap-2'}>
-      <HandThumbDownIcon
-        className={clsx(
-            'border-1 w-6 rounded bg-primary-400 fill-white  stroke-primary-500  p-1 ring-1 ring-primary-500 hover:fill-red-300'
-        )}
-        stroke={'#a49f9f'}
-      />
+    <div className={'flex items-center gap-2 '}>
+      <HandThumbDownIcon className={clsx('border-1  w-6 p-1 group-hover:fill-red-300')} stroke={'#a49f9f'} />
       {children}
     </div>
   </PrimaryButton>

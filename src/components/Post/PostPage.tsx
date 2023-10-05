@@ -12,8 +12,12 @@ import { VoteDownButton, VoteUpButton } from '@components/buttons'
 import { useEditItem } from '@/hooks/useEditItem'
 import SummaryButton from '@components/buttons/AIPostSummaryButton'
 import { OutputDataToHTML } from '@components/Discourse/OutputDataToMarkDown'
-import { PostItem } from '@components/Post/postItem'
+import { PostItem } from '@components/Post/PostItem'
 import { PostComments } from '@components/Post/PostComments'
+import { Tab } from '@headlessui/react'
+import { PencilIcon } from '@heroicons/react/20/solid'
+import { useRouter } from 'next/router'
+import {ChatIcon, InfoIcon, PollIcon} from '@components/CommunityActionTabs'
 
 export function PostPage({ kind, postInstance, postId, groupId, comments, post, community, commentInstance }) {
   const user = useUserIfJoined(groupId)
@@ -45,6 +49,8 @@ export function PostPage({ kind, postInstance, postId, groupId, comments, post, 
 
   const { checkUserBalance } = useValidateUserBalance(community, address)
 
+  const router = useRouter()
+
   const voteForPost = async (postId, voteType: 0 | 1) => {
     if (!user) return
     const hasSufficientBalance = await checkUserBalance()
@@ -69,12 +75,84 @@ export function PostPage({ kind, postInstance, postId, groupId, comments, post, 
   return (
     <div className="h-screen w-full  transition-colors ">
       <div className="grid grid-cols-12 gap-6">
-        {/* Post Item */}
-        <div className="col-span-12 h-fit rounded-lg bg-white p-6 shadow-md transition-shadow dark:bg-gray-700 md:col-span-6">
-          <CommunityCard community={community} isAdmin={false} variant={'banner'} />
-
+        <SplitContent>
           <PostItem post={post} />
-          <div className="mb-4 flex justify-between border-b pb-4 dark:border-gray-700">
+        </SplitContent>
+        <SplitContent>
+          <Tab.Group>
+            <Tab.List className="ml-2 flex w-fit space-x-4 rounded-t border-b border-b-primary-500 bg-gray-200 p-1 dark:bg-gray-500">
+              <Tab
+                className={({ selected }) =>
+                  `rounded p-2 text-gray-600 dark:text-white ${selected ? 'bg-primary-400 dark:bg-gray-800' : ' '}`
+                }
+              >
+           <InfoIcon/>
+
+              </Tab>
+              <Tab
+                className={({ selected }) =>
+                  `rounded p-2 text-gray-600 dark:text-white ${selected ? 'bg-primary-400 dark:bg-gray-800' : ' '}`
+                }
+              >
+                <PollIcon className={'h-5 w-5'} />
+              </Tab>
+              <Tab
+                className={({ selected }) =>
+                  `rounded p-2 text-gray-600 dark:text-white ${selected ? 'bg-primary-400 dark:bg-gray-800' : ''}`
+                }
+              >
+                 <ChatIcon className={'h-5 w-5'} />
+              </Tab>
+            </Tab.List>
+            <Tab.Panels>
+              <Tab.Panel>
+                <CommunityCard
+                  variant={'banner'}
+                  community={community}
+                  actions={[
+                    {
+                      label: 'Edit',
+                      icon: <PencilIcon className={'h-full w-4'} />,
+                      onClick: () => router.push(`/communities/${community?.groupId}/edit`),
+                    },
+                  ]}
+                />
+              </Tab.Panel>
+              <Tab.Panel
+                className={
+                  'relative flex aspect-4 transform cursor-default flex-col justify-between rounded-lg bg-white p-2 text-gray-900 shadow-md shadow-primary-900 transition-transform  hover:bg-gray-100 dark:bg-gray-950/20 dark:text-gray-100 dark:shadow-primary-900 dark:hover:bg-gray-800 '
+                }
+              >
+                <div className="flex flex-col gap-6">
+                  <div className="text-md">Polls</div>
+                </div>
+              </Tab.Panel>
+              <Tab.Panel
+                className={
+                  'relative flex aspect-4 transform cursor-default flex-col justify-between rounded-lg bg-white p-2 text-gray-900 shadow-md shadow-primary-900 transition-transform  hover:bg-gray-100 dark:bg-gray-950/20 dark:text-gray-100 dark:shadow-primary-900 dark:hover:bg-gray-800 '
+                }
+              >
+                <PostComments
+                  users={users}
+                  comments={comments}
+                  groupId={groupId}
+                  postId={postId}
+                  commentInstance={commentInstance}
+                  postEditorRef={postEditorRef}
+                  canDelete={canDelete}
+                  checkUserBalance={checkUserBalance}
+                  address={address}
+                  user={user}
+                  setIsLoading={setIsLoading}
+                  identityCommitment={identityCommitment}
+                  editItem={editItem}
+                  isLoading={isLoading}
+                />
+              </Tab.Panel>
+            </Tab.Panels>
+          </Tab.Group>
+
+          <div className=" mt-2 flex justify-between border-b pb-4 dark:border-gray-700">
             <div className="flex items-center gap-4">
               <VoteUpButton
                 isConnected={!!address}
@@ -91,7 +169,7 @@ export function PostPage({ kind, postInstance, postId, groupId, comments, post, 
                 }
                 disabled={isLoading || !address}
               >
-                <span className="font-bold text-gray-800 dark:text-gray-300">{post.upvote}</span>
+                <span className="font-bold text-white dark:text-gray-300">{post.upvote}</span>
               </VoteUpButton>
 
               <VoteDownButton
@@ -109,34 +187,12 @@ export function PostPage({ kind, postInstance, postId, groupId, comments, post, 
                 }
                 disabled={isLoading || !address}
               >
-                <span className="font-bold text-gray-800 dark:text-gray-300">{post.downvote}</span>
+                <span className="font-bold text-white dark:text-gray-300">{post.downvote}</span>
               </VoteDownButton>
             </div>
             <SummaryButton postData={OutputDataToHTML(post?.description)} postTitle={post.title} />
           </div>
-        </div>
-
-        {/* Sidebar Content */}
-        <div className="col-span-12 overflow-y-auto rounded-lg bg-white p-6 shadow-md transition-shadow dark:bg-gray-900 md:col-span-6">
-          {/* Voting Buttons */}
-
-          <PostComments
-            users={users}
-            comments={comments}
-            groupId={groupId}
-            postId={postId}
-            commentInstance={commentInstance}
-            postEditorRef={postEditorRef}
-            canDelete={canDelete}
-            checkUserBalance={checkUserBalance}
-            address={address}
-            user={user}
-            setIsLoading={setIsLoading}
-            identityCommitment={identityCommitment}
-            editItem={editItem}
-            isLoading={isLoading}
-          />
-        </div>
+        </SplitContent>
       </div>
     </div>
   )
@@ -165,3 +221,5 @@ export const handleVote = async ({ e, vote, voteForPost, id, setIsLoading }: Han
   }
   setIsLoading(false)
 }
+
+export const SplitContent = ({ children }) => <div className="col-span-12 gap-2 md:col-span-6">{children}</div>

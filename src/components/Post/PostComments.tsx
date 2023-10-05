@@ -15,6 +15,8 @@ import dynamic from 'next/dynamic'
 import { ContentType, User } from '@/lib/model'
 import { Item } from '@/types/contract/ForumInterface'
 import { EditItemParams } from '@/hooks/useEditItem'
+import { RenderPost } from '@components/Discourse/TopicPosts/RenderPost'
+import EditorJsRenderer from '@components/editor-js/EditorJSRenderer'
 
 const Editor = dynamic(() => import('@components/editor-js/Editor'), {
   ssr: false,
@@ -32,6 +34,30 @@ export interface TempComment {
   id: string
   createdAt: Date
   content: string
+}
+
+export const NewPostModal: {
+  openFormButtonClosed: string
+  editor: string
+  submitButton: string
+  formBody: string
+  rootOpen: string
+  formContainerOpen: string
+  rootClosed: string
+  openFormButtonOpen: string
+} = {
+  rootClosed: '!w-fit !p-0',
+  rootOpen: 'fixed z-50 inset-0 p-12 bg-gray-900/50 flex justify-center items-center ',
+  formBody: 'w-full h-full flex flex-col gap-4 min-h-[400px] justify-between ',
+  editor:
+    'border rounded-md py-2 px-3  transition-shadow focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 dark:text-dark-100',
+  submitButton:
+    'bg-green-500 text-white border-none rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-600',
+  formContainerOpen:
+    'bg-white dark:bg-gray-900 p-6 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg w-full max-w-3xl overflow-y-auto ',
+  openFormButtonOpen: 'self-end hidden',
+  openFormButtonClosed:
+    'h-full bg-primary-500 text-white rounded-md hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600',
 }
 
 export const PostComments = ({
@@ -292,7 +318,7 @@ export const PostComments = ({
   }
 
   return (
-    <div className="flex flex-col gap-4 space-y-4 rounded-lg bg-white p-4 shadow-md transition-colors dark:bg-gray-900">
+    <>
       <NewPostForm
         editorId={`post_comment${groupId}`}
         description={comment}
@@ -306,49 +332,42 @@ export const PostComments = ({
         title={''}
         itemType={'comment'}
         actionType={'new'}
-        classes={{
-          rootOpen: 'fixed z-50 inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center',
-          formBody: 'w-full h-full flex flex-col gap-4',
-          editor: 'border rounded py-1 px-2 bg-white dark:bg-gray-800',
-          submitButton: 'bg-green-500 text-white border-none rounded hover:bg-green-600',
-          formContainerOpen:
-            'bg-white dark:bg-gray-800 p-4 border border-gray-300 dark:border-gray-700 rounded shadow-lg w-full max-w-3xl',
-          openFormButtonOpen: 'bg-primary-500 text-white opacity-0 hover:bg-primary-600',
-        }}
-        submitButtonText={t('button.comment')}
-        placeholder={t('placeholder.comment')}
-        openFormButtonText={t('button.comment')}
+        classes={NewPostModal}
+        submitButtonText={t('button.comment') || 'missing-text'}
+        placeholder={t('placeholder.comment') || 'missing-text'}
+        openFormButtonText={t('button.comment') || 'missing-text'}
       />
 
-      {sortedCommentsData.map((c, i) => (
+      {sortedCommentsData.map((comment, i) => (
         <motion.div
           key={i}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="rounded-lg bg-white p-4 shadow-sm transition-colors dark:bg-gray-800"
+          className="mt-4 rounded-lg bg-white p-4 shadow-sm transition-colors dark:bg-gray-800"
         >
-          <div key={c.id} className="flex flex-col">
-            <div
-              className={`rounded p-4 ${
-                commentIsConfirmed(c.id) || commentsMap[c?.id]?.isSaving
-                  ? 'border border-green-400 bg-green-100 dark:bg-green-900'
-                  : 'border border-red-400 bg-red-100 dark:bg-red-900'
-              }`}
-            >
-              {c && (
+          <div key={comment.id} className="flex flex-col gap-2">
+            <div className={`rounded p-2`}>
+              {comment && (
                 <div
-                  className={`${commentsMap[c?.id]?.isEditing ? 'min-h-[150px] rounded border border-solid pl-4' : ''}`}
+                  className={`${
+                    commentsMap[comment?.id]?.isEditing
+                      ? 'min-h-[150px] rounded border border-solid pl-4'
+                      : 'flex flex-col gap-2'
+                  }`}
                 >
-                  <Editor
-                    editorRef={commentEditorRef}
-                    holder={'comment' + '_' + c?.id}
-                    readOnly={!commentsMap[c?.id]?.isEditing}
-                    onChange={val => setOnEditCommentContent(c, val)}
-                    placeholder={t('placeholder.enterComment') as string}
-                    data={c}
-                  />
-                  {(identityCommitment || canDelete) && <CommentActions comment={c} canDelete={canDelete} />}
+                  {commentsMap[comment?.id]?.isEditing && (
+                    <Editor
+                      editorRef={commentEditorRef}
+                      holder={'comment' + '_' + comment?.id}
+                      readOnly={!commentsMap[comment?.id]?.isEditing}
+                      onChange={val => setOnEditCommentContent(comment, val)}
+                      placeholder={t('placeholder.enterComment') as string}
+                      data={comment}
+                    />
+                  )}
+                  {!commentsMap[comment?.id]?.isEditing && <EditorJsRenderer data={comment} />}
+                  {(identityCommitment || canDelete) && <CommentActions comment={comment} canDelete={canDelete} />}
                 </div>
               )}
             </div>
@@ -356,17 +375,17 @@ export const PostComments = ({
               <div
                 className="flex gap-4"
                 style={{
-                  visibility: commentIsConfirmed(c.id) ? 'visible' : 'hidden',
+                  visibility: commentIsConfirmed(comment.id) ? 'visible' : 'hidden',
                 }}
               >
                 <p className="inline-block text-sm">
-                  🕛 {c?.time ? formatDistanceToNow(new Date(c?.time).getTime()) : '-'}
+                  🕛 {comment?.time ? formatDistanceToNow(new Date(comment?.time).getTime()) : '-'}
                 </p>
               </div>
             </div>
           </div>
         </motion.div>
       ))}
-    </div>
+    </>
   )
 }

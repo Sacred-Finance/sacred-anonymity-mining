@@ -13,24 +13,24 @@ export const CommunityCardFooter = () => {
   if (!community) return null
 
   return (
-    <div className="flex h-9 items-center justify-between space-x-2 rounded-b-lg p-2 group-hover:z-10">
+    <div className="flex h-10 items-center justify-between space-x-2 rounded-b-lg py-2 group-hover:z-10">
       <RemoveGroup groupId={community.id} hidden={false} />
 
       <div className="flex items-center gap-4 space-x-2 rounded">
         <p
-          className="flex items-center gap-1 rounded bg-gray-200 p-2 text-sm hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
+          className="flex items-center gap-1 rounded bg-gray-200 p-1 text-sm hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
           title={'users'}
         >
           {userCount ?? 0} <UserIcon className="h-full w-4" />
         </p>
         <p
-          className="flex items-center gap-1 rounded bg-gray-200 p-2 text-sm hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
+          className="flex items-center gap-1 rounded bg-gray-200 p-1 text-sm hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
           title={'posts'}
         >
           {posts.length} <BookOpenIcon className="h-full w-4" />
         </p>
 
-        <div className="flex items-center rounded p-2 hover:bg-gray-300 dark:hover:bg-gray-600">
+        <div className="flex items-center   rounded hover:bg-gray-300 dark:hover:bg-gray-600">
           <Image
             title={`chain ${community.chainId} ${supportedChains[community.chainId].name}`}
             src={chainLogos[community.chainId]}

@@ -63,7 +63,6 @@ export function EditGroup({ group }: EditGroupProps) {
       })
   }
 
-  const previousImage = useValidatedImage(group.groupDetails.bannerCID)
   // The useEffect that handles the initial setup
   useEffect(() => {
     if (group.groupDetails.bannerCID) fetchImage(group.groupDetails.bannerCID, 'banner')
@@ -90,7 +89,8 @@ export function EditGroup({ group }: EditGroupProps) {
   }
 
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setGroupDescriptionState(e.target.value)
+
+      setGroupDescriptionState(e.target.value)
   }
 
   const handleTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {

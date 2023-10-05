@@ -98,7 +98,7 @@ const CreatePollUI = ({ groupId }: CreatePollUIProps) => {
           <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden outline-none focus:outline-none">
             <div className="relative   w-[70%] max-w-6xl">
               {/*content*/}
-              <div className="relative flex w-full flex-col rounded border-0 bg-white shadow-lg outline-none focus:outline-none">
+              <div className="relative flex w-full flex-col rounded border-0 bg-white shadow-lg outline-none focus:outline-none dark:bg-gray-800">
                 {/*header*/}
                 <div className="flex items-start justify-between rounded-t border-b border-solid border-slate-200 p-5">
                   <h3 className="text-3xl font-semibold">Create Poll</h3>
@@ -114,27 +114,32 @@ const CreatePollUI = ({ groupId }: CreatePollUIProps) => {
                 {/*body*/}
                 <div className="relative flex flex-col gap-4 p-6">
                   {/* PollType */}
-                  <div className="justify-left flex">
+                  <div className="justify-left flex gap-4">
                     {pollTypes.map((i, index) => (
-                      <div key={`${index}`} className="  inline-block min-h-[1.5rem] pl-[1.5rem]">
+                      <div key={index} className="flex gap-2">
                         <input
                           className="checked:border-primary checked:after:border-primary checked:after:bg-primary checked:focus:border-primary dark:checked:border-primary dark:checked:after:border-primary dark:checked:after:bg-primary dark:checked:focus:border-primary relative float-left  h-5 w-5 appearance-none rounded-full border-2 border-solid border-neutral-300 before:pointer-events-none before:absolute before:h-4 before:w-4 before:scale-0 before:rounded-full before:bg-transparent before:opacity-0 before:shadow-[0px_0px_0px_13px_transparent] before:content-[''] after:absolute after:z-[1] after:block after:h-4 after:w-4 after:rounded-full after:content-[''] checked:before:opacity-[0.16] checked:after:absolute checked:after:left-1/2 checked:after:top-1/2 checked:after:h-[0.625rem] checked:after:w-[0.625rem] checked:after:rounded-full checked:after:content-[''] checked:after:[transform:translate(-50%,-50%)] hover:cursor-pointer hover:before:opacity-[0.04] hover:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:shadow-none focus:outline-none focus:ring-0 focus:before:scale-100 focus:before:opacity-[0.12] focus:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:before:transition-[box-shadow_0.2s,transform_0.2s] checked:focus:before:scale-100 checked:focus:before:shadow-[0px_0px_0px_13px_#3b71ca] checked:focus:before:transition-[box-shadow_0.2s,transform_0.2s] dark:border-neutral-600 dark:focus:before:shadow-[0px_0px_0px_13px_rgba(255,255,255,0.4)] dark:checked:focus:before:shadow-[0px_0px_0px_13px_#3b71ca]"
                           type="radio"
                           name={`POLL_TYPE`}
                           checked={i.value === pollType}
                           onChange={() => setPollType(i.value)}
-                          id={`inlineRadio${i}`}
+                          id={`${i.value}`}
                           value={i.value}
                         />
-                        <label className=" inline-block pl-[0.15rem] hover:cursor-pointer">{i.label}</label>
+                        <label htmlFor={`${i.value}`} className="inline-block pl-[0.15rem] hover:cursor-pointer">
+                          {i.label}
+                        </label>
                       </div>
                     ))}
                   </div>
 
                   {/* Title */}
-                  <div className="flex w-full flex-col gap-4">
-                    <div className="text-md">Title (Max 60)</div>
+                  <div className="flex w-full flex-col gap-2">
+                    <label htmlFor={'title'} className="text-md">
+                      Title (Max 60)
+                    </label>
                     <input
+                      id={'title'}
                       className={`${clsx(classes.input)}`}
                       placeholder={'Poll Title'}
                       type="text"
@@ -143,11 +148,15 @@ const CreatePollUI = ({ groupId }: CreatePollUIProps) => {
                     />
                   </div>
 
-                  <div>
+                  <div className="flex w-full flex-col gap-2">
+                    <label htmlFor={'content'} className="text-md">
+                      Content
+                    </label>
                     <Editor
                       divProps={{
-                        className: clsx('z-50',),
+                        className: clsx('z-50'),
                       }}
+                      id={'content'}
                       data={description}
                       // editorRef={editorReference}
                       onChange={setDescription}
@@ -186,10 +195,11 @@ const CreatePollUI = ({ groupId }: CreatePollUIProps) => {
                   {/* Options */}
                   <div className="flex w-full flex-col gap-4">
                     <div className="text-md">Options (Minimum 2, Maximum 10)</div>
-                    <div className="gap-4">
+                    <div className="flex flex-col gap-4">
                       {options.map((option, index) => (
-                        <div className="flex items-center" key={index}>
+                        <div className="flex items-center gap-2" key={index}>
                           <input
+                            tabIndex={index}
                             className={`${clsx(classes.input)}`}
                             placeholder={'Option'}
                             type="text"
@@ -201,33 +211,35 @@ const CreatePollUI = ({ groupId }: CreatePollUIProps) => {
                             }}
                           />
 
-                          <div className="">
-                            <button
-                              onClick={() => {
-                                const newOptions = [...options]
-                                newOptions.splice(index, 1)
-                                setOptions(newOptions)
-                              }}
-                              disabled={options.length <= 2}
-                              className="border-pink-500   rounded border px-2 py-2 text-xs font-bold uppercase text-red-500 outline-none transition-all duration-150 ease-linear hover:bg-red-500 hover:text-white focus:outline-none active:bg-red-600"
-                              type="button"
-                            >
-                              <TrashIcon width={20} />
-                            </button>
+                          <button
+                            onClick={() => {
+                              const newOptions = [...options]
+                              newOptions.splice(index, 1)
+                              setOptions(newOptions)
+                            }}
+                            disabled={options.length <= 2}
+                            className="border-pink-500 rounded border  px-2 py-2 text-xs font-bold uppercase text-red-500 outline-none transition-all duration-150 ease-linear hover:bg-red-500 hover:text-white focus:outline-none active:bg-red-600 disabled:cursor-not-allowed disabled:opacity-25"
+                            type="button"
+                          >
+                            <TrashIcon width={20} />
+                          </button>
 
-                            <button
-                              onClick={() => {
-                                const newOptions = [...options]
-                                newOptions.push('')
-                                setOptions(newOptions)
-                              }}
-                              disabled={options.length >= 10 || index !== options.length - 1}
-                              className="border-pink-500   rounded border px-2 py-2 text-xs font-bold uppercase text-gray-500 outline-none transition-all duration-150 ease-linear hover:bg-gray-500 hover:text-white focus:outline-none active:bg-gray-600"
-                              type="button"
-                            >
-                              <PlusIcon width={20} />
-                            </button>
-                          </div>
+                          <button
+                            onClick={() => {
+                              const newOptions = [...options]
+                              newOptions.push('')
+                              setOptions(newOptions)
+                            }}
+                            disabled={options.length >= 10 || index !== options.length - 1}
+                            className={clsx(
+                              'border-pink-500  rounded border px-2 py-2 text-xs font-bold uppercase text-gray-500 outline-none transition-all duration-150 ease-linear hover:bg-gray-500 hover:text-white focus:outline-none active:bg-gray-600',
+                              'mr-1 last:mr-0',
+                              options.length >= 10 || index !== options.length - 1 ? 'hidden' : ''
+                            )}
+                            type="button"
+                          >
+                            <PlusIcon width={20} />
+                          </button>
                         </div>
                       ))}
                     </div>

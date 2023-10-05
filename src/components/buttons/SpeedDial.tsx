@@ -1,14 +1,16 @@
 import React, { ReactNode, useState } from 'react'
 import { motion } from 'framer-motion'
 import { TbGridDots } from 'react-icons/tb'
+import { Bars2Icon } from '@heroicons/react/20/solid'
+import clsx from 'clsx'
 
-interface ActionItem {
+export interface ActionItem {
   icon: ReactNode
   label: ReactNode // This can be an SVG or any other visual React component
   onClick: () => void
 }
 
-interface SpeedDialProps {
+export interface SpeedDialProps {
   actions: (ActionItem | false)[]
   onHover?: (e) => React.MouseEvent<HTMLButtonElement, MouseEvent>
   onOpen?: () => void
@@ -28,18 +30,26 @@ export const SpeedDial: React.FC<SpeedDialProps> = ({ actions, onHover, onOpen }
         aria-controls="speed-dial-menu-square"
         aria-expanded={isOpen}
         onClick={() => {
-          setIsOpen(!isOpen)
+          if (actions.length) setIsOpen(!isOpen)
           onOpen && onOpen()
         }}
       >
-        <TbGridDots className="h-8 w-8 p-1 text-gray-400 transition-transform duration-300 group-hover:text-primary-400" />
+        {isOpen ? (
+          <Bars2Icon className={'h-6 w-6 text-gray-700 dark:text-gray-300 dark:group-hover:text-white'} />
+        ) : (
+          <TbGridDots className={'h-6 w-6 text-gray-700 dark:text-gray-300 dark:group-hover:text-white'} />
+        )}
         <span className="sr-only">Open actions menu</span>
       </motion.button>
+
       <div
         id="speed-dial-menu-square"
-        className={`flex flex-col items-center ${
-          isOpen ? '' : 'hidden'
-        } absolute right-0 mb-4 space-y-2 rounded-lg bg-white p-4 shadow-lg dark:bg-gray-800`}
+        className={clsx(
+          `flex flex-col items-center ${
+            isOpen ? '' : 'hidden'
+          } absolute right-0 mb-4 space-y-2 rounded-lg bg-black/50 p-4 shadow-lg `,
+          !actions.length && 'hidden'
+        )}
       >
         {actions.map((action, index) => (
           <React.Fragment key={index}>

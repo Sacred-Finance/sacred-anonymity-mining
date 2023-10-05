@@ -1,60 +1,4 @@
-import { Tab } from '@headlessui/react'
 import React from 'react'
-import clsx from 'clsx'
-
-const tabClass = selected => {
-  console.log('selected', selected)
-  return clsx(
-    'focus:outline-none  rounded-full select:none ring-0 select:ring-none',
-    selected ? 'text-primary-400' : 'text-gray-500'
-  )
-}
-
-type TabTypes = 'community' | 'gas' | 'chat'
-
-interface TabProperties {
-  hidden: boolean
-  onClick: () => void
-  panel: React.ReactNode
-  defaultIndex?: number
-}
-
-interface CommunityActionTabsProps {
-  tabs: {
-    [key in TabTypes]?: TabProperties
-  }
-  defaultTab?: TabTypes
-}
-
-const hiddenOrUndefined = (tab: TabProperties) => tab?.hidden || !tab
-
-export const CommunityActionTabs = (props: CommunityActionTabsProps) => {
-  const panels = Object.keys(props.tabs).map((tab, index) => {
-    if (hiddenOrUndefined(props.tabs[tab as TabTypes])) {
-      return null
-    }
-    return <Tab.Panel key={tab}>{props.tabs[tab as TabTypes].panel}</Tab.Panel>
-  })
-
-  const tabs = Object.keys(props.tabs).map(tab => {
-    if (hiddenOrUndefined(props.tabs[tab as TabTypes])) {
-      return null
-    }
-    return (
-      <Tab key={tab} className={({ selected }) => tabClass(selected)} onClick={props.tabs[tab as TabTypes].onClick}>
-        {TabIcons[tab as TabTypes]}
-      </Tab>
-    )
-  })
-
-  const defaultIndex = Object.keys(props.tabs).findIndex(tab => tab === props.defaultTab)
-  return (
-    <Tab.Group defaultIndex={defaultIndex}>
-      <Tab.List className={'flex items-center gap-2 px-4'}>{tabs}</Tab.List>
-      <Tab.Panels>{panels}</Tab.Panels>
-    </Tab.Group>
-  )
-}
 
 const BaseSVG = ({ children, ...props }) => {
   return (
@@ -72,9 +16,16 @@ const BaseSVG = ({ children, ...props }) => {
   )
 }
 
-const CommunityIcon = () => {
+export const CommunityIcon = ({ ...props }) => {
   return (
-    <BaseSVG xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+    <BaseSVG
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      stroke="currentColor"
+      {...props}
+    >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -84,21 +35,53 @@ const CommunityIcon = () => {
   )
 }
 
-const ChatIcon = () => {
+export const ChatIcon = ({ ...props }) => {
   return (
-    <BaseSVG>
+    <BaseSVG {...props}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
-        d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"
+        d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"
       />
     </BaseSVG>
   )
 }
 
-const GasPumpIcon = () => {
+export const PollIcon = ({ ...props }) => {
   return (
-    <BaseSVG viewBox="0 0 460 460">
+    <BaseSVG {...props}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.148 2.148A12.061 12.061 0 0116.5 7.605"
+      />
+    </BaseSVG>
+  )
+}
+
+export const InfoIcon = ({ ...props }) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth="1.5"
+      stroke="currentColor"
+      className="h-6 w-6"
+      {...props}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"
+      />
+    </svg>
+  )
+}
+
+export const GasPumpIcon = ({ ...props }) => {
+  return (
+    <BaseSVG viewBox="0 0 460 460" {...props}>
       <g>
         <path
           d="M400.927,348.367c-1.811-17.321-9.423-36.684-22.628-57.546c-22.174-35.033-34.9-77.122-38.064-125.559l34.164-21.773

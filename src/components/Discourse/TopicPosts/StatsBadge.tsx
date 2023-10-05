@@ -14,7 +14,7 @@ export const StatsBadge = memo(
     icon?: any
     pluralizeLabel?: boolean
   }) => (
-    <div className="flex h-full cursor-auto items-center space-x-2 rounded-md bg-white p-1 px-2 text-sm shadow-sm dark:bg-gray-800">
+    <div className="flex h-full cursor-auto items-center space-x-2 rounded-md bg-white p-1 px-2 text-gray-900 dark:text-white text-sm shadow-sm dark:bg-gray-800">
       {label && <span>{_.startCase(pluralizeLabel ? pluralize(label, value) : label)}</span>}
       {icon}
       {value && <span>{value}</span>}

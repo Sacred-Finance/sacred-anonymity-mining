@@ -19,9 +19,7 @@ export const Logo = ({ invertTheme = false }) => {
     />
   )
 }
-export const LogoDynamic = (props: any) => {
-  return <DynamicLogo {...props} />
-}
+
 export const MobileLogo = (props: any) => {
   return <Image unoptimized src={mobileLogo} className={'w-8'} alt={logo} {...props} />
 }
@@ -40,7 +38,7 @@ const logoAnimation = {
 }
 const duration = 0.5
 export const DynamicLogo = ({ purple = '#721BEF', black = '#000', className }) => {
-  const { resolvedTheme, setTheme } = useTheme()
+  const { resolvedTheme } = useTheme()
 
   if (resolvedTheme === 'dark') {
     black = '#fff'
@@ -65,6 +63,7 @@ export const DynamicLogo = ({ purple = '#721BEF', black = '#000', className }) =
           fill="url(#paint0_linear_2713_1307)"
           {...logoAnimation}
         />
+
         <g clipPath="url(#clip1_2713_1307)">
           <motion.path
             initial={{ opacity: 0 }}

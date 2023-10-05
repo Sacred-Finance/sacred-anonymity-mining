@@ -32,7 +32,7 @@ export const RenderPost = ({ post, postRefs, setPostsInView, controls, setTarget
       className={
       clsx(
           depth === 0 ? 'ml-0' : 'ml-8',
-          "flex flex-col gap-8 rounded-lg border border-gray-300 bg-white p-6 shadow-md transition-colors duration-300 hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-900 dark:hover:bg-gray-800"
+          "flex flex-col gap-8 rounded-lg border border-gray-300 bg-white p-6 shadow-md transition-colors duration-300 hover:bg-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:hover:bg-gray-900/80"
         )
       }
     >

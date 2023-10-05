@@ -66,17 +66,6 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         exit={{ x: -100 }}
         className={'sticky top-0 z-10 flex h-auto w-full flex-col dark:bg-gray-800 '}
       >
-        {/*<div*/}
-        {/*  className={clsx(*/}
-        {/*    'flex w-full items-center justify-between rounded px-4 py-2 hover:bg-gray-300 dark:hover:bg-gray-700',*/}
-        {/*    isMobile ? 'block' : 'hidden'*/}
-        {/*  )}*/}
-        {/*>*/}
-        {/*  <button onClick={() => setIsOpen(!isOpen)} className="rounded  px-4 py-2 hover:bg-gray-300">*/}
-        {/*    {isOpen ? 'Close' : 'Menu'}*/}
-        {/*  </button>*/}
-        {/*</div>*/}
-
         <div className="flex w-full flex-col items-center">
           <ul className=" flex flex-col items-center gap-2 py-4 text-primary-600 ">
             <button onClick={() => setIsOpen(!isOpen)} className={clsx('flex w-full items-center justify-center')}>
@@ -90,7 +79,6 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             </button>
 
             <SideItem title={'home'} href={'/'} isOpen={isOpen} icon={<HomeIcon />} />
-            {/*<BugModal />*/}
             <SideItem title={'New Community'} href={'/create-group'} isOpen={isOpen} icon={<PlusCircleIcon />} />
             <Avatar user={user?.identityCommitment?.toString()} />
           </ul>

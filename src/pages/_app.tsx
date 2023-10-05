@@ -38,7 +38,7 @@ function App({ Component, pageProps }: AppProps) {
               }),
           }}
         >
-          <ThemeProvider enableSystem={true} attribute={'class'} disableTransitionOnChange defaultTheme={'dark'}>
+          <ThemeProvider enableSystem={true} attribute={'class'}  defaultTheme={'dark'}>
             <StandardLayout>
               <Component {...pageProps} />
             </StandardLayout>

@@ -185,15 +185,19 @@ function CreateGroupFormUI({ onCreate }) {
         )))
 
   return (
-    <div className={clsx(' w-full max-w-screen-xl space-y-6 sm:p-8 md:p-24')}>
+    <div
+      className={clsx(
+        'w-full max-w-screen-xl space-y-6 rounded-lg text-primary-600 shadow dark:bg-gray-900 dark:text-gray-200 sm:p-8 md:p-12 '
+      )}
+    >
       <div className="flex items-center justify-between py-4">
-        <h1 className="text-2xl font-semibold text-gray-700">{t('createCommunity')}</h1>
+        <h1 className="text-2xl font-semibold">{t('createCommunity')}</h1>
       </div>
 
       <div className="flex flex-col space-y-4">
-        <label className="text-lg text-gray-700">{t('placeholder.communityName')}</label>
+        <label className="text-lg ">{t('placeholder.communityName')}</label>
         <input
-          className="rounded border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
+          className="form-input rounded border border-gray-400 px-3 py-2 focus:border-primary-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
           placeholder={'An awesome community name'}
           type="text"
           value={groupName}
@@ -201,12 +205,15 @@ function CreateGroupFormUI({ onCreate }) {
         />
       </div>
       <div className="flex flex-col space-y-4">
-        <label className="text-lg text-gray-700">{t('placeholder.communityTags')}</label>
+        <label className="text-lg">{t('placeholder.communityTags')}</label>
         <div className={'flex gap-4'}>
           {tags.map((tag, index) => (
             <div key={index}>
               {tag.trim() && (
-                <span key={index} className="rounded border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none">
+                <span
+                  key={index}
+                  className="rounded border border-gray-400 px-3 py-2 dark:border-gray-600 dark:bg-gray-700"
+                >
                   {tag}
                 </span>
               )}
@@ -214,7 +221,7 @@ function CreateGroupFormUI({ onCreate }) {
           ))}
         </div>
         <input
-          className="rounded border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
+          className="rounded border border-gray-400 px-3 py-2 focus:border-primary-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
           placeholder={'tag1, tag2, tag3'}
           type="text"
           value={tags}
@@ -222,16 +229,16 @@ function CreateGroupFormUI({ onCreate }) {
         />
       </div>
       <div className="flex flex-col space-y-4">
-        <label className="text-lg text-gray-700">{t('placeholder.communityDescription')}</label>
+        <label className="text-lg ">{t('placeholder.communityDescription')}</label>
         <textarea
-          className="h-20 rounded border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
+          className="h-20 rounded border border-gray-400 px-3 py-2 focus:border-primary-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
           placeholder={t('placeholder.communityDescriptionContent') || ''}
           value={groupDescription}
           onChange={handleDescriptionChange}
         />
       </div>
 
-      <div className={'flex items-start gap-4'}>
+      <div className={'flex items-start gap-4 dark:text-primary-500 '}>
         <PictureUpload
           uploadedImageUrl={bannerUrl}
           displayName={t('banner')}
@@ -249,10 +256,10 @@ function CreateGroupFormUI({ onCreate }) {
       <div className="flex items-center justify-between space-x-4">
         <div className="flex items-center space-x-4">
           <ToolTip toolTip={t('toolTip.tokenGating.message') || ''}>
-            <QuestionMarkCircleIcon className="h-6 w-6 text-gray-700" />
+            <QuestionMarkCircleIcon className="h-6 w-6" />
           </ToolTip>
 
-          <label htmlFor={'isChecked'} className="text-lg font-semibold text-gray-700">
+          <label htmlFor={'isChecked'} className="text-lg font-semibold">
             {t('toolTip.tokenGating.title')}
           </label>
 
@@ -276,7 +283,7 @@ function CreateGroupFormUI({ onCreate }) {
           <div className="group relative w-60">
             <button
               disabled={!reqMandatory}
-              className="flex w-full items-center justify-between rounded border border-gray-300 bg-white px-2 py-1 text-gray-700 focus:outline-none"
+              className="flex w-full items-center justify-between rounded border border-gray-400 bg-white px-2 py-1 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             >
               {selectedChain.name}
               <ChevronRightIcon
@@ -285,12 +292,12 @@ function CreateGroupFormUI({ onCreate }) {
               />
             </button>
 
-            <div className="absolute left-0 z-50 hidden w-48 overflow-hidden rounded bg-white shadow-lg ring-1 ring-black ring-opacity-5 group-hover:block">
+            <div className="absolute left-0 z-50  hidden w-48 overflow-hidden rounded border border-gray-400 bg-white shadow-lg ring-1 ring-black ring-opacity-5 group-hover:block dark:border-gray-600 dark:bg-gray-700">
               <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
                 {supportedChainsArray.map((k, i) => (
                   <button
                     key={k.id}
-                    className="w-full px-3 py-2 text-left text-gray-700 hover:bg-gray-200 focus:outline-none"
+                    className="w-full border border-gray-400 px-3 py-2 text-left hover:bg-gray-200 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
                     onClick={e => {
                       selectChain(k)
                       formik.setFieldValue('tokenRequirements', [initialValues])
@@ -318,7 +325,7 @@ function CreateGroupFormUI({ onCreate }) {
           <motion.form onSubmit={submit}>
             {formik.values.tokenRequirements.length === 0 && (
               <div className="flex flex-col items-center justify-center space-y-4 rounded border border-gray-200 bg-gray-100 p-4">
-                <p className="text-sm font-semibold text-gray-700">{t('placeholder.noTokenRequirements')}</p>
+                <p className="text-sm font-semibold ">{t('placeholder.noTokenRequirements')}</p>
               </div>
             )}
 
@@ -336,11 +343,11 @@ function CreateGroupFormUI({ onCreate }) {
                       exit={{ opacity: 0, y: 20, overflowY: 'hidden' }}
                       transition={{ duration: 0.5 }}
                     >
-                      <p className="pt-2 font-bold text-gray-700">{i + 1}.</p>
+                      <p className="pt-2 font-bold ">{i + 1}.</p>
                       <div className="relative flex-grow">
                         <input
                           disabled={!reqMandatory}
-                          className="w-full rounded border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
+                          className="w-full rounded  border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
                           value={r.tokenAddress}
                           onChange={e => handleReqInput(e, i)}
                           name={`tokenRequirements.${i}.tokenAddress`}
@@ -355,7 +362,7 @@ function CreateGroupFormUI({ onCreate }) {
                       <div className="w-32">
                         <input
                           disabled={!reqMandatory}
-                          className="w-full rounded border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
+                          className="dark:ext-gray-700 w-full  rounded border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
                           type="number"
                           min={0}
                           defaultValue={r.minAmount}
@@ -388,7 +395,6 @@ function CreateGroupFormUI({ onCreate }) {
           </motion.form>
         </AnimatePresence>
       </FormikProvider>
-
       <div className={'flex flex-col justify-between space-x-0 py-2 md:flex-row md:space-x-2 md:py-4'}>
         <Link
           href="/"

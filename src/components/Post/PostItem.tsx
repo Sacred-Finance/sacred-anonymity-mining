@@ -7,8 +7,8 @@ import { Identity } from '@semaphore-protocol/identity'
 import { createNote } from '@/lib/utils'
 import { BigNumber } from 'ethers'
 import { PollUI } from '@components/PollIUI'
-import { ContentActions } from '@components/Post/contentActions'
-import { PostTitle } from '@components/Post/postTitle'
+import { ContentActions } from '@components/Post/ContentActions'
+import { PostTitle } from '@components/Post/PostTitle'
 import { ContentType, User } from '@/lib/model'
 import { useContentManagement } from '@/hooks/useContentManagement'
 import { useTranslation } from 'react-i18next'
@@ -109,7 +109,7 @@ export const PostItem = ({ post }: { post: Item }) => {
   const isPostPage = !isNaN(postId)
 
   return (
-    <div className=" mt-6 rounded-lg bg-white p-6 shadow-md transition-colors dark:bg-gray-900">
+    <div className="min-w-[250px] rounded-lg bg-white p-6 shadow-md transition-colors dark:bg-gray-900">
       <div>
         {post.kind === ContentType.POLL && <PollUI id={post.id} groupId={post.groupId} post={post} />}
 
@@ -165,7 +165,7 @@ export const PostItem = ({ post }: { post: Item }) => {
               setIsContentEditing={setIsContentEditing}
               onClickCancel={() => setIsContentEditing(false)}
               isLoading={isLoading}
-              hidden={isPostPage}
+              hidden={false}
             />
             <CommentCount post={post} isContentEditing={isContentEditing} />
           </div>

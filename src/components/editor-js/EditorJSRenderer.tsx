@@ -23,7 +23,7 @@ const EditorJsRenderer = ({ data, onlyPreview = false, isHtml = false, className
 
   return (
     <div
-      className={clsx('dark:prose-dark prose prose-lg max-w-full', onlyPreview && 'prose-sm line-clamp-4', className)}
+      className={clsx('dark:text-white prose prose-lg max-w-full select:text-primary-400', onlyPreview && 'prose-sm line-clamp-4', className)}
     >
       {html.map((item, index) => {
         if (typeof item === 'string') {

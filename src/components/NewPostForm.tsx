@@ -245,23 +245,22 @@ export const NewPostForm = ({
           )}
         >
           <div className={clsx(c?.formBody)}>
+            <div className="text-md">Title (Max 60)</div>
+            {itemType === 'post' && title !== false && (
+              <input
+                disabled={isPreview}
+                className={clsx(
+                  'w-full rounded border-gray-200 p-1 text-base transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-gray-100'
+                )}
+                ref={inputRef}
+                placeholder={
+                  t(itemType !== 'post' ? 'placeholder.enterComment' : 'placeholder.enterPostTitle') as string
+                }
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+              />
+            )}
             <Tab.Group>
-              {/*<EditorTabs setIsPreview={setIsPreview} isPreview={isPreview} disabled={!description} />*/}
-              <div className="text-md">Title (Max 60)</div>
-              {itemType === 'post' && title !== false && (
-                <input
-                  disabled={isPreview}
-                  className={clsx(
-                    'w-full rounded border-gray-200 p-1 text-base transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-gray-100'
-                  )}
-                  ref={inputRef}
-                  placeholder={
-                    t(itemType !== 'post' ? 'placeholder.enterComment' : 'placeholder.enterPostTitle') as string
-                  }
-                  value={title}
-                  onChange={e => setTitle(e.target.value)}
-                />
-              )}
               <Tab.Panels>
                 <div className="text-md">Content</div>
                 <ContentSection
@@ -279,6 +278,7 @@ export const NewPostForm = ({
                 />
               </Tab.Panels>
             </Tab.Group>
+
             {error && <p className={clsx('text-red-500')}>{error}</p>}
             <FormButtons
               disableSubmit={disableSubmit}
@@ -314,7 +314,7 @@ const FormButtons = ({
       className={clsx(c?.cancelButton, 'bg-red-400 text-white hover:bg-opacity-80 hover:text-white')}
       onClick={handleClose}
     >
-      {description?.blocks?.length > 0 ? t('button.clearForm') : t('button.closeForm')}
+      {t('button.closeForm')}
     </CancelButton>
     <PrimaryButton
       className={clsx(c?.submitButton, 'hover:bg-opacity-80')}

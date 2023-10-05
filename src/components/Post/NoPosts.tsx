@@ -10,9 +10,6 @@ export const NoPosts = ({ onClick, children }: { onClick?: () => void; children?
   return (
     <div
       onClick={onClick}
-      className={
-        'font-bold flex h-96 select-none w-full flex-col items-center justify-center rounded border p-2 text-center text-xl '
-      }
     >
       {t('noPostsFound')}
       {children}

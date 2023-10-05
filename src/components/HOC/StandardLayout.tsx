@@ -11,11 +11,10 @@ import useSWR, { preload } from 'swr'
 
 const fetcher = url =>
   fetch(url).then(res => {
-    console.log('fetching data')
     return res.json()
   })
 
-preload('/api/data', fetcher)
+// preload('/api/data', fetcher)
 
 export default function StandardLayout({ children }) {
   const pageRef = useRef(null)

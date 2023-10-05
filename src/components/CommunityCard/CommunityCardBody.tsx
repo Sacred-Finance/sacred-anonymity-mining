@@ -8,10 +8,8 @@ import { CommunityLogo } from '@components/CommunityCard/CommunityCardHeader'
 export const CommunityCardBody: React.FC = () => {
   const community = useLocalCommunity()
 
-  const isBanner = community?.variant === 'banner'
   const tags = community?.groupDetails?.tags || []
 
-  const chainId = community?.chainId
   const requirements = community?.requirements || []
 
   return (
@@ -19,7 +17,7 @@ export const CommunityCardBody: React.FC = () => {
       <CommunityLogo />
       {tags.length > 0 && (
         <div className="flex h-fit flex-col space-y-2 border-gray-200 px-2 dark:border-gray-700">
-          <p className="text-lg font-medium dark:text-gray-300">Tags</p>
+          <p className="text-base font-light dark:text-gray-300">Tags</p>
           <div className="flex flex-wrap space-x-2">
             {tags
               .filter(tag => tag !== ethers.constants.HashZero)
@@ -41,7 +39,7 @@ export const CommunityCardBody: React.FC = () => {
       )}
 
       <div className="flex h-fit flex-col space-y-2 px-2">
-        <p className="text-lg font-medium dark:text-gray-300">
+        <p className="text-base font-light dark:text-gray-300">
           {requirements.length > 0 ? 'Requirements' : 'No Requirements'}
         </p>
         {requirements.map(r => (
@@ -53,13 +51,6 @@ export const CommunityCardBody: React.FC = () => {
           </span>
         ))}
       </div>
-
-      {isBanner && (
-        <div className="mt-4 space-y-2">
-          <p className="text-lg font-medium dark:text-gray-300">Community Description</p>
-          <p className="text-sm dark:text-gray-400">{community?.groupDetails?.description}</p>
-        </div>
-      )}
     </div>
   )
 }

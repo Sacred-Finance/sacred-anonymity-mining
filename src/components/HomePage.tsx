@@ -63,46 +63,44 @@ function NoCommunities(props: { groups: Group[]; searchTerm: string }) {
   const router = useRouter()
   return (
     <>
-      {props.groups?.length === 0 && (
-        <div className="col-span-full flex w-full flex-col items-center justify-center space-y-4">
-          <motion.h2
-            layout
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-            className="text-3xl font-semibold dark:text-gray-200 "
-          >
-            Oops, No Results Found
-          </motion.h2>
-          <motion.p
-            layout
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="px-4 text-center text-lg dark:text-gray-300"
-          >
-            <>
-              {' '}
-              {props.searchTerm
-                ? 'We could not find any communities that match your search. Try adjusting your filters or search again with a different term'
-                : 'We could not find any communities at this time. Please try again later'}
-              .
-            </>
-          </motion.p>
-          <motion.button
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="rounded bg-purple-500 px-4 py-2 font-bold text-white shadow dark:bg-purple-700 dark:text-gray-200"
-            onClick={() => {
-              // link to create community page /create
-              router.push('/create-group')
-            }}
-          >
-            Create a new community
-          </motion.button>
-        </div>
-      )}
+      <div className="col-span-full flex w-full flex-col items-center justify-center space-y-4">
+        <motion.h2
+          layout
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="text-3xl font-semibold dark:text-gray-200 "
+        >
+          Oops, No Results Found
+        </motion.h2>
+        <motion.p
+          layout
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="px-4 text-center text-lg dark:text-gray-300"
+        >
+          <>
+            {' '}
+            {props.searchTerm
+              ? 'We could not find any communities that match your search. Try adjusting your filters or search again with a different term'
+              : 'We could not find any communities at this time. Please try again later'}
+            .
+          </>
+        </motion.p>
+        <motion.button
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="rounded bg-purple-500 px-4 py-2 font-bold text-white shadow dark:bg-purple-700 dark:text-gray-200"
+          onClick={() => {
+            // link to create community page /create
+            router.push('/create-group')
+          }}
+        >
+          Create a new community
+        </motion.button>
+      </div>
     </>
   )
 }
@@ -222,10 +220,10 @@ function HomePage({ isAdmin = false, users, communities }: HomeProps) {
   }
 
   return (
-    <div className="flex w-full flex-col items-start border-b-2 border-primary-500 px-1 pb-8 pt-0 text-primary-500 dark:border-primary-600">
+    <div className="flex w-full flex-col  items-start  rounded-lg border-primary-500 p-4  text-primary-500 shadow-md dark:border-primary-600  dark:bg-gray-900 ">
       <Tab.Group selectedIndex={selectedIndex} onChange={setSelectedIndex} vertical={false}>
-        <div className="grid grid-flow-dense gap-4 rounded-lg bg-white p-4 shadow-md dark:bg-gray-900 sm:justify-items-stretch">
-          <div className="flex w-full flex-wrap items-center gap-10 sm:col-span-2 sm:justify-center md:col-span-2 md:justify-start">
+        <div className="grid grid-flow-dense  gap-10 sm:justify-items-stretch">
+          <div className="flex w-full flex-wrap items-center gap-10 sm:col-span-2 sm:justify-center md:col-span-2 md:justify-start ">
             <div className="flex flex-wrap items-center gap-2">
               <div className="flex flex-col gap-1">
                 <small className="font-semibold text-gray-600 dark:text-gray-400">Search</small>
@@ -262,7 +260,7 @@ function HomePage({ isAdmin = false, users, communities }: HomeProps) {
                   transition={{ duration: 0.5 }}
                   className="flex flex-wrap gap-7 sm:justify-stretch"
                 >
-                  <NoCommunities groups={communities} searchTerm={searchTerm} />
+                  {localCommunities.length === 0 && <NoCommunities groups={communities} searchTerm={searchTerm} />}
                   {localCommunities.map(community => (
                     <CommunityCard key={community.groupId} community={community} />
                   ))}
@@ -291,20 +289,20 @@ function HomePage({ isAdmin = false, users, communities }: HomeProps) {
 export const SearchBar = ({ debouncedResults }) => {
   return (
     <>
-      <div className="flex min-w-[200px] items-center rounded border text-primary-600 hover:shadow-md  dark:bg-gray-800 ">
+      <div className="form-input flex min-w-[200px] items-center  rounded hover:shadow-md  dark:bg-gray-800 dark:text-white">
         <div className={'flex justify-center p-3'}>
-          <MagnifyingGlassIcon className="h-6 w-6" />
+          <MagnifyingGlassIcon className="h-6 w-6 text-black dark:text-inherit" />
         </div>
         <input
           id="search"
           name="search"
-          className="col-span-6 flex h-full w-full rounded border-0  bg-transparent outline-0 focus:select-none focus:outline-none  focus:ring-0"
+          className="col-span-6 flex h-full w-full rounded border-0  bg-transparent outline-0 focus:select-none focus:outline-none text-black dark:text-inherit focus:ring-0"
           onChange={debouncedResults}
           type="text"
           placeholder="Explore"
         />
         <button
-          className={'flex justify-center p-3 hover:opacity-75'}
+          className={'flex justify-center p-3 hover:opacity-75 text-black dark:text-inherit'}
           onClick={() => {
             document.getElementById('search').value = ''
             debouncedResults({ target: { value: '' } })
