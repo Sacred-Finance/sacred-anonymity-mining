@@ -8,9 +8,9 @@ interface DropdownProps {
   selected: { key: string; value: any }
 }
 
-const Dropdown = ({ disabled, options, selected, onSelect }: DropdownProps) => {
+const Dropdown = ({ disabled = false, options, selected, onSelect }: DropdownProps) => {
   return (
-    <div>
+    <div className='group'>
       <button
         disabled={disabled}
         className="flex w-full items-center justify-between rounded-md border border-gray-300 bg-white px-2 py-1 text-gray-700 focus:outline-none"
@@ -22,7 +22,7 @@ const Dropdown = ({ disabled, options, selected, onSelect }: DropdownProps) => {
         />
       </button>
 
-      <div className="absolute left-0 z-50 hidden w-48 overflow-hidden rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 group-hover:block">
+      <div className="absolute left-auto z-50 hidden w-48 overflow-hidden rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 group-hover:block">
         <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
           {options.map((k, i) => (
             <button

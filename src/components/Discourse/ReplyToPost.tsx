@@ -8,6 +8,7 @@ import { OutputDataToMarkDown } from '@components/Discourse/OutputDataToMarkDown
 import { useTranslation } from 'react-i18next'
 import EditorJS, { OutputData } from '@editorjs/editorjs'
 import { Topic } from '@components/Discourse/types'
+import { useFetchBalance } from '@/hooks/useFetchBalance'
 
 const ReplyToPost = ({
   post,
@@ -21,10 +22,25 @@ const ReplyToPost = ({
   const { t } = useTranslation()
   const [description, setDescription] = useState<OutputData>(null)
   const editorReference = useRef<EditorJS>()
-
+  const [selectedToReveal, setSelectedToReveal] = useState(0)
+  const { fetchBalance } = useFetchBalance();
   const onSubmit = async () => {
     if (!description) return toast.error(t('error.emptyPost'))
-    const raw = OutputDataToMarkDown(description)
+    let raw = OutputDataToMarkDown(description)
+
+    if (selectedToReveal > 0) {
+      try {
+        const balance = await fetchBalance();
+        if (balance) {
+          const percentageToReveal = balance * selectedToReveal / 100;
+          const toAppend = `\n \n <i>Sacred Bot: User has chosen to reveal ${percentageToReveal} tokens. </i>`;
+          raw = raw + toAppend;
+        }
+      } catch (error) {
+        console.error(error);
+        return;
+      }
+    }
     try {
       const newPost = await axios.post('/api/discourse/postToTopic', {
         topic_id: post.topic_id,
@@ -78,6 +94,12 @@ const ReplyToPost = ({
         openFormButtonClosed: 'self-end mr-3 bg-primary-500',
         root: '!z-50 relative',
         ...formProps?.classes,
+      }}
+      tokenBalanceReveal={{
+        selectedValue: selectedToReveal,
+        onSelected(value) {
+          setSelectedToReveal(value)
+        },
       }}
     />
   )

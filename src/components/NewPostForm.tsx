@@ -6,6 +6,7 @@ import { EyeIcon, PencilIcon } from '@heroicons/react/20/solid'
 import dynamic from 'next/dynamic'
 import clsx from 'clsx'
 import AnonymizeButton from "@components/buttons/AIAnonymiseButton";
+import Dropdown from './buttons/Dropdown/Dropdown'
 
 export interface EditorJsType {
   blocks: {
@@ -13,6 +14,8 @@ export interface EditorJsType {
     data: any
   }[]
 }
+
+const percentageToReveal = [0, 25, 50, 75, 100];
 
 const Editor = dynamic(() => import('./editor-js/Editor'), {
   ssr: false,
@@ -75,6 +78,10 @@ export interface NewPostFormProps {
     formContainerClosed?: string
     input?: string
   }
+  tokenBalanceReveal?: {
+    onSelected: (value: number) => void
+    selectedValue: number
+  }
 }
 
 export const NewPostForm = ({
@@ -99,6 +106,7 @@ export const NewPostForm = ({
   placeholder,
   showButtonWhenFormOpen = false,
   classes: c,
+  tokenBalanceReveal = null
 }: NewPostFormProps) => {
   const { t } = useTranslation()
   const [isPreview, setIsPreview] = useState(false)
@@ -205,14 +213,22 @@ export const NewPostForm = ({
               >
                 {description?.blocks?.length > 0 ? t('button.clearForm') : t('button.closeForm')}
               </CancelButton>
-              <PrimaryButton
-                className={clsx('bg-gray-500/20 hover:bg-gray-500/40', c?.submitButton)}
-                onClick={handleSubmitAction}
-                isLoading={isSubmitting}
-                disabled={isSubmitting}
-              >
-                {submitButtonText}
-              </PrimaryButton>
+              <div className='flex flex-row gap-2 items-center'>
+                {tokenBalanceReveal && <Dropdown
+                  options={percentageToReveal.map((percentage) => ({key: `${percentage}%`, value: percentage}))}
+                  selected={{key: `${tokenBalanceReveal.selectedValue}% Reveal`, value: tokenBalanceReveal?.selectedValue}}
+                  onSelect={(value) => tokenBalanceReveal?.onSelected(value)}
+                  disabled={false}
+                /> }
+                <PrimaryButton
+                  className={clsx('bg-gray-500/20 hover:bg-gray-500/40', c?.submitButton)}
+                  onClick={handleSubmitAction}
+                  isLoading={isSubmitting}
+                  disabled={isSubmitting}
+                >
+                  {submitButtonText}
+                </PrimaryButton>
+              </div>
             </div>
 
             {isSubmitted && <p>Form submitted successfully!</p>}
