@@ -27,7 +27,7 @@ const PostToTopic = ({ topic }: { topic: Topic }) => {
         const balance = await fetchBalance();
         if (balance) {
           const percentageToReveal = balance * selectedToReveal / 100;
-          const toAppend = `\n \n <i>Sacred Bot: User has chosen to reveal ${percentageToReveal} tokens. </i>`;
+          const toAppend = `<br><br><br><i>Sacred Bot: User has chosen to reveal ${percentageToReveal} tokens. </i>`;
           raw = raw + toAppend;
         }
       } catch (error) {
