@@ -1,5 +1,5 @@
 import { ethers, providers } from 'ethers'
-import { erc20dummyABI, forumContract, jsonRPCProvider, supportedChains } from '@/constant/const'
+import { erc20dummyABI, forumContract, getRpcProvider } from '@/constant/const'
 import { setCache } from '@/lib/redis'
 import { getContent, getIpfsHashFromBytes32, parseComment, parsePost, uploadImageToIPFS } from '@/lib/utils'
 import { CommunityDetails, Requirement } from '@/lib/model'
@@ -235,7 +235,7 @@ export const addRequirementDetails = async (community: Group): Promise<Awaited<R
   // get symbol and name of token
   return (await Promise.all(
     community.requirements.map(async requirement => {
-      const provider = new providers.JsonRpcProvider(`${supportedChains[community.chainId].rpcUrls['infura'].http[0]}/${process.env.NEXT_PUBLIC_INFURA_API_KEY}`, community.chainId)
+      const provider = getRpcProvider(community.chainId);
       const token = new ethers.Contract(requirement.tokenAddress, erc20dummyABI, provider)
       let symbol = '';  
       let name = '';

@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { ethers, providers, utils } from 'ethers'
-import { erc20dummyABI, jsonRPCProvider, supportedChains, supportedChainsArray } from '../../constant/const'
+import { erc20dummyABI, getRpcProvider, supportedChains, supportedChainsArray } from '../../constant/const'
 import { FieldArray, FormikProvider, useFormik } from 'formik'
 import { Chain } from 'wagmi'
 import { ToolTip } from '@components/HOC/ToolTip'
@@ -102,7 +102,7 @@ function CreateGroupFormUI({ onCreate }) {
     await formik.setFieldValue(`tokenRequirements.${i}.tokenAddress`, val, false)
     if (val) {
       if (utils.isAddress(val)) {
-        const p = new providers.JsonRpcProvider(`${selectedChain.rpcUrls['infura'].http[0]}/${process.env.NEXT_PUBLIC_INFURA_API_KEY}`, selectedChain.id)
+        const p = getRpcProvider(selectedChain.id);
 
         const contract = new ethers.Contract(val, erc20dummyABI, p)
         const setNameNotFoundError = async () => {
