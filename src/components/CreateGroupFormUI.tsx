@@ -18,6 +18,7 @@ function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
   const initialValues = {
     tokenAddress: '',
     minAmount: 0,
+    // maxAmount: 0,
     token: '-',
     decimals: 0,
   }
@@ -112,6 +113,7 @@ function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
       return {
         ...v,
         minAmount: BigInt(v?.minAmount * 10 ** v?.decimals).toString(),
+        // maxAmount: BigInt(v?.maxAmount * 10 ** v?.decimals).toString(),
       }
     })
     onCreate({
@@ -317,6 +319,20 @@ function CreateGroupFormUI({ onCreateGroupClose, onCreate }) {
                           placeholder={t('placeholder.minAmount')}
                         />
                       </div>
+
+                      {/* <div className="w-[12.5%]">
+                        <input
+                          disabled={!reqMandatory}
+                          className={clsx('w-full', classes.input)}
+                          type="number"
+                          min={0}
+                          defaultValue={r.maxAmount}
+                          value={r.maxAmount}
+                          onChange={formik.handleChange}
+                          name={`tokenRequirements.${i}.maxAmount`}
+                          placeholder={t('placeholder.maxAmount')}
+                        />
+                      </div> */}
 
                       <button
                         type="button"

@@ -1,5 +1,5 @@
-import { ethers } from 'ethers'
-import { erc20dummyABI, forumContract, jsonRPCProvider } from '@/constant/const'
+import { ethers, providers } from 'ethers'
+import { erc20dummyABI, forumContract, getRpcProvider } from '@/constant/const'
 import { setCache } from '@/lib/redis'
 import { getContent, getIpfsHashFromBytes32, parseComment, parsePost, uploadImageToIPFS } from '@/lib/utils'
 import { CommunityDetails, Requirement } from '@/lib/model'
@@ -235,7 +235,8 @@ export const addRequirementDetails = async (community: Group): Promise<Awaited<R
   // get symbol and name of token
   return (await Promise.all(
     community.requirements.map(async requirement => {
-      const token = new ethers.Contract(requirement.tokenAddress, erc20dummyABI, jsonRPCProvider)
+      const provider = getRpcProvider(community.chainId);
+      const token = new ethers.Contract(requirement.tokenAddress, erc20dummyABI, provider)
       let symbol = '';  
       let name = '';
       let decimals = 0;
@@ -247,6 +248,7 @@ export const addRequirementDetails = async (community: Group): Promise<Awaited<R
         console.log(error)
       }
       const minAmount = requirement.minAmount.toString()
+      // const maxAmount = requirement?.maxAmount?.toString()
 
       return {
         tokenAddress: requirement.tokenAddress,
@@ -254,6 +256,7 @@ export const addRequirementDetails = async (community: Group): Promise<Awaited<R
         name,
         decimals,
         minAmount,
+        // maxAmount
       }
     })
   )) as unknown as Requirement[]
@@ -271,9 +274,10 @@ function serializeGroupData(rawGroupData: RawGroupData): Group {
       description: rawGroupData.groupDetails.description.toString(),
       tags: rawGroupData.groupDetails.tags.map(t => t.toString()),
     },
-    requirements: rawGroupData.requirements.map(r => ({
+    requirements: rawGroupData?.requirements.map(r => ({
       tokenAddress: r.tokenAddress,
       minAmount: r.minAmount.toString(),
+      // maxAmount: r?.maxAmount?.toString(),
     })),
     note: rawGroupData.note.toString(),
     userCount: rawGroupData.userCount.toNumber(),
