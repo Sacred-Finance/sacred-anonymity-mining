@@ -294,7 +294,27 @@ export function PostPage({
                   <Tab.Panel
                     className={clsx('scrollbar max-h-[calc(90vh - 200px)] col-span-12 flex w-full flex-col gap-2')}
                   >
+                    <div className={'flex gap-2'}>
+                      <NewPostForm
+                          editorId={`post_comment${post.groupId}`}
+                          description={comment}
+                          setDescription={setComment}
+                          handleSubmit={addComment}
+                          setTitle={() => {}}
+                          resetForm={() => setComment(null)}
+                          isEditable={true}
+                          isReadOnly={false}
+                          title={''}
+                          itemType={'comment'}
+                          actionType={'new'}
+                          classes={NewPostModal}
+                          submitButtonText={t('button.comment') || 'missing-text'}
+                          placeholder={t('placeholder.comment') || 'missing-text'}
+                          openFormButtonText={t('button.comment') || 'missing-text'}
+                      />
 
+                      <CreatePollUI groupId={post.groupId} />
+                    </div>
                     {sortedCommentsData.length ? <PostComments comments={sortedCommentsData} /> : null}
                     {!sortedCommentsData.length && (
                       <div className="flex flex-col items-center justify-center gap-2">
