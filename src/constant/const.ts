@@ -2,8 +2,9 @@ import { Contract, ethers } from 'ethers'
 import { avalancheFuji, Chain, goerli, polygonMumbai, sepolia } from 'wagmi/chains'
 import ForumABI from '../constant/abi/Forum.json'
 import { Forum } from '@/types/contract/Forum'
+import { Address } from '@/types/common'
 
-export const ForumContractAddress: `0x${string}` = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`
+export const ForumContractAddress: Address = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as Address
 export const unirepAddress = process.env.NEXT_PUBLIC_UNIREP_ADDRESS
 
 export const attesterAddress = process.env.NEXT_PUBLIC_ATTESTER_ADDRESS

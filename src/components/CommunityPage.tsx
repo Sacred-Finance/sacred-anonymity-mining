@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { Dispatch, SetStateAction, useRef, useState } from 'react'
 import { Post } from '@/lib/post'
 import { useActiveUser, useUserIfJoined, useUsers } from '@/contexts/CommunityProvider'
 import { useAccount } from 'wagmi'
@@ -7,16 +7,16 @@ import { SortByOption } from '@components/SortBy'
 import { useUnirepSignUp } from '@/hooks/useUnirepSignup'
 import { User } from '@/lib/model'
 import { useValidateUserBalance } from '@/utils/useValidateUserBalance'
-import { useLoaderContext } from '@/contexts/LoaderContext'
 import { toast } from 'react-toastify'
 import { useItemsSortedByVote } from '@/hooks/useItemsSortedByVote'
 import clsx from 'clsx'
-import { NewPostForm } from '@components/NewPostForm'
+import { NewPostForm, NewPostFormProps } from '@components/NewPostForm'
 import { PostList } from '@components/Post/PostList'
 import { Group, Item } from '@/types/contract/ForumInterface'
 import CreatePollUI from './CreatePollUI'
 import { useContentManagement } from '@/hooks/useContentManagement'
 import { CommunityCard } from '@components/CommunityCard/CommunityCard'
+import { NewPostModal } from '@components/Post/PostComments'
 
 export function CommunityPage({
   children,
@@ -43,8 +43,8 @@ export function CommunityPage({
   const [sortBy, setSortBy] = useState<SortByOption>('highest')
 
   const { checkUserBalance } = useValidateUserBalance(community, address)
-  const { setIsLoading, isLoading: isContextLoading } = useLoaderContext()
-  const postEditorRef = useRef<any>()
+  const [isLoading, setIsLoading] = useState(false)
+
 
   const validateRequirements = () => {
     if (!address) return toast.error(t('alert.connectWallet'), { toastId: 'connectWallet' })
@@ -69,7 +69,7 @@ export function CommunityPage({
       return
     }
 
-    let ipfsHash
+    let ipfsHash: string
 
     const hasSufficientBalance = await checkUserBalance()
     if (!hasSufficientBalance) return
@@ -77,17 +77,17 @@ export function CommunityPage({
     setIsLoading(true)
 
     try {
-      const { status } = await postInstance?.create(
-        {
+      const { status } = await postInstance?.create({
+        postContent: {
           title: contentTitle,
           description: contentDescription,
         },
-        address,
-        users,
-        activeUser,
-        groupId as string,
-        setIsLoading,
-        (post, cid) => {
+        address: address,
+        users: users,
+        postedByUser: activeUser as User,
+        groupId: groupId as string,
+        setWaiting: setIsLoading,
+        onIPFSUploadSuccess: (post, cid) => {
           ipfsHash = cid
           setTempContents([
             {
@@ -96,8 +96,8 @@ export function CommunityPage({
             },
             ...tempContents,
           ])
-        }
-      )
+        },
+      })
 
       if (status === 200) {
         clearInput()
@@ -122,56 +122,40 @@ export function CommunityPage({
     }
   }
 
-  const handleSortChange = (newSortBy: SortByOption) => {
-    setSortBy(newSortBy)
-  }
-
   const sortedData = useItemsSortedByVote(tempContents, posts, sortBy)
 
-  const clearInput = isEdit => {
+  const clearInput = (isEdit = false) => {
     if (isEdit) {
-      // setPostEditing(false)
-      setContentTitle(post?.title)
-      setContentDescription(post?.description)
+      if (setContentTitle) {
+        setContentTitle(post?.title || null)
+      }
+      setContentDescription(post?.description || null)
       return
     } else {
-      setContentTitle('')
-      setContentDescription(undefined)
-      postEditorRef?.current?.clear?.()
+      if (setContentTitle) {
+        setContentTitle('')
+      }
+      setContentDescription(null)
     }
   }
 
-  const propsForNewPost = {
+  const propsForNewPost: NewPostFormProps = {
     editorId: `${groupId}_post`,
     submitButtonText: t('button.submit') as string,
     openFormButtonText: t('button.newPost') as string,
     description: contentDescription,
     setDescription: setContentDescription,
     handleSubmit: addPost,
-    editorReference: postEditorRef,
     showButtonWhenFormOpen: true,
-    setTitle: setContentTitle,
+    setTitle: setContentTitle as Dispatch<SetStateAction<string | null>>,
     resetForm: () => clearInput(true),
     isReadOnly: false,
-    isSubmitting: isContextLoading,
+    isSubmitting: isLoading,
     title: contentTitle as string,
     isEditable: true,
     itemType: 'post',
     actionType: 'new',
-    classes: {
-      rootClosed: '!w-fit !p-0',
-      rootOpen: 'fixed z-50 inset-0 p-12 bg-gray-900/50 flex justify-center items-center ',
-      formBody: 'w-full h-full flex flex-col gap-4 min-h-[400px] justify-between ',
-      editor:
-        'border rounded-md py-2 px-3  transition-shadow focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 dark:text-dark-100',
-      submitButton:
-        'bg-green-500 text-white border-none rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-600',
-      formContainerOpen:
-        'bg-white dark:bg-gray-900 p-6 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg w-full max-w-3xl overflow-y-auto ',
-      openFormButtonOpen: 'self-end hidden',
-      openFormButtonClosed:
-        'h-full bg-primary-500 text-white rounded-md hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600',
-    },
+    classes: NewPostModal,
   }
 
   return (
@@ -184,8 +168,8 @@ export function CommunityPage({
           <CreatePollUI groupId={groupId} />
           <NewPostForm {...propsForNewPost} />
         </div>
-          <PostList posts={sortedData} />
-          <div className="mt-6">{children}</div>
+        <PostList posts={sortedData} />
+        <div className="mt-6">{children}</div>
       </div>
     </div>
   )

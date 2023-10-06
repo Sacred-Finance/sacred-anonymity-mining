@@ -47,7 +47,10 @@ export const CommunityCardBody: React.FC = () => {
             className="flex w-fit items-center truncate rounded-md bg-gray-200 px-2 py-0.5 text-xs dark:bg-gray-700 dark:text-gray-300"
             key={r?.tokenAddress}
           >
-            {`${r?.symbol} - ${Number(r?.minAmount) / 10 ** (r?.decimals ?? 0)}`}
+            {/*{`${r?.symbol} - ${Number(r?.minAmount) / 10 ** (r?.decimals || 0)}`}*/}
+              {/* ETHERS FORMAT NUMBER */}
+              {ethers.BigNumber.from(r?.minAmount).div(ethers.BigNumber.from(10).pow(r?.decimals || 0)).toString()}
+              {ethers.constants.AddressZero !== r?.tokenAddress && ` ${r?.tokenAddress.slice(0, 6)}...${r?.tokenAddress.slice(-4)}`}
           </span>
         ))}
       </div>

@@ -9,17 +9,12 @@ import LoadingComponent from '@components/LoadingComponent'
 import SideBar from '@components/SideBar'
 import useSWR, { preload } from 'swr'
 
-const fetcher = url =>
-  fetch(url).then(res => {
-    return res.json()
-  })
 
 // preload('/api/data', fetcher)
 
 export default function StandardLayout({ children }) {
   const pageRef = useRef(null)
   const router = useRouter()
-  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
@@ -59,7 +54,7 @@ export default function StandardLayout({ children }) {
   })
 
   return (
-    <div className={'flex h-full flex-col'} ref={pageRef}>
+    <div className={'flex h-full flex-col '} ref={pageRef}>
       <div className={'flex w-full flex-col '} ref={pageRef}>
         <Header />
         <div className={'relative flex flex-1 '}>

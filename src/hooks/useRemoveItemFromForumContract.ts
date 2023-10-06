@@ -10,6 +10,7 @@ import { CommentClass } from '@/lib/comment'
 import { useTranslation } from 'react-i18next'
 import { ContentType, PostContent, User } from '@/lib/model'
 import { getGroupWithPostAndCommentData } from '@/lib/fetcher'
+import {Address} from "@/types/common";
 
 export const useRemoveItemFromForumContract = (groupId, postId, isAdminOrModerator, setIsLoading) => {
   const { address } = useAccount()
@@ -31,9 +32,12 @@ export const useRemoveItemFromForumContract = (groupId, postId, isAdminOrModerat
   }
 
   const deleteItem = async (itemId, itemType: number) => {
-    if (itemType !== ContentType.POST && itemType !== ContentType.POLL && itemType !== ContentType.COMMENT)
-      return toast.error(t('alert.deleteFailed'))
-    if (validateRequirements() !== true) return
+    if (Number(itemType) != ContentType.POST && itemType != ContentType.POLL && itemType != ContentType.COMMENT){
+        return toast.error(t('toast.error.invalidItemType'), { type: 'error', toastId: 'min' })
+    }
+
+    if (!validateRequirements()) return
+
     if (isAdminOrModerator) {
       return writeAsync ? writeAsync({
         recklesslySetUnpreparedArgs: [+itemId],
@@ -72,7 +76,7 @@ export const useRemoveItemFromForumContract = (groupId, postId, isAdminOrModerat
       commentInstance.commentsCacheId(),
       data => {
         const commentsListCopy = [...data]
-        const i = commentsListCopy.findIndex(c => +c.id === itemId)
+        const i = commentsListCopy.findIndex(c => +c.id == itemId)
         commentsListCopy.splice(i, 1)
         return commentsListCopy
       },
@@ -81,7 +85,7 @@ export const useRemoveItemFromForumContract = (groupId, postId, isAdminOrModerat
   }
 
   const { data, writeAsync } = useContractWrite({
-    address: ForumContractAddress as `0x${string}`,
+    address: ForumContractAddress as Address,
     abi: ForumABI.abi,
     functionName: 'removeItem',
     mode: 'recklesslyUnprepared',

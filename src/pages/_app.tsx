@@ -13,7 +13,6 @@ import { avalancheFuji, goerli, localhost, mainnet, polygonMumbai, sepolia } fro
 import { configureChains, createClient, WagmiConfig } from 'wagmi'
 import { publicProvider } from 'wagmi/providers/public'
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc'
-import { LoaderProvider } from '../contexts/LoaderContext'
 import { CommunityProvider } from '../contexts/CommunityProvider'
 import { startIPFS } from '../lib/utils'
 import { ToastContainer } from 'react-toastify'
@@ -25,28 +24,26 @@ import { merge } from 'lodash'
 
 function App({ Component, pageProps }: AppProps) {
   return (
-    <LoaderProvider>
-      <Web3Wrapper>
-        <HeadGlobal />
-        <SWRConfig
-          value={{
-            revalidateOnFocus: false,
-            revalidateOnReconnect: false,
-            fetcher: (resource, init) =>
-              fetch(resource, init).then(res => {
-                return res.json()
-              }),
-          }}
-        >
-          <ThemeProvider enableSystem={true} attribute={'class'}  defaultTheme={'dark'}>
+    <ThemeProvider attribute={'class'} defaultTheme={'dark'} storageKey={'theme-color'}>
+        <Web3Wrapper>
+          <HeadGlobal />
+          <SWRConfig
+            value={{
+              revalidateOnFocus: false,
+              revalidateOnReconnect: false,
+              fetcher: (resource, init) =>
+                fetch(resource, init).then(res => {
+                  return res.json()
+                }),
+            }}
+          >
             <StandardLayout>
               <Component {...pageProps} />
+              <ToastContainer />
             </StandardLayout>
-          </ThemeProvider>
-        </SWRConfig>
-        <ToastContainer />
-      </Web3Wrapper>
-    </LoaderProvider>
+          </SWRConfig>
+        </Web3Wrapper>
+    </ThemeProvider>
   )
 }
 
@@ -144,7 +141,6 @@ const myTheme = merge(darkTheme(), {
 
 // Web3Wrapper
 export function Web3Wrapper({ children }) {
-  const { resolvedTheme } = useTheme()
 
   const didLoadRef = useRef(false)
   useEffect(() => {

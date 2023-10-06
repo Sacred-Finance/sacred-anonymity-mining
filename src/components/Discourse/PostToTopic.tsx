@@ -9,8 +9,7 @@ import { OutputDataToMarkDown } from '@components/Discourse/OutputDataToMarkDown
 
 const PostToTopic = ({ topic, mutate }: { topic: Topic; mutate: (newPost: Post) => void }) => {
   const { t } = useTranslation()
-  const [description, setDescription] = useState<OutputData>(null)
-  const editorReference = useRef<EditorJS>()
+  const [description, setDescription] = useState<OutputData | null>(null)
 
   const onSubmit = async () => {
     if (!description) return toast.error(t('error.emptyPost'))
@@ -58,10 +57,8 @@ const PostToTopic = ({ topic, mutate }: { topic: Topic; mutate: (newPost: Post) 
         description={description}
         setDescription={setDescription}
         handleSubmit={onSubmit}
-        editorReference={editorReference}
         resetForm={() => {
           // @ts-ignore
-          editorReference.current.clear()
           setDescription(null)
         }}
         title={false}

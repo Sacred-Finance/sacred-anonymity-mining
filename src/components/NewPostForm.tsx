@@ -1,11 +1,13 @@
 import { useTranslation } from 'react-i18next'
-import React, { RefObject, useCallback, useRef, useState } from 'react'
+import React, { Dispatch, RefObject, SetStateAction, useCallback, useRef, useState } from 'react'
 import EditorJsRenderer from './editor-js/EditorJSRenderer'
 import { CancelButton, PrimaryButton } from './buttons'
 import { EyeIcon, PencilIcon } from '@heroicons/react/20/solid'
 import dynamic from 'next/dynamic'
 import clsx from 'clsx'
 import { Tab } from '@headlessui/react'
+import { classes } from '@styles/classes'
+import { OutputData } from '@editorjs/editorjs'
 
 export interface EditorJsType {
   blocks: {
@@ -52,10 +54,9 @@ function EditorTabs({ setIsPreview }: ToggleButtonProps) {
 
 export interface NewPostFormProps {
   editorId: string
-  editorReference: RefObject<EditorJsType>
   title: string | false
-  setTitle: (value: string) => void
-  description: EditorJsType
+  setTitle: Dispatch<SetStateAction<string | null>>
+  description: OutputData | null
   setDescription: (value: EditorJsType) => void
   resetForm: (isEdited: boolean) => void
   isReadOnly: boolean
@@ -98,16 +99,14 @@ const commonButtonClasses = 'border-gray-500 border text-sm text-gray-500 transi
 function ContentSection({
   data,
   inputs,
-  editorRef,
   onChange,
   readOnly,
   placeholder,
   holder,
 }: {
   preview: boolean
-  data: EditorJsType
+  data: OutputData | null
   inputs: string | undefined
-  editorRef: React.RefObject<EditorJsType>
   onChange: (value: EditorJsType) => void
   readOnly: boolean
   placeholder: string | undefined
@@ -118,10 +117,11 @@ function ContentSection({
       <Tab.Panel className="rounded border-gray-200">
         <Editor
           divProps={{
-            className: clsx('z-50'),
+            className: clsx(
+              'z-50 w-full bg-white !text-black form-input h-full rounded-md shadow-md overflow-y-scroll max-h-[calc(50vh)]'
+            ),
           }}
           data={data}
-          editorRef={editorRef}
           onChange={onChange}
           readOnly={readOnly}
           placeholder={placeholder}
@@ -138,7 +138,6 @@ function ContentSection({
 
 export const NewPostForm = ({
   editorId,
-  editorReference,
   title,
   setTitle,
   description,
@@ -178,10 +177,10 @@ export const NewPostForm = ({
     }
   }, [description, handleSubmit])
 
-  const handleOpen = () => {
+  const handleOpen = (): void => {
     if (isFormOpen) {
       setIsFormOpen(false)
-      return resetForm(actionType)
+      return resetForm(!!actionType)
     }
     setIsFormOpen(true)
     onOpen && onOpen()
@@ -245,20 +244,26 @@ export const NewPostForm = ({
           )}
         >
           <div className={clsx(c?.formBody)}>
-            <div className="text-md">Title (Max 60)</div>
             {itemType === 'post' && title !== false && (
-              <input
-                disabled={isPreview}
-                className={clsx(
-                  'w-full rounded border-gray-200 p-1 text-base transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-gray-100'
-                )}
-                ref={inputRef}
-                placeholder={
-                  t(itemType !== 'post' ? 'placeholder.enterComment' : 'placeholder.enterPostTitle') as string
-                }
-                value={title}
-                onChange={e => setTitle(e.target.value)}
-              />
+              <>
+                <label htmlFor={'title'} className="text-md">
+                  Title (Max 60)
+                </label>
+
+                <input
+                  id={'title'}
+                  disabled={isPreview}
+                  className={clsx(
+                    'w-full rounded border-gray-200 p-1 text-base transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-gray-100'
+                  )}
+                  ref={inputRef}
+                  placeholder={
+                    t(itemType !== 'post' ? 'placeholder.enterComment' : 'placeholder.enterPostTitle') as string
+                  }
+                  value={title}
+                  onChange={e => setTitle(e.target.value)}
+                />
+              </>
             )}
             <Tab.Group>
               <Tab.Panels>
@@ -267,7 +272,6 @@ export const NewPostForm = ({
                   preview={isPreview}
                   data={description}
                   inputs={c?.editor}
-                  editorRef={editorReference}
                   onChange={(value: EditorJsType) => {
                     setDescription(value)
                     setError(null)
@@ -287,7 +291,6 @@ export const NewPostForm = ({
               isSubmitting={isSubmitting}
               submitButtonText={submitButtonText}
               t={t}
-              description={description}
               c={c}
             />
 
@@ -299,16 +302,7 @@ export const NewPostForm = ({
   )
 }
 
-const FormButtons = ({
-  handleClose,
-  handleSubmitAction,
-  isSubmitting,
-  submitButtonText,
-  t,
-  description,
-  c,
-  disableSubmit,
-}) => (
+const FormButtons = ({ handleClose, handleSubmitAction, isSubmitting, submitButtonText, t, c, disableSubmit }) => (
   <div className="flex justify-between">
     <CancelButton
       className={clsx(c?.cancelButton, 'bg-red-400 text-white hover:bg-opacity-80 hover:text-white')}

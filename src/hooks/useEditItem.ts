@@ -12,10 +12,12 @@ import { ContentType, PostContent, User } from '@/lib/model'
 import { Identity } from '@semaphore-protocol/identity'
 import { mutate } from 'swr'
 import { getGroupWithPostAndCommentData } from '@/lib/fetcher'
+import { Address } from '@/types/common'
+import { Item } from '@/types/contract/ForumInterface'
 
 interface UseEditItemParams {
-  postId: any
-  groupId: any
+  item: Item
+  commentId?: any
   isAdminOrModerator: any
   setIsLoading: any
 }
@@ -28,19 +30,25 @@ export interface EditItemParams {
 }
 
 export const useEditItem = ({
-  postId,
-  groupId,
+  item,
   isAdminOrModerator,
   setIsLoading,
 }: UseEditItemParams): {
   editItem: ({ content, itemId, itemType, note }: EditItemParams) => Promise<any>
 } => {
+  console.log('useEditItem', item)
+  const { groupId, parentId, id, kind } = item
+
+  const postId = kind == 0 ? id : parentId
+  const commentId = kind == 1 ? id : null
   const { address } = useAccount()
   const member = useUserIfJoined(groupId)
   const postInstance = new Post(postId, groupId)
-  const commentInstance = new CommentClass(groupId, postId, null)
+  const commentInstance = commentId ? new CommentClass(groupId, postId, commentId) : null
+
+  console.log('commentInstance', commentInstance)
   const { writeAsync } = useContractWrite({
-    address: ForumContractAddress as `0x${string}`,
+    address: ForumContractAddress as Address,
     abi: ForumABI.abi,
     functionName: 'editItem',
     mode: 'recklesslyUnprepared',
@@ -85,19 +93,21 @@ export const useEditItem = ({
           '/circuits/VerifyOwner__prod.wasm',
           '/circuits/VerifyOwner__prod.0.zkey'
         )
-        return writeAsync({
-          recklesslySetUnpreparedArgs: [a, b, c, itemId, signal],
-        }).then(async value => {
-          return await value.wait().then(async () => {
-            await mutate(getGroupWithPostAndCommentData(groupId, postId))
-          })
-        })
+        return writeAsync
+          ? writeAsync({
+              recklesslySetUnpreparedArgs: [a, b, c, itemId, signal],
+            }).then(async value => {
+              return await value.wait().then(async () => {
+                await mutate(getGroupWithPostAndCommentData(groupId, postId))
+              })
+            })
+          : null
       } catch (error) {
         // this.undoNewPost(groupId, cid);
         throw error
       }
     } else {
-      return itemType === 0 ?? itemType === 2
+      return itemType == 0 ?? itemType == 2
         ? postInstance?.edit(content, address, itemId, member as User, groupId, setIsLoading)
         : commentInstance?.edit(content, address, itemId, member as User, groupId, setIsLoading)
     }

@@ -7,15 +7,14 @@ import { useTheme } from 'next-themes'
 
 import { motion } from 'framer-motion'
 
-export const Logo = ({ invertTheme = false }) => {
+export const Logo = ({ invertTheme = false, className }) => {
   const { resolvedTheme } = useTheme()
   return (
     <Image
-      priority={true}
-      unoptimized={true}
-      src={(resolvedTheme === 'dark' || invertTheme) ? logoLight : logo}
+      src={resolvedTheme === 'dark' || invertTheme ? logoLight : logo}
       width={200}
       alt={logo}
+      className={className}
     />
   )
 }
@@ -43,7 +42,6 @@ export const DynamicLogo = ({ purple = '#721BEF', black = '#000', className }) =
   if (resolvedTheme === 'dark') {
     black = '#fff'
   }
-
 
   return (
     <motion.svg

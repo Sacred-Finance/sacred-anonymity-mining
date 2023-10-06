@@ -19,6 +19,7 @@ export type PrimaryButtonProps = {
   startIcon?: React.ReactNode
   loadingPosition?: 'start' | 'end'
   toolTip?: string | boolean
+  variant?: 'primary' | 'secondary' | 'minimal'
 } & ButtonHTMLAttributes<HTMLButtonElement>
 export function PrimaryButton({
   children,
@@ -28,6 +29,7 @@ export function PrimaryButton({
   isJoined,
   resetClasses,
   loadingPosition = 'end',
+  variant = 'primary',
   ...rest
 }: PrimaryButtonProps & ButtonHTMLAttributes<HTMLButtonElement>): JSX.Element {
   const { t } = useTranslation()
@@ -43,14 +45,22 @@ export function PrimaryButton({
     }
   }
 
+  const classes = {
+    primary:
+      'rounded-lg border bg-primary-500 px-4 py-2 text-white shadow-md transition duration-150 ease-in-out hover:brightness-125 focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-opacity-50 active:bg-primary-700 disabled:opacity-60',
+    secondary:
+      'rounded-lg border bg-white px-4 py-2 text-primary-500 shadow-md transition duration-150 ease-in-out hover:brightness-125 focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-opacity-50 active:bg-gray-100 disabled:opacity-60',
+    minimal:
+      'rounded-lg border bg-transparent px-4 py-2 text-primary-500 shadow-md transition duration-150 ease-in-out hover:brightness-125 focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-opacity-50 active:bg-gray-100 disabled:opacity-60',
+  }
+
   return (
     <ToolTip tooltip={rest?.toolTip || false}>
       <button
         {...rest}
         disabled={rest.disabled || isLoading}
         className={clsx(
-          !resetClasses &&
-            'rounded-lg border bg-primary-500 px-4 py-2 text-white shadow-md transition duration-150 ease-in-out hover:brightness-125 focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-opacity-50 active:bg-primary-700 disabled:opacity-60',
+          !resetClasses && classes[variant],
           !resetClasses && 'flex items-center gap-2 disabled:cursor-not-allowed',
           rest.className
         )}

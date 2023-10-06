@@ -5,8 +5,6 @@ import { Identity } from '@semaphore-protocol/identity'
 import _ from 'lodash'
 import { useAccount } from 'wagmi'
 import { useIdentity } from '@/hooks/useIdentity'
-import { useRouter } from 'next/router'
-import { useLoaderContext } from './LoaderContext'
 import { Group, Item } from '@/types/contract/ForumInterface'
 import { Topic } from '@components/Discourse/types'
 
@@ -14,6 +12,7 @@ export type CommunityId = string | number | ethers.BigNumber
 type CommunityContextType = {
   state: State
   dispatch: React.Dispatch<Action>
+  isLoading: boolean
 }
 
 interface ActiveCommunity {
@@ -169,7 +168,7 @@ export function getGroupIdOrUserId(communityOrUser: Group | User): number {
 
 export const CommunityProvider: React.FC<any> = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(reducer, initialState)
-  const { setIsLoading } = useLoaderContext()
+  const [isLoading, setIsLoading] = React.useState(true)
 
   // when state has communities, stop loading
   useEffect(() => {
@@ -179,7 +178,7 @@ export const CommunityProvider: React.FC<any> = ({ children }: { children: React
     }
   }, [state.communities])
 
-  return <CommunityContext.Provider value={{ state, dispatch }}>{children}</CommunityContext.Provider>
+  return <CommunityContext.Provider value={{ state, dispatch, isLoading }}>{children}</CommunityContext.Provider>
 }
 
 export function useCommunityById(id: string | number): Group | undefined {
@@ -229,7 +228,7 @@ export function useUserIfJoined(communityId: string | number): (User & { avatar:
 }
 
 export const addAvatarToUser = (user: User) => {
-  const avatar = getAvatarUrl(user?.identityCommitment?.toString());
+  const avatar = getAvatarUrl(user?.identityCommitment?.toString())
   return { ...user, avatar }
 }
 

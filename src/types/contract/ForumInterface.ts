@@ -1,5 +1,6 @@
 import { BigNumber, ethers } from 'ethers'
 import {OutputData} from "@editorjs/editorjs";
+import {OutputBlockData} from "@editorjs/editorjs/types/data-formats/output-data";
 
 export interface Admins {
   _admins: string[]
@@ -401,6 +402,7 @@ export type Item = {
   createdAt: Date
   title?: string
   description?: OutputData | undefined
+  // blocks?: OutputBlockData[] | undefined
 }
 
 export type ReputationProof = {

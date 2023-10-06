@@ -1,11 +1,11 @@
-import { DynamicLogo } from './Logo'
+import { Logo } from './Logo'
 
-const LoadingPage = () => {
+const LoadingComponent = () => {
   return (
-    <div className="flex  items-center justify-center h-screen">
-      <DynamicLogo className="scale-[25%]" />
+    <div className="flex  h-screen items-center justify-center">
+      <Logo className="w-[100vw] scale-[25%]" />
     </div>
   )
 }
 
-export default LoadingPage
+export default LoadingComponent

@@ -33,7 +33,6 @@ export const useLocalCommunity = () => {
   if (!community) throw new Error('CommunityContext not found')
   return community
 }
-// ... (rest of the imports)
 
 export const CommunityCard = ({
   community,
@@ -42,7 +41,7 @@ export const CommunityCard = ({
 }: {
   community: Group & { variant?: 'default' | 'banner' }
   isAdmin?: boolean
-  variant?: 'default' | 'banner'
+  variant?: 'default' | 'banner' // banner variant is used for the community banner, it does not have a shadow or hover effect, nor does it have a join button
   actions?: (ActionItem | false)[]
 }) => {
   const router = useRouter()
@@ -66,9 +65,9 @@ export const CommunityCard = ({
             base: 'relative',
           },
           root: {
-            base: 'aspect-4 min-w-[450px] flex-col flex justify-between cursor-default relative  text-gray-900 dark:text-gray-100  rounded-lg bg-white dark:bg-gray-950/20 p-2 transition-transform transform ',
+            base: 'aspect-4 min-w-[450px] flex-col flex justify-between cursor-default relative  text-gray-900 dark:text-gray-100  rounded-lg bg-white dark:bg-gray-950/20  transition-transform transform ',
             children: clsx(
-              'group min-w-[450px]  min-h-[200px] flex flex-col justify-between rounded-lg  flex-grow',
+              'group min-w-[450px]  min-h-[200px] flex flex-col justify-between rounded-lg  p-2 flex-grow',
               variant === 'banner'
                 ? 'text-xl'
                 : 'max-w-[450px] shadow-primary-900 dark:shadow-primary-900 shadow-md hover:bg-gray-100 dark:hover:bg-gray-800 ' // banner should not have shadow or hover effects

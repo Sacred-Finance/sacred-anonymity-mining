@@ -7,13 +7,7 @@ import { useTranslation } from 'react-i18next'
 import EditorJS, { OutputData } from '@editorjs/editorjs'
 import { Post, Topic } from '@components/Discourse/types'
 
-interface NewPostResponse {
-  action: string
-  post: Post
-  success: boolean
-}
-
-const ReplyToPost = ({
+const ReplyToDiscoursePost = ({
   post,
   formProps,
   addReplyToPosts,
@@ -23,8 +17,7 @@ const ReplyToPost = ({
   addReplyToPosts?: (newPost: Topic['post_stream']['posts'][0]) => void
 }) => {
   const { t } = useTranslation()
-  const [description, setDescription] = useState<OutputData>(null)
-  const editorReference = useRef<EditorJS>()
+  const [description, setDescription] = useState<OutputData | null>(null)
 
   const onSubmit = async () => {
     if (!description) return toast.error(t('error.emptyPost'))
@@ -55,14 +48,11 @@ const ReplyToPost = ({
   return (
     <NewPostForm
       editorId={`${post.id}_post`}
-      editorReference={editorReference}
       title={false}
       setTitle={() => {}}
       description={description}
       setDescription={setDescription}
       resetForm={() => {
-        // @ts-ignore
-        editorReference.current.clear()
         setDescription(null)
       }}
       isReadOnly={false}
@@ -86,4 +76,4 @@ const ReplyToPost = ({
   )
 }
 
-export default ReplyToPost
+export default ReplyToDiscoursePost

@@ -1,5 +1,5 @@
 import { StatsBadge } from '@components/Discourse/TopicPosts/StatsBadge'
-import ReplyToPost from '@components/Discourse/ReplyToPost'
+import ReplyToDiscoursePost from '@components/Discourse/ReplyToDiscoursePost'
 import React from 'react'
 
 export const PostFooter = ({ post, addReplyToPosts }) => (
@@ -10,7 +10,7 @@ export const PostFooter = ({ post, addReplyToPosts }) => (
       <StatsBadge pluralizeLabel label={'Reply'} value={post.reply_count.toString()} />
     </div>
     <div className={'flex h-full items-center gap-4'}>
-      <ReplyToPost post={post} addReplyToPosts={addReplyToPosts} />
+      <ReplyToDiscoursePost post={post} addReplyToPosts={addReplyToPosts} />
     </div>
   </div>
 )

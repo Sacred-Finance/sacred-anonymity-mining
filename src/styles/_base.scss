@@ -71,8 +71,8 @@ body {
   display: flex;
 }
 
-.codex-editor > *[contenteditable='true']:hover  {
-    background-color: #cccccc !important; ;
+.codex-editor > *[contenteditable='true']:hover {
+  background-color: #cccccc !important;
 }
 
 //
@@ -123,14 +123,13 @@ body {
 //  cursor: default;
 //}
 //
-//.ce-popover {
-//  color: black;
-//  font-weight: bold;
-//}
-//.ce-toolbar {
-//  opacity: 1;
-//  color: white;
-//}
+
+.codex-editor {
+  .ce-toolbar * {
+    color: black;
+  }
+}
+
 //
 //.ce-toolbar__plus svg {
 //  border-radius: 50%;
@@ -259,10 +258,10 @@ body {
 //  color: white !important;
 //}
 //
-//.cdx-search-field__input:focus {
+//.cdx-search-field__input {
 //  border-color: var(--primary) !important;
-//  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.6) !important;
 //  outline: none !important;
+//  color: black !important;
 //}
 //.cdx-search-field__icon {
 //  margin-inline: 4px;
@@ -403,5 +402,11 @@ body {
 
   :hover::-webkit-scrollbar-thumb {
     visibility: visible;
+  }
+
+  .scrollbar {
+    scrollbar-color: white var(--primary-darker) !important;
+    scrollbar-width: thin !important;
+    scrollbar-face-color: var(--primary-darker) !important;
   }
 }

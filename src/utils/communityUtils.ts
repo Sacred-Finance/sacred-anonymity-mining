@@ -360,7 +360,7 @@ export async function augmentItemData(rawItemData: RawItemData): Promise<Item> {
       }
     }
     let content: any
-    if (normalizedItemData.kind === ContentType.COMMENT) {
+    if (normalizedItemData.kind == ContentType.COMMENT) {
       content = parseComment(stringifiedContent)
     } else {
       content = parsePost(stringifiedContent)

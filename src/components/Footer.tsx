@@ -1,10 +1,5 @@
 import { Logo } from './Logo'
-import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
-
-const ListHeader = ({ children }) => {
-  return <p className=" text-lg font-semibold text-gray-200 dark:text-gray-200">{children}</p>
-}
 
 export default function Footer(): JSX.Element {
   const { t, ready } = useTranslation()
@@ -12,44 +7,71 @@ export default function Footer(): JSX.Element {
   if (!ready) return <> </>
 
   return (
-    <footer className="w-full border-t border-gray-700 bg-gray-800 py-4 dark:bg-gray-900">
-      <div className="container  grid grid-cols-1 gap-4 px-4 sm:px-6 md:grid-cols-2 lg:px-8">
-        <div className="flex flex-col items-center space-y-3">
-          <ListHeader>{t('footer.followUs')}</ListHeader>
-          <a href="http://discord.gg/43spxvqqmJ" className="text-gray-300 hover:text-purple-500">
-            {t('footer.discord')}
-          </a>
-          <a href="https://twitter.com/SacredLogos" className="text-gray-300 hover:text-purple-500">
-            {t('footer.twitter')}
-          </a>
-          <a href="https://t.me/SacredLogosOfficial" className="text-gray-300 hover:text-purple-500">
-            {t('footer.telegram')}
-          </a>
-          <a href="https://sacredlogos.medium.com/" className="text-gray-300 hover:text-purple-500">
-            {t('footer.medium')}
-          </a>
+    <footer className="bg-gray-800 dark:bg-gray-900">
+      <div className="container mx-auto px-6 py-8 lg:px-16">
+        <div className="md:flex md:justify-between">
+          <div className="mb-6 flex items-center md:mb-0">
+            <Logo invertTheme={true} className="mr-3 h-8" />
+          </div>
+          <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
+            {/* Follow Us Section */}
+            <div>
+              <h2 className="mb-6 text-lg font-semibold text-gray-400">{t('footer.followUs')}</h2>
+              <ul className="font-medium text-gray-500 dark:text-gray-400">
+                <li className="mb-4">
+                  <a href="http://discord.gg/43spxvqqmJ" className="hover:text-purple-500">
+                    {t('footer.discord')}
+                  </a>
+                </li>
+                <li className="mb-4">
+                  <a href="https://twitter.com/SacredLogos" className="hover:text-purple-500">
+                    {t('footer.twitter')}
+                  </a>
+                </li>
+                <li className="mb-4">
+                  <a href="https://t.me/SacredLogosOfficial" className="hover:text-purple-500">
+                    {t('footer.telegram')}
+                  </a>
+                </li>
+                <li>
+                  <a href="https://sacredlogos.medium.com/" className="hover:text-purple-500">
+                    {t('footer.medium')}
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Legal Section */}
+            <div>
+              <h2 className="mb-6 text-lg font-semibold text-gray-400">{t('footer.legal')}</h2>
+              <ul className="font-medium text-gray-500 dark:text-gray-400">
+                <li className="mb-4">
+                  <a
+                    href="https://sacred-finance.github.io/Sacred_Privacy_Policy.pdf"
+                    className="hover:text-purple-500"
+                  >
+                    {t('footer.privacyPolicy')}
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://sacred-finance.github.io/Sacred_Terms_of_Service.pdf"
+                    className="hover:text-purple-500"
+                  >
+                    {t('footer.termsOfService')}
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col items-center space-y-3">
-          <ListHeader>{t('footer.legal')}</ListHeader>
-          <a
-            href="https://sacred-finance.github.io/Sacred_Privacy_Policy.pdf"
-            className="text-gray-300 hover:text-purple-500"
-          >
-            {t('footer.privacyPolicy')}
-          </a>
-          <a
-            href="https://sacred-finance.github.io/Sacred_Terms_of_Service.pdf"
-            className="text-gray-300 hover:text-purple-500"
-          >
-            {t('footer.termsOfService')}
-          </a>
+        <hr className="my-6 border-gray-700 dark:border-gray-900 sm:mx-auto lg:my-8" />
+        <div className="sm:flex sm:items-center sm:justify-between">
+          <span className="text-sm text-gray-500 dark:text-gray-400 sm:text-center">
+            © 2023 SacredLogos. All Rights Reserved.
+          </span>
+          {/* Add additional social icons if necessary */}
         </div>
-      </div>
-      <div className="container  border-t border-gray-700 px-4 pt-10 sm:px-6 lg:px-8">
-        <div className="flex justify-center">
-          <Logo invertTheme={true}  />
-        </div>
-        <p className="pt-6 text-center text-sm text-gray-300">© 2023 Sacred.</p>
       </div>
     </footer>
   )

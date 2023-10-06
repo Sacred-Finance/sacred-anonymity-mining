@@ -6,32 +6,39 @@ const editorJsHtml = require('editorjs-html')
 const EditorJsToHtml = editorJsHtml()
 
 interface Props {
-  data: OutputData | string
-  onlyPreview?: boolean
+  data?: OutputData | string
   isHtml?: boolean
   className?: string
 }
 
-type ParsedContent = string | JSX.Element
-
-const EditorJsRenderer = ({ data, onlyPreview = false, isHtml = false, className }: Props) => {
+const EditorJsRenderer = ({ data, isHtml = false, className }: Props) => {
   if (!data) {
     return null
   }
 
-  const html = isHtml ? [data as string] : (EditorJsToHtml.parse(data as OutputData) as ParsedContent[])
+  console.log(data)
+
+  let html: (string | JSX.Element)[] = []
+
+  if (isHtml && typeof data === 'string') {
+    html = [data]
+  } else if (data && 'blocks' in data && Array.isArray(data.blocks) && data.blocks.length) {
+    html = EditorJsToHtml?.parse(data) as (string | JSX.Element)[]
+  }
+
+  if (!Array.isArray(html)) {
+    console.log('html is not an array', html)
+    return null
+  }
 
   return (
-    <div
-      className={clsx('dark:text-white prose prose-lg max-w-full select:text-primary-400', onlyPreview && 'prose-sm line-clamp-4', className)}
-    >
+    <div className={clsx('select:text-primary-400 prose-lg max-w-full ', className)}>
       {html.map((item, index) => {
         if (typeof item === 'string') {
           return <div dangerouslySetInnerHTML={{ __html: item }} key={index}></div>
         }
-        if (typeof item === 'object') {
-          return <div key={index}>{Object.keys(item)}</div>
-        }
+        // Assuming the object can be represented by its keys. Adjust if needed.
+        return <div key={index}>{Object.keys(item).join(', ')}</div>
       })}
     </div>
   )

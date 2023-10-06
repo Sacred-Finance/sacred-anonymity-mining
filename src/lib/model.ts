@@ -18,7 +18,7 @@ export interface CommunityDetails {
 
 export interface User {
   name: string
-  identityCommitment: Identity
+  identityCommitment: Identity['_commitment']
   id: number | string
   groupId: number
 }

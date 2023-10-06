@@ -40,6 +40,7 @@ const SummaryButton: React.FC<SummaryButtonProps> = ({ postData, postTitle }) =>
         title={postData.length < 25 ? 'Post content too short to summarize' : data ? 'View summary' : 'Summarize post'}
         endIcon={<SparklesIcon className={clsx('h-5 w-5', data ? 'text-white' : 'text-gray-500')} height={20} />}
         isLoading={isLoading}
+        variant={'minimal'}
       >
         {data ? 'Summary' : 'Summarize'}
       </PrimaryButton>
@@ -47,12 +48,15 @@ const SummaryButton: React.FC<SummaryButtonProps> = ({ postData, postTitle }) =>
       {showModal && (
         <div className="fixed inset-0 z-[51] flex items-center justify-center bg-black bg-opacity-50">
           <div
-            className="relative w-1/2 overflow-y-auto rounded bg-white dark:bg-gray-600 200 p-8 text-center"
+            className="200 relative w-1/2 overflow-y-auto rounded bg-white p-8 text-center dark:bg-gray-600"
             onClick={e => {
               e.stopPropagation()
             }}
           >
-            <button onClick={toggleModal} className="absolute right-2 top-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+            <button
+              onClick={toggleModal}
+              className="absolute right-2 top-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+            >
               Close
             </button>
             <span className={'text-xl font-bold '}>{!postTitle ? 'Summary' : postTitle}</span>

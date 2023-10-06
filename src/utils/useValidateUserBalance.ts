@@ -16,7 +16,7 @@ interface ValidationResult {
   toastMessage: string
 }
 
-export const useValidateUserBalance = (community: Group | undefined, address: `0x${string}` | undefined) => {
+export const useValidateUserBalance = (community: Group | undefined, address: Address | undefined) => {
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
   const [fetchEnabled, setFetchEnabled] = useState(false)
 

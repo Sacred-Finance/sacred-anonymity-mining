@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import clsx from 'clsx'
 import { classes } from '@/styles/classes'
 import { PlusIcon, TrashIcon } from '@heroicons/react/20/solid'
@@ -7,6 +7,8 @@ import { usePoll } from '@/hooks/usePoll'
 import { toast } from 'react-toastify'
 import { PrimaryButton } from './buttons'
 import dynamic from 'next/dynamic'
+import { debounce } from 'lodash'
+import { OutputData } from '@editorjs/editorjs'
 const Editor = dynamic(() => import('./editor-js/Editor'), {
   ssr: false,
 })
@@ -18,11 +20,12 @@ interface CreatePollUIProps {
 const CreatePollUI = ({ groupId }: CreatePollUIProps) => {
   const [showModal, setShowModal] = React.useState(false)
   const [title, setTitle] = React.useState('Do you like this poll?')
-  const [description, setDescription] = React.useState(null)
+  const [description, setDescription] = React.useState<OutputData | null>(null)
   const [pollType, setPollType] = React.useState(0)
   const [duration, setDuration] = React.useState(168)
   const [rateScaleFrom, setRateScaleFrom] = React.useState(0)
   const [rateScaleTo, setRateScaleTo] = React.useState(0)
+  const editorReference = React.useRef(null)
 
   const [options, setOptions] = React.useState(['Yes', 'No'])
   const [loading, setLoading] = React.useState(false)
@@ -75,6 +78,7 @@ const CreatePollUI = ({ groupId }: CreatePollUIProps) => {
       setLoading(false)
     }
   }
+  const debouncedSetDescription = useCallback(debounce(setDescription, 300), [])
 
   const disableSave = () => {
     if (!title || !duration || options.some(option => !option)) {
@@ -139,6 +143,9 @@ const CreatePollUI = ({ groupId }: CreatePollUIProps) => {
                       Title (Max 60)
                     </label>
                     <input
+                      //highlight on click
+                      onClick={e => e.currentTarget.select()}
+                      maxLength={60}
                       id={'title'}
                       className={`${clsx(classes.input)}`}
                       placeholder={'Poll Title'}
@@ -154,12 +161,15 @@ const CreatePollUI = ({ groupId }: CreatePollUIProps) => {
                     </label>
                     <Editor
                       divProps={{
-                        className: clsx('z-50'),
+                        className: clsx(
+                          'z-50 bg-white w-full h-full rounded-md shadow-md overflow-y-scroll max-h-[calc(50vh)]',
+                          classes.input
+                        ),
                       }}
                       id={'content'}
                       data={description}
-                      // editorRef={editorReference}
-                      onChange={setDescription}
+                      editorRef={editorReference}
+                      onChange={debouncedSetDescription}
                       readOnly={false}
                       placeholder={'Poll Description'}
                       holder={`create-poll`}

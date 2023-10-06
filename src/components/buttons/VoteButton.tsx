@@ -25,6 +25,7 @@ export const VoteUpButton = ({
     }}
     isConnected={props.isConnected}
     isJoined={props.isJoined}
+    variant={'minimal'}
   >
     <div className={'flex items-center gap-2 '}>
       <HandThumbUpIcon className={clsx('border-1  w-6 p-1 group-hover:fill-green-300')} stroke={'#a49f9f'} />
@@ -46,6 +47,8 @@ export const VoteDownButton = ({
     isConnected={props.isConnected}
     isJoined={props.isJoined}
     className={clsx(props.className)}
+    variant={'minimal'}
+
   >
     <div className={'flex items-center gap-2 '}>
       <HandThumbDownIcon className={clsx('border-1  w-6 p-1 group-hover:fill-red-300')} stroke={'#a49f9f'} />

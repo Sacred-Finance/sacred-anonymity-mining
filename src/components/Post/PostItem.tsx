@@ -20,18 +20,21 @@ import { mutate } from 'swr'
 import { getGroupWithPostAndCommentData } from '@/lib/fetcher'
 import { Avatar } from '@components/Avatar'
 import EditorJsRenderer from '@components/editor-js/EditorJSRenderer'
+import { Address } from '@/types/common'
 
 const Editor = dynamic(() => import('../editor-js/Editor'), {
   ssr: false,
 })
 
 export const PostItem = ({ post }: { post: Item }) => {
-  const router = useRouter()
-  const { postId, groupId } = router.query as { postId: string; groupId: string }
+  const { groupId, parentId, id, kind } = post
+
+  const postId = kind == 0 ? id : parentId
+
   const user = useUserIfJoined(post.groupId)
   const address = useAccount().address
   const { isAdmin, isModerator } = useCheckIfUserIsAdminOrModerator(address)
-  const canDelete = isAdmin || isModerator
+  const canDelete = isAdmin || isModerator || false
   const [isLoading, setIsLoading] = useState(false)
 
   const { t } = useTranslation()
@@ -39,9 +42,12 @@ export const PostItem = ({ post }: { post: Item }) => {
 
   const isAdminOrModerator = isAdmin || isModerator
 
+  const isTypeOfPost = post.kind.toString() === ContentType.POST.toString()
+  const isTypeOfComment = post.kind.toString() === ContentType.COMMENT.toString()
+  const isTypeOfPoll = post.kind.toString() === ContentType.POLL.toString()
+
   const { editItem } = useEditItem({
-    groupId: groupId as unknown as number,
-    postId: postId as unknown as number,
+    item: post,
     isAdminOrModerator: isAdminOrModerator,
     setIsLoading,
   })
@@ -50,18 +56,22 @@ export const PostItem = ({ post }: { post: Item }) => {
     if (!contentRef || !address || !user) return
 
     try {
-      if (!contentTitle) {
-        toast.error(t('alert.emptyTitle'))
+      if (isTypeOfPost) {
+        if (!contentTitle) {
+          toast.error(t('alert.emptyTitle'))
+        }
+        if (!contentDescription || !contentDescription.blocks?.length) {
+          toast.error(t('alert.emptyContent'))
+        }
+        if (!contentTitle || !contentDescription || !contentDescription.blocks?.length)
+          return toast.error(t('alert.emptyContent'))
       }
-      if (!contentDescription || !contentDescription.blocks?.length) {
-        toast.error(t('alert.emptyContent'))
-      }
-      if (!contentTitle || !contentDescription || !contentDescription.blocks?.length)
-        return toast.error(t('alert.emptyContent'))
+
       setIsLoading(true)
+      console.log({ title: contentTitle, description: contentDescription })
       await editItem({
         content: { title: contentTitle, description: contentDescription },
-        itemId: postId,
+        itemId: Number(id),
         itemType: post.kind,
         note: post.note,
       }).then(async value => {
@@ -88,8 +98,8 @@ export const PostItem = ({ post }: { post: Item }) => {
     contentTitle,
     setContentTitle,
   } = useContentManagement({
-    isPost: true,
-    defaultContentDescription: post.description,
+    isPost: isTypeOfPost,
+    defaultContentDescription: post.description || { blocks: post.blocks },
     defaultContentTitle: post.title,
   })
 
@@ -98,10 +108,8 @@ export const PostItem = ({ post }: { post: Item }) => {
     updateIsPostEditable({
       post,
       user,
-      isAdminOrModerator,
       address,
       setIsPostEditable: setIsContentEditable,
-      groupId: groupId as unknown as number,
       canDelete,
     })
   }, [user, post, isAdminOrModerator, address, groupId, canDelete])
@@ -109,45 +117,47 @@ export const PostItem = ({ post }: { post: Item }) => {
   const isPostPage = !isNaN(postId)
 
   return (
-    <div className="min-w-[250px] rounded-lg bg-white p-6 shadow-md transition-colors dark:bg-gray-900">
+    <div className="min-w-[250px] rounded-lg bg-white p-3 shadow-md transition-colors dark:bg-gray-900">
       <div>
-        {post.kind === ContentType.POLL && <PollUI id={post.id} groupId={post.groupId} post={post} />}
+        {isTypeOfPoll && <PollUI id={post.id} groupId={post.groupId} post={post} />}
 
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col ">
+          {isTypeOfPost && (
+            <div className="flex flex-col gap-4">
+              {isContentEditing && (
+                <input
+                  name="title"
+                  className="focus:ring-primary-dark rounded bg-gray-100 p-4 text-black placeholder-gray-500 focus:outline-none focus:ring-2 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400"
+                  placeholder={t('placeholder.enterPostTitle') as string}
+                  type="text"
+                  value={contentTitle}
+                  onChange={e => setContentTitle(e.target.value)}
+                />
+              )}
+
+              {!isContentEditing && post.title && (
+                <PostTitle title={post.title} id={post.id} onPostPage={isPostPage} post={post} />
+              )}
+            </div>
+          )}
+
           <div className="flex flex-col gap-4">
-            {isContentEditing ? (
-              <input
-                name="title"
-                className="focus:ring-primary-dark rounded bg-gray-100 p-4 text-black placeholder-gray-500 focus:outline-none focus:ring-2 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400"
-                placeholder={t('placeholder.enterPostTitle') as string}
-                type="text"
-                value={contentTitle}
-                onChange={e => setContentTitle(e.target.value)}
-              />
-            ) : (
-              <PostTitle post={post} id={<Avatar user={post.ownerEpoch} />} onPostPage={isPostPage} router={router} />
-            )}
-          </div>
-
-          <div className="flex flex-col gap-4">
-            {/* Do not show label on postPage */}
-            {!isPostPage && (
-              <label htmlFor="content" className="text-sm text-gray-600 dark:text-gray-400">
-                Content
-              </label>
-            )}
-
             {!isContentEditing ? (
-              <EditorJsRenderer data={post.description} onlyPreview={!postId} />
+              <EditorJsRenderer
+                data={isTypeOfPost ? post.description : { blocks: post.blocks || post?.description?.blocks }}
+              />
             ) : (
               <Editor
                 editorRef={contentRef}
-                holder={`${post?.id}_post`}
+                holder={`${post?.id}_${isTypeOfPost ? 'post' : 'comment'}`}
                 readOnly={!isContentEditing}
                 onChange={val => setContentDescription(val)}
                 placeholder={t('placeholder.enterPostContent') as string}
-                data={post.description}
-                className="rounded-md bg-gray-100 dark:bg-gray-800"
+                data={isTypeOfPost ? post.description : post}
+                divProps={{
+                  className:
+                    'rounded-md bg-gray-100 dark:bg-gray-800 dark:!text-white p-4 focus:outline-none focus:ring-2 focus:ring-primary-dark',
+                }}
               />
             )}
           </div>
@@ -167,7 +177,6 @@ export const PostItem = ({ post }: { post: Item }) => {
               isLoading={isLoading}
               hidden={false}
             />
-            <CommentCount post={post} isContentEditing={isContentEditing} />
           </div>
         </div>
       </div>
@@ -178,36 +187,21 @@ export const PostItem = ({ post }: { post: Item }) => {
 const updateIsPostEditable = async ({
   post,
   user,
-  isAdminOrModerator,
   address,
   setIsPostEditable,
-  groupId,
   canDelete,
 }: {
   post: Item
   user: User
-  isAdminOrModerator: boolean
-  address: string
+  address: Address
   setIsPostEditable: React.Dispatch<React.SetStateAction<boolean>>
-  groupId: number
   canDelete: boolean
 }) => {
-  console.log('updateIsPostEditable', {
-    post,
-    user,
-    isAdminOrModerator,
-    address,
-    setIsPostEditable,
-    groupId,
-    canDelete,
-  })
   if (user && post) {
     const isEditable = await checkIfPostIsEditable({
-      note: post.note,
-      contentCID: post.contentCID,
+      post,
       address,
       userName: user.name,
-      groupId,
       canDelete,
     })
     setIsPostEditable(isEditable)
@@ -216,27 +210,19 @@ const updateIsPostEditable = async ({
 
 // Function to check if the post is editable
 const checkIfPostIsEditable = async ({
-  note,
+  post,
   address,
   userName,
-  groupId,
   canDelete,
 }: {
-  note: any
-  contentCID: any
-  address: string
+  post: Item
+  address: Address
   userName: string
-  groupId: number
   canDelete: boolean
 }): Promise<boolean> => {
-  const userPosting = new Identity(`${address}_${groupId}_${userName}`)
+  const userPosting = new Identity(`${address}_${post.groupId}_${userName}`)
   const generatedNote = await createNote(userPosting)
   const generatedNoteAsBigNumber = BigNumber.from(generatedNote).toString()
-  const noteBigNumber = BigNumber.from(note).toString()
+  const noteBigNumber = BigNumber.from(post.note).toString()
   return generatedNoteAsBigNumber === noteBigNumber || canDelete
-}
-
-const CommentCount = ({ post, isContentEditing }: { post: Item; isContentEditing: boolean }) => {
-  if (!isContentEditing) return null
-  return <span className="text-gray-600">{post?.childIds?.length || 0} comments</span>
 }
