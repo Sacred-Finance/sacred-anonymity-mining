@@ -9,7 +9,6 @@ import LoadingComponent from '@components/LoadingComponent'
 import SideBar from '@components/SideBar'
 import useSWR, { preload } from 'swr'
 
-
 // preload('/api/data', fetcher)
 
 export default function StandardLayout({ children }) {
@@ -30,6 +29,7 @@ export default function StandardLayout({ children }) {
   useEffect(() => {
     if (!data) return
     const { communitiesData, users } = data
+
     if (!communitiesData || !users) return
     // convert id back to bignumber
     dispatch({ type: 'SET_COMMUNITIES', payload: communitiesData.map(c => ({ ...c, id: BigNumber.from(c.id) })) })
@@ -48,7 +48,7 @@ export default function StandardLayout({ children }) {
 
   const childrenWithProps = React.Children.map(children, child => {
     if (React.isValidElement(child)) {
-      return React.cloneElement(child, { ...data })
+      return React.cloneElement(child, { ...data, key: router.pathname })
     }
     return child
   })

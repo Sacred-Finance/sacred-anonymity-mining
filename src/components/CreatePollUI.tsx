@@ -9,15 +9,18 @@ import { PrimaryButton } from './buttons'
 import dynamic from 'next/dynamic'
 import { debounce } from 'lodash'
 import { OutputData } from '@editorjs/editorjs'
+import { Group, Item } from '@/types/contract/ForumInterface'
+import {useAccount} from "wagmi";
 const Editor = dynamic(() => import('./editor-js/Editor'), {
   ssr: false,
 })
 
 interface CreatePollUIProps {
-  groupId: string
+  group: Group
+  post?: Item
 }
 
-const CreatePollUI = ({ groupId }: CreatePollUIProps) => {
+const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
   const [showModal, setShowModal] = React.useState(false)
   const [title, setTitle] = React.useState('Do you like this poll?')
   const [description, setDescription] = React.useState<OutputData | null>(null)
@@ -25,12 +28,16 @@ const CreatePollUI = ({ groupId }: CreatePollUIProps) => {
   const [duration, setDuration] = React.useState(168)
   const [rateScaleFrom, setRateScaleFrom] = React.useState(0)
   const [rateScaleTo, setRateScaleTo] = React.useState(0)
-  const editorReference = React.useRef(null)
 
   const [options, setOptions] = React.useState(['Yes', 'No'])
   const [loading, setLoading] = React.useState(false)
 
-  const { createPoll } = usePoll({ groupId })
+  const {address} = useAccount()
+
+  const { createPoll } = usePoll({
+    group,
+  })
+
   const pollTypes = [
     {
       name: PollType.SINGLE_ANSWER.toString(),
@@ -50,28 +57,37 @@ const CreatePollUI = ({ groupId }: CreatePollUIProps) => {
   ]
 
   const submit = async () => {
+    if (!address) {
+        toast.error('Please connect your wallet')
+        return
+    }
     setLoading(true)
     try {
-      await createPoll(
-        {
-          title,
-          description,
+      await createPoll({
+        post: post,
+        group: group,
+        pollType: pollType,
+        duration: duration,
+        options: options,
+        answers: options,
+        rateScaleFrom: rateScaleFrom,
+        rateScaleTo: rateScaleTo,
+        content: {
+          title: title,
+          description: description,
         },
-        pollType,
-        duration,
-        options,
-        pollType == PollType.NUMERIC_RATING ? rateScaleFrom : 0,
-        pollType == PollType.NUMERIC_RATING ? rateScaleTo : 0,
-        () => {
+        onSuccessCallback: () => {
           toast.success('Poll created successfully')
           setLoading(false)
           setShowModal(false)
         },
-        err => {
-          toast.error(err)
+        onErrorCallback: err => {
+          console.log(err)
+          setShowModal(false)
+          toast.error(err?.message ?? err)
           setLoading(false)
-        }
-      )
+        },
+      })
     } catch (error) {
       toast.error(error?.message ?? error)
 
@@ -87,6 +103,7 @@ const CreatePollUI = ({ groupId }: CreatePollUIProps) => {
   }
   return (
     <>
+
       <PrimaryButton
         className={clsx(
           'w-fit',
@@ -100,7 +117,7 @@ const CreatePollUI = ({ groupId }: CreatePollUIProps) => {
       {showModal ? (
         <>
           <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden outline-none focus:outline-none">
-            <div className="relative   w-[70%] max-w-6xl">
+            <div className="relative  w-full md:w-[70%] md:max-w-6xl">
               {/*content*/}
               <div className="relative flex w-full flex-col rounded border-0 bg-white shadow-lg outline-none focus:outline-none dark:bg-gray-800">
                 {/*header*/}
@@ -155,20 +172,18 @@ const CreatePollUI = ({ groupId }: CreatePollUIProps) => {
                     />
                   </div>
 
-                  <div className="flex w-full flex-col gap-2">
+                  <div className="flex max-h-[calc(35vh)] w-full flex-col gap-2 overflow-y-scroll">
                     <label htmlFor={'content'} className="text-md">
                       Content
                     </label>
                     <Editor
                       divProps={{
                         className: clsx(
-                          'z-50 bg-white w-full h-full rounded-md shadow-md overflow-y-scroll max-h-[calc(50vh)]',
-                          classes.input
+                          'z-50 bg-white !text-black w-full h-full rounded-md shadow-md overflow-y-visible form-textarea'
                         ),
                       }}
                       id={'content'}
                       data={description}
-                      editorRef={editorReference}
                       onChange={debouncedSetDescription}
                       readOnly={false}
                       placeholder={'Poll Description'}
@@ -242,9 +257,10 @@ const CreatePollUI = ({ groupId }: CreatePollUIProps) => {
                             }}
                             disabled={options.length >= 10 || index !== options.length - 1}
                             className={clsx(
-                              'border-pink-500  rounded border px-2 py-2 text-xs font-bold uppercase text-gray-500 outline-none transition-all duration-150 ease-linear hover:bg-gray-500 hover:text-white focus:outline-none active:bg-gray-600',
-                              'mr-1 last:mr-0',
-                              options.length >= 10 || index !== options.length - 1 ? 'hidden' : ''
+                              'border-pink-500 mr-1 rounded border px-2 py-2 text-xs font-bold uppercase text-gray-500 outline-none transition-all duration-150 ease-linear last:mr-0 hover:bg-gray-500 hover:text-white focus:outline-none active:bg-gray-600',
+                              options.length >= 10 || index !== options.length - 1
+                                ? 'hidden'
+                                : 'bg-green-500/90 text-white'
                             )}
                             type="button"
                           >

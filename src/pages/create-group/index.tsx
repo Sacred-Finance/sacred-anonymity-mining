@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
-import { ethers, utils } from 'ethers'
-import { erc20dummyABI, jsonRPCProvider, supportedChains, supportedChainsArray } from '@/constant/const'
+import { ethers, providers, utils } from 'ethers'
+import { erc20dummyABI, getRpcProvider, supportedChains, supportedChainsArray } from '@/constant/const'
 import { FieldArray, FormikProvider, useFormik } from 'formik'
 import { Chain } from 'wagmi'
 import ToolTip from '@components/HOC/ToolTip'
@@ -14,6 +14,9 @@ import { ChevronRightIcon, QuestionMarkCircleIcon } from '@heroicons/react/20/so
 import { AnimatePresence, motion } from 'framer-motion'
 import { useCreateCommunity } from '@/hooks/useCreateCommunity'
 import Link from 'next/link'
+import WithStandardLayout from '@components/HOC/WithStandardLayout'
+import { isImageFile } from '@pages/communities/[groupId]/edit'
+import Dropdown from '@/components/buttons/Dropdown/Dropdown'
 
 export interface HandleSetImage {
   file: File | null
@@ -35,6 +38,7 @@ function CreateGroupFormUI({ onCreate }) {
   const initialValues = {
     tokenAddress: '',
     minAmount: 0,
+    // maxAmount: 0,
     token: '-',
     decimals: 0,
   }
@@ -90,7 +94,7 @@ function CreateGroupFormUI({ onCreate }) {
     await formik.setFieldValue(`tokenRequirements.${i}.tokenAddress`, val, false)
     if (val) {
       if (utils.isAddress(val)) {
-        const p = jsonRPCProvider
+        const p = getRpcProvider(selectedChain.id);
 
         const contract = new ethers.Contract(val, erc20dummyABI, p)
         const setNameNotFoundError = async () => {
@@ -154,6 +158,7 @@ function CreateGroupFormUI({ onCreate }) {
       return {
         ...v,
         minAmount: BigInt(v?.minAmount * 10 ** v?.decimals).toString(),
+        // maxAmount: BigInt(v?.maxAmount * 10 ** v?.decimals).toString(),
       }
     })
     await onCreate({
@@ -255,7 +260,7 @@ function CreateGroupFormUI({ onCreate }) {
 
       <div className="flex items-center justify-between space-x-4">
         <div className="flex items-center space-x-4">
-          <ToolTip toolTip={t('toolTip.tokenGating.message') || ''}>
+          <ToolTip tooltip={t('toolTip.tokenGating.message') || ''}>
             <QuestionMarkCircleIcon className="h-6 w-6" />
           </ToolTip>
 
@@ -279,36 +284,18 @@ function CreateGroupFormUI({ onCreate }) {
           />
         </div>
 
-        <div className=" relative inline-flex w-[200px] items-center gap-4">
+        <div className="relative inline-flex w-[200px] items-center gap-4">
           <div className="group relative w-60">
-            <button
+            <Dropdown
+              options={supportedChainsArray.map(c => ({key: c.name, value: c}))}
+              selected={{key: selectedChain.name, value: selectedChain}}
+              onSelect={(v) => {
+                selectChain(v)
+                formik.setFieldValue('tokenRequirements', [initialValues])
+                if (!reqMandatory) setReqMandatory(true)
+              }}
               disabled={!reqMandatory}
-              className="flex w-full items-center justify-between rounded border border-gray-400 bg-white px-2 py-1 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            >
-              {selectedChain.name}
-              <ChevronRightIcon
-                className="h-5 w-5 transform transition-transform duration-200 group-hover:rotate-90"
-                aria-hidden="true"
-              />
-            </button>
-
-            <div className="absolute left-0 z-50  hidden w-48 overflow-hidden rounded border border-gray-400 bg-white shadow-lg ring-1 ring-black ring-opacity-5 group-hover:block dark:border-gray-600 dark:bg-gray-700">
-              <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                {supportedChainsArray.map((k, i) => (
-                  <button
-                    key={k.id}
-                    className="w-full border border-gray-400 px-3 py-2 text-left hover:bg-gray-200 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
-                    onClick={e => {
-                      selectChain(k)
-                      formik.setFieldValue('tokenRequirements', [initialValues])
-                      if (!reqMandatory) setReqMandatory(true)
-                    }}
-                  >
-                    {k.name}
-                  </button>
-                ))}
-              </div>
-            </div>
+            />
           </div>
 
           <button
@@ -337,7 +324,7 @@ function CreateGroupFormUI({ onCreate }) {
                     <motion.div
                       key={i}
                       layout
-                      className="flex items-center space-x-4"
+                      className="flex items-center space-x-4 h-[80px]"
                       initial={{ opacity: 0, y: 20, overflowY: 'visible' }}
                       animate={{ opacity: 1, y: 0, overflowY: 'hidden' }}
                       exit={{ opacity: 0, y: 20, overflowY: 'hidden' }}
@@ -345,18 +332,24 @@ function CreateGroupFormUI({ onCreate }) {
                     >
                       <p className="pt-2 font-bold ">{i + 1}.</p>
                       <div className="relative flex-grow">
+                        <div className="text-blue-gray-500 absolute right-7 top-2/4 grid h-5 w-5 -translate-y-2/4 place-items-center">
+                          <span className="text-xs font-semibold text-gray-500">{r.token}</span>
+                        </div>
                         <input
                           disabled={!reqMandatory}
-                          className="w-full rounded  border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+                          className={clsx(
+                            er[`tokenRequirements_${i}`] ? 'border-red-600 focus:border-red-600 focus:ring-0' : 'border-gray-300',
+                            er[`tokenRequirements_${i}`] && '',
+                            'w-full rounded-md borde px-3 py-2 text-gray-700 focus:outline-none')}
                           value={r.tokenAddress}
                           onChange={e => handleReqInput(e, i)}
                           name={`tokenRequirements.${i}.tokenAddress`}
                           placeholder={t('placeholder.tokenAddress')}
                           type="text"
                         />
-                        <p className={clsx('absolute text-sm text-red-600', er[`tokenRequirements_${i}`] && 'visible')}>
+                        <small className={clsx('block absolute text-sm text-red-600', er[`tokenRequirements_${i}`] && 'visible')}>
                           {er[`tokenRequirements_${i}`]}
-                        </p>
+                        </small>
                       </div>
 
                       <div className="w-32">
@@ -372,6 +365,20 @@ function CreateGroupFormUI({ onCreate }) {
                           placeholder={t('placeholder.minAmount')}
                         />
                       </div>
+
+                      {/* <div className="w-32">
+                        <input
+                          disabled={!reqMandatory}
+                          className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
+                          type="number"
+                          min={0}
+                          defaultValue={r.maxAmount}
+                          value={r.maxAmount}
+                          onChange={formik.handleChange}
+                          name={`tokenRequirements.${i}.maxAmount`}
+                          placeholder={t('placeholder.maxAmount')}
+                        />
+                      </div> */}
 
                       <button
                         type="button"

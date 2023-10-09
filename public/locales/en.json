@@ -70,6 +70,7 @@
     "comment": "Comment",
     "join_one": "Join",
     "join_other": "Joined",
+    "leave": "Leave",
     "addComment": "Add Comment",
     "addReply": "Add Reply",
     "addPost": "Add Post",

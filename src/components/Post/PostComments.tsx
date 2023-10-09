@@ -1,8 +1,9 @@
 import React from 'react'
 import { commentIsConfirmed, formatDistanceToNow } from '@/lib/utils'
 import { motion } from 'framer-motion'
-import { Item } from '@/types/contract/ForumInterface'
+import {Group, Item} from '@/types/contract/ForumInterface'
 import { PostItem } from '@components/Post/PostItem'
+import {useCommunityContext} from "@/contexts/CommunityProvider";
 
 export interface TempComment {
   id: string
@@ -24,17 +25,19 @@ export const NewPostModal: {
   rootOpen: 'fixed z-50 inset-0 p-12 bg-gray-900/50 flex justify-center items-center ',
   formBody: 'w-full h-full flex flex-col gap-4 min-h-[400px] justify-between ',
   editor:
-    'border rounded-md py-2 px-3 min-h-[300px] transition-shadow focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 dark:text-dark-100',
+    'border rounded-md py-2 px-3 min-h-[300px] transition-shadow focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 dark:text-dark-100 ',
   submitButton:
-    'bg-green-500 text-white border-none rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-600',
+    'bg-green-500 text-white border-none rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-600 ',
   formContainerOpen:
-    'bg-white dark:bg-gray-900 p-6 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg w-full max-w-3xl overflow-y-auto ',
+    'bg-white dark:bg-gray-900 p-6 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg w-full max-w-3xl ',
   openFormButtonOpen: 'self-end hidden',
   openFormButtonClosed:
     'h-full bg-primary-500 text-white rounded-md hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600',
 }
 
 export const PostComments = ({ comments }: { comments: Item[] }) => {
+  const { state } = useCommunityContext()
+  const community = state.activeCommunity.community as Group
   return (
     <div className={'flex flex-grow flex-col gap-4 '}>
       {comments.map((comment, i) => (
@@ -46,7 +49,7 @@ export const PostComments = ({ comments }: { comments: Item[] }) => {
           className="rounded-lg bg-white  shadow-sm transition-colors dark:bg-gray-800"
         >
           <div className="flex flex-col gap-2 overflow-y-scroll">
-            {comment && <PostItem post={comment} />}
+            {comment && <PostItem post={comment} group={community} />}
             <div className="pt-3 text-gray-600 dark:text-gray-400">
               <div
                 className="flex gap-4"

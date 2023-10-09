@@ -44,28 +44,35 @@ export const postHandler = (res: NextApiResponse) => async (url: string, body: a
         'Accept': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
       },
-    });
-    res.status(200).json(response.data);
+    })
+    res.status(200).json(response.data)
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message })
   }
-};
+}
 
-export const gptPostHandler = (res: NextApiResponse) => async (url: string, body: any) => {
+export const gptPostHandler = async (url: string, body: any) => {
   try {
-    const response = await axios.post(url, JSON.stringify(body), {
+    const response = await axios.post(url, body, {
       headers: {
-        'origin': 'https://app.sacredprotocol.com',
-        'Content-Type': 'application/json; charset=UTF-8',
+        'Content-Type': 'application/json',
         'Accept': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
+        'origin': 'https://app.sacredprotocol.com',
       },
-    });
-    res.status(200).json(response.data);
+    })
+    {
+    }
+    return response.data
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    if (error.response) {
+      // The request was made and the server responded with a status code that falls out of the range of 2xx
+      throw new Error(`Request failed with status ${error.response.status}: ${JSON.stringify(error.response.data)}`)
+    }
+    // Other errors (network error, timeout, etc)
+    throw new Error(error.message)
   }
-};
+}
 
 export function discourseAuthenticationHeaders() {
   return {

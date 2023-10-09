@@ -52,7 +52,7 @@ export default App
 // Web3 Configs
 const stallTimeout = 10_0000
 const { chains, provider, webSocketProvider } = configureChains(
-  [polygonMumbai, sepolia, avalancheFuji, goerli],
+  [polygonMumbai],
   [
     alchemyProvider({
       apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY as string,
@@ -84,11 +84,6 @@ const { chains, provider, webSocketProvider } = configureChains(
         } else if (chain.id === sepolia.id) {
           return {
             http: process.env.NEXT_PUBLIC_SEPOLIA_URL ?? '',
-            webSocket: process.env.NEXT_PUBLIC_LOCALHOST_URL ?? '',
-          }
-        } else if (chain.id === avalancheFuji.id) {
-          return {
-            http: process.env.NEXT_PUBLIC_AVALANCHE_FUJI_URL ?? '',
             webSocket: process.env.NEXT_PUBLIC_LOCALHOST_URL ?? '',
           }
         }

@@ -54,10 +54,17 @@ export function PrimaryButton({
       'rounded-lg border bg-transparent px-4 py-2 text-primary-500 shadow-md transition duration-150 ease-in-out hover:brightness-125 focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-opacity-50 active:bg-gray-100 disabled:opacity-60',
   }
 
+  // filter out props that are spreadable to the button
+  const buttonProps = Object.fromEntries(
+    Object.entries(rest).filter(
+      ([key]) => !['toolTip', 'requirements', 'isConnected', 'isJoined', 'variant', 'loadingPosition', 'startIcon', 'endIcon'].includes(key)
+    )
+  )
+
   return (
     <ToolTip tooltip={rest?.toolTip || false}>
       <button
-        {...rest}
+        {...buttonProps}
         disabled={rest.disabled || isLoading}
         className={clsx(
           !resetClasses && classes[variant],

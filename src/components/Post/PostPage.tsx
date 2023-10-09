@@ -1,10 +1,10 @@
-import { useActiveUser, useCommunityContext, useUserIfJoined } from '@/contexts/CommunityProvider'
+import { useActiveUser, useCommunityContext, useUserIfJoined, useUsers } from '@/contexts/CommunityProvider'
 import { useAccount } from 'wagmi'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
 import { useTranslation } from 'next-i18next'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
 import { useValidateUserBalance } from '@/utils/useValidateUserBalance'
-import { BigNumber } from 'ethers'
+import { BigNumber, utils } from 'ethers'
 import { toast } from 'react-toastify'
 import { CommunityCard } from '@components/CommunityCard/CommunityCard'
 import { VoteDownButton, VoteUpButton } from '@components/buttons'
@@ -18,47 +18,43 @@ import { PencilIcon } from '@heroicons/react/20/solid'
 import { useRouter } from 'next/router'
 import { ChatIcon, InfoIcon, PollIcon } from '@components/CommunityActionTabs'
 import clsx from 'clsx'
-import { NewPostForm } from '@components/NewPostForm'
+import { NewPostForm, NewPostFormProps } from '@components/NewPostForm'
 import { OutputData } from '@editorjs/editorjs'
 import { useItemsSortedByVote } from '@/hooks/useItemsSortedByVote'
 import { SortByOption } from '@components/SortBy'
 import { Group, Item } from '@/types/contract/ForumInterface'
 import { CommentClass } from '@/lib/comment'
 import { Post } from '@/lib/post'
-import { User } from '@/lib/model'
+import { ContentType, ItemCreationRequest, ReputationProofStruct, User } from '@/lib/model'
 import CreatePollUI from '@components/CreatePollUI'
 import ToolTip from '@components/HOC/ToolTip'
+import { useFetchUsers } from '@/hooks/useFetchUsers'
+import { Group as SemaphoreGroup } from '@semaphore-protocol/group'
+import { Identity } from '@semaphore-protocol/identity'
+import { UnirepUser } from '@/lib/unirep'
+import { useContentManagement } from '@/hooks/useContentManagement'
+import { createComment, vote } from '@/lib/api'
+import { generateProof } from '@semaphore-protocol/proof'
+import { createNote, getBytes32FromIpfsHash, hashBytes, hashBytes2, uploadIPFS } from '@/lib/utils'
+import { mutate } from 'swr'
+import { getGroupWithPostAndCommentData } from '@/lib/fetcher'
+import { emptyPollRequest } from '@/lib/item'
 
 export function PostPage({
-  postInstance,
   comments,
   post,
   community,
-  commentInstance,
 }: {
   postInstance: Post
-  groupId: any
   comments: Item[]
   post: Item
   community: Group
   commentInstance: CommentClass
 }) {
-  const user = useUserIfJoined(post.groupId)
-  const activeUser = useActiveUser({ groupId: post.groupId })
-  const { state } = useCommunityContext()
-  const { users } = state
-  const postId = post.parentId
-
+  const postId = post.id
   const { address } = useAccount()
-  const [isLoading, setIsLoading] = useState(false)
 
-  const { isAdmin, isModerator, fetchIsAdmin, fetchIsModerator } = useCheckIfUserIsAdminOrModerator(address)
-  const { editItem } = useEditItem({
-    item: post,
-    isAdminOrModerator: isAdmin || isModerator,
-    setIsLoading: setIsLoading,
-  })
-  const canDelete = isAdmin || isModerator
+  const { fetchIsAdmin, fetchIsModerator } = useCheckIfUserIsAdminOrModerator(address)
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -74,107 +70,9 @@ export function PostPage({
   const { t } = useTranslation()
   const [tempComments, setTempComments] = useState<TempComment[]>([])
 
-  const commentEditorRef = useRef<any>()
   const [commentsSortBy, setCommentsSortBy] = useState<SortByOption>('highest')
 
-  const identityCommitment = user ? BigInt(user?.identityCommitment?.toString()) : null
-
-  const { checkUserBalance } = useValidateUserBalance(community, address)
-
   const router = useRouter()
-
-  const voteForPost = async (postId, voteType: 0 | 1) => {
-    if (!user) return
-    const hasSufficientBalance = await checkUserBalance()
-    if (!hasSufficientBalance) return
-    setIsLoading(true)
-
-    try {
-      const { status } = await postInstance?.vote(voteType, address, users, activeUser, postId, groupId)
-
-      if (status === 200) {
-        setIsLoading(false)
-        postInstance?.updatePostsVote(postInstance, postId, voteType, false)
-      } else {
-        toast(t('alert.voteFailed'))
-      }
-    } catch (error) {
-      console.log(error)
-      toast(t('alert.voteFailed'))
-      setIsLoading(false)
-    }
-  }
-
-  const [comment, setComment] = useState<OutputData | null>(null)
-
-  const validateRequirements = () => {
-    if (!address) return toast.error(t('toast.error.notLoggedIn'), { type: 'error', toastId: 'min' })
-    if (!user) return toast.error(t('toast.error.notJoined'), { type: 'error', toastId: 'min' })
-
-    return true
-  }
-
-  const addComment = async () => {
-    if (validateRequirements() !== true) return
-    const hasSufficientBalance = await checkUserBalance()
-    if (!hasSufficientBalance) return
-    let ipfsHash = ''
-
-    try {
-      setIsLoading(true)
-      const response = await commentInstance?.create(
-        comment,
-        address,
-        users,
-        user as User,
-        post.groupId,
-        setIsLoading,
-        (comment, cid) => {
-          ipfsHash = cid
-          setTempComments([
-            {
-              id: cid,
-              createdAt: new Date(),
-              content: comment,
-            },
-            ...tempComments,
-          ])
-        }
-      )
-
-      if (response?.status === 200) {
-        clearInput()
-        toast.success(t('alert.commentCreateSuccess'))
-      } else {
-        toast.error(t('alert.addCommentFailed'))
-      }
-    } catch (error) {
-      clearInput()
-      if (error?.message?.includes('ProveReputation_227')) {
-        toast.error(t('error.notEnoughReputation'), { toastId: 'notEnoughReputation' })
-      } else {
-        toast.error(t('alert.addCommentFailed'))
-      }
-    } finally {
-      setIsLoading(false)
-      setTempComments(prevComments => {
-        const tempCommentIndex = prevComments.findIndex(t => t.id === ipfsHash)
-        if (tempCommentIndex > -1) {
-          const tempCommentsCopy = [...prevComments]
-          tempCommentsCopy.splice(tempCommentIndex, 1)
-          return tempCommentsCopy
-        }
-        return prevComments
-      })
-    }
-  }
-
-  const clearInput = () => {
-    setComment({
-      blocks: [],
-    })
-    commentEditorRef?.current?.clear()
-  }
 
   const sortedCommentsData = useItemsSortedByVote(tempComments, comments, commentsSortBy)
 
@@ -184,45 +82,12 @@ export function PostPage({
         <div className="flex h-full flex-wrap sm:flex-col-reverse md:flex-row">
           <div className="flex w-full flex-col space-y-3 p-3 md:w-1/2">
             <div className="sticky top-0 z-10 flex  gap-4 border-b p-3 dark:border-gray-700 dark:bg-gray-900">
-              <VoteUpButton
-                isConnected={!!address}
-                isJoined={!!user}
-                isLoading={isLoading}
-                onClick={e =>
-                  handleVote({
-                    e,
-                    vote: 'upvote',
-                    voteForPost,
-                    id: post.id,
-                    setIsLoading,
-                  })
-                }
-                disabled={isLoading || !address}
-              >
-                <span className="font-bold text-white dark:text-gray-300">{post.upvote}</span>
-              </VoteUpButton>
-              <VoteDownButton
-                isConnected={!!address}
-                isJoined={!!user}
-                isLoading={isLoading}
-                onClick={e =>
-                  handleVote({
-                    e,
-                    vote: 'downvote',
-                    voteForPost,
-                    id: post.id,
-                    setIsLoading,
-                  })
-                }
-                disabled={isLoading || !address}
-              >
-                <span className="font-bold text-white dark:text-gray-300">{post.downvote}</span>
-              </VoteDownButton>
+              <VoteForItemUI post={post} group={community} />
               <SummaryButton postData={OutputDataToHTML(post?.description)} postTitle={post.title} />
             </div>
 
             <div className="flex-1 overflow-y-auto">
-              <PostItem post={post} />
+              <PostItem post={post} group={community} />
             </div>
           </div>
 
@@ -262,7 +127,7 @@ export function PostPage({
                   </Tab>
                 </div>
               </Tab.List>
-              <div className="overflow-y-auto max-h-screen pb-40">
+              <div className="max-h-screen overflow-y-auto pb-40">
                 <Tab.Panels>
                   <Tab.Panel
                     className={clsx('scrollbar max-h-[calc(90vh - 200px)] col-span-12 flex w-full flex-col gap-2')}
@@ -283,37 +148,23 @@ export function PostPage({
                     className={clsx('scrollbar max-h-[calc(90vh - 200px)] col-span-12 flex w-full flex-col gap-2')}
                   >
                     <div className={'flex gap-2'}>
-                      <CreatePollUI groupId={post.groupId} />
+                      <CreatePollUI post={post} group={community} />
                     </div>
                     {!sortedCommentsData.length && (
                       <div className="flex flex-col items-center justify-center gap-2">
                         <div className="text-md">No Polls yet</div>
                       </div>
                     )}
+                    {sortedCommentsData.length ? (
+                      <PostComments comments={sortedCommentsData.filter(comment => comment.kind == ContentType.POLL)} />
+                    ) : null}
                   </Tab.Panel>
                   <Tab.Panel
                     className={clsx('scrollbar max-h-[calc(90vh - 200px)] col-span-12 flex w-full flex-col gap-2')}
                   >
                     <div className={'flex gap-2'}>
-                      <NewPostForm
-                          editorId={`post_comment${post.groupId}`}
-                          description={comment}
-                          setDescription={setComment}
-                          handleSubmit={addComment}
-                          setTitle={() => {}}
-                          resetForm={() => setComment(null)}
-                          isEditable={true}
-                          isReadOnly={false}
-                          title={''}
-                          itemType={'comment'}
-                          actionType={'new'}
-                          classes={NewPostModal}
-                          submitButtonText={t('button.comment') || 'missing-text'}
-                          placeholder={t('placeholder.comment') || 'missing-text'}
-                          openFormButtonText={t('button.comment') || 'missing-text'}
-                      />
-
-                      <CreatePollUI groupId={post.groupId} />
+                      <CreateCommentUI post={post} group={community} />
+                      <CreatePollUI post={post} group={community} />
                     </div>
                     {sortedCommentsData.length ? <PostComments comments={sortedCommentsData} /> : null}
                     {!sortedCommentsData.length && (
@@ -335,31 +186,260 @@ export function PostPage({
 interface HandleVoteParams {
   e: any
   vote: 'upvote' | 'downvote'
-  voteForPost: any
-  id: any
+  voteForPost: (itemId: number, voteType: 0 | 1) => Promise<void>
+  itemId: any
   setIsLoading: any
 }
 
-export const handleVote = async ({ e, vote, voteForPost, id, setIsLoading }: HandleVoteParams): Promise<void> => {
+export const handleVote = async ({ e, vote, voteForPost, itemId, setIsLoading }: HandleVoteParams): Promise<void> => {
   e.stopPropagation()
   e.preventDefault()
-  if (isNaN(id)) {
+  if (isNaN(itemId)) {
     toast.error('Invalid post id')
     return
   }
   setIsLoading(true)
   const val = vote === 'upvote' ? 0 : 1
-  const voteResponse = await voteForPost(BigNumber.from(id).toNumber(), val)
+  const voteResponse = await voteForPost(BigNumber.from(itemId).toNumber(), val)
   if (voteResponse) {
     console.log('voteResponse', voteResponse)
   }
   setIsLoading(false)
 }
-export const SplitContent = ({ children, ...props }) => (
-  <div
-    {...props}
-    className={clsx('scrollbar max-h-[calc(90vh - 200px)] col-span-12 gap-2 overflow-y-auto md:col-span-5')}
-  >
-    {children}
-  </div>
-)
+
+const CreateCommentUI = ({ group, post }: { group: Group; post: Item }) => {
+  const groupId = group.groupId
+  const user = useUserIfJoined(group.id.toString())
+  const activeUser = useActiveUser({ groupId: group.id })
+  const { t } = useTranslation()
+  const { address } = useAccount()
+  const { checkUserBalance } = useValidateUserBalance(group, address)
+  const { fetchUsersFromSemaphoreContract } = useFetchUsers(group.id.toString(), false)
+
+  const [isLoading, setIsLoading] = useState(false)
+
+  const validateRequirements = () => {
+    if (!address) return toast.error(t('alert.connectWallet'), { toastId: 'connectWallet' })
+    if (!user) return toast.error(t('toast.error.notJoined'), { type: 'error', toastId: 'min' })
+
+    return true
+  }
+
+  const { contentDescription, setContentDescription, tempContents, contentTitle, setTempContents, setContentTitle } =
+    useContentManagement({
+      isPost: false,
+      defaultContentDescription: undefined,
+      defaultContentTitle: undefined,
+    })
+
+  const addComment: () => Promise<void> = async () => {
+    if (validateRequirements() !== true) return
+    if (!contentDescription) {
+      toast.error('Please enter a title and description', { toastId: 'missingTitleOrDesc' })
+      return
+    }
+    const hasSufficientBalance = await checkUserBalance()
+    if (!hasSufficientBalance) return
+
+    setIsLoading(true)
+    let currentDate = new Date()
+    const _message = currentDate.getTime() + '#' + JSON.stringify(contentDescription)
+
+    const cid = await uploadIPFS(_message)
+    if (!cid) {
+      throw 'Upload to IPFS failed'
+    }
+
+    const signal = getBytes32FromIpfsHash(cid)
+    const extraNullifier = hashBytes(signal).toString()
+    let semaphoreGroup = new SemaphoreGroup(group.id)
+
+    const users = await fetchUsersFromSemaphoreContract()
+    users.forEach(u => semaphoreGroup.addMember(BigInt(u)))
+
+    try {
+      const userIdentity = new Identity(`${address}_${group.id}_${activeUser?.name || 'anon'}`)
+
+      console.log('userIdentity', userIdentity)
+
+      const unirepUser = new UnirepUser(userIdentity)
+      await unirepUser.updateUserState()
+      const userState = await unirepUser.getUserState()
+      const note = await createNote(userIdentity)
+
+      let reputationProof = await userState.genProveReputationProof({
+        epkNonce: 0,
+        minRep: 0,
+        graffitiPreImage: 0,
+      })
+
+      const epochData = unirepUser.getEpochData()
+      const epoch: ReputationProofStruct = {
+        publicSignals: epochData.publicSignals,
+        proof: epochData.proof,
+        publicSignalsQ: reputationProof.publicSignals,
+        proofQ: reputationProof.proof,
+        ownerEpoch: BigNumber.from(epochData.epoch)?.toString(),
+        ownerEpochKey: epochData.epochKey,
+      }
+
+      const fullProof = await generateProof(userIdentity, semaphoreGroup, extraNullifier, hashBytes(signal))
+
+      const request: ItemCreationRequest = {
+        contentCID: signal,
+        merkleTreeRoot: fullProof.merkleTreeRoot.toString(),
+        nullifierHash: fullProof.nullifierHash.toString(),
+        note: note.toString(),
+      }
+
+      await createComment({
+        groupId: groupId as string,
+        parentId: post.id.toString(),
+        request: request,
+        solidityProof: fullProof.proof,
+        unirepProof: epoch,
+        asPoll: false,
+        pollRequest: emptyPollRequest,
+      }).then(async res => {
+        await mutate(getGroupWithPostAndCommentData(groupId, post.id))
+        toast.success('Comment created successfully')
+        return res
+      })
+      setIsLoading(false)
+    } catch (error) {
+      setIsLoading(false)
+      toast.error('Failed to create comment')
+    }
+  }
+
+  const propsForNewPost: NewPostFormProps = {
+    editorId: `${groupId}_comment`,
+    submitButtonText: t('button.submit') as string,
+    openFormButtonText: t('button.newComment') as string,
+    description: contentDescription,
+    setDescription: setContentDescription,
+    handleSubmit: addComment,
+    showButtonWhenFormOpen: true,
+    setTitle: setContentTitle as Dispatch<SetStateAction<string | null>>,
+    resetForm: () => {},
+    isReadOnly: false,
+    isSubmitting: isLoading,
+    title: '',
+    isEditable: true,
+    itemType: 'comment',
+    actionType: 'new',
+    classes: NewPostModal,
+  }
+
+  return <NewPostForm {...propsForNewPost} />
+}
+
+export const VoteForItemUI = ({ post, group }: { post: Item; group: Group }) => {
+  const groupId = group.id.toString()
+  const user = useUserIfJoined(groupId)
+  const activeUser = useActiveUser({ groupId: groupId })
+  const { t } = useTranslation()
+  const { address } = useAccount()
+  const { checkUserBalance } = useValidateUserBalance(group, address)
+  const { fetchUsersFromSemaphoreContract } = useFetchUsers(group.id.toString(), false)
+
+  const [isLoading, setIsLoading] = useState(false)
+
+  const validateRequirements = () => {
+    if (!address) return toast.error(t('alert.connectWallet'), { toastId: 'connectWallet' })
+    if (!user) return toast.error(t('toast.error.notJoined'), { type: 'error', toastId: 'min' })
+
+    return true
+  }
+
+  const voteForPost = async (itemId: number, voteType: 0 | 1) => {
+    if (validateRequirements() !== true) return
+
+    const hasSufficientBalance = await checkUserBalance()
+    if (!hasSufficientBalance) return
+
+    setIsLoading(true)
+    try {
+      const voteCmdNum = hashBytes2(+itemId, 'vote')
+      const signal = utils.hexZeroPad('0x' + voteCmdNum.toString(16), 32)
+      const extraNullifier = voteCmdNum.toString()
+      let semaphoreGroup = new SemaphoreGroup(BigInt(groupId))
+      const users = await fetchUsersFromSemaphoreContract()
+      users.forEach(u => semaphoreGroup.addMember(BigInt(u)))
+      const userIdentity = new Identity(`${address}_${group.id}_anon`)
+
+      const unirepUser = new UnirepUser(userIdentity)
+      await unirepUser.updateUserState()
+      const userState = await unirepUser.getUserState()
+      let reputationProof = await userState.genProveReputationProof({
+        epkNonce: 0,
+        minRep: 0,
+        graffitiPreImage: 0,
+      })
+
+      const { proof, nullifierHash, merkleTreeRoot } = await generateProof(
+        userIdentity,
+        semaphoreGroup,
+        extraNullifier,
+        signal
+      )
+
+      const epochData = unirepUser.getEpochData()
+      const voteProofData: ReputationProofStruct = {
+        publicSignals: epochData.publicSignals,
+        proof: epochData.proof,
+        publicSignalsQ: reputationProof.publicSignals,
+        proofQ: reputationProof.proof,
+        ownerEpoch: BigNumber.from(epochData.epoch)?.toString(),
+        ownerEpochKey: epochData.epochKey,
+      }
+
+      return vote(
+        itemId.toString(),
+        groupId,
+        voteType,
+        merkleTreeRoot.toString(),
+        nullifierHash.toString(),
+        proof,
+        voteProofData
+      )
+        .then(async res => {
+          await mutate(getGroupWithPostAndCommentData(groupId, post.id))
+          toast.success('Vote created successfully')
+          return res
+        })
+        .catch(err => {
+          console.log(err)
+          toast.error('Failed to create vote')
+          setIsLoading(false)
+        })
+    } catch (error) {
+      console.log(error)
+      toast(t('alert.voteFailed'))
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <>
+      <VoteUpButton
+        isConnected={!!address}
+        isJoined={!!activeUser}
+        isLoading={isLoading}
+        onClick={e => voteForPost(Number(post.id), 0)}
+        disabled={isLoading || !address}
+      >
+        <span className="font-bold text-gray-500 dark:text-gray-300">{post.upvote}</span>
+      </VoteUpButton>
+      <VoteDownButton
+        isConnected={!!address}
+        isJoined={!!activeUser}
+        isLoading={isLoading}
+        onClick={e => voteForPost(Number(post.id), 1)}
+        disabled={isLoading || !address}
+      >
+        <span className="font-bold  text-gray-500 dark:text-gray-300">{post.downvote}</span>
+      </VoteDownButton>
+    </>
+  )
+}

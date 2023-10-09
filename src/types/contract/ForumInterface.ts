@@ -195,6 +195,7 @@ export interface NewUser {
 export interface Requirement {
   tokenAddress: string
   minAmount: string
+  // maxAmount: string
   // The following are not part of the contract
   name?: string
   symbol?: string
@@ -203,7 +204,8 @@ export interface Requirement {
 
 export interface RawRequirement {
   tokenAddress: string
-  minAmount: ethers.BigNumber
+  minAmount: ethers.BigNumber,
+  // maxAmount: ethers.BigNumber
 }
 
 export type RawGroupData = {
@@ -232,7 +234,7 @@ export interface Group {
   userCount: number
   ownerIdentity?: string
   chainId: number
-  posts: number[]
+  posts: Item[]
   removed: boolean
   // The following are not part of the contract
   groupId?: string

@@ -36,7 +36,7 @@ export function SideItem({
           href={(!onClick && href) || '/'}
           {...linkProps}
           className={clsx(
-            'flex w-full items-center rounded p-3 shadow group-hover:bg-gray-200 dark:group-hover:bg-gray-800',
+            'flex w-full items-center rounded md:p-3 shadow group-hover:bg-gray-200 dark:group-hover:bg-gray-800',
             isOpen ? 'gap-3' : 'flex-col gap-1',
             active && ' brightness-125'
           )}

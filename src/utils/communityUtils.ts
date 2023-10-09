@@ -2,7 +2,7 @@ import { ethers } from 'ethers'
 import { erc20dummyABI, forumContract, providerMap } from '@/constant/const'
 import { setCache } from '@/lib/redis'
 import { getContent, getIpfsHashFromBytes32, parseComment, parsePost, uploadImageToIPFS } from '@/lib/utils'
-import { CommunityDetails, ContentType, Requirement } from '@/lib/model'
+import {CommunityDetails, ContentType, ReputationProofStruct, Requirement} from '@/lib/model'
 
 import pica from 'pica'
 import { useCallback } from 'react'
@@ -282,6 +282,7 @@ export const addRequirementDetails = async (community: Group): Promise<Awaited<R
       }
 
       const minAmount = requirement.minAmount.toString()
+      // const maxAmount = requirement?.maxAmount?.toString()
 
       return {
         tokenAddress: requirement.tokenAddress,
@@ -289,6 +290,7 @@ export const addRequirementDetails = async (community: Group): Promise<Awaited<R
         name,
         decimals,
         minAmount,
+        // maxAmount
       }
     })
   )) as unknown as Requirement[]
@@ -306,9 +308,10 @@ function serializeGroupData(rawGroupData: RawGroupData): Group {
       description: rawGroupData.groupDetails.description.toString(),
       tags: rawGroupData.groupDetails.tags.map(t => t.toString()),
     },
-    requirements: rawGroupData.requirements.map(r => ({
+    requirements: rawGroupData?.requirements.map(r => ({
       tokenAddress: r.tokenAddress,
       minAmount: r.minAmount.toString(),
+      // maxAmount: r?.maxAmount?.toString(),
     })),
     note: rawGroupData.note.toString(),
     userCount: rawGroupData.userCount.toNumber(),
@@ -375,4 +378,3 @@ export async function augmentItemData(rawItemData: RawItemData): Promise<Item> {
   }
 }
 
-export async function serializeUserData(uniRepUser: UnirepUser) {}

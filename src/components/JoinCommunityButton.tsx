@@ -11,6 +11,7 @@ import { toast } from 'react-toastify'
 import { Group } from '@/types/contract/ForumInterface'
 import clsx from 'clsx'
 import { PrimaryButton } from './buttons'
+import {useConnectModal} from "@rainbow-me/rainbowkit";
 
 interface JoinButtonProps {
   community: Group
@@ -31,6 +32,8 @@ export function CircularLoader({ className }: { className?: string }) {
 }
 
 export const JoinCommunityButton = memo(({ community, hideIfJoined }: JoinButtonProps) => {
+  const { openConnectModal } = useConnectModal();
+
   const { groupId, name: groupName } = community
 
   const [isLoading, setIsLoading] = React.useState(false)
@@ -44,6 +47,9 @@ export const JoinCommunityButton = memo(({ community, hideIfJoined }: JoinButton
 
   const validateBeforeOpen = async (): Promise<boolean> => {
     if (!address) {
+      if (openConnectModal) {
+        openConnectModal()
+      }
       toast.error(t('alert.connectWallet'), { toastId: 'connectWallet' })
 
       return false

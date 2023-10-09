@@ -46,7 +46,7 @@ export const CommunityCard = ({
 }) => {
   const router = useRouter()
   const { address } = useAccount()
-  const user = useUserIfJoined(community.groupId as string)
+  const user = useUserIfJoined(community.id)
   const { isOwner } = useCheckIsOwner(community, address)
   const [showBackground, setShowBackground] = useState(false)
   const bannerSrc = useValidatedImage(community?.groupDetails?.bannerCID)
@@ -143,7 +143,7 @@ const CardOverlay = () => {
           className="absolute inset-0 h-full w-full rounded-lg object-cover"
           src={bannerSrc ?? mobileLogo}
           alt={'community logo'}
-          layout="fill"
+
           fill={true}
           unoptimized
         />

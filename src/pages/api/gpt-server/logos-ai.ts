@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import {gptPostHandler, postHandler} from '@pages/api/discourse/helper'
+import { gptPostHandler } from '@pages/api/discourse/helper'
 
 export enum Template {
   Chat = 'Chat',
@@ -23,24 +23,20 @@ export enum Template {
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     if (req.method === 'POST') {
-      console.log('request received', req.body)
-      const { text } = req.body
+      const { text, mode } = req.body
       if (!text) {
         console.log('no post data')
         return res.status(400).json({ error: 'Text is required' })
       }
-
       const url = `${process.env.NEXT_LOGOS_AI_API_URL}/analysis`
-      return await gptPostHandler(res)(url, { input: text, mode: Template.Summarize })
-
-      // return response
+      const responseData = await gptPostHandler(url, { text: text, mode:mode})
+      return res.status(200).json(responseData)
     } else {
-      // Handle methods other than POST
       res.setHeader('Allow', ['POST'])
       res.status(405).end(`Method ${req.method} Not Allowed`)
     }
   } catch (error) {
-    console.error('Error fetching data:', error) // Log the error with details
+    console.error('Error fetching data:', error)
     res.status(500).json({ error: error.message })
   }
 }

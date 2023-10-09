@@ -1,15 +1,20 @@
-import { JoinCommunityButton } from '../JoinCommunityButton'
-import React from 'react'
+import { CircularLoader, JoinCommunityButton } from '../JoinCommunityButton'
+import React, { useState } from 'react'
 import { useLocalCommunity } from './CommunityCard'
+import { LeaveCommunityButton } from '../LeaveCommunityButton'
+import { useUserIfJoined } from '@/contexts/CommunityProvider'
 import RemoveGroup from '../RemoveGroup'
 import { BookOpenIcon, UserIcon } from '@heroicons/react/20/solid'
 import Image from 'next/image'
 import { chainLogos, supportedChains } from '@/constant/const'
+import ToolTip from '@components/HOC/ToolTip'
 
 export const CommunityCardFooter = () => {
   const community = useLocalCommunity()
   const userCount = community?.userCount
   const posts = community?.posts || []
+  const hasUserJoined = useUserIfJoined(community.id.toString())
+
   if (!community) return null
 
   return (
@@ -23,18 +28,20 @@ export const CommunityCardFooter = () => {
         >
           {userCount ?? 0} <UserIcon className="h-full w-4" />
         </p>
-        <p
-          className="flex items-center gap-1 rounded bg-gray-200 p-1 text-sm hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
-          title={'posts'}
-        >
-          {posts.length} <BookOpenIcon className="h-full w-4" />
-        </p>
+
+        <ToolTip tooltip={'posts'}>
+          <p className=" flex items-center gap-1 rounded bg-gray-200 p-1 text-sm hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600">
+            {posts.length}
+
+            <BookOpenIcon className="h-full w-4" />
+          </p>
+        </ToolTip>
 
         <div className="flex items-center   rounded hover:bg-gray-300 dark:hover:bg-gray-600">
           <Image
             title={`chain ${community.chainId} ${supportedChains[community.chainId].name}`}
             src={chainLogos[community.chainId]}
-            alt={chainLogos[137]}
+            alt={'ChainLogo'}
             width={35}
             height={35}
             className="rounded"
@@ -43,7 +50,19 @@ export const CommunityCardFooter = () => {
       </div>
 
       {community ? (
-        <JoinCommunityButton community={community} hideIfJoined={community.variant === 'banner'} />
+        <React.Fragment>
+          {hasUserJoined ? (
+            <LeaveCommunityButton community={community} />
+          ) : (
+            <React.Fragment>
+              {hasUserJoined == null ? (
+                <CircularLoader />
+              ) : (
+                <JoinCommunityButton community={community} hideIfJoined={community.variant === 'banner'} />
+              )}
+            </React.Fragment>
+          )}
+        </React.Fragment>
       ) : (
         <svg className="h-5 w-5 animate-spin text-blue-600 dark:text-blue-400" viewBox="0 0 24 24">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>

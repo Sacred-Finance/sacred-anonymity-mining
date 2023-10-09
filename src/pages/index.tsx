@@ -7,7 +7,6 @@ function Home({ communitiesData, users }) {
     <HomePage
       isAdmin={false}
       communities={communitiesData.map(c => ({ ...c, id: BigNumber.from(c.id) }))}
-      users={users}
     />
   )
 }

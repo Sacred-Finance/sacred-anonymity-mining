@@ -15,7 +15,7 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'react-toastify'
 import { useEditItem } from '@/hooks/useEditItem'
 import dynamic from 'next/dynamic'
-import { Item } from '@/types/contract/ForumInterface'
+import { Group, Item } from '@/types/contract/ForumInterface'
 import { mutate } from 'swr'
 import { getGroupWithPostAndCommentData } from '@/lib/fetcher'
 import { Avatar } from '@components/Avatar'
@@ -26,10 +26,15 @@ const Editor = dynamic(() => import('../editor-js/Editor'), {
   ssr: false,
 })
 
-export const PostItem = ({ post }: { post: Item }) => {
+export const PostItem = ({ post, group }: { post: Item; group: Group }) => {
   const { groupId, parentId, id, kind } = post
 
-  const postId = kind == 0 ? id : parentId
+  // PostItem supports both posts and comments, so we need to check if the post is a comment or not.
+  // We can't rely on checking parent id because the parent id of a post is always 0.
+  // So we check if the kind of the post is a comment or not.
+
+  // this is assuming posts are never responses, which is true for now - but now we have polls,.
+  const postId = kind == ContentType.POST || kind == ContentType.POST ? id : parentId
 
   const user = useUserIfJoined(post.groupId)
   const address = useAccount().address
@@ -38,13 +43,12 @@ export const PostItem = ({ post }: { post: Item }) => {
   const [isLoading, setIsLoading] = useState(false)
 
   const { t } = useTranslation()
-  const contentRef = useRef<any>(null)
 
   const isAdminOrModerator = isAdmin || isModerator
 
-  const isTypeOfPost = post.kind.toString() === ContentType.POST.toString()
-  const isTypeOfComment = post.kind.toString() === ContentType.COMMENT.toString()
-  const isTypeOfPoll = post.kind.toString() === ContentType.POLL.toString()
+  const isTypeOfPost = post.kind == ContentType.POST
+  const isTypeOfComment = post.kind == ContentType.COMMENT
+  const isTypeOfPoll = post.kind == ContentType.POLL
 
   const { editItem } = useEditItem({
     item: post,
@@ -53,7 +57,7 @@ export const PostItem = ({ post }: { post: Item }) => {
   })
 
   const saveEditedPost = async () => {
-    if (!contentRef || !address || !user) return
+    if (!address || !user) return
 
     try {
       if (isTypeOfPost) {
@@ -119,9 +123,10 @@ export const PostItem = ({ post }: { post: Item }) => {
   return (
     <div className="min-w-[250px] rounded-lg bg-white p-3 shadow-md transition-colors dark:bg-gray-900">
       <div>
-        {isTypeOfPoll && <PollUI id={post.id} groupId={post.groupId} post={post} />}
 
-        <div className="flex flex-col ">
+        {isTypeOfPoll && <PollUI group={group} post={post} />}
+
+        <div className="flex flex-col gap-2">
           {isTypeOfPost && (
             <div className="flex flex-col gap-4">
               {isContentEditing && (
@@ -148,7 +153,6 @@ export const PostItem = ({ post }: { post: Item }) => {
               />
             ) : (
               <Editor
-                editorRef={contentRef}
                 holder={`${post?.id}_${isTypeOfPost ? 'post' : 'comment'}`}
                 readOnly={!isContentEditing}
                 onChange={val => setContentDescription(val)}

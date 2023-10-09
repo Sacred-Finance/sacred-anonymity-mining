@@ -11,7 +11,7 @@ export const PostTitle = ({ title, id, onPostPage, post }) => {
     ((
       <Link
         href={`/communities/${post.groupId}/post/${post.id}`}
-        className="prose-sm line-clamp-1 flex items-center gap-4 text-lg font-semibold text-gray-700 hover:text-blue-600 hover:underline dark:text-gray-200 dark:hover:text-blue-400"
+        className="prose-sm !line-clamp-2 flex items-center gap-4 text-lg font-semibold text-gray-700 hover:text-blue-600 hover:underline dark:text-gray-200 dark:hover:text-blue-400"
         onClick={e => {
           if (onPostPage) {
             e.preventDefault()

@@ -1,4 +1,4 @@
-import { useContractReads } from 'wagmi'
+import {Address, useContractReads} from 'wagmi'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'react-toastify'
 import { erc20dummyABI } from '../constant/const'

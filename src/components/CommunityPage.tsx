@@ -9,7 +9,6 @@ import { User } from '@/lib/model'
 import { useValidateUserBalance } from '@/utils/useValidateUserBalance'
 import { toast } from 'react-toastify'
 import { useItemsSortedByVote } from '@/hooks/useItemsSortedByVote'
-import clsx from 'clsx'
 import { NewPostForm, NewPostFormProps } from '@components/NewPostForm'
 import { PostList } from '@components/Post/PostList'
 import { Group, Item } from '@/types/contract/ForumInterface'
@@ -18,33 +17,42 @@ import { useContentManagement } from '@/hooks/useContentManagement'
 import { CommunityCard } from '@components/CommunityCard/CommunityCard'
 import { NewPostModal } from '@components/Post/PostComments'
 
-export function CommunityPage({
-  children,
-  postInstance,
-  community,
-  posts,
-  post,
-}: {
-  children?: React.ReactNode
-  postId: string | undefined
-  community: Group
-  posts?: Item[]
-  post?: Item
-  postInstance: Post
-}) {
-  const groupId = postInstance.groupId
+export function CommunityPage({ community, posts }: { community: Group; posts?: Item[] }) {
+  const groupId = community.id.toString()
   const user = useUserIfJoined(groupId as string)
   useUnirepSignUp({ groupId: groupId, name: (user as User)?.name })
-  const activeUser = useActiveUser({ groupId })
-  const { address } = useAccount()
-  const users = useUsers()
-  const { t } = useTranslation()
 
   const [sortBy, setSortBy] = useState<SortByOption>('highest')
 
-  const { checkUserBalance } = useValidateUserBalance(community, address)
-  const [isLoading, setIsLoading] = useState(false)
+  const sortedData = useItemsSortedByVote([], posts, sortBy)
 
+  return (
+    <div className="relative mt-6 flex min-h-screen gap-6 rounded-lg  p-6 transition-colors dark:bg-gray-800">
+      <div className="sticky top-0 flex w-full flex-col gap-6">
+        <div className="max-w-[450px]">
+          <CommunityCard community={community} isAdmin={false} variant={'banner'} />
+        </div>
+        <div className="flex w-fit gap-4 rounded-lg bg-gray-200 p-4 dark:bg-gray-900">
+          <CreatePollUI group={community} />
+          <CreatePostUI group={community} />
+        </div>
+        <PostList posts={sortedData} />
+      </div>
+    </div>
+  )
+}
+
+const CreatePostUI = ({ group }: { group: Group }) => {
+  const groupId = group.groupId
+  const user = useUserIfJoined(group.id.toString())
+  const activeUser = useActiveUser({ groupId: group.id.toString() })
+  const { t } = useTranslation()
+  const { address } = useAccount()
+  const { checkUserBalance } = useValidateUserBalance(group, address)
+  const users = useUsers()
+  const postInstance = group && new Post(undefined, group.id.toString())
+
+  const [isLoading, setIsLoading] = useState(false)
 
   const validateRequirements = () => {
     if (!address) return toast.error(t('alert.connectWallet'), { toastId: 'connectWallet' })
@@ -56,8 +64,8 @@ export function CommunityPage({
   const { contentDescription, setContentDescription, tempContents, contentTitle, setTempContents, setContentTitle } =
     useContentManagement({
       isPost: true,
-      defaultContentDescription: post?.description,
-      defaultContentTitle: post?.title,
+      defaultContentDescription: undefined,
+      defaultContentTitle: undefined,
     })
 
   const addPost: () => Promise<void> = async () => {
@@ -69,7 +77,6 @@ export function CommunityPage({
       return
     }
 
-    let ipfsHash: string
 
     const hasSufficientBalance = await checkUserBalance()
     if (!hasSufficientBalance) return
@@ -88,54 +95,17 @@ export function CommunityPage({
         groupId: groupId as string,
         setWaiting: setIsLoading,
         onIPFSUploadSuccess: (post, cid) => {
-          ipfsHash = cid
-          setTempContents([
-            {
-              id: cid,
-              ...post,
-            },
-            ...tempContents,
-          ])
+          toast.success('content stored correctly')
         },
       })
 
       if (status === 200) {
-        clearInput()
         setIsLoading(false)
       } else {
         setIsLoading(false)
       }
     } catch (error) {
       setIsLoading(false)
-
-      // toast({
-    } finally {
-      // setLoading.off()
-      setTempContents(prevPosts => {
-        const tempPostIndex = prevPosts.findIndex(t => t.id === ipfsHash)
-        if (tempPostIndex > -1) {
-          const tempPostsCopy = [...prevPosts]
-          tempPostsCopy.splice(tempPostIndex, 1)
-          return tempPostsCopy
-        }
-      })
-    }
-  }
-
-  const sortedData = useItemsSortedByVote(tempContents, posts, sortBy)
-
-  const clearInput = (isEdit = false) => {
-    if (isEdit) {
-      if (setContentTitle) {
-        setContentTitle(post?.title || null)
-      }
-      setContentDescription(post?.description || null)
-      return
-    } else {
-      if (setContentTitle) {
-        setContentTitle('')
-      }
-      setContentDescription(null)
     }
   }
 
@@ -148,7 +118,7 @@ export function CommunityPage({
     handleSubmit: addPost,
     showButtonWhenFormOpen: true,
     setTitle: setContentTitle as Dispatch<SetStateAction<string | null>>,
-    resetForm: () => clearInput(true),
+    resetForm: () => {},
     isReadOnly: false,
     isSubmitting: isLoading,
     title: contentTitle as string,
@@ -158,42 +128,5 @@ export function CommunityPage({
     classes: NewPostModal,
   }
 
-  return (
-    <div className="relative mt-6 flex min-h-screen gap-6 rounded-lg  p-6 transition-colors dark:bg-gray-800">
-      <div className="sticky top-0 flex w-full flex-col gap-6">
-        <div className="max-w-[450px]">
-          <CommunityCard community={community} isAdmin={false} variant={'banner'} />
-        </div>
-        <div className="flex w-fit gap-4 rounded-lg bg-gray-200 p-4 dark:bg-gray-900">
-          <CreatePollUI groupId={groupId} />
-          <NewPostForm {...propsForNewPost} />
-        </div>
-        <PostList posts={sortedData} />
-        <div className="mt-6">{children}</div>
-      </div>
-    </div>
-  )
-}
-
-export const PostNavigator = ({ posts, visiblePostIds, scrollIntoView }) => {
-  return (
-    <div className="sticky top-24 flex flex-col gap-4 rounded  p-4">
-      <h2 className="mb-2 text-base font-bold">Posts</h2>
-      <ul className="flex flex-col gap-2">
-        {posts.map(post => (
-          <li key={post.id}>
-            <button
-              onClick={() => scrollIntoView(post.id)}
-              className={clsx(
-                'text-left text-sm font-bold transition-colors hover:cursor-pointer',
-                visiblePostIds.includes(post.id) ? 'text-primary-600' : 'text-gray-600'
-              )}
-            >
-              {post.title}
-            </button>
-          </li>
-        ))}
-      </ul>
-    </div>
-  )
+  return <NewPostForm {...propsForNewPost} />
 }

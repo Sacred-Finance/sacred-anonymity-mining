@@ -4,17 +4,18 @@ import mobileLogo from '../../public/logo.svg'
 import React from 'react'
 import Image from 'next/image'
 import { useTheme } from 'next-themes'
-
 import { motion } from 'framer-motion'
 
-export const Logo = ({ invertTheme = false, className }) => {
+export const Logo = ({ invertTheme = false, className }: { invertTheme?: boolean; className?: string }) => {
   const { resolvedTheme } = useTheme()
   return (
     <Image
       src={resolvedTheme === 'dark' || invertTheme ? logoLight : logo}
       width={200}
-      alt={logo}
+      alt={logo || 'logo'}
       className={className}
+      unoptimized
+      fetchPriority={'high'}
     />
   )
 }

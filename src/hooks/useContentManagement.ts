@@ -21,7 +21,9 @@ type ContentManagementResult = {
 }
 export function useContentManagement(config: ContentManagementConfig): ContentManagementResult {
   const [contentTitle, setContentTitle] = useState<string | null>(config.defaultContentTitle || null)
-  const [contentDescription, setContentDescription] = useState<OutputData | null>(config.defaultContentDescription || null)
+  const [contentDescription, setContentDescription] = useState<OutputData | null>(
+    config.defaultContentDescription || null
+  )
   const [tempContents, setTempContents] = useState([])
   const [isContentEditable, setIsContentEditable] = useState(false)
   const [isContentEditing, setIsContentEditing] = useState(false)

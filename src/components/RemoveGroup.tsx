@@ -40,7 +40,7 @@ const RemoveGroup: React.FC<RemoveGroupProps> = ({ groupId, hidden }) => {
   return (
     <>
       {isAdmin && (
-        <ToolTip toolTip={t('toolTip.removeCommunity.message') as string}>
+        <ToolTip tooltip={t('toolTip.removeCommunity.message') as string}>
           <button
             id="edit-community-button"
             className={`${

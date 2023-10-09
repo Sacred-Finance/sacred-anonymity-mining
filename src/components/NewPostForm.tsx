@@ -5,6 +5,8 @@ import { CancelButton, PrimaryButton } from './buttons'
 import { EyeIcon, PencilIcon } from '@heroicons/react/20/solid'
 import dynamic from 'next/dynamic'
 import clsx from 'clsx'
+import AnonymizeButton from '@components/buttons/AIAnonymiseButton'
+import Dropdown from './buttons/Dropdown/Dropdown'
 import { Tab } from '@headlessui/react'
 import { classes } from '@styles/classes'
 import { OutputData } from '@editorjs/editorjs'
@@ -15,6 +17,8 @@ export interface EditorJsType {
     data: any
   }[]
 }
+
+const percentageToReveal = [0, 25, 50, 75, 100]
 
 const Editor = dynamic(() => import('./editor-js/Editor'), {
   ssr: false,
@@ -88,6 +92,10 @@ export interface NewPostFormProps {
     formContainerClosed?: string
     input?: string
   }
+  tokenBalanceReveal?: {
+    onSelected: (value: number) => void
+    selectedValue: number
+  }
 }
 
 const getClassNames = (base, customClassNames, condition) => {
@@ -114,11 +122,11 @@ function ContentSection({
 }) {
   return (
     <>
-      <Tab.Panel className="rounded border-gray-200">
+      <Tab.Panel className="rounded border-gray-200  ">
         <Editor
           divProps={{
             className: clsx(
-              'z-50 w-full bg-white !text-black form-input h-full rounded-md shadow-md overflow-y-scroll max-h-[calc(50vh)]'
+              'z-50 w-full bg-white !text-black form-input h-full rounded-md shadow-md min-h-[35vh]'
             ),
           }}
           data={data}
@@ -156,6 +164,7 @@ export const NewPostForm = ({
   placeholder,
   showButtonWhenFormOpen = false,
   classes: c,
+  tokenBalanceReveal = null,
 }: NewPostFormProps) => {
   const { t } = useTranslation()
   const [isPreview, setIsPreview] = useState(false)
@@ -245,7 +254,7 @@ export const NewPostForm = ({
         >
           <div className={clsx(c?.formBody)}>
             {itemType === 'post' && title !== false && (
-              <>
+              <div className={'gap-2 flex flex-col'}>
                 <label htmlFor={'title'} className="text-md">
                   Title (Max 60)
                 </label>
@@ -263,10 +272,10 @@ export const NewPostForm = ({
                   value={title}
                   onChange={e => setTitle(e.target.value)}
                 />
-              </>
+              </div>
             )}
             <Tab.Group>
-              <Tab.Panels>
+              <Tab.Panels className={'overflow-y-scroll max-h-[calc(50vh)]'}>
                 <div className="text-md">Content</div>
                 <ContentSection
                   preview={isPreview}
@@ -280,6 +289,8 @@ export const NewPostForm = ({
                   placeholder={placeholder}
                   holder={editorId}
                 />
+
+                {/*<AnonymizeButton setDescription={setDescription}  postData={description}  />*/}
               </Tab.Panels>
             </Tab.Group>
 
@@ -292,6 +303,7 @@ export const NewPostForm = ({
               submitButtonText={submitButtonText}
               t={t}
               c={c}
+              tokenBalanceReveal={tokenBalanceReveal}
             />
 
             {isSubmitted && <p>Form submitted successfully!</p>}
@@ -302,7 +314,16 @@ export const NewPostForm = ({
   )
 }
 
-const FormButtons = ({ handleClose, handleSubmitAction, isSubmitting, submitButtonText, t, c, disableSubmit }) => (
+const FormButtons = ({
+  handleClose,
+  handleSubmitAction,
+  isSubmitting,
+  submitButtonText,
+  t,
+  c,
+  disableSubmit,
+  tokenBalanceReveal,
+}) => (
   <div className="flex justify-between">
     <CancelButton
       className={clsx(c?.cancelButton, 'bg-red-400 text-white hover:bg-opacity-80 hover:text-white')}
@@ -310,13 +331,23 @@ const FormButtons = ({ handleClose, handleSubmitAction, isSubmitting, submitButt
     >
       {t('button.closeForm')}
     </CancelButton>
-    <PrimaryButton
-      className={clsx(c?.submitButton, 'hover:bg-opacity-80')}
-      onClick={handleSubmitAction}
-      isLoading={isSubmitting}
-      disabled={isSubmitting || disableSubmit}
-    >
-      {submitButtonText}
-    </PrimaryButton>
+    <div className="flex flex-row items-center gap-2">
+      {tokenBalanceReveal && (
+        <Dropdown
+          options={percentageToReveal.map(percentage => ({ key: `${percentage}%`, value: percentage }))}
+          selected={{ key: `${tokenBalanceReveal.selectedValue}% Reveal`, value: tokenBalanceReveal?.selectedValue }}
+          onSelect={value => tokenBalanceReveal?.onSelected(value)}
+          disabled={false}
+        />
+      )}
+      <PrimaryButton
+        className={clsx(c?.submitButton, 'hover:bg-opacity-80')}
+        onClick={handleSubmitAction}
+        isLoading={isSubmitting}
+        disabled={isSubmitting || disableSubmit}
+      >
+        {submitButtonText}
+      </PrimaryButton>
+    </div>
   </div>
 )

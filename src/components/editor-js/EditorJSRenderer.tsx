@@ -1,5 +1,5 @@
 import { OutputData } from '@editorjs/editorjs'
-import React from 'react'
+import React, {memo} from 'react'
 import clsx from 'clsx'
 
 const editorJsHtml = require('editorjs-html')
@@ -15,8 +15,6 @@ const EditorJsRenderer = ({ data, isHtml = false, className }: Props) => {
   if (!data) {
     return null
   }
-
-  console.log(data)
 
   let html: (string | JSX.Element)[] = []
 
@@ -44,4 +42,4 @@ const EditorJsRenderer = ({ data, isHtml = false, className }: Props) => {
   )
 }
 
-export default EditorJsRenderer
+export default memo(EditorJsRenderer)

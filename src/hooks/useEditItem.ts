@@ -36,17 +36,16 @@ export const useEditItem = ({
 }: UseEditItemParams): {
   editItem: ({ content, itemId, itemType, note }: EditItemParams) => Promise<any>
 } => {
-  console.log('useEditItem', item)
   const { groupId, parentId, id, kind } = item
 
-  const postId = kind == 0 ? id : parentId
-  const commentId = kind == 1 ? id : null
+  const postId = kind == ContentType.POST ? id : parentId
+  const commentId = kind == ContentType.COMMENT ? id : null
+  const pollId = kind == ContentType.POLL ? id : null
   const { address } = useAccount()
   const member = useUserIfJoined(groupId)
   const postInstance = new Post(postId, groupId)
   const commentInstance = commentId ? new CommentClass(groupId, postId, commentId) : null
 
-  console.log('commentInstance', commentInstance)
   const { writeAsync } = useContractWrite({
     address: ForumContractAddress as Address,
     abi: ForumABI.abi,

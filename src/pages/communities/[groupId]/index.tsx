@@ -23,6 +23,10 @@ function Group() {
           posts: data.posts,
         },
       })
+      dispatch({
+        type: 'SET_USERS',
+        payload: data?.users
+      })
     }
   }, [data?.group, data?.posts, data?.users, isValidating])
   if (error) return <div>Error: {error.message}</div>
@@ -32,9 +36,8 @@ function Group() {
 
   group.id = ethers.BigNumber.from(group.id)
 
-  const postInstance = group && new Post(undefined, group.groupId.toString())
 
-  return <CommunityPage community={group} posts={posts} postId={postId as string} postInstance={postInstance as Post} />
+  return <CommunityPage community={group} posts={posts}  />
 }
 
 export default Group

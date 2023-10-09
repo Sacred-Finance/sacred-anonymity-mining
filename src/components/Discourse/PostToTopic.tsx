@@ -6,14 +6,31 @@ import { useTranslation } from 'react-i18next'
 import { NewPostForm } from '@components/NewPostForm'
 import { toast } from 'react-toastify'
 import { OutputDataToMarkDown } from '@components/Discourse/OutputDataToMarkDown'
+import { useFetchBalance } from '@/hooks/useFetchBalance'
 
 const PostToTopic = ({ topic, mutate }: { topic: Topic; mutate: (newPost: Post) => void }) => {
   const { t } = useTranslation()
   const [description, setDescription] = useState<OutputData | null>(null)
+  const [selectedToReveal, setSelectedToReveal] = useState(0)
+  const { fetchBalance } = useFetchBalance();
 
   const onSubmit = async () => {
     if (!description) return toast.error(t('error.emptyPost'))
-    const raw = OutputDataToMarkDown(description)
+    let raw = OutputDataToMarkDown(description)
+
+    if (selectedToReveal > 0) {
+      try {
+        const balance = await fetchBalance();
+        if (balance) {
+          const percentageToReveal = balance * selectedToReveal / 100;
+          const toAppend = `<br><br><br><i>Sacred Bot: User has chosen to reveal ${percentageToReveal} tokens. </i>`;
+          raw = raw + toAppend;
+        }
+      } catch (error) {
+        console.error(error);
+        return;
+      }
+    }
 
     try {
       const newPost = await axios.post('/api/discourse/postToTopic', {
@@ -67,6 +84,12 @@ const PostToTopic = ({ topic, mutate }: { topic: Topic; mutate: (newPost: Post) 
         actionType={'new'}
         submitButtonText={t('button.post') as string}
         openFormButtonText={t('button.newPost') as string}
+        tokenBalanceReveal={{
+          selectedValue: selectedToReveal,
+          onSelected(value) {
+            setSelectedToReveal(value)
+          },
+        }}
       />
     </>
   )

@@ -7,15 +7,25 @@ import { Address } from '@/types/common'
 
 export const MIN_REP_COMMENT = 0
 
+interface CreateParams {
+  commentContent: any
+  address: Address
+  users: User[]
+  postedByUser: User
+  groupId: string
+  setWaiting: Function
+  onIPFSUploadSuccess: (comment, cid) => void
+}
+
 export class CommentClass {
-  id: string
+  id?: string
   groupId: string
   postId: string
 
-  constructor(groupId, postId, id: string) {
-    this.id = id
-    this.postId = postId
+  constructor(groupId, postId, id?: string) {
     this.groupId = groupId
+    this.postId = postId
+    this.id = id
   }
 
   commentsCacheId() {
@@ -26,15 +36,15 @@ export class CommentClass {
     return `${this.postId}_comment_${this.id ?? commentId}`
   }
 
-  async create(
+  async create({
     commentContent,
-    address: Address,
-    users: User[],
-    postedByUser: User,
-    groupId: string,
-    setWaiting: Function,
-    onIPFSUploadSuccess: (comment, cid) => void
-  ) {
+    address,
+    users,
+    postedByUser,
+    groupId,
+    setWaiting,
+    onIPFSUploadSuccess,
+  }: CreateParams) {
     return await create.call(
       this,
       commentContent,

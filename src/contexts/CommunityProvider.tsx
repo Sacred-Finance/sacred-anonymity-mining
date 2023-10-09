@@ -7,6 +7,7 @@ import { useAccount } from 'wagmi'
 import { useIdentity } from '@/hooks/useIdentity'
 import { Group, Item } from '@/types/contract/ForumInterface'
 import { Topic } from '@components/Discourse/types'
+import { hasUserJoined } from '@/lib/utils'
 
 export type CommunityId = string | number | ethers.BigNumber
 type CommunityContextType = {
@@ -68,7 +69,10 @@ function reducer(state: State, action: Action): State {
     case 'SET_ACTIVE_COMMUNITY':
       return {
         ...state,
-        activeCommunity: action.payload,
+        activeCommunity: {
+          ...action.payload,
+          community: { ...action.payload.community, id: ethers.BigNumber.from(action.payload.community.id) },
+        },
       }
     case 'SET_ACTIVE_POST':
       return {
@@ -196,35 +200,45 @@ export function useActiveUser({ groupId }): User | undefined {
   const identity = useIdentity(groupId ? { groupId: groupId as string } : undefined)
 
   return useMemo(
-    () => state.users.find(c => c.identityCommitment === identity?.getCommitment().toString()),
-    [state.users, identity]
+    () => state.usersGrouped[groupId]?.find(c => c.identityCommitment === identity?.getCommitment().toString()),
+    [state.usersGrouped, identity]
   )
 }
 
-export function useUserIfJoined(communityId: string | number): (User & { avatar: string }) | false {
+export function useUserIfJoined(communityId: string | number): User | false {
   const { state } = useCommunityContext()
-  useCommunityById(communityId)
   const { address: userAddress } = useAccount()
+  const [userJoined, setUserJoined] = React.useState<User | false>(null)
 
+  useEffect(() => {
+    checkIfUserHasJoined()
+  }, [userAddress, state.usersGrouped[communityId]?.length])
+
+  const checkIfUserHasJoined = async () => {
+    if (userAddress) {
+      const generatedIdentity = new Identity(`${userAddress}_${communityId}_anon`)
+      const userJoined = await hasUserJoined(Number(communityId), generatedIdentity.getCommitment().toString())
+      if (userJoined) {
+        setUserJoined({
+          name: 'anon',
+          identityCommitment: generatedIdentity.getCommitment().toString(),
+          groupId: +communityId,
+          id: null,
+        })
+      } else {
+        setUserJoined(false)
+      }
+    }
+  }
+
+  // return useMemo(() => {
   if (!userAddress) return false
-  if (!state.usersGrouped) throw new Error('hasUserJoined - usersGrouped is undefined')
-  if (!state.usersGrouped[communityId]) {
-    return false
-  }
+  // if (!state.usersGrouped) throw new Error('hasUserJoined - usersGrouped is undefined')
+  // if (!state.usersGrouped[communityId]) {
+  //   return false
+  // }
 
-  const foundUser = state.usersGrouped[communityId]?.find(u => {
-    const generatedIdentity = new Identity(`${userAddress}_${communityId}_${u.name}`)
-    const userCommitment = generatedIdentity.getCommitment().toString()
-
-    return _.toNumber(+u?.groupId) === _.toNumber(communityId) && u?.identityCommitment === userCommitment
-  }) as User
-
-  if (foundUser) {
-    // Adding avatar to the found user
-    return addAvatarToUser(foundUser)
-  }
-
-  return false
+  return userJoined
 }
 
 export const addAvatarToUser = (user: User) => {

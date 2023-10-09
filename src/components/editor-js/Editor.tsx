@@ -14,7 +14,6 @@ type Props = {
   onChange(val: OutputData): void
   holder: string
   placeholder?: string
-  editorRef?: React.MutableRefObject<EditorJS>
   readOnly?: boolean
   divProps?: DivProps
 }

@@ -220,9 +220,9 @@ function HomePage({ isAdmin = false, users, communities }: HomeProps) {
   }
 
   return (
-    <div className="flex w-full flex-col  items-start  rounded-lg border-primary-500 p-4  text-primary-500 shadow-md dark:border-primary-600  dark:bg-gray-900 ">
+    <div className="flex w-full flex-col  items-start  rounded-lg border-primary-500 md:p-4   text-primary-500 shadow-md dark:border-primary-600  dark:bg-gray-900 ">
       <Tab.Group selectedIndex={selectedIndex} onChange={setSelectedIndex} vertical={false}>
-        <div className="grid grid-flow-dense  gap-10 sm:justify-items-stretch">
+        <div className="grid grid-flow-dense  md:gap-10 sm:justify-items-stretch">
           <div className="flex w-full flex-wrap items-center gap-10 sm:col-span-2 sm:justify-center md:col-span-2 md:justify-start ">
             <div className="flex flex-wrap items-center gap-2">
               <div className="flex flex-col gap-1">
@@ -251,14 +251,14 @@ function HomePage({ isAdmin = false, users, communities }: HomeProps) {
           </div>
 
           <AnimatePresence mode={'sync'}>
-            <Tab.Panels className="min-h-screen rounded-lg bg-white p-4 dark:bg-gray-900">
+            <Tab.Panels className="min-h-screen rounded-lg bg-white  dark:bg-gray-900">
               <Tab.Panel key="panel1">
                 <motion.div
                   initial="initial"
                   animate="animate"
                   exit="exit"
                   transition={{ duration: 0.5 }}
-                  className="flex flex-wrap gap-7 sm:justify-stretch"
+                  className="flex flex-wrap gap-7 md:justify-evenly lg:justify-start xs:justify-center"
                 >
                   {localCommunities.length === 0 && <NoCommunities groups={communities} searchTerm={searchTerm} />}
                   {localCommunities.map(community => (
@@ -273,7 +273,7 @@ function HomePage({ isAdmin = false, users, communities }: HomeProps) {
                   animate="animate"
                   exit="exit"
                   transition={{ duration: 0.5 }}
-                  className="flex flex-wrap gap-4 sm:justify-stretch"
+                  className="flex flex-wrap gap-4 xs:justify-center md:justify-start "
                 >
                   <AllTopics />
                 </motion.div>

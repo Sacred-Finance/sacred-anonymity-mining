@@ -132,7 +132,8 @@ export class UnirepUser {
     await userState.waitForSync()
     const currentEpoch = await this.unirep.attesterCurrentEpoch(attesterAddress)
 
-    if (!this.getEpochData() || !this.getEpochData().epochKey || this.getEpochData().epoch < currentEpoch) {
+    if (!this.getEpochData() || !this.getEpochData()?.epochKey || this.getEpochData().epoch < currentEpoch) {
+      console.log('Updating Epoch Key:', attesterAddress)
       const { publicSignals, proof, epochKey, epoch } = await userState.genEpochKeyProof({ nonce: 0 })
       UnirepUser.user.epochData = {
         epoch,
@@ -199,6 +200,7 @@ export class UnirepUser {
   async signup(): Promise<void> {
     console.time('signup')
     let userState = UnirepUser.user.userState || (await this.genUserState())
+    await this.updateUserState();
     const { publicSignals, proof } = await userState.genUserSignUpProof()
     const { status } = await userUnirepSignUp(publicSignals, proof)
 
@@ -213,7 +215,6 @@ export class UnirepUser {
   hasReputationLoaded(): boolean {
     return this.reputationLoaded
   }
-
 
   /**
    * Update the user state.
