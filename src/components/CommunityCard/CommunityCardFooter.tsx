@@ -22,13 +22,14 @@ export const CommunityCardFooter = () => {
       <RemoveGroup groupId={community.id} hidden={false} />
 
       <div className="flex items-center gap-4 space-x-2 rounded">
-        <p
-          className="flex items-center gap-1 rounded bg-gray-200 p-1 text-sm hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
-          title={'users'}
-        >
-          {userCount ?? 0} <UserIcon className="h-full w-4" />
-        </p>
-
+        <ToolTip tooltip={'# Users'}>
+          <p
+            className="flex items-center gap-1 rounded bg-gray-200 p-1 text-sm hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
+            title={'users'}
+          >
+            {userCount ?? 0} <UserIcon className="h-full w-4" />
+          </p>
+        </ToolTip>
         <ToolTip tooltip={'posts'}>
           <p className=" flex items-center gap-1 rounded bg-gray-200 p-1 text-sm hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600">
             {posts.length}
