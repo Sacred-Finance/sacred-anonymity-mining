@@ -2,6 +2,8 @@ import { DownVoteIcon, UpVoteIcon } from '@/constant/icons'
 import { CircularLoader } from '@components/JoinCommunityButton'
 import { PrimaryButton, PrimaryButtonProps } from '@components/buttons/PrimaryButton'
 import clsx from 'clsx'
+import { ReactNode } from 'react'
+import { HandThumbDownIcon, HandThumbUpIcon } from '@heroicons/react/20/solid'
 
 interface VoteButton {
   icon: React.ReactNode
@@ -10,8 +12,10 @@ interface VoteButton {
   className?: string
 }
 
-const voteButtonClass = 'h-8 w-8 hover:border !gap-0 relative text-xl  m-1 !p-1 hover:bg-gray-50  bg-white'
-export const VoteUpButton = ({ ...props }: { props?: VoteButton } & PrimaryButtonProps) => (
+export const VoteUpButton = ({
+  children,
+  ...props
+}: { props?: VoteButton; children: ReactNode } & PrimaryButtonProps) => (
   <PrimaryButton
     aria-label={'upvote'}
     {...props}
@@ -21,20 +25,18 @@ export const VoteUpButton = ({ ...props }: { props?: VoteButton } & PrimaryButto
     }}
     isConnected={props.isConnected}
     isJoined={props.isJoined}
-    className={clsx(voteButtonClass, props.className)}
+    variant={'minimal'}
   >
-    <UpVoteIcon
-      className={clsx(
-        'absolute left-1/2 top-1/2',
-        '-translate-x-1/2 -translate-y-1/2 transform',
-        props.isLoading ? 'opacity-0' : 'opacity-100'
-      )}
-      fill={'#4CAF50'}
-      stroke={'#a49f9f'}
-    />
+    <div className={'flex items-center gap-2 '}>
+      <HandThumbUpIcon className={clsx('border-1  w-6 p-1 group-hover:fill-green-300')} stroke={'#a49f9f'} />
+      {children}
+    </div>
   </PrimaryButton>
 )
-export const VoteDownButton = ({ ...props }: { props?: VoteButton } & PrimaryButtonProps) => (
+export const VoteDownButton = ({
+  children,
+  ...props
+}: { props?: VoteButton; children: ReactNode } & PrimaryButtonProps) => (
   <PrimaryButton
     aria-label={'downvote'}
     {...props}
@@ -44,16 +46,13 @@ export const VoteDownButton = ({ ...props }: { props?: VoteButton } & PrimaryBut
     }}
     isConnected={props.isConnected}
     isJoined={props.isJoined}
-    className={clsx(voteButtonClass, props.className)}
+    className={clsx(props.className)}
+    variant={'minimal'}
+
   >
-    <DownVoteIcon
-      className={clsx(
-        'absolute left-1/2 top-1/2',
-        '-translate-x-1/2 -translate-y-1/2 transform',
-        props.isLoading ? 'opacity-0' : 'opacity-100'
-      )}
-      fill={'#d51221'}
-      stroke={'#a49f9f'}
-    />
+    <div className={'flex items-center gap-2 '}>
+      <HandThumbDownIcon className={clsx('border-1  w-6 p-1 group-hover:fill-red-300')} stroke={'#a49f9f'} />
+      {children}
+    </div>
   </PrimaryButton>
 )

@@ -27,7 +27,7 @@ export const EDITOR_TOOLS: EditorConfig['tools'] = {
   code: Code,
   header: {
     class: Header,
-    inlineToolbar: ['marker', 'link'],
+    inlineToolbar: true,
     shortcut: 'CMD+SHIFT+H',
   },
   paragraph: {
@@ -35,9 +35,7 @@ export const EDITOR_TOOLS: EditorConfig['tools'] = {
     inlineToolbar: true,
     config: {
       tunes: true,
-
     },
-
   },
   checklist: {
     class: Checklist,

@@ -1,4 +1,6 @@
 import { BigNumber, ethers } from 'ethers'
+import {OutputData} from "@editorjs/editorjs";
+import {OutputBlockData} from "@editorjs/editorjs/types/data-formats/output-data";
 
 export interface Admins {
   _admins: string[]
@@ -230,8 +232,9 @@ export interface Group {
   id: number
   note: string
   userCount: number
+  ownerIdentity?: string
   chainId: number
-  posts: number[]
+  posts: Item[]
   removed: boolean
   // The following are not part of the contract
   groupId?: string
@@ -400,7 +403,8 @@ export type Item = {
   // The following are not part of the contract
   createdAt: Date
   title?: string
-  description?: string
+  description?: OutputData | undefined
+  // blocks?: OutputBlockData[] | undefined
 }
 
 export type ReputationProof = {

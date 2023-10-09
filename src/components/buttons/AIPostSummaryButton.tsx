@@ -13,15 +13,10 @@ interface SummaryButtonProps {
 
 const SummaryButton: React.FC<SummaryButtonProps> = ({ postData, postTitle }) => {
   const { isLoading, data, error, fetchData } = useGPTServerAnalysis({ postData, template: Template.Summarize })
-  const [showModal, setShowModal] = React.useState(!isLoading && data)
-  const [showMindMap, setShowMindMap] = React.useState(false)
+  const [showModal, setShowModal] = React.useState(false)
 
   const toggleModal = () => {
     setShowModal(!showModal)
-  }
-
-  const toggleMindMap = () => {
-    setShowMindMap(!showMindMap)
   }
 
   React.useEffect(() => {
@@ -32,7 +27,7 @@ const SummaryButton: React.FC<SummaryButtonProps> = ({ postData, postTitle }) =>
 
   return (
     <div
-      className="relative"
+      className="relative w-fit"
       onClick={() => {
         if (showModal) {
           toggleModal()
@@ -43,12 +38,9 @@ const SummaryButton: React.FC<SummaryButtonProps> = ({ postData, postTitle }) =>
         onClick={data ? toggleModal : fetchData}
         disabled={isLoading || postData.length < 25}
         title={postData.length < 25 ? 'Post content too short to summarize' : data ? 'View summary' : 'Summarize post'}
-        endIcon={<SparklesIcon className={clsx('h-5 w-5', data ? 'text-white' : 'text-blue-500')} height={20} />}
+        endIcon={<SparklesIcon className={clsx('h-5 w-5', data ? 'text-white' : 'text-gray-500')} height={20} />}
         isLoading={isLoading}
-        className={clsx(
-          'flex items-center gap-2 rounded px-2 py-1 text-blue-500 outline outline-2  outline-blue-500 hover:bg-blue-600 hover:text-white focus:outline-none',
-          data ? 'bg-blue-500 text-white' : ''
-        )}
+        variant={'minimal'}
       >
         {data ? 'Summary' : 'Summarize'}
       </PrimaryButton>
@@ -56,12 +48,15 @@ const SummaryButton: React.FC<SummaryButtonProps> = ({ postData, postTitle }) =>
       {showModal && (
         <div className="fixed inset-0 z-[51] flex items-center justify-center bg-black bg-opacity-50">
           <div
-            className="relative w-1/2 overflow-y-auto rounded-lg bg-white p-8 text-center"
+            className="200 relative w-1/2 overflow-y-auto rounded bg-white p-8 text-center dark:bg-gray-600"
             onClick={e => {
               e.stopPropagation()
             }}
           >
-            <button onClick={toggleModal} className="absolute right-2 top-2 text-gray-400 hover:text-gray-600">
+            <button
+              onClick={toggleModal}
+              className="absolute right-2 top-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+            >
               Close
             </button>
             <span className={'text-xl font-bold '}>{!postTitle ? 'Summary' : postTitle}</span>
@@ -73,21 +68,7 @@ const SummaryButton: React.FC<SummaryButtonProps> = ({ postData, postTitle }) =>
                 <div className="text-gray-500">Please try again later.</div>
               </>
             )}
-            <EditorJsRenderer
-              data={data ? (showMindMap ? data.mindMap : data.html) : 'Loading summary...'}
-              isHtml={true}
-            />
-            <PrimaryButton
-              disabled={true} // TODO: Revise when mind map is ready
-                title={'Feature coming soon'}
-              onClick={toggleMindMap}
-              className={clsx(
-                'flex items-center gap-2 rounded px-2 py-1 text-blue-500 outline outline-2  outline-blue-500 hover:bg-blue-600 hover:text-white focus:outline-none',
-                data ? 'bg-blue-500 text-white' : ''
-              )}
-            >
-              Show Mind Map
-            </PrimaryButton>
+            <EditorJsRenderer data={data ? data.html : 'Loading summary...'} isHtml={true} />
           </div>
         </div>
       )}

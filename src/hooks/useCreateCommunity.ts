@@ -12,6 +12,7 @@ import { CommunityDetails, Requirement } from '@/lib/model'
 import { Group } from '@/types/contract/ForumInterface'
 interface ICreateCommunityArgs extends Group {
   name: string
+  description: string
   requirements: Requirement[]
   bannerFile: File
   logoFile: File
@@ -25,7 +26,7 @@ export const useCreateCommunity = (onCreateGroupClose: () => void) => {
   const { dispatch } = useCommunityContext()
 
   return useCallback(
-    async ({ name, requirements, bannerFile, logoFile, chainId, tags }: ICreateCommunityArgs) => {
+    async ({ name, requirements, bannerFile, logoFile, chainId, tags, description }: ICreateCommunityArgs) => {
       if (!isConnected || !address) {
         throw new Error('Not connected')
       }
@@ -35,7 +36,7 @@ export const useCreateCommunity = (onCreateGroupClose: () => void) => {
 
         const { logoCID, bannerCID } = await uploadImages({ bannerFile, logoFile })
         const communityDetails: CommunityDetails = {
-          description: name,
+          description: description,
           tags: tags?.map(tag => getBytes32FromString(tag)) || [],
           bannerCID: bannerCID ? getBytes32FromIpfsHash(bannerCID) : constants.HashZero,
           logoCID: logoCID ? getBytes32FromIpfsHash(logoCID) : constants.HashZero,

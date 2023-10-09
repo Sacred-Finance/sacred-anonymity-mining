@@ -1,20 +1,16 @@
 import axios from 'axios'
-import { Topic } from '@components/Discourse/types'
-import dynamic from 'next/dynamic'
-import React, { useEffect, useRef, useState } from 'react'
+import { Post, Topic } from '@components/Discourse/types'
+import React, { useRef, useState } from 'react'
 import EditorJS, { OutputData } from '@editorjs/editorjs'
 import { useTranslation } from 'react-i18next'
 import { NewPostForm } from '@components/NewPostForm'
 import { toast } from 'react-toastify'
-import { mutate } from 'swr'
-import { getDiscourseData } from '@/lib/fetcher'
 import { OutputDataToMarkDown } from '@components/Discourse/OutputDataToMarkDown'
 import { useFetchBalance } from '@/hooks/useFetchBalance'
 
-const PostToTopic = ({ topic }: { topic: Topic }) => {
+const PostToTopic = ({ topic, mutate }: { topic: Topic; mutate: (newPost: Post) => void }) => {
   const { t } = useTranslation()
-  const [description, setDescription] = useState<OutputData>(null)
-  const editorReference = useRef<EditorJS>()
+  const [description, setDescription] = useState<OutputData | null>(null)
   const [selectedToReveal, setSelectedToReveal] = useState(0)
   const { fetchBalance } = useFetchBalance();
 
@@ -47,9 +43,12 @@ const PostToTopic = ({ topic }: { topic: Topic }) => {
         is_warning: false,
         category: 4,
       })
-      toast.success(t('alert.postCreateSuccess'))
+
+      if (newPost.data.post) {
+        toast.success(t('alert.postCreateSuccess'))
+        mutate(newPost.data.post)
+      }
       // mutate where key includes topic_id and post_id
-      await mutate(key => key.includes(newPost.data.topic_id))
     } catch (error) {
       toast.error(t('alert.postCreateFailed'))
       console.error(error)
@@ -63,32 +62,26 @@ const PostToTopic = ({ topic }: { topic: Topic }) => {
       <NewPostForm
         isReadOnly={false}
         classes={{
-          // root open needs to have content centered perfectly
-          // we need to gray out the background
-          rootClosed: '!m-0 !p-0 !h-0',
-          rootOpen:
-            'fixed inset-0 z-50 mt-0 !bg-black/60 !w-full !h-full bg-opacity-50 left-0 top-0 right-0 bottom-0 inset-0  ' +
-            'flex flex-col justify-center items-center' +
-            ' overflow-y-auto ',
-          formContainerOpen: 'bg-white  rounded-lg shadow-lg p-6 w-full max-w-3xl mx-auto',
-          openFormButton: 'text-white z-60 !bg-gray-900 fixed bottom-4 right-4 z-50',
+          rootOpen: 'fixed z-50 inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center',
+          formBody: 'w-full h-full flex flex-col gap-4',
+          editor: 'border rounded py-1 px-2 bg-white dark:bg-gray-800',
+          submitButton: 'bg-green-500 text-white border-none rounded hover:bg-green-600',
+          formContainerOpen:
+            'bg-white dark:bg-gray-800 p-4 border border-gray-300 dark:border-gray-700 rounded shadow-lg w-full max-w-3xl',
+          openFormButtonOpen: 'bg-primary-500 text-white opacity-0 hover:bg-primary-600',
         }}
         editorId={`${topic?.id}_post`}
         description={description}
         setDescription={setDescription}
         handleSubmit={onSubmit}
-        editorReference={editorReference}
         resetForm={() => {
           // @ts-ignore
-          editorReference.current.clear()
           setDescription(null)
         }}
-        isSubmitting={false}
         title={false}
         isEditable={true}
         itemType={'post'}
-        handlerType={'new'}
-        formVariant={'default'}
+        actionType={'new'}
         submitButtonText={t('button.post') as string}
         openFormButtonText={t('button.newPost') as string}
         tokenBalanceReveal={{

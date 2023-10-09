@@ -10,11 +10,19 @@ export async function joinGroup(groupId: string, identityCommitment: string, use
     identityCommitment,
     groupId,
     username,
-    note
+    note,
   })
 }
 
-export async function leaveGroup(groupId: string, identityCommitment: string, a: any, b: any, c: any, siblings:any[], pathIndices: number[]) {
+export async function leaveGroup(
+  groupId: string,
+  identityCommitment: string,
+  a: any,
+  b: any,
+  c: any,
+  siblings: any[],
+  pathIndices: number[]
+) {
   return axios.post(`${RELAYER_URL}/leave-group`, {
     identityCommitment,
     groupId,
@@ -22,47 +30,65 @@ export async function leaveGroup(groupId: string, identityCommitment: string, a:
     b,
     c,
     siblings,
-    pathIndices
+    pathIndices,
   })
 }
 
-export async function createGroup(requirements: Requirement[], groupName: string, chainId: number, details: CommunityDetails, note: string) {
+export async function createGroup(
+  requirements: Requirement[],
+  groupName: string,
+  chainId: number,
+  details: CommunityDetails,
+  note: string
+) {
   return axios.post(`${RELAYER_URL}/create-group`, {
     groupName,
     requirements,
     chainId,
     details,
-    note: note.toString()
-  });
+    note: note.toString(),
+  })
 }
 
-export async function createPost(
-  groupId: string,
-  request: ItemCreationRequest,
-  solidityProof: Proof,
-  unirepProof: ReputationProofStruct,
-  asPoll: boolean,
+interface Post {
+  groupId: string
+  request: ItemCreationRequest
+  solidityProof: Proof
+  unirepProof: ReputationProofStruct
+  asPoll: boolean
   pollRequest: PollRequestStruct
-) {
+}
+
+export async function createPost({ groupId, request, solidityProof, unirepProof, asPoll, pollRequest }: Post) {
   return axios.post(`${RELAYER_URL}/post`, {
     groupId,
     request,
     solidityProof,
     unirepProof,
     asPoll,
-    pollRequest
+    pollRequest,
   })
 }
 
-export async function createComment(
-  groupId: string,
-  parentId: string,
-  request: ItemCreationRequest,
-  solidityProof: Proof,
-  unirepProof: ReputationProofStruct,
-  asPoll: boolean,
+interface Comment {
+  groupId: string
+  parentId: string
+  request: ItemCreationRequest
+  solidityProof: Proof
+  unirepProof: ReputationProofStruct
+  asPoll: boolean
   pollRequest: PollRequestStruct
-) {
+}
+
+export async function createComment({
+  groupId,
+  parentId,
+  request,
+  solidityProof,
+  unirepProof,
+  asPoll,
+  pollRequest,
+}: Comment) {
   return axios.post(`${RELAYER_URL}/comment`, {
     groupId,
     parentId,
@@ -70,7 +96,7 @@ export async function createComment(
     solidityProof,
     unirepProof,
     asPoll,
-    pollRequest
+    pollRequest,
   })
 }
 
@@ -111,14 +137,13 @@ export async function userUnirepSignUp(publicSignals: BigNumberish[], proof: Big
   })
 }
 
-
 export async function setGroupDetails(groupId: string, a: any, b: any, c: any, details: any) {
   return axios.post(`${RELAYER_URL}/set-group-details`, {
     groupId,
     a,
     b,
     c,
-    details
+    details,
   })
 }
 
@@ -128,7 +153,7 @@ export async function setGroupDescription(groupId: string, a: any, b: any, c: an
     a,
     b,
     c,
-    description
+    description,
   })
 }
 
@@ -138,7 +163,7 @@ export async function setGroupTags(groupId: string, a: any, b: any, c: any, tags
     a,
     b,
     c,
-    tags
+    tags,
   })
 }
 
@@ -148,7 +173,7 @@ export async function setGroupBanner(groupId: string, a: any, b: any, c: any, ba
     a,
     b,
     c,
-    bannerCID
+    bannerCID,
   })
 }
 
@@ -158,11 +183,19 @@ export async function setGroupLogo(groupId: string, a: any, b: any, c: any, logo
     a,
     b,
     c,
-    logoCID
+    logoCID,
   })
 }
 
-export async function votePoll(itemId: string, groupId: string, pollData: number[], merkleRoot: BigNumberish, nullifierHash: BigNumberish, solidityProof: Proof, voteRepProof: ReputationProofStruct) {
+export async function votePoll(
+  itemId: string,
+  groupId: string,
+  pollData: number[],
+  merkleRoot: BigNumberish,
+  nullifierHash: BigNumberish,
+  solidityProof: Proof,
+  voteRepProof: ReputationProofStruct
+) {
   return axios.post(`${RELAYER_URL}/vote-poll`, {
     itemId,
     groupId,
@@ -170,6 +203,6 @@ export async function votePoll(itemId: string, groupId: string, pollData: number
     merkleRoot,
     nullifierHash,
     solidityProof,
-    voteRepProof
+    voteRepProof,
   })
 }

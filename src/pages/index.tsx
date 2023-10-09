@@ -1,8 +1,8 @@
 import { BigNumber } from 'ethers'
-import WithStandardLayout from '@components/HOC/WithStandardLayout'
 import HomePage from '../components/HomePage'
 
 function Home({ communitiesData, users }) {
+  if (!communitiesData || !users) return null
   return (
     <HomePage
       isAdmin={false}
@@ -11,4 +11,4 @@ function Home({ communitiesData, users }) {
   )
 }
 
-export default WithStandardLayout(Home)
+export default (Home)

@@ -1,6 +1,7 @@
 import React, { use, useEffect } from 'react'
 import { useTranslation } from 'next-i18next'
-import { ToolTip } from './HOC/ToolTip'
+import ToolTip from '@components/HOC/ToolTip'
+
 import { TrashIcon } from '@heroicons/react/20/solid'
 import { useRemoveGroup } from '@/hooks/useRemoveGroup'
 import { useAccount } from 'wagmi'
@@ -28,7 +29,7 @@ const RemoveGroup: React.FC<RemoveGroupProps> = ({ groupId, hidden }) => {
   const onClick = () => {
     setIsLoading(true)
     writeAsync?.({ recklesslySetUnpreparedArgs: [groupId] }).finally(() => {
-      setIsLoading(false);
+      setIsLoading(false)
     })
   }
 
@@ -39,11 +40,7 @@ const RemoveGroup: React.FC<RemoveGroupProps> = ({ groupId, hidden }) => {
   return (
     <>
       {isAdmin && (
-        <ToolTip
-          type="primary"
-          title={t('toolTip.removeCommunity.title')}
-          message={t('toolTip.removeCommunity.message') as string}
-        >
+        <ToolTip tooltip={t('toolTip.removeCommunity.message') as string}>
           <button
             id="edit-community-button"
             className={`${

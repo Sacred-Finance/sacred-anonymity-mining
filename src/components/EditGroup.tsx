@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router'
-import { useAccount, useContract, useProvider, useSigner } from 'wagmi'
+import { useAccount, useContract, useProvider } from 'wagmi'
 import { useTranslation } from 'next-i18next'
 import { ForumContractAddress } from '@/constant/const'
 import ForumABI from '@/constant/abi/Forum.json'
@@ -17,14 +17,11 @@ import { PictureUpload } from '@components/PictureUpload'
 import Link from 'next/link'
 import { PrimaryButton } from '@components/buttons'
 import { buttonVariants } from '@styles/classes'
-import { CommunityContext } from '@components/CommunityCard/CommunityCard'
-import { CommunityCardHeader } from '@components/CommunityCard/CommunityCardHeader'
-import { CommunityCardBody } from '@components/CommunityCard/CommunityCardBody'
 import { HandleSetImage, isImageFile } from '@pages/communities/[groupId]/edit'
 import { Group } from '@/types/contract/ForumInterface'
 import RemoveGroup from '@components/RemoveGroup'
-import { useRemoveGroup } from '@/hooks/useRemoveGroup'
-import { CommunityId } from '@/contexts/CommunityProvider'
+import DeleteItemButton from '@components/buttons/DeleteItemButton'
+import { useValidatedImage } from '@components/CommunityCard/UseValidatedImage'
 
 interface EditGroupProps {
   group: Group
@@ -34,10 +31,6 @@ export function EditGroup({ group }: EditGroupProps) {
   const { address } = useAccount()
   const {} = useProvider()
   const { t } = useTranslation()
-
-  const { data: signer } = useSigner()
-
-  const { write } = useRemoveGroup(group.groupId as CommunityId)
 
   const handleUpdateStateAfterEdit = useFetchCommunitiesByIds([Number(group.groupId)], false)
 
@@ -96,7 +89,8 @@ export function EditGroup({ group }: EditGroupProps) {
   }
 
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setGroupDescriptionState(e.target.value)
+
+      setGroupDescriptionState(e.target.value)
   }
 
   const handleTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -161,21 +155,19 @@ export function EditGroup({ group }: EditGroupProps) {
   }, [bannerFile, logoFile, group.id, forumContract, groupDescriptionState, groupName])
 
   return (
-    <div
-      className={clsx('relative mx-auto mb-64 grid h-screen w-full max-w-screen-2xl  grid-cols-1 gap-8 sm:p-8 md:p-24')}
-    >
-      <div className="flex flex-col space-y-4 sm:col-span-full md:col-span-6 lg:col-span-6">
+    <div className={clsx('max-w-screen-2xl  relative z-50  grid w-full grid-cols-1 gap-4 sm:p-8 md:p-24')}>
+      <div className="-z-[1] flex flex-col space-y-4 sm:col-span-full md:col-span-6 lg:col-span-6">
         <div className="flex flex-row items-center justify-between py-4">
-          <h1 className="flex text-2xl font-semibold text-gray-700">{t('editCommunity')}</h1>
+          <h1 className="text-2xl font-semibold text-gray-700 dark:text-gray-300">{t('editCommunity')}</h1>
           <div>
             <RemoveGroup groupId={group.id} hidden={false} />
           </div>
         </div>
 
         <div className="flex flex-col space-y-4">
-          <label className="text-lg text-gray-700">{t('placeholder.communityName')}</label>
+          <label className="text-lg text-gray-700 dark:text-gray-300">{t('placeholder.communityName')}</label>
           <input
-            className="rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
+            className="focus:border-blue-500 rounded border px-3 py-2 text-gray-700 transition-colors focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:focus:border-blue-400"
             placeholder={'An awesome community name'}
             type="text"
             value={groupName}
@@ -184,14 +176,14 @@ export function EditGroup({ group }: EditGroupProps) {
         </div>
 
         <div className="flex flex-col space-y-4">
-          <label className="text-lg text-gray-700">{t('placeholder.communityTags')}</label>
-          <div className={'flex gap-2'}>
+          <label className="text-lg text-gray-700 dark:text-gray-300">{t('placeholder.communityTags')}</label>
+          <div className={'flex gap-4'}>
             {tags.map((tag, index) => (
               <div key={index}>
                 {tag.trim() && (
                   <span
                     key={index}
-                    className="rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
+                    className="rounded border border-gray-300 bg-gray-200 px-3 py-2 text-gray-700 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300"
                   >
                     {tag}
                   </span>
@@ -200,7 +192,7 @@ export function EditGroup({ group }: EditGroupProps) {
             ))}
           </div>
           <input
-            className="rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
+            className="focus:border-blue-500 rounded border px-3 py-2 text-gray-700 transition-colors focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:focus:border-blue-400"
             placeholder={'tag1, tag2, tag3'}
             type="text"
             value={tags}
@@ -209,16 +201,16 @@ export function EditGroup({ group }: EditGroupProps) {
         </div>
 
         <div className="flex flex-col space-y-4">
-          <label className="text-lg text-gray-700">{t('placeholder.communityDescription')}</label>
+          <label className="text-lg text-gray-700 dark:text-gray-300">{t('placeholder.communityDescription')}</label>
           <textarea
-            className="h-20 rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
+            className="focus:border-blue-500 h-20 rounded border px-3 py-2 text-gray-700 transition-colors focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:focus:border-blue-400"
             placeholder={t('placeholder.communityDescriptionContent') || ''}
             value={groupDescriptionState}
             onChange={handleDescriptionChange}
           />
         </div>
 
-        <div className="flex gap-3 ">
+        <div className="flex gap-4 ">
           <PictureUpload
             uploadedImageUrl={bannerUrl}
             displayName={t('banner')}
@@ -234,75 +226,45 @@ export function EditGroup({ group }: EditGroupProps) {
           />
         </div>
 
-        <div className={'flex flex-col justify-between space-x-0 py-2 md:flex-row md:space-x-2 md:py-4'}>
+        <div className="flex flex-col justify-between space-x-0 py-2 md:flex-row md:space-x-2 md:py-4">
           <Link
             href="/"
-            className="mb-2 rounded-lg border-2 border-red-400 p-2 text-red-500 hover:bg-red-500 hover:text-white md:mb-0 md:px-4"
+            className="rounded border-2 border-red-400 p-2 text-red-500 transition-colors hover:bg-red-500 hover:text-white dark:border-red-600 dark:text-red-400 dark:hover:bg-red-600 md:px-4"
           >
             Back
           </Link>
 
+          <DeleteItemButton isAdminOrModerator={true} groupId={group.id} itemId={group.id} itemType={'group'} />
+
           <PrimaryButton
-            className={clsx(buttonVariants.primarySolid, ' border')}
-            // disabled={isSubmitDisabled}
+            className={clsx(
+              buttonVariants.primarySolid,
+              ' border transition-colors hover:bg-blue-600 dark:bg-blue-700 dark:text-gray-300 dark:hover:bg-blue-800'
+            )}
             onClick={togglePreview}
           >
             {t('preview')}
           </PrimaryButton>
         </div>
       </div>
+      {previewCard && <div className="fixed inset-0 bg-gray-900/80 transition-colors" />}
 
-      {previewCard && <div className="fixed inset-0 m-0 bg-gray-900/60 " />}
       {previewCard && (
-          <div className="absolute inset-0  flex flex-col items-center space-y-8 p-10 rounded">
-            <h1 className="text-4xl font-semibold text-white">Double check your changes!</h1>
-            <div className="flex w-3/4 justify-between space-x-16">
-              <CommunityContext.Provider value={group}>
-                <div className="w-1/2 bg-white p-4 rounded shadow-lg">
-                  <h4 className="text-xl font-medium text-gray-700">Before</h4>
-                  <CommunityCardHeader />
-                  <CommunityCardBody />
-                </div>
-              </CommunityContext.Provider>
-
-              <CommunityContext.Provider
-                  value={{
-                    ...group,
-                    groupDetails: {
-                      ...group?.groupDetails,
-                      logoCID: logoUrl as string,
-                      bannerCID: bannerUrl as string,
-                      description: groupDescriptionState,
-                    },
-                  }}
-              >
-                <div className="w-1/2 bg-white p-4 rounded shadow-lg">
-                  <h4 className="text-xl font-medium text-gray-700">After</h4>
-                  <CommunityCardHeader srcBannerOverride={bannerUrl} srcLogoOverride={logoUrl} />
-                  <CommunityCardBody />
-                </div>
-              </CommunityContext.Provider>
-            </div>
-            <div className="flex w-3/4 justify-between">
-              <button
-                  onClick={hidePreview}
-                  className="text-white bg-red-400 hover:bg-red-500 rounded px-4 py-2"
-              >
-                Cancel
-              </button>
-              <PrimaryButton
-                  className={clsx(buttonVariants.solid, 'z-50 border px-4')}
-
-                  // disabled={isSubmitDisabled}
-                  onClick={submitAllGroupDetails}
-                  isLoading={isSubmitting}
-              >
-                {t('button.confirm-edit')}
-              </PrimaryButton>
-            </div>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className=" z-50 flex h-40 w-40 bg-gray-400">
+            <PrimaryButton className={clsx('bg-red-400')} onClick={hidePreview} isLoading={isSubmitting}>
+              Cancel
+            </PrimaryButton>
+            <PrimaryButton
+              // disabled={isSubmitDisabled}
+              onClick={submitAllGroupDetails}
+              isLoading={isSubmitting}
+            >
+              {t('button.confirm-edit')}
+            </PrimaryButton>
           </div>
+        </div>
       )}
-
     </div>
   )
 }

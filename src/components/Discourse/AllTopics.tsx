@@ -21,11 +21,9 @@ const AllTopics = () => {
 
   return (
     <>
-      <div className="row-gap-8 mb-8 grid grid-cols-1 justify-items-center   gap-4 sm:grid-cols-1 md:grid-cols-2 md:justify-items-center lg:grid-cols-3">
-        {topicList?.topics?.map(topic => (
-          <TopicCommunityCard key={topic.id} topic={topic} variant={'default'} />
-        ))}
-      </div>
+      {topicList?.topics?.map(topic => (
+        <TopicCommunityCard key={topic.id} topic={topic} variant={'default'} />
+      ))}
     </>
   )
 }

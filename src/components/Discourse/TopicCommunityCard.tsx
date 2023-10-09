@@ -3,18 +3,14 @@ import React from 'react'
 import { Topic } from '@components/Discourse/types'
 import { formatDistanceToNow } from '@/lib/utils'
 import clsx from 'clsx'
-import EditGroupModal from '@components/EditGroupModal'
 import Link from 'next/link'
-import { CommunityCardHeader } from '@components/CommunityCard/CommunityCardHeader'
-import { CommunityCardBody } from '@components/CommunityCard/CommunityCardBody'
-import { CommunityCardFooter } from '@components/CommunityCard/CommunityCardFooter'
-import { CommunityContext } from '@components/CommunityCard/CommunityCard'
 
 const TimeSinceLastPost: React.FC<{ topic: Topic }> = ({ topic }) => (
-  <li>Last Post: {formatDistanceToNow(new Date(topic.last_posted_at))}</li>
+  <li className="my-1">Last Post: {formatDistanceToNow(new Date(topic.last_posted_at))}</li>
 )
+
 const TimeSinceTopicCreated: React.FC<{ topic: Topic }> = ({ topic }) => (
-  <li>Created: {formatDistanceToNow(new Date(topic.created_at))}</li>
+  <li className="my-1">Created: {formatDistanceToNow(new Date(topic.created_at))}</li>
 )
 
 const TopicCommunityCard: React.FC<{ topic: Topic; variant?: 'banner' | 'default' }> = ({
@@ -25,21 +21,23 @@ const TopicCommunityCard: React.FC<{ topic: Topic; variant?: 'banner' | 'default
     key={topic.id}
     href={`/discourse/${topic.id}`}
     className={clsx(
-      'relative w-full',
-      variant === 'banner' ? 'pointer-events-auto ' : 'max-w-[450px] rounded-lg ring-1 ring-gray-900'
+      'relative block w-full max-w-lg flex-shrink-0 flex-grow transform rounded shadow transition-transform dark:shadow-white',
+      variant === 'banner'
+        ? 'pointer-events-auto '
+        : 'hover-peer:-z-[1] peer overflow-hidden border border-gray-900 bg-white transition-all duration-300 ease-in-out hover:z-[150] dark:bg-gray-900 sm:w-full md:w-auto'
     )}
   >
-    <div className={'space-y-8 relative flex h-full flex-col rounded-lg'}>
-      <div className="relative grid grid-cols-8 items-center justify-items-center">
-        <div className="col-span-full p-4 flex h-36 w-full items-center justify-center rounded-t-lg bg-primary-400 text-xl font-semibold text-white">
-          {topic?.fancy_title}
-        </div>
+    <div className="relative flex h-full flex-col space-y-4 rounded bg-white transition-colors dark:bg-gray-900">
+      <div className="flex h-36 w-full items-center justify-center rounded-t bg-gray-800 p-4 text-xl font-semibold text-white dark:text-gray-300">
+        {topic?.fancy_title}
       </div>
-      <div className="p-2">
-        <span className="mr-2">Posts: {topic.posts_count}</span>
-        <span className="mr-2">Likes: {topic.like_count}</span>
-        <span>Views: {topic.views}</span>
-        <ul className=" text-xs">
+      <div className="space-y-2 p-4">
+        <div className="flex justify-between">
+          <span className="text-gray-700 dark:text-gray-300">Posts: {topic.posts_count}</span>
+          <span className="text-gray-700 dark:text-gray-300">Likes: {topic.like_count}</span>
+          <span className="text-gray-700 dark:text-gray-300">Views: {topic.views}</span>
+        </div>
+        <ul className="text-xs text-gray-500 dark:text-gray-400">
           <TimeSinceTopicCreated topic={topic} />
           <TimeSinceLastPost topic={topic} />
         </ul>

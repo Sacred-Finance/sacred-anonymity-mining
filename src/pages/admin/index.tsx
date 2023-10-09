@@ -5,8 +5,8 @@ import { useRouter } from 'next/router'
 import { useTranslation } from 'react-i18next'
 import { ForumContractAddress } from '@/constant/const'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
-import { useLoaderContext } from '@/contexts/LoaderContext'
 import { useFetchAdminsAndModerators } from '@/hooks/useFetchAdminsAndModerators'
+import { Address } from '@/types/common'
 
 const Access: React.FC = () => {
   const { address } = useAccount()
@@ -15,7 +15,6 @@ const Access: React.FC = () => {
 
   const { isAdmin, isModerator, fetchIsAdmin } = useCheckIfUserIsAdminOrModerator(address)
   const { isFetching, isLoading, admins, moderators, fetchAdmins, fetchModerators } = useFetchAdminsAndModerators()
-  const { setIsLoading } = useLoaderContext()
 
   useEffect(() => {
     console.log(address)
@@ -30,12 +29,12 @@ const Access: React.FC = () => {
 
   /** remove admin */
   const { write: writeRemoveAdmin } = useContractWrite({
-    address: ForumContractAddress as `0x${string}`,
+    address: ForumContractAddress as Address,
     abi: ForumABI.abi,
     functionName: 'removeAdmin',
     mode: 'recklesslyUnprepared',
     onSettled: (data, error) => {
-      setIsLoading(false)
+      // setIsLoading(false)
     },
     onSuccess: async (data, variables) => {
       try {
@@ -48,12 +47,12 @@ const Access: React.FC = () => {
 
   /** remove moderator */
   const { write: writeRemoveModerator } = useContractWrite({
-    address: ForumContractAddress as `0x${string}`,
+    address: ForumContractAddress as Address,
     abi: ForumABI.abi,
     functionName: 'removeModerators',
     mode: 'recklesslyUnprepared',
     onSettled: (data, error) => {
-      setIsLoading(false)
+      // setIsLoading(false)
     },
     onSuccess: async (data, variables) => {
       try {
@@ -65,12 +64,12 @@ const Access: React.FC = () => {
 
   /** add admin */
   const { write: writeAddAdmin } = useContractWrite({
-    address: ForumContractAddress as `0x${string}`,
+    address: ForumContractAddress as Address,
     abi: ForumABI.abi,
     functionName: 'addAdmins',
     mode: 'recklesslyUnprepared',
     onSettled: (data, error) => {
-      setIsLoading(false)
+      // setIsLoading(false)
     },
     onSuccess: async (data, variables) => {
       try {
@@ -82,12 +81,12 @@ const Access: React.FC = () => {
 
   /** add moderator */
   const { write: writeAddModerator } = useContractWrite({
-    address: ForumContractAddress as `0x${string}`,
+    address: ForumContractAddress as Address,
     abi: ForumABI.abi,
     functionName: 'addModerators',
     mode: 'recklesslyUnprepared',
     onSettled: (data, error) => {
-      setIsLoading(false)
+      // setIsLoading(false)
     },
     onSuccess: async (data, variables) => {
       try {
@@ -98,38 +97,42 @@ const Access: React.FC = () => {
   })
 
   const onAddAdmin = value => {
-    setIsLoading(true)
-    writeAddAdmin({
-      recklesslySetUnpreparedArgs: [[value]],
-    })
+    if (writeAddAdmin) {
+      writeAddAdmin({
+        recklesslySetUnpreparedArgs: [[value]],
+      })
+    }
   }
 
   const onAddModerator = value => {
-    setIsLoading(true)
-    writeAddModerator({
-      recklesslySetUnpreparedArgs: [[value]],
-    })
+    if (writeAddModerator) {
+      writeAddModerator({
+        recklesslySetUnpreparedArgs: [[value]],
+      })
+    }
   }
 
   const onRemoveAdmin = value => {
-    setIsLoading(true)
-    writeRemoveAdmin({
-      recklesslySetUnpreparedArgs: [value],
-    })
+    if (writeRemoveAdmin) {
+      writeRemoveAdmin({
+        recklesslySetUnpreparedArgs: [value],
+      })
+    }
   }
 
   const onRemoveModerator = value => {
-    setIsLoading(true)
-    writeRemoveModerator({
-      recklesslySetUnpreparedArgs: [[value]],
-    })
+    if (writeRemoveModerator) {
+      writeRemoveModerator({
+        recklesslySetUnpreparedArgs: [[value]],
+      })
+    }
   }
 
   const AddressInput = ({ placeholder, onSubmit }) => {
     const [value, setValue] = useState('')
     const patternError = value && !/^0x[a-fA-F0-9]{40}$/g.test(value)
     return (
-      <div className="flex flex-row gap-3">
+      <div className="flex flex-row gap-4">
         {/* <FormControl isInvalid={patternError}> */}
         <input
           type="text"
@@ -189,15 +192,15 @@ const Access: React.FC = () => {
     )
   }
   return (
-    <div className='m-10'>
-      <div className="flex flex-col gap-5">
-        <h1 className="text-left font-bold text-[22px]" color={'primary.500'}>
+    <div className="">
+      <div className="flex flex-col gap-4">
+        <h1 className="text-left text-[22px] font-bold" color={'primary.500'}>
           Admins
         </h1>
         <AddressInput placeholder={'Admin Address'} onSubmit={v => onAddAdmin(v)}></AddressInput>
         <TableWrapper items={admins} canRemove={isAdmin} onRemove={v => onRemoveAdmin(v)}></TableWrapper>
 
-        <h1 className="text-left font-bold text-[22px]" color={'primary.500'}>
+        <h1 className="text-left text-[22px] font-bold" color={'primary.500'}>
           Moderators
         </h1>
         <AddressInput placeholder={'Moderator Address'} onSubmit={v => onAddModerator(v)}></AddressInput>

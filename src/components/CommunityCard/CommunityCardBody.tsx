@@ -1,111 +1,59 @@
 import React from 'react'
-import { useLocalCommunity } from './CommunityCard'
-import { supportedChains } from '../../constant/const'
-import clsx from 'clsx'
-import { classes } from '../../styles/classes'
-import { getStringFromBytes32 } from '@/lib/utils'
-import { Group } from '@/types/contract/ForumInterface'
-import { User } from '@/lib/model'
 import { ethers } from 'ethers'
 
-function CommunityTags({
-  community,
-}: {
-  community: Group & { variant?: 'default' | 'banner'; user: User | false | undefined }
-}) {
-  return community?.groupDetails?.tags?.length ? (
-    <ItemContainer variant={'singleItem'}>
-      <p className="mb-1 font-semibold">Tags</p>
-      {community?.groupDetails?.tags
-        .filter(tag => tag !== ethers.constants.HashZero)
-        ?.map(tag => (
-          <p className="w-min rounded bg-blue-500 px-2 py-1 text-xs text-white" key={tag}>
-            {getStringFromBytes32(tag)}
-          </p>
-        ))}
-    </ItemContainer>
-  ) : (
-    <></>
-  )
-}
+import { useLocalCommunity } from './CommunityCard'
+import { getStringFromBytes32 } from '@/lib/utils'
+import { CommunityLogo } from '@components/CommunityCard/CommunityCardHeader'
 
-export const CommunityCardBody = () => {
+export const CommunityCardBody: React.FC = () => {
   const community = useLocalCommunity()
 
-  const isBanner = community?.variant === 'banner'
-  return (
-    <div
-      className={clsx(
-        ' grid grid-cols-2  gap-4  p-4 ',
-        !community.user && ' rounded-b-lg',
-        isBanner ? 'relative mx-2 w-fit ' : ''
-      )}
-    >
-      <CommunityInfo community={community} />
-      <CommunityTags community={community} />
-      <CommunityChainId community={community} />
-      <CommunityRequirements community={community} />
+  const tags = community?.groupDetails?.tags || []
 
-      {community?.variant === 'banner' && (
-        <ItemContainer>
-          <p className="mb-1 font-semibold">Community Description</p>
-          <p className="col-span-auto text-sm">{community?.groupDetails?.description} </p>
-        </ItemContainer>
+  const requirements = community?.requirements || []
+
+  return (
+    <div className="flex min-h-fit w-full items-start space-x-4 dark:text-white">
+      <CommunityLogo />
+      {tags.length > 0 && (
+        <div className="flex h-fit flex-col space-y-2 border-gray-200 px-2 dark:border-gray-700">
+          <p className="text-base font-light dark:text-gray-300">Tags</p>
+          <div className="flex flex-wrap space-x-2">
+            {tags
+              .filter(tag => tag !== ethers.constants.HashZero)
+              .map(tag => {
+                const tagString = getStringFromBytes32(tag)
+                return (
+                  <span
+                    className="flex w-fit items-center truncate rounded-md bg-gray-200 px-2 py-0.5 text-xs dark:bg-gray-700 dark:text-gray-300"
+                    style={{ maxWidth: '100%' }}
+                    title={tagString}
+                    key={tag}
+                  >
+                    {tagString}
+                  </span>
+                )
+              })}
+          </div>
+        </div>
       )}
+
+      <div className="flex h-fit flex-col space-y-2 px-2">
+        <p className="text-base font-light dark:text-gray-300">
+          {requirements.length > 0 ? 'Requirements' : 'No Requirements'}
+        </p>
+        {requirements.map(r => (
+          <span
+            className="flex w-fit items-center truncate rounded-md bg-gray-200 px-2 py-0.5 text-xs dark:bg-gray-700 dark:text-gray-300"
+            key={r?.tokenAddress}
+          >
+            {/*{`${r?.symbol} - ${Number(r?.minAmount) / 10 ** (r?.decimals || 0)}`}*/}
+              {/* ETHERS FORMAT NUMBER */}
+              {ethers.BigNumber.from(r?.minAmount).div(ethers.BigNumber.from(10).pow(r?.decimals || 0)).toString()}
+              {ethers.constants.AddressZero !== r?.tokenAddress && ` ${r?.tokenAddress.slice(0, 6)}...${r?.tokenAddress.slice(-4)}`}
+          </span>
+        ))}
+      </div>
     </div>
-  )
-}
-
-const CommunityInfo = ({ community }: { community: Group }) => {
-  return (
-    <ItemContainer>
-      <p className="mb-1 font-semibold">Community Info</p>
-      <p className="text-xs">{`${community.userCount ?? 0} Members`}</p>
-      <p className="text-xs">{community.posts?.length > 0 ? `${community.posts.length} Posts` : 'No posts yet'}</p>
-    </ItemContainer>
-  )
-}
-
-const CommunityChainId = ({ community }: { community: Group }) => {
-  return (
-    <ItemContainer>
-      <p className="mb-1 font-semibold">Blockchain</p>
-      <p className="text-xs">{supportedChains[community.chainId]?.name}</p>
-    </ItemContainer>
-  )
-}
-
-interface ItemContainerVariants {
-  default: string
-  singleItem: string
-}
-
-const itemContainerVariants: ItemContainerVariants = {
-  default: 'rounded-md p-1 ring-1 ring-gray-900/30',
-  singleItem: 'rounded-md p-1 ring-1 ring-gray-900/30 flex items-center gap-3 flex-wrap',
-}
-
-export const ItemContainer = ({
-  children,
-  variant = 'default',
-}: {
-  children: React.ReactNode
-  variant?: keyof ItemContainerVariants
-}) => <div className={clsx(itemContainerVariants[variant])}> {children} </div>
-
-const CommunityRequirements = ({ community }: { community: Group }) => {
-  const renderRequirements = () =>
-    community?.requirements?.map(r => (
-      <p className="text-xs" key={r?.tokenAddress}>
-        {`${r?.symbol}`} {' - '} {`${r?.symbol}`} {' - '} {Number(r?.minAmount) / 10 ** (r?.decimals ?? 0)}
-      </p>
-    ))
-  return community?.requirements?.length > 0 ? (
-    <ItemContainer>
-      <p className="mb-1 font-semibold">Requirements</p>
-      {renderRequirements()}
-    </ItemContainer>
-  ) : (
-    <></>
   )
 }

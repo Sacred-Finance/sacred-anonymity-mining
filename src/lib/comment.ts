@@ -2,40 +2,49 @@ import { BigNumber } from 'ethers'
 import { mutate } from 'swr'
 import { User } from './model'
 import { getCache, removeAt, setCache } from './redis'
-import { create, editContent, handleDeleteItem, updateContentVote} from '@/lib/item'
+import { create, editContent, handleDeleteItem, updateContentVote } from '@/lib/item'
+import { Address } from '@/types/common'
 
 export const MIN_REP_COMMENT = 0
 
+interface CreateParams {
+  commentContent: any
+  address: Address
+  users: User[]
+  postedByUser: User
+  groupId: string
+  setWaiting: Function
+  onIPFSUploadSuccess: (comment, cid) => void
+}
+
 export class CommentClass {
-  id: string
+  id?: string
   groupId: string
   postId: string
 
-  constructor(groupId, postId, id: string) {
-    this.id = id
-    this.postId = postId
+  constructor(groupId, postId, id?: string) {
     this.groupId = groupId
+    this.postId = postId
+    this.id = id
   }
 
   commentsCacheId() {
     return this.postId + '_comments'
   }
-  cacheId() {
-    return this.postId + '_comments'
-  }
+
   specificId(commentId?) {
     return `${this.postId}_comment_${this.id ?? commentId}`
   }
 
-  async create(
+  async create({
     commentContent,
-    address: string,
-    users: User[],
-    postedByUser: User,
-    groupId: string,
-    setWaiting: Function,
-    onIPFSUploadSuccess: (comment, cid) => void
-  ) {
+    address,
+    users,
+    postedByUser,
+    groupId,
+    setWaiting,
+    onIPFSUploadSuccess,
+  }: CreateParams) {
     return await create.call(
       this,
       commentContent,
@@ -49,17 +58,11 @@ export class CommentClass {
     )
   }
 
-  async edit(commentContent, address: string, itemId, postedByUser: User, groupId: string, setWaiting: Function) {
+  async edit(commentContent, address: Address, itemId, postedByUser: User, groupId: string, setWaiting: Function) {
     return await editContent.call(this, 'comment', commentContent, address, itemId, postedByUser, groupId, setWaiting)
   }
 
-  async delete(address: string, itemId, users: User[], postedByUser: User, groupId: string, setWaiting: Function) {
+  async delete(address: Address, itemId, users: User[], postedByUser: User, groupId: string, setWaiting: Function) {
     return await handleDeleteItem.call(this, address, postedByUser, itemId)
   }
-
-  async updateCommentsVote(itemId, voteType, confirmed: boolean, revert = false) {
-    updateContentVote.call(this, itemId, voteType, confirmed, 'comment', revert)
-  }
-
-
 }

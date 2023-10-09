@@ -1,50 +1,49 @@
 import '@styles/style.scss'
 import type { AppProps } from 'next/app'
-import { useTheme } from 'next-themes'
+import { ThemeProvider, useTheme } from 'next-themes'
 import { app } from '@/appConfig'
 import { useEffect, useRef } from 'react'
 import HeadGlobal from '@/components/HeadGlobal'
 import '../../i18n'
 import { alchemyProvider } from 'wagmi/providers/alchemy'
 
-import { connectorsForWallets, darkTheme, lightTheme, RainbowKitProvider } from '@rainbow-me/rainbowkit'
+import { connectorsForWallets, darkTheme, RainbowKitProvider, Theme } from '@rainbow-me/rainbowkit'
 import { braveWallet, coinbaseWallet, injectedWallet, metaMaskWallet } from '@rainbow-me/rainbowkit/wallets'
 import { avalancheFuji, goerli, localhost, mainnet, polygonMumbai, sepolia } from 'wagmi/chains'
 import { configureChains, createClient, WagmiConfig } from 'wagmi'
 import { publicProvider } from 'wagmi/providers/public'
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc'
-import { LoaderProvider } from '../contexts/LoaderContext'
 import { CommunityProvider } from '../contexts/CommunityProvider'
 import { startIPFS } from '../lib/utils'
-// import { useFetchUsers } from '../hooks/useFetchUsers'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import LoadingPage from '../components/LoadingComponent'
 import ErrorBoundary from '../components/ErrorBoundary'
-import { useMounted } from '@/hooks/useMounted'
 import { SWRConfig } from 'swr'
+import StandardLayout from '@components/HOC/StandardLayout'
+import { merge } from 'lodash'
 
 function App({ Component, pageProps }: AppProps) {
   return (
-    <LoaderProvider>
-      <Web3Wrapper>
-        <HeadGlobal />
-        <SWRConfig
-          value={{
-            revalidateOnFocus: false,
-            revalidateOnReconnect: false,
-            fetcher: (resource, init) =>
-              fetch(resource, init).then(res => {
-                console.log('res', res)
-                return res.json()
-              }),
-          }}
-        >
-          <Component {...pageProps} />
-        </SWRConfig>
-        <ToastContainer />
-      </Web3Wrapper>
-    </LoaderProvider>
+    <ThemeProvider attribute={'class'} defaultTheme={'dark'} storageKey={'theme-color'}>
+        <Web3Wrapper>
+          <HeadGlobal />
+          <SWRConfig
+            value={{
+              revalidateOnFocus: false,
+              revalidateOnReconnect: false,
+              fetcher: (resource, init) =>
+                fetch(resource, init).then(res => {
+                  return res.json()
+                }),
+            }}
+          >
+            <StandardLayout>
+              <Component {...pageProps} />
+              <ToastContainer />
+            </StandardLayout>
+          </SWRConfig>
+        </Web3Wrapper>
+    </ThemeProvider>
   )
 }
 
@@ -129,9 +128,14 @@ const client = createClient({
   },
 })
 
+const myTheme = merge(darkTheme(), {
+  colors: {
+    accentColor: '#07296d',
+  },
+} as Theme)
+
 // Web3Wrapper
 export function Web3Wrapper({ children }) {
-  const { resolvedTheme } = useTheme()
 
   const didLoadRef = useRef(false)
   useEffect(() => {
@@ -151,7 +155,7 @@ export function Web3Wrapper({ children }) {
         chains={chains}
         initialChain={polygonMumbai.id} // Optional, initialChain={1}, initialChain={chain.mainnet}, initialChain={gnosisChain}
         showRecentTransactions={false}
-        theme={resolvedTheme === 'dark' ? darkTheme() : lightTheme()}
+        theme={myTheme}
         id={'rainbowkit'}
       >
         <CommunityProvider>

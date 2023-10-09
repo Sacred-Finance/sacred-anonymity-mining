@@ -1,10 +1,7 @@
 import { useCallback, useContext } from 'react'
-import { useLoaderContext } from '../contexts/LoaderContext'
 import { toast } from 'react-toastify'
 
 export const useHandleCommunityAction = () => {
-  const { setIsLoading } = useLoaderContext()
-
   return useCallback(
     async (
       actionFn: (...args: any[]) => Promise<any>,
@@ -13,7 +10,6 @@ export const useHandleCommunityAction = () => {
       successCallback?: () => void
     ) => {
       try {
-        setIsLoading(true)
         const response = await actionFn(...actionParams)
 
         if (!response) {
@@ -37,12 +33,18 @@ export const useHandleCommunityAction = () => {
         } else {
           console.error('Error in action')
         }
-        setIsLoading(false)
       } catch (error) {
         console.error('error in action', error)
-        setIsLoading(false)
+        toast.error(error.name, {
+          autoClose: 7000,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          toastId: 'handleCommunity',
+        } as any)
       }
     },
-    [toast, setIsLoading]
+    [toast]
   )
 }

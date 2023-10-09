@@ -69,8 +69,13 @@ export const JoinCommunityButton = memo(({ community, hideIfJoined }: JoinButton
       isLoading={isLoading}
       onClick={join}
       className={clsx(
-        `flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold text-white transition-colors duration-200 `,
-        hasUserJoined ? 'bg-green-500 hover:bg-green-600' : 'bg-blue-500 hover:bg-blue-600',
+        // 3d topleft
+        'h-9 w-28',
+        'border border-transparent ',
+        `flex items-center justify-center !gap-1 rounded border text-sm transition-colors duration-200 `,
+        hasUserJoined
+          ? 'dark:bg-green-500/30 bg-green-500/70 text-sm text-black '
+          : 'bg-primary-500 text-white hover:bg-primary-500',
         'disabled:opacity-50'
       )}
     >

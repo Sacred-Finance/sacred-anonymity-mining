@@ -2,20 +2,25 @@ import React, { ReactNode, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { CircularLoader } from '@components/JoinCommunityButton'
+import { useRouter } from 'next/router'
 
 function useBreadcrumbs(): BreadCrumbItem[] {
   const [breadcrumbItems, setBreadcrumbItems] = useState<BreadCrumbItem[]>([])
 
+  const router = useRouter()
   const { state } = useCommunityContext()
 
   const community = state.activeCommunity.community
   const post = state.activePost.post
 
   useEffect(() => {
-    if (!community || !post) return
+    if (!community || !post) {
+      setBreadcrumbItems([])
+      return
+    }
     const items = generateBreadcrumbItems(community, post, location)
     setBreadcrumbItems(items)
-  }, [community, post])
+  }, [community, post, router])
 
   return breadcrumbItems
 }
@@ -24,25 +29,20 @@ export const Breadcrumbs = ({ backdrop = false }): JSX.Element => {
   const breadcrumbItems = useBreadcrumbs()
 
   return (
-    <nav
-      className="flex justify-between gap-2 rounded-lg border border-gray-200 bg-gray-50 px-5 py-3 text-gray-700 dark:border-gray-700 dark:bg-gray-800"
-      aria-label="Breadcrumb"
-    >
-      <ol className="flex items-center gap-5">
+    <nav className="flex justify-between gap-4 rounded-t px-5 py-3 text-gray-700 " aria-label="Breadcrumb">
+      <ol className="flex items-center gap-4 dark:text-white">
         {breadcrumbItems?.map((item, index) => {
           if (!item) return null
           return (
-            <li key={index} className="inline-flex items-center gap-5">
+            <li key={index} className="inline-flex items-center gap-4">
               <Link
                 href={item.href}
-                className={` inline-flex items-center rounded border px-3 py-1 text-sm font-medium text-gray-700 dark:text-gray-400 dark:hover:text-white ${
-                  item.isCurrentPage ? 'bg-primary-500 font-bold text-white hover:bg-primary-700 ' : 'hover:bg-white/80'
-                }`}
                 onClick={e => {
                   if (item.isCurrentPage) {
                     e.preventDefault()
                   }
                 }}
+                className={item.isCurrentPage ? '' : 'text-primary-600 hover:text-primary-700'}
               >
                 {item.label}
               </Link>
@@ -132,13 +132,13 @@ function generateBreadcrumbItems(community, post, location): BreadCrumbItem[] {
     ]
   } else if (location.pathname.includes('discourse')) {
     items = [
-        { label: 'Home', href: '/', isCurrentPage: false },
-        {
-          label: 'Discourse',
-          href: `/discourse/${community.fancy_title}`,
-          isCurrentPage: true,
-        },
-        ]
+      { label: 'Home', href: '/', isCurrentPage: false },
+      {
+        label: 'Discourse',
+        href: `/discourse/${community.fancy_title}`,
+        isCurrentPage: true,
+      },
+    ]
   }
 
   return items
