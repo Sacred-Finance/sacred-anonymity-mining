@@ -15,14 +15,15 @@ import {
 import { motion } from 'framer-motion'
 import clsx from 'clsx'
 import { Group } from '@/types/contract/ForumInterface'
-import { User } from '@/lib/model'
-import AllTopics from '@components/Discourse/AllTopics'
+import { DiscourseCommunity } from '@/lib/model'
 import { Tab } from '@headlessui/react'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
+import Communities from './Discourse/Communities'
 
 interface HomeProps {
   isAdmin: boolean
-  communities: Group[]
+  communities: Group[],
+  discourseCommunities: DiscourseCommunity[]
 }
 const filterButtonClass = 'rounded-md p-2 text-white transition-colors duration-200 ease-in-out dark:bg-gray-900 '
 const iconClass = 'h-5 w-5 fill-inherit stroke-inherit text-gray-500 dark:fill-white'
@@ -47,7 +48,7 @@ const FilterButton = ({ filterKey, iconTrue, iconFalse, applyFilter, currentFilt
   )
 }
 
-function HomePage({ isAdmin = false, communities }: HomeProps) {
+function HomePage({ isAdmin = false, communities, discourseCommunities }: HomeProps) {
 
   const [localCommunities, setLocalCommunities] = useState<Group[]>(communities)
   const [searchTerm, setSearchTerm] = useState('')
@@ -174,8 +175,7 @@ function HomePage({ isAdmin = false, communities }: HomeProps) {
       <Tab.Group selectedIndex={selectedIndex} onChange={setSelectedIndex}>
         <Tab.List className="flex space-x-1 rounded-xl bg-blue-900/20 p-1">
           <Tab className={({ selected }) => tabClass(selected)}>Logos</Tab>
-          <Tab className={({ selected }) => tabClass(selected)}>Logos Discourse</Tab>
-          <Tab className={({ selected }) => tabClass(selected)}>Another Discourse</Tab>
+          <Tab className={({ selected }) => tabClass(selected)}>Discourse</Tab>
         </Tab.List>
         <Tab.Panels>
           <Tab.Panel>
@@ -222,10 +222,7 @@ function HomePage({ isAdmin = false, communities }: HomeProps) {
             )}
           </Tab.Panel>
           <Tab.Panel>
-            <AllTopics />
-          </Tab.Panel>
-          <Tab.Panel>
-            <>wip</>
+            <Communities communities={discourseCommunities} />
           </Tab.Panel>
         </Tab.Panels>
       </Tab.Group>
