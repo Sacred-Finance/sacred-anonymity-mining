@@ -5,7 +5,7 @@ export default function ToolTip({ tooltip, children, direction = 'right' }) {
   const [isHovered, setIsHovered] = useState(false)
 
   const tooltipClassNames = clsx(
-    'absolute bottom-full flex items-center justify-center rounded bg-gray-800/90 p-2 text-center text-xs text-white transition-all',
+    'absolute  flex items-center justify-center rounded bg-gray-800/90 p-2 text-center text-xs text-white transition-all',
     {
       'left-full ml-2 opacity-0': direction === 'right' && !isHovered,
       'right-full mr-2 opacity-0': direction === 'left' && !isHovered,

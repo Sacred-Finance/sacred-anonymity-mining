@@ -12,7 +12,7 @@ import { useEditItem } from '@/hooks/useEditItem'
 import SummaryButton from '@components/buttons/AIPostSummaryButton'
 import { OutputDataToHTML } from '@components/Discourse/OutputDataToMarkDown'
 import { PostItem } from '@components/Post/PostItem'
-import { NewPostModal, PostComments, TempComment } from '@components/Post/PostComments'
+import { NewPostModal, PostComment, PostComments, TempComment } from '@components/Post/PostComments'
 import { Tab } from '@headlessui/react'
 import { PencilIcon } from '@heroicons/react/20/solid'
 import { useRouter } from 'next/router'
@@ -76,105 +76,109 @@ export function PostPage({
 
   const sortedCommentsData = useItemsSortedByVote(tempComments, comments, commentsSortBy)
 
+  const [selectedTab, setSelectedTab] = useState(0)
+  const handleTabChange = (index: number) => {
+    setSelectedTab(index)
+  }
+
   return (
-    <div className="flex h-screen w-full flex-col transition-colors dark:bg-gray-800">
+    <div className="flex w-full flex-col bg-gray-100 transition-colors dark:bg-gray-800">
       <div className="flex-1 overflow-hidden">
-        <div className="flex h-full flex-wrap sm:flex-col-reverse md:flex-row">
-          <div className="flex w-full flex-col space-y-3 p-3 md:w-1/2">
-            <div className="sticky top-0 z-10 flex  gap-4 border-b p-3 dark:border-gray-700 dark:bg-gray-900">
+        <div className="flex h-full flex-col md:flex-row">
+          <div className=" flex flex-col gap-4 overflow-y-scroll p-3 md:w-1/2">
+            <div className="sticky top-0 z-10 flex gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
               <VoteForItemUI post={post} group={community} />
               <SummaryButton postData={OutputDataToHTML(post?.description)} postTitle={post.title} />
             </div>
-
-            <div className="flex-1 overflow-y-auto">
+            <div className="scrollbar max-h-[calc(90vh - 200px)] col-span-12 flex   w-full  flex-col gap-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
               <PostItem post={post} group={community} />
             </div>
           </div>
 
-          {/* Tabs Section */}
-          <div className=" flex-1 flex-col space-y-3 p-3 md:flex md:w-1/2">
-            <Tab.Group>
-              <Tab.List className="sticky top-0 z-10 flex justify-between gap-2 rounded-t border-b border-b-primary-500 bg-white p-3 dark:border-gray-700 dark:bg-gray-900 ">
-                <div>
+          <div className=" flex flex-col gap-4 overflow-y-scroll p-3 md:w-1/2">
+            <Tab.Group onChange={handleTabChange} defaultIndex={selectedTab} selectedIndex={selectedTab}>
+              <Tab.List className="sticky top-0 z-10 flex gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
+                {['Community Info', 'Polls', 'All Replies'].map((tooltip, index) => (
                   <Tab
                     className={({ selected }) =>
-                      `rounded p-2 text-gray-600    dark:text-white ${
-                        selected ? 'bg-primary-400 dark:bg-gray-800' : ' '
+                      `flex rounded p-2 text-white ${
+                        selected ? 'bg-primary-600 dark:bg-primary-800' : 'bg-primary-300 dark:bg-gray-800'
                       }`
                     }
+                    key={index}
                   >
-                    <ToolTip tooltip={'Community Info'}>
-                      <InfoIcon />
-                    </ToolTip>
+                    {tooltip === 'Community Info' && (
+                      <ToolTip tooltip={tooltip}>
+                        <InfoIcon />
+                      </ToolTip>
+                    )}
+                    {tooltip === 'Polls' && (
+                      <ToolTip tooltip={tooltip}>
+                        <PollIcon className="h-5 w-5" />
+                      </ToolTip>
+                    )}
+                    {tooltip === 'All Replies' && (
+                      <ToolTip tooltip={tooltip}>
+                        <ChatIcon className="h-5 w-5" />
+                      </ToolTip>
+                    )}
                   </Tab>
-                  <Tab
-                    className={({ selected }) =>
-                      `rounded p-2 text-gray-600 dark:text-white ${selected ? 'bg-primary-400 dark:bg-gray-800' : ' '}`
-                    }
-                  >
-                    <ToolTip tooltip={'Polls'}>
-                      <PollIcon className={'h-5 w-5'} />
-                    </ToolTip>
-                  </Tab>
-                  <Tab
-                    className={({ selected }) =>
-                      `rounded p-2 text-gray-600 dark:text-white ${selected ? 'bg-primary-400 dark:bg-gray-800' : ''}`
-                    }
-                  >
-                    <ToolTip tooltip={'All Replies'}>
-                      <ChatIcon className={'h-5 w-5'} />
-                    </ToolTip>
-                  </Tab>
-                </div>
+                ))}
               </Tab.List>
-              <div className="max-h-screen overflow-y-auto pb-40">
-                <Tab.Panels>
-                  <Tab.Panel
-                    className={clsx('scrollbar max-h-[calc(90vh - 200px)] col-span-12 flex w-full flex-col gap-2')}
-                  >
-                    <CommunityCard
-                      variant={'banner'}
-                      community={community}
-                      actions={[
-                        {
-                          label: 'Edit',
-                          icon: <PencilIcon className={'h-full w-4'} />,
-                          onClick: () => router.push(`/communities/${community?.groupId}/edit`),
-                        },
-                      ]}
-                    />
-                  </Tab.Panel>
-                  <Tab.Panel
-                    className={clsx('scrollbar max-h-[calc(90vh - 200px)] col-span-12 flex w-full flex-col gap-2')}
-                  >
-                    <div className={'flex gap-2'}>
-                      <CreatePollUI post={post} group={community} />
+              {(selectedTab === 2 || selectedTab === 1) && (
+                <div className="sticky top-0 z-10 flex gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
+                  <div className={'flex gap-4'}>
+                    {selectedTab === 2 && <CreateCommentUI post={post} group={community} />}
+                    {(selectedTab === 1 || selectedTab === 2) && <CreatePollUI post={post} group={community} />}
+                  </div>
+                </div>
+              )}
+
+              <Tab.Panels
+                className={
+                  'scrollbar max-h-[calc(90vh - 200px)] col-span-12 flex w-full flex-col gap-4   rounded-xl  border bg-white p-3  dark:border-gray-700 dark:bg-gray-900  '
+                }
+              >
+                <Tab.Panel className="flex flex-col gap-4">
+                  <CommunityCard
+                    variant={'banner'}
+                    community={community}
+                    actions={[
+                      {
+                        label: 'Edit',
+                        icon: <PencilIcon className={'h-full w-4'} />,
+                        onClick: () => router.push(`/communities/${community?.groupId}/edit`),
+                      },
+                    ]}
+                  />
+                </Tab.Panel>
+                <Tab.Panel className="flex flex-col ">
+                  {!sortedCommentsData.length && (
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <div className="text-md">No Polls yet</div>
                     </div>
-                    {!sortedCommentsData.length && (
-                      <div className="flex flex-col items-center justify-center gap-2">
-                        <div className="text-md">No Polls yet</div>
-                      </div>
-                    )}
-                    {sortedCommentsData.length ? (
-                      <PostComments comments={sortedCommentsData.filter(comment => comment.kind == ContentType.POLL)} />
-                    ) : null}
-                  </Tab.Panel>
-                  <Tab.Panel
-                    className={clsx('scrollbar max-h-[calc(90vh - 200px)] col-span-12 flex w-full flex-col gap-2')}
-                  >
-                    <div className={'flex gap-2'}>
-                      <CreateCommentUI post={post} group={community} />
-                      <CreatePollUI post={post} group={community} />
+                  )}
+                  {sortedCommentsData
+                    .filter(comment => comment.kind == ContentType.POLL)
+                    .map(comment => (
+                        <PostComment comment={comment} key={comment.id} />
+                    ))}
+                </Tab.Panel>
+                <Tab.Panel className="flex flex-col gap-4 ">
+                  {sortedCommentsData.map(comment => (
+                    <>
+                      <PostComment comment={comment} key={comment.id} />
+
+                      <hr />
+                    </>
+                  ))}
+                  {!sortedCommentsData.length && (
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <div className="text-md">No comments yet</div>
                     </div>
-                    {sortedCommentsData.length ? <PostComments comments={sortedCommentsData} /> : null}
-                    {!sortedCommentsData.length && (
-                      <div className="flex flex-col items-center justify-center gap-2">
-                        <div className="text-md">No comments yet</div>
-                      </div>
-                    )}
-                  </Tab.Panel>
-                </Tab.Panels>
-              </div>
+                  )}
+                </Tab.Panel>
+              </Tab.Panels>
             </Tab.Group>
           </div>
         </div>
@@ -406,6 +410,7 @@ export const VoteForItemUI = ({ post, group }: { post: Item; group: Group }) => 
         .then(async res => {
           await mutate(getGroupWithPostAndCommentData(groupId, post.id))
           toast.success('Vote created successfully')
+          setIsLoading(false)
           return res
         })
         .catch(err => {

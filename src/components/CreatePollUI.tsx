@@ -10,7 +10,7 @@ import dynamic from 'next/dynamic'
 import { debounce } from 'lodash'
 import { OutputData } from '@editorjs/editorjs'
 import { Group, Item } from '@/types/contract/ForumInterface'
-import {useAccount} from "wagmi";
+import { useAccount } from 'wagmi'
 const Editor = dynamic(() => import('./editor-js/Editor'), {
   ssr: false,
 })
@@ -32,7 +32,7 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
   const [options, setOptions] = React.useState(['Yes', 'No'])
   const [loading, setLoading] = React.useState(false)
 
-  const {address} = useAccount()
+  const { address } = useAccount()
 
   const { createPoll } = usePoll({
     group,
@@ -58,8 +58,8 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
 
   const submit = async () => {
     if (!address) {
-        toast.error('Please connect your wallet')
-        return
+      toast.error('Please connect your wallet')
+      return
     }
     setLoading(true)
     try {
@@ -103,7 +103,6 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
   }
   return (
     <>
-
       <PrimaryButton
         className={clsx(
           'w-fit',

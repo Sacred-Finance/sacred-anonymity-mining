@@ -28,7 +28,7 @@ export const VoteUpButton = ({
     variant={'minimal'}
   >
     <div className={'flex items-center gap-2 '}>
-      <HandThumbUpIcon className={clsx('border-1  w-6 p-1 group-hover:fill-green-300')} stroke={'#a49f9f'} />
+      <HandThumbUpIcon className={clsx('border-1 w-6 p-1 group-hover:fill-green-300')} stroke={'#a49f9f'} />
       {children}
     </div>
   </PrimaryButton>

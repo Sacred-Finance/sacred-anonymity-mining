@@ -1,9 +1,9 @@
 import React from 'react'
 import { commentIsConfirmed, formatDistanceToNow } from '@/lib/utils'
 import { motion } from 'framer-motion'
-import {Group, Item} from '@/types/contract/ForumInterface'
+import { Group, Item } from '@/types/contract/ForumInterface'
 import { PostItem } from '@components/Post/PostItem'
-import {useCommunityContext} from "@/contexts/CommunityProvider";
+import { useCommunityContext } from '@/contexts/CommunityProvider'
 
 export interface TempComment {
   id: string
@@ -35,39 +35,27 @@ export const NewPostModal: {
     'h-full bg-primary-500 text-white rounded-md hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600',
 }
 
-export const PostComments = ({ comments }: { comments: Item[] }) => {
+export const PostComment = ({ comment }: { comment: Item }) => {
   const { state } = useCommunityContext()
   const community = state.activeCommunity.community as Group
   return (
-    <div className={'flex flex-grow flex-col gap-4 '}>
-      {comments.map((comment, i) => (
-        <motion.div
-          key={comment.id}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="rounded-lg bg-white  shadow-sm transition-colors dark:bg-gray-800"
+    <>
+      {comment && <PostItem post={comment} group={community} />}
+      <div className="pt-3 text-gray-600 dark:text-gray-400">
+        <div
+          className="flex gap-4"
+          style={{
+            visibility: commentIsConfirmed(comment.id) ? 'visible' : 'hidden',
+          }}
         >
-          <div className="flex flex-col gap-2 overflow-y-scroll">
-            {comment && <PostItem post={comment} group={community} />}
-            <div className="pt-3 text-gray-600 dark:text-gray-400">
-              <div
-                className="flex gap-4"
-                style={{
-                  visibility: commentIsConfirmed(comment.id) ? 'visible' : 'hidden',
-                }}
-              >
-                <p className="inline-block text-sm">
-                  🕛{' '}
-                  {comment?.description?.time || comment?.time
-                    ? formatDistanceToNow(new Date(comment?.description?.time || comment?.time).getTime())
-                    : '-'}
-                </p>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      ))}
-    </div>
+          <p className="inline-block text-sm">
+            🕛{' '}
+            {comment?.description?.time || comment?.time
+              ? formatDistanceToNow(new Date(comment?.description?.time || comment?.time).getTime())
+              : '-'}
+          </p>
+        </div>
+      </div>
+    </>
   )
 }

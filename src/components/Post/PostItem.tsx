@@ -29,11 +29,6 @@ const Editor = dynamic(() => import('../editor-js/Editor'), {
 export const PostItem = ({ post, group }: { post: Item; group: Group }) => {
   const { groupId, parentId, id, kind } = post
 
-  // PostItem supports both posts and comments, so we need to check if the post is a comment or not.
-  // We can't rely on checking parent id because the parent id of a post is always 0.
-  // So we check if the kind of the post is a comment or not.
-
-  // this is assuming posts are never responses, which is true for now - but now we have polls,.
   const postId = kind == ContentType.POST || kind == ContentType.POST ? id : parentId
 
   const user = useUserIfJoined(post.groupId)
@@ -121,67 +116,64 @@ export const PostItem = ({ post, group }: { post: Item; group: Group }) => {
   const isPostPage = !isNaN(postId)
 
   return (
-    <div className="min-w-[250px] rounded-lg bg-white p-3 shadow-md transition-colors dark:bg-gray-900">
-      <div>
+    <div>
+      {isTypeOfPoll && <PollUI group={group} post={post} />}
 
-        {isTypeOfPoll && <PollUI group={group} post={post} />}
-
-        <div className="flex flex-col gap-2">
-          {isTypeOfPost && (
-            <div className="flex flex-col gap-4">
-              {isContentEditing && (
-                <input
-                  name="title"
-                  className="focus:ring-primary-dark rounded bg-gray-100 p-4 text-black placeholder-gray-500 focus:outline-none focus:ring-2 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400"
-                  placeholder={t('placeholder.enterPostTitle') as string}
-                  type="text"
-                  value={contentTitle}
-                  onChange={e => setContentTitle(e.target.value)}
-                />
-              )}
-
-              {!isContentEditing && post.title && (
-                <PostTitle title={post.title} id={post.id} onPostPage={isPostPage} post={post} />
-              )}
-            </div>
-          )}
-
+      <div className="flex flex-col gap-2">
+        {isTypeOfPost && (
           <div className="flex flex-col gap-4">
-            {!isContentEditing ? (
-              <EditorJsRenderer
-                data={isTypeOfPost ? post.description : { blocks: post.blocks || post?.description?.blocks }}
-              />
-            ) : (
-              <Editor
-                holder={`${post?.id}_${isTypeOfPost ? 'post' : 'comment'}`}
-                readOnly={!isContentEditing}
-                onChange={val => setContentDescription(val)}
-                placeholder={t('placeholder.enterPostContent') as string}
-                data={isTypeOfPost ? post.description : post}
-                divProps={{
-                  className:
-                    'rounded-md bg-gray-100 dark:bg-gray-800 dark:!text-white p-4 focus:outline-none focus:ring-2 focus:ring-primary-dark',
-                }}
+            {isContentEditing && (
+              <input
+                name="title"
+                className="focus:ring-primary-dark rounded bg-gray-100 p-4 text-black placeholder-gray-500 focus:outline-none focus:ring-2 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400"
+                placeholder={t('placeholder.enterPostTitle') as string}
+                type="text"
+                value={contentTitle}
+                onChange={e => setContentTitle(e.target.value)}
               />
             )}
-          </div>
 
-          <div className="flex items-center justify-between gap-4">
-            <ContentActions
-              item={post}
-              contentId={post.id}
-              isContentEditable={isContentEditable}
-              isEditing={isContentEditing}
-              onContentPage={isPostPage}
-              save={() => saveEditedPost()}
-              groupId={groupId}
-              isAdminOrModerator={isAdminOrModerator}
-              setIsContentEditing={setIsContentEditing}
-              onClickCancel={() => setIsContentEditing(false)}
-              isLoading={isLoading}
-              hidden={false}
-            />
+            {!isContentEditing && post.title && (
+              <PostTitle title={post.title} id={post.id} onPostPage={isPostPage} post={post} />
+            )}
           </div>
+        )}
+
+        <div className="flex flex-col gap-4">
+          {!isContentEditing ? (
+            <EditorJsRenderer
+              data={isTypeOfPost ? post.description : { blocks: post.blocks || post?.description?.blocks }}
+            />
+          ) : (
+            <Editor
+              holder={`${post?.id}_${isTypeOfPost ? 'post' : 'comment'}`}
+              readOnly={!isContentEditing}
+              onChange={val => setContentDescription(val)}
+              placeholder={t('placeholder.enterPostContent') as string}
+              data={isTypeOfPost ? post.description : post}
+              divProps={{
+                className:
+                  'rounded-md bg-gray-100 dark:bg-gray-800 dark:!text-white p-4 focus:outline-none focus:ring-2 focus:ring-primary-dark',
+              }}
+            />
+          )}
+        </div>
+
+        <div className="sticky bottom-0 flex items-center justify-between gap-4">
+          <ContentActions
+            item={post}
+            contentId={post.id}
+            isContentEditable={isContentEditable}
+            isEditing={isContentEditing}
+            onContentPage={isPostPage}
+            save={() => saveEditedPost()}
+            groupId={groupId}
+            isAdminOrModerator={isAdminOrModerator}
+            setIsContentEditing={setIsContentEditing}
+            onClickCancel={() => setIsContentEditing(false)}
+            isLoading={isLoading}
+            hidden={false}
+          />
         </div>
       </div>
     </div>
