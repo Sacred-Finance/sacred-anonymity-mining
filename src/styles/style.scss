@@ -6,7 +6,9 @@
 @import 'base';
 @import '@rainbow-me/rainbowkit/styles.css';
 
-html,body, #__next {
+html,
+body,
+#__next {
   height: 100vh;
   min-height: 100vh;
   overflow-y: auto;
@@ -19,10 +21,24 @@ body {
   width: 100%;
   height: 100%;
 }
-#rainbowkit{
+#rainbowkit {
   height: 100%;
 }
-#__next > div[data-rk="rainbowkit"] {
+#__next > div[data-rk='rainbowkit'] {
   height: 100%;
+}
+
+
+:root {
+  --bgSize: 55px;
+}
+// animation: polka 1s linear infinite;
+@keyframes polka {
+  0% {
+    background-position: 0 0, 0 0;
+  }
+  100% {
+    background-position: var(--bgSize) var(--bgSize), 0 0;
+  }
 }
 

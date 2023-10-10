@@ -1,21 +1,23 @@
 import { useContractWrite } from 'wagmi'
 import { ForumContractAddress } from '../constant/const'
 import ForumABI from '../constant/abi/Forum.json'
-import { useLoaderContext } from '../contexts/LoaderContext'
 import { setCacheAtSpecificPath } from '../lib/redis'
 import { CommunityId, useCommunityContext } from '../contexts/CommunityProvider'
 import { toast } from 'react-toastify'
 import { useRouter } from 'next/router'
+import {Address} from "@/types/common";
+import {useState} from "react";
 
 export const useRemoveGroup = (groupId: CommunityId) => {
   const { dispatch, state } = useCommunityContext()
 
-  const { isLoading, setIsLoading } = useLoaderContext()
+  const [isLoading, setIsLoading] = useState(false)
+
 
   const router = useRouter();
 
   return useContractWrite({
-    address: ForumContractAddress as `0x${string}`,
+    address: ForumContractAddress as Address,
     abi: ForumABI.abi,
     functionName: 'removeGroup',
     mode: 'recklesslyUnprepared',

@@ -7,8 +7,9 @@ import { usePoll } from '@/hooks/usePoll'
 import { toast } from 'react-toastify'
 import { CircularLoader } from './JoinCommunityButton'
 import clsx from 'clsx'
+import { Group, Item } from '@/types/contract/ForumInterface'
 
-export const PollUI = ({ id, groupId, post }) => {
+export const PollUI = ({ group, post }: { group: Group; post: Item }) => {
   const [answers, setAnswers] = React.useState([])
   const [results, setResults] = React.useState([])
   const [totalVotes, setTotalVotes] = React.useState(0)
@@ -21,7 +22,10 @@ export const PollUI = ({ id, groupId, post }) => {
   const [isFetching, setIsFetching] = React.useState(false)
   const [isLoading, setIsLoading] = React.useState(false)
 
-  const { submitPoll } = usePoll({ groupId })
+  const { submitPoll } = usePoll({ group })
+
+  const id = post.id
+
   useEffect(() => {
     fetchPollDetails()
   }, [id])
@@ -50,7 +54,7 @@ export const PollUI = ({ id, groupId, post }) => {
           results.forEach((result, index) => {
             emptyArray[index] = Number(result)
           })
-          setTotalVotes(emptyArray.reduce((a, b) => a + b))
+          if (emptyArray.length) setTotalVotes(emptyArray?.reduce((a, b) => a + b))
           return emptyArray
         })
         setAnswers(answersFromIPFS)
@@ -60,22 +64,22 @@ export const PollUI = ({ id, groupId, post }) => {
       })
   }
 
-  const onSubmitPoll = () => {
+  const onSubmitPoll = async () => {
     setIsLoading(true)
-    submitPoll(
+    await submitPoll({
       id,
-      answersToSubmit,
-      async data => {
+      pollData: answersToSubmit,
+      onErrorCallback: err => {
+        setIsLoading(false)
+        toast.error(err?.message ?? err)
+      },
+      onSuccessCallback: async data => {
         console.log(data)
         await fetchPollDetails()
         setIsLoading(false)
         toast.success('Poll submitted successfully')
       },
-      err => {
-        setIsLoading(false)
-        toast.error(err?.message ?? err)
-      }
-    )
+    })
   }
 
   const isVoteDisabled = () => {
@@ -89,7 +93,7 @@ export const PollUI = ({ id, groupId, post }) => {
   const VoteIndicator = ({ progress }) => {
     return (
       <div className="my-auto h-1 w-[90%] bg-neutral-200 dark:bg-neutral-600">
-        <div style={{width: `${progress}%`}} className={clsx(`h-1 bg-blue-500`)}></div>
+        <div style={{ width: `${progress}%` }} className={clsx(`h-1 bg-blue-500`)}></div>
       </div>
     )
   }
@@ -110,7 +114,7 @@ export const PollUI = ({ id, groupId, post }) => {
                   </label>
                 </div>
                 <div className="flex flex-row">
-                  <VoteIndicator progress={results[i] ? (results[i] / totalVotes * 100) : 0} />
+                  <VoteIndicator progress={results[i] ? (results[i] / totalVotes) * 100 : 0} />
                   <div className="ml-[8px]">
                     <input
                       disabled={pollExpired}
@@ -132,7 +136,6 @@ export const PollUI = ({ id, groupId, post }) => {
                 </div>
               </div>
             ))}
-
           {pollType == PollType.MULTI_ANSWER &&
             answers.map((answer, i) => (
               <div key={`${post.id}_${i}`} className="mb-[0.125rem] mr-4 min-h-[1.5rem] pl-[1.5rem]">
@@ -143,7 +146,7 @@ export const PollUI = ({ id, groupId, post }) => {
                   </label>
                 </div>
                 <div className="flex flex-row">
-                  <VoteIndicator progress={results[i] ? (results[i] / totalVotes * 100) : 0} />
+                  <VoteIndicator progress={results[i] ? (results[i] / totalVotes) * 100 : 0} />
                   <div className="ml-[8px]">
                     <input
                       disabled={pollExpired}
@@ -163,7 +166,6 @@ export const PollUI = ({ id, groupId, post }) => {
                 </div>
               </div>
             ))}
-
           {pollType == PollType.NUMERIC_RATING &&
             answers.map((answer, i) => (
               <div key={`${post.id}_${i}`} className="mb-[0.125rem] mr-4 min-h-[1.5rem] pl-[1.5rem]">
@@ -174,7 +176,7 @@ export const PollUI = ({ id, groupId, post }) => {
                   </label>
                 </div>
                 <div className="flex flex-row">
-                  <VoteIndicator progress={results[i] ? (results[i] / totalVotes * 100)  : 0} />
+                  <VoteIndicator progress={results[i] ? (results[i] / totalVotes) * 100 : 0} />
                   <div className="">
                     {!pollExpired && (
                       <input
@@ -197,20 +199,18 @@ export const PollUI = ({ id, groupId, post }) => {
                 </div>
               </div>
             ))}
-          {!pollExpired && (
-            <PrimaryButton
-              className={clsx(
-                'w-fit',
-                'border-gray-500 border text-sm text-gray-500 transition-colors duration-150 hover:bg-gray-500 hover:text-white'
-              )}
-              type="button"
-              isLoading={isLoading}
-              onClick={onSubmitPoll}
-              disabled={isVoteDisabled()}
-            >
-              Vote
-            </PrimaryButton>
-          )}
+          <PrimaryButton
+            className={clsx(
+              'w-fit',
+              'border-gray-500 border text-sm text-gray-500 transition-colors duration-150 hover:bg-gray-500 hover:text-white'
+            )}
+            type="button"
+            isLoading={isLoading}
+            onClick={onSubmitPoll}
+            disabled={isVoteDisabled() || pollExpired}
+          >
+            {pollExpired ? 'Poll Expired' : 'Vote'}
+          </PrimaryButton>
         </div>
       )}
     </React.Fragment>

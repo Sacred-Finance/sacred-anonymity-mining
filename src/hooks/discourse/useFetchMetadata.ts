@@ -1,7 +1,7 @@
 import { use, useEffect, useState } from "react"
 import axios from "axios";
 
-export const useFetchMetadata = (id) => {
+export const useFetchMetadata = (groupId) => {
   const [community, setCommunity] = useState<{
     name: string
     description: string
@@ -12,7 +12,7 @@ export const useFetchMetadata = (id) => {
   useEffect(() => {
     setLoading(true)
     const fetchMetadata = async () => {
-      const { data } = await axios.get(`/api/discourse/${id}/metadata`)
+      const { data } = await axios.get(`/api/discourse/${groupId}/metadata`)
       setCommunity({
         name: data['og:title'],
         description: data['og:description'],

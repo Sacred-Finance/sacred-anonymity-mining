@@ -24,7 +24,7 @@ export const useFetchUsers = (groupId, loadOnInit = true,) => {
   }
 
   const fetchUsersFromSemaphoreContract = async () => {
-    return await semaphoreContract?.getGroupMembers(groupId?.toString())
+    return  semaphoreContract?.getGroupMembers(groupId?.toString())
   }
 
   const fetchUsers = async () => {

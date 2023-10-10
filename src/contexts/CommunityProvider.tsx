@@ -5,8 +5,6 @@ import { Identity } from '@semaphore-protocol/identity'
 import _ from 'lodash'
 import { useAccount } from 'wagmi'
 import { useIdentity } from '@/hooks/useIdentity'
-import { useRouter } from 'next/router'
-import { useLoaderContext } from './LoaderContext'
 import { Group, Item } from '@/types/contract/ForumInterface'
 import { Topic } from '@components/Discourse/types'
 import { hasUserJoined } from '@/lib/utils'
@@ -15,6 +13,7 @@ export type CommunityId = string | number | ethers.BigNumber
 type CommunityContextType = {
   state: State
   dispatch: React.Dispatch<Action>
+  isLoading: boolean
 }
 
 interface ActiveCommunity {
@@ -70,7 +69,10 @@ function reducer(state: State, action: Action): State {
     case 'SET_ACTIVE_COMMUNITY':
       return {
         ...state,
-        activeCommunity: action.payload,
+        activeCommunity: {
+          ...action.payload,
+          community: { ...action.payload.community, id: ethers.BigNumber.from(action.payload.community.id) },
+        },
       }
     case 'SET_ACTIVE_POST':
       return {
@@ -170,7 +172,7 @@ export function getGroupIdOrUserId(communityOrUser: Group | User): number {
 
 export const CommunityProvider: React.FC<any> = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(reducer, initialState)
-  const { setIsLoading } = useLoaderContext()
+  const [isLoading, setIsLoading] = React.useState(true)
 
   // when state has communities, stop loading
   useEffect(() => {
@@ -180,7 +182,7 @@ export const CommunityProvider: React.FC<any> = ({ children }: { children: React
     }
   }, [state.communities])
 
-  return <CommunityContext.Provider value={{ state, dispatch }}>{children}</CommunityContext.Provider>
+  return <CommunityContext.Provider value={{ state, dispatch, isLoading }}>{children}</CommunityContext.Provider>
 }
 
 export function useCommunityById(id: string | number): Group | undefined {
@@ -206,7 +208,7 @@ export function useActiveUser({ groupId }): User | undefined {
 export function useUserIfJoined(communityId: string | number): User | false {
   const { state } = useCommunityContext()
   const { address: userAddress } = useAccount()
-  const [userJoined, setUserJoined] = React.useState<User | false>(null);
+  const [userJoined, setUserJoined] = React.useState<User | false>(null)
 
   useEffect(() => {
     checkIfUserHasJoined()
@@ -214,10 +216,15 @@ export function useUserIfJoined(communityId: string | number): User | false {
 
   const checkIfUserHasJoined = async () => {
     if (userAddress) {
-      const generatedIdentity = new Identity(`${userAddress}_${communityId}_${`anon`}`)
-      const userJoined = await hasUserJoined(communityId, generatedIdentity.getCommitment().toString());
+      const generatedIdentity = new Identity(`${userAddress}_${communityId}_anon`)
+      const userJoined = await hasUserJoined(Number(communityId), generatedIdentity.getCommitment().toString())
       if (userJoined) {
-        setUserJoined({name: 'anon', identityCommitment: generatedIdentity, groupId: +communityId, id: null})
+        setUserJoined({
+          name: 'anon',
+          identityCommitment: generatedIdentity.getCommitment().toString(),
+          groupId: +communityId,
+          id: null,
+        })
       } else {
         setUserJoined(false)
       }
@@ -232,4 +239,13 @@ export function useUserIfJoined(communityId: string | number): User | false {
   // }
 
   return userJoined
+}
+
+export const addAvatarToUser = (user: User) => {
+  const avatar = getAvatarUrl(user?.identityCommitment?.toString())
+  return { ...user, avatar }
+}
+
+export const getAvatarUrl = (hash: string) => {
+  return `https://robohash.org/${hash}`
 }

@@ -1,13 +1,12 @@
 import clsx from 'clsx'
 import { PrimaryButton } from '@components/buttons'
-import { CircularProgress } from '@components/CircularProgress'
 import { CircularLoader } from '@components/JoinCommunityButton'
 
 export const Pagination = ({ currentPage = 1, totalPages, onPageChange }) => {
   const radius = 100
   const sliceAngle = 360 / totalPages
   return (
-    <div className="sticky left-0 top-0 z-[20]  my-1  flex select-none items-center rounded border-white  p-2 text-white">
+    <div className="sticky left-0 top-0 z-[20]    flex select-none items-center rounded border-white  p-2 text-white">
       <PrimaryButton
         resetClasses={true}
         onClick={() => onPageChange(currentPage - 1)}

@@ -5,6 +5,16 @@ module.exports = {
     // Dangerously allow production builds to successfully complete even if your project has eslint errors.
     ignoreDuringBuilds: true,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'ipfs.io',
+      },
+    ],
+    minimumCacheTTL: 60,
+
+  },
   typescript: {
     // Dangerously allow production builds to successfully complete even if your project has type errors.
     ignoreBuildErrors: true,

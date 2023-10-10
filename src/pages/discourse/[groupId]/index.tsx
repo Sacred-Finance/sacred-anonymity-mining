@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react'
-import WithStandardLayout from '@components/HOC/WithStandardLayout'
 import TopicCommunityCard from '@/components/Discourse/TopicCommunityCard'
 import { TopicList } from '@/components/Discourse/types'
 import axios from 'axios'
 import { useRouter } from 'next/router'
 import { useFetchMetadata } from '@/hooks/discourse/useFetchMetadata'
 import { CircularLoader } from '@/components/JoinCommunityButton'
+import _ from 'lodash'
 
 export const DiscourseCommunityBanner = (loading, community) => (
-  (<div className="m-8 w-auto rounded-lg border border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-800">
+  (<div className="mx-0 my-4 w-auto rounded-lg border border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-800">
     {loading ? (
       <CircularLoader className="mx-auto my-5 h-8 w-8" />
     ) : (
@@ -24,34 +24,35 @@ export const DiscourseCommunityBanner = (loading, community) => (
 ))
 
 const Index = () => {
+  const [topicList, setTopicList] = useState<TopicList>()
   const router = useRouter()
   const { groupId } = router.query
   const { community, loading } = useFetchMetadata(groupId)
-  const [topicList, setTopicList] = useState<TopicList>()
 
   useEffect(() => {
     const fetchTopics = async () => {
       try {
-        const response = await axios.get(`/api/discourse/${groupId}/topics`, {})
+        const response = await axios.get(`/api/discourse/${groupId}/topics`)
         setTopicList(response.data.topic_list)
       } catch (error) {
         console.error(error)
       }
     }
-
     fetchTopics()
   }, [])
 
   return (
     <>
       {DiscourseCommunityBanner(loading, community)}
-      <div className="row-gap-8 m-8 grid grid-cols-1 justify-items-center   gap-4 sm:grid-cols-1 md:grid-cols-2 md:justify-items-center lg:grid-cols-3">
+      <div className='flex flex-wrap gap-4 xs:justify-center md:justify-start'>
         {topicList?.topics?.map(topic => (
           <TopicCommunityCard key={topic.id} topic={topic} variant={'default'} />
         ))}
       </div>
+
     </>
   )
 }
 
-export default WithStandardLayout(Index)
+export default Index
+

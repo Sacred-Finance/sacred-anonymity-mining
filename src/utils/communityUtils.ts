@@ -1,13 +1,14 @@
-import { ethers, providers } from 'ethers'
-import { erc20dummyABI, forumContract, getRpcProvider } from '@/constant/const'
+import { ethers } from 'ethers'
+import { erc20dummyABI, forumContract, providerMap } from '@/constant/const'
 import { setCache } from '@/lib/redis'
 import { getContent, getIpfsHashFromBytes32, parseComment, parsePost, uploadImageToIPFS } from '@/lib/utils'
-import { CommunityDetails, Requirement } from '@/lib/model'
+import {CommunityDetails, ContentType, ReputationProofStruct, Requirement} from '@/lib/model'
 
 import pica from 'pica'
 import { useCallback } from 'react'
 import { Group, Item, RawGroupData, RawItemData } from '@/types/contract/ForumInterface'
 import { Event } from '@ethersproject/contracts'
+import { UnirepUser } from '@/lib/unirep'
 
 type GroupId = number
 
@@ -231,28 +232,61 @@ export const handleFileImageUpload = (e, setImageFileState) => {
 }
 
 export const addRequirementDetails = async (community: Group): Promise<Awaited<Requirement[]>> => {
-  // looking at the requirements array, we need to get the details of each requirement from the contract and add it to the community object
-  // get symbol and name of token
   return (await Promise.all(
     community.requirements.map(async requirement => {
-      const provider = getRpcProvider(community.chainId);
-      const token = new ethers.Contract(requirement.tokenAddress, erc20dummyABI, provider)
-      let symbol = '';  
-      let name = '';
-      let decimals = 0;
+      let token
       try {
-        symbol = await token?.symbol();
-        name = await token?.name()
-        decimals = await token?.decimals()
-      } catch (error) {
-        console.log(error)
+        token = new ethers.Contract(requirement.tokenAddress, erc20dummyABI, providerMap[community.chainId])
+      } catch (e) {
+        console.error('Error creating token contract:', e)
+        return {
+          tokenAddress: requirement.tokenAddress,
+          symbol: '',
+          name: '',
+          decimals: '',
+          minAmount: requirement.minAmount.toString(),
+        }
       }
+
+      if (!token) {
+        console.warn('Token contract not initialized:', requirement.tokenAddress)
+        return {
+          tokenAddress: requirement.tokenAddress,
+          symbol: '',
+          name: '',
+          decimals: '',
+          minAmount: requirement.minAmount.toString(),
+        }
+      }
+
+      let symbol, name, decimals
+      try {
+        symbol = await token.symbol()
+      } catch (e) {
+        console.error('Error fetching token symbol:', e)
+        symbol = ''
+      }
+
+      try {
+        name = await token.name()
+      } catch (e) {
+        console.error('Error fetching token name:', e)
+        name = ''
+      }
+
+      try {
+        decimals = await token.decimals()
+      } catch (e) {
+        console.error('Error fetching token decimals:', e)
+        decimals = ''
+      }
+
       const minAmount = requirement.minAmount.toString()
       // const maxAmount = requirement?.maxAmount?.toString()
 
       return {
         tokenAddress: requirement.tokenAddress,
-        symbol,
+        symbol: symbol ? symbol.toString() : '',
         name,
         decimals,
         minAmount,
@@ -328,7 +362,12 @@ export async function augmentItemData(rawItemData: RawItemData): Promise<Item> {
         removed: true,
       }
     }
-    const content = normalizedItemData.kind === 1 ? parseComment(stringifiedContent) : parsePost(stringifiedContent)
+    let content: any
+    if (normalizedItemData.kind == ContentType.COMMENT) {
+      content = parseComment(stringifiedContent)
+    } else {
+      content = parsePost(stringifiedContent)
+    }
 
     return {
       ...normalizedItemData,
@@ -338,3 +377,4 @@ export async function augmentItemData(rawItemData: RawItemData): Promise<Item> {
     console.error('augmentItemData', e)
   }
 }
+

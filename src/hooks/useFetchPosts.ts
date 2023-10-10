@@ -11,8 +11,6 @@ export const useFetchPosts = posts => {
 
   const router = useRouter()
   const { groupId } = router.query
-
-  console.log('posts', posts)
   const {
     data: postData,
     error,

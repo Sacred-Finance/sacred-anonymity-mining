@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react'
 import { Post } from '@/lib/post'
-import WithStandardLayout from '@components/HOC/WithStandardLayout'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
-import { PostPage } from '@components/PostPage'
+import { PostPage } from '@components/Post/PostPage'
 import { ethers } from 'ethers'
 import useSWR from 'swr'
 import fetcher, { getGroupWithPostAndCommentData } from '@/lib/fetcher'
@@ -47,9 +46,6 @@ function PostIndex() {
 
   return (
     <PostPage
-      kind={post.kind}
-      postId={post.id}
-      groupId={group.groupId}
       postInstance={postInstance}
       post={post}
       community={group}
@@ -59,4 +55,4 @@ function PostIndex() {
   )
 }
 
-export default WithStandardLayout(PostIndex)
+export default (PostIndex)

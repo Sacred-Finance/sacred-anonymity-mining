@@ -250,7 +250,7 @@ export const commentIsConfirmed = (id: string) => {
 }
 
 export const postIsConfirmed = id => {
-  // if confirmed, the id is an  integer/object stored in the contract instead of just an ipfs hash
+  // if confirmed, the id is an integer/object stored in the contract instead of just an ipfs hash
   if (/^\d+$/.test(id)) {
     return true
   } else {

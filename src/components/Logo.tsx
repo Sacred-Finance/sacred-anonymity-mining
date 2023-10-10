@@ -4,24 +4,22 @@ import mobileLogo from '../../public/logo.svg'
 import React from 'react'
 import Image from 'next/image'
 import { useTheme } from 'next-themes'
-
 import { motion } from 'framer-motion'
 
-export const Logo = ({ invertTheme = false }) => {
+export const Logo = ({ invertTheme = false, className }: { invertTheme?: boolean; className?: string }) => {
   const { resolvedTheme } = useTheme()
   return (
     <Image
-      priority={true}
-      unoptimized={true}
-      src={(resolvedTheme === 'dark' || invertTheme) ? logoLight : logo}
+      src={resolvedTheme === 'dark' || invertTheme ? logoLight : logo}
       width={200}
-      alt={logo}
+      alt={logo || 'logo'}
+      className={className}
+      unoptimized
+      fetchPriority={'high'}
     />
   )
 }
-export const LogoDynamic = (props: any) => {
-  return <DynamicLogo {...props} />
-}
+
 export const MobileLogo = (props: any) => {
   return <Image unoptimized src={mobileLogo} className={'w-8'} alt={logo} {...props} />
 }
@@ -40,17 +38,12 @@ const logoAnimation = {
 }
 const duration = 0.5
 export const DynamicLogo = ({ purple = '#721BEF', black = '#000', className }) => {
-  const { resolvedTheme, setTheme } = useTheme()
+  const { resolvedTheme } = useTheme()
 
   if (resolvedTheme === 'dark') {
     black = '#fff'
   }
 
-  const [isMounted, setIsMounted] = React.useState(false)
-  React.useEffect(() => {
-    setIsMounted(true)
-  }, [])
-  if (!isMounted) return null
   return (
     <motion.svg
       height="220"
@@ -69,6 +62,7 @@ export const DynamicLogo = ({ purple = '#721BEF', black = '#000', className }) =
           fill="url(#paint0_linear_2713_1307)"
           {...logoAnimation}
         />
+
         <g clipPath="url(#clip1_2713_1307)">
           <motion.path
             initial={{ opacity: 0 }}
