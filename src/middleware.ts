@@ -14,9 +14,8 @@ export async function middleware(request: NextRequest, res: NextResponse) {
       const p = pathname.split('/')
       if (p[3] && isNumber(+p[3])) {
         const data = await (await fetch(
-          'https://script.google.com/macros/s/AKfycbzzGv6wR7nQ6_sD9s5piyrjG_2U0kt9_Hc4hnDqrPhFX1h5EYlUClh22iVaY_ORcCPu4A/exec'
+          process.env.NEXT_PUBLIC_DISCOURSE_GOOGLE_SHEET_API_URL
         )).json()
-        console.log('data', data)
         const communities = data.communities
         const community = communities.find(
           (community: any) => +community.id === +p[3]
