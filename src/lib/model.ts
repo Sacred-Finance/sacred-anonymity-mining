@@ -68,3 +68,10 @@ export enum PollType {
   'MULTI_ANSWER',//User can select multiple answers in the answer list.
   'NUMERIC_RATING'//User can specify values per anwser, the value must be in the range(rateScaleFrom~rateScaleTo)
 }
+
+export type DiscourseCommunity = {
+  apiKey?: string,
+  username?: string,
+  endpoint?: string,
+  id?: number
+}
