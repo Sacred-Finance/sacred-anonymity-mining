@@ -1,6 +1,6 @@
 import { LRUCache } from 'lru-cache';
 import { NextApiRequest, NextApiResponse } from 'next'
-const urlMetadata = require('url-metadata');
+import urlMetadata from 'url-metadata';
 const options = {
   max: 500, // Maximum of 500 items in the cache
   ttl: 1000 * 60 * 60 * 24, // Items live for 1 day
