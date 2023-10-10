@@ -6,13 +6,14 @@ type Data = {
 }
 
 export default async function (req: NextApiRequest, res: NextApiResponse<Data>) {
-  const { id, post_ids } = req.query;
+  const { topicId, post_ids } = req.query;
+  const { endpoint } = req.headers
 
   // Convert post_ids from string or string[] to an array of strings
   const postIdsArray = Array.isArray(post_ids) ? post_ids : post_ids?.split(',');
 
   // Append post_ids to the URL
-  const url = `https://logos.discourse.group/t/${id}/posts.json?post_ids[]=${postIdsArray?.join('&post_ids[]=')}`;
+  const url = `${endpoint}/t/${topicId}/posts.json?post_ids[]=${postIdsArray?.join('&post_ids[]=')}`;
 
-  await getHandler(res)(url);
+  await getHandler(req, res)(url);
 }

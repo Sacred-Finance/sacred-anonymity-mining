@@ -10,6 +10,7 @@ import { mutate } from 'swr'
 import { getDiscourseData } from '@/lib/fetcher'
 import { OutputDataToMarkDown } from '@components/Discourse/OutputDataToMarkDown'
 import { useFetchBalance } from '@/hooks/useFetchBalance'
+import { useRouter } from 'next/router'
 
 const PostToTopic = ({ topic }: { topic: Topic }) => {
   const { t } = useTranslation()
@@ -17,7 +18,8 @@ const PostToTopic = ({ topic }: { topic: Topic }) => {
   const editorReference = useRef<EditorJS>()
   const [selectedToReveal, setSelectedToReveal] = useState(0)
   const { fetchBalance } = useFetchBalance();
-
+  const router = useRouter();
+  const { groupId } = router.query;
   const onSubmit = async () => {
     if (!description) return toast.error(t('error.emptyPost'))
     let raw = OutputDataToMarkDown(description)
@@ -37,7 +39,7 @@ const PostToTopic = ({ topic }: { topic: Topic }) => {
     }
 
     try {
-      const newPost = await axios.post('/api/discourse/postToTopic', {
+      const newPost = await axios.post(`/api/discourse/${groupId}/postToTopic`, {
         topic_id: topic.id,
         raw: raw,
         unlist_topic: false,

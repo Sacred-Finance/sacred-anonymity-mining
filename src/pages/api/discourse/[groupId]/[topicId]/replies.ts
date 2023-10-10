@@ -3,8 +3,9 @@ import { getHandler } from '@pages/api/discourse/helper'
 
 
 export default async function (req: NextApiRequest, res: NextApiResponse) {
-  const { id } = req.query
-  const url = `https://logos.discourse.group/posts/${id}/replies.json`
+  const { topicId } = req.query
+  const { endpoint } = req.headers
+  const url = `${endpoint}/posts/${topicId}/replies.json`
 
-  return await getHandler(res, true)(url)
+  return await getHandler(req, res, true)(url)
 }

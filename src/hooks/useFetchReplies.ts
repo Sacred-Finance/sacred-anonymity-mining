@@ -1,8 +1,11 @@
+import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 
 export const useFetchReplies = posts => {
   const [postsWithReplies, setPostsWithReplies] = useState([])
   const [loading, setLoading] = useState(true)
+  const router = useRouter()
+  const { groupId } = router.query
 
   useEffect(() => {
     const fetchReplies = async () => {
@@ -12,7 +15,7 @@ export const useFetchReplies = posts => {
 
       // Fetch the replies for each post that has them
       const fetchRepliesPromises = postsWithReplyCount.map(post =>
-        fetch(`/api/discourse/${post.id}/replies`).then(res => res.json())
+        fetch(`/api/discourse/${groupId}/${post.id}/replies`).then(res => res.json())
       )
 
       // Use Promise.all to wait for all the fetch promises to resolve
