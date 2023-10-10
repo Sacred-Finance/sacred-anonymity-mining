@@ -2,7 +2,6 @@ import Community from '@/components/Discourse/Community'
 import { DiscourseCommunity } from '@/lib/model'
 
 const Communities = ({ communities }: { communities?: DiscourseCommunity[] }) => {
-  console.log(communities)
 
   return (
     <div className="m-5 grid grid-cols-2 gap-6 md:grid-cols-4">
