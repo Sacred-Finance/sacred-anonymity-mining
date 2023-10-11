@@ -23,8 +23,8 @@ export const getHandler =
           return res.json(cachedData)
         }
       }
-      const { apiKey, username } = req.headers;
-      const response = await axios.get(url, discourseAuthenticationHeaders(apiKey as string, username as string))
+      const { apikey, username } = req.headers;
+      const response = await axios.get(url, discourseAuthenticationHeaders(apikey as string, username as string))
 
       if (shouldCache) {
         cache.set(url, response.data)
@@ -38,10 +38,10 @@ export const getHandler =
 
 export const postHandler = (req: NextApiRequest, res: NextApiResponse) => async (url: string, body: any) => {
   try {
-    const { apiKey, username } = req.headers;
+    const { apikey, username } = req.headers;
     const response = await axios.post(url, JSON.stringify(body), {
       headers: {
-        ...discourseAuthenticationHeaders(apiKey as string, username as string).headers,
+        ...discourseAuthenticationHeaders(apikey as string, username as string).headers,
         'Content-Type': 'application/json; charset=UTF-8',
         'Accept': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
