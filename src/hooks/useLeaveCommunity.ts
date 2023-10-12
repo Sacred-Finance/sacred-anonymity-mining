@@ -1,16 +1,14 @@
 import { useActiveUser, useCommunityContext, useUsers } from '@/contexts/CommunityProvider'
 import { leaveGroup } from '@/lib/api'
 import { User } from '@/lib/model'
-import { createNote, generateGroth16Proof } from '@/lib/utils'
+import { createNote, fetchUsersFromSemaphoreContract, generateGroth16Proof } from '@/lib/utils'
 import { Group } from '@semaphore-protocol/group'
 import { Identity } from '@semaphore-protocol/identity'
 import { useAccount } from 'wagmi'
-import { useFetchUsers } from './useFetchUsers'
 
 const username = 'anon';
 
 export const useLeaveCommunity = ({ id }) => {
-  const { fetchUsersFromSemaphoreContract } = useFetchUsers(id, false)
   const activeUser = useActiveUser({ groupId: id })
   const { address } = useAccount()
   const { dispatch } = useCommunityContext() // Use the context hook to access the required context values
@@ -20,7 +18,7 @@ export const useLeaveCommunity = ({ id }) => {
 
     const userIdentity = new Identity(`${address}_${id}_anon`)
     let group = new Group(id);
-    const users = await fetchUsersFromSemaphoreContract();
+    const users = await fetchUsersFromSemaphoreContract(id);
     users.forEach(u => group.addMember(BigInt(u)))
     const index = group.indexOf(BigInt(userIdentity.commitment));
     // group.removeMember(index);

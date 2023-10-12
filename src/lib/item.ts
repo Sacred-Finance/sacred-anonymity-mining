@@ -1,7 +1,7 @@
 import { ItemCreationRequest, ReputationProofStruct, User } from '@/lib/model'
 import { BigNumber, ethers } from 'ethers'
 import { Identity } from '@semaphore-protocol/identity'
-import { createNote, generateGroth16Proof, getBytes32FromIpfsHash, hashBytes, uploadIPFS } from '@/lib/utils'
+import { createNote, fetchUsersFromSemaphoreContract, generateGroth16Proof, getBytes32FromIpfsHash, hashBytes, uploadIPFS } from '@/lib/utils'
 import { forumContract } from '@/constant/const'
 import { createComment, createPost, edit } from '@/lib/api'
 import { UnirepUser } from '@/lib/unirep'
@@ -78,13 +78,13 @@ export async function create(content, type, address, users, postedByUser, groupI
 
     const extraNullifier = hashBytes(signal).toString()
     const note = await createNote(userPosting)
-    const u = users.filter(u => u?.groupId === +groupId)
-    const g = new SemaphoreGroup(groupId)
-    u.forEach(u => g.addMember(BigInt(u)))
+    let semaphoreGroup = new SemaphoreGroup(groupId)
+    const u = await fetchUsersFromSemaphoreContract(groupId)
+    u.forEach(u => semaphoreGroup.addMember(BigInt(u)))
 
     const { proof, merkleTreeRoot, nullifierHash } = await generateProof(
       userPosting,
-      g,
+      semaphoreGroup,
       extraNullifier,
       hashBytes(signal)
     )

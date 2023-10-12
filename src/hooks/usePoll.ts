@@ -3,16 +3,14 @@ import { createComment, createPost, votePoll } from '@/lib/api'
 import { getGroupWithPostAndCommentData, getGroupWithPostData } from '@/lib/fetcher'
 import { ItemCreationRequest, PollRequestStruct, PostContent, ReputationProofStruct } from '@/lib/model'
 import { UnirepUser } from '@/lib/unirep'
-import { createNote, getBytes32FromIpfsHash, hashBytes, hashBytes2, uploadIPFS } from '@/lib/utils'
+import { createNote, fetchUsersFromSemaphoreContract, getBytes32FromIpfsHash, hashBytes, hashBytes2, uploadIPFS } from '@/lib/utils'
 import { Group, Item } from '@/types/contract/ForumInterface'
 import { Group as SemaphoreGroup } from '@semaphore-protocol/group'
 import { Identity } from '@semaphore-protocol/identity'
 import { generateProof } from '@semaphore-protocol/proof'
 import { BigNumber } from 'ethers'
-import { useRouter } from 'next/router'
 import { mutate } from 'swr'
 import { useAccount } from 'wagmi'
-import { useFetchUsers } from './useFetchUsers'
 
 interface Poll {
   content: PostContent
@@ -35,7 +33,6 @@ interface SubmitPollParams {
 
 export const usePoll = ({  group }: { group: Group }) => {
   const { address } = useAccount()
-  const { fetchUsersFromSemaphoreContract } = useFetchUsers(group.id.toString(), false)
   const activeUser = useActiveUser({ groupId: group.id })
 
   const createPoll = async ({
@@ -60,7 +57,7 @@ export const usePoll = ({  group }: { group: Group }) => {
 
       const signal = getBytes32FromIpfsHash(cid)
       const extraNullifier = hashBytes(signal).toString()
-      const users = await fetchUsersFromSemaphoreContract()
+      const users = await fetchUsersFromSemaphoreContract(group.id)
       let semaphoreGroup = new SemaphoreGroup(group.id)
       users.forEach(u => semaphoreGroup.addMember(BigInt(u)))
       const userIdentity = new Identity(`${address}_${group.id}_${activeUser?.name || 'anon'}`)
@@ -153,7 +150,7 @@ export const usePoll = ({  group }: { group: Group }) => {
       const signal = hashBytes2(id, 'votePoll')
       const extraNullifier = signal.toString()
       let semaphoreGroup = new SemaphoreGroup(group.id)
-      const users = await fetchUsersFromSemaphoreContract()
+      const users = await fetchUsersFromSemaphoreContract(group.id)
       users.forEach(u => semaphoreGroup.addMember(BigInt(u)))
       const userIdentity = new Identity(`${address}_${group.id}_anon`)
 
