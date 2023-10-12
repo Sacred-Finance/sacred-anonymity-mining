@@ -28,14 +28,13 @@ import { Post } from '@/lib/post'
 import { ContentType, ItemCreationRequest, ReputationProofStruct, User } from '@/lib/model'
 import CreatePollUI from '@components/CreatePollUI'
 import ToolTip from '@components/HOC/ToolTip'
-import { useFetchUsers } from '@/hooks/useFetchUsers'
 import { Group as SemaphoreGroup } from '@semaphore-protocol/group'
 import { Identity } from '@semaphore-protocol/identity'
 import { UnirepUser } from '@/lib/unirep'
 import { useContentManagement } from '@/hooks/useContentManagement'
 import { createComment, vote } from '@/lib/api'
 import { generateProof } from '@semaphore-protocol/proof'
-import { createNote, getBytes32FromIpfsHash, hashBytes, hashBytes2, uploadIPFS } from '@/lib/utils'
+import { createNote, fetchUsersFromSemaphoreContract, getBytes32FromIpfsHash, hashBytes, hashBytes2, uploadIPFS } from '@/lib/utils'
 import { mutate } from 'swr'
 import { getGroupWithPostAndCommentData } from '@/lib/fetcher'
 import { emptyPollRequest } from '@/lib/item'
@@ -218,7 +217,6 @@ const CreateCommentUI = ({ group, post }: { group: Group; post: Item }) => {
   const { t } = useTranslation()
   const { address } = useAccount()
   const { checkUserBalance } = useValidateUserBalance(group, address)
-  const { fetchUsersFromSemaphoreContract } = useFetchUsers(group.id.toString(), false)
 
   const [isLoading, setIsLoading] = useState(false)
 
@@ -258,7 +256,7 @@ const CreateCommentUI = ({ group, post }: { group: Group; post: Item }) => {
     const extraNullifier = hashBytes(signal).toString()
     let semaphoreGroup = new SemaphoreGroup(group.id)
 
-    const users = await fetchUsersFromSemaphoreContract()
+    const users = await fetchUsersFromSemaphoreContract(groupId)
     users.forEach(u => semaphoreGroup.addMember(BigInt(u)))
 
     try {
@@ -345,7 +343,6 @@ export const VoteForItemUI = ({ post, group }: { post: Item; group: Group }) => 
   const { t } = useTranslation()
   const { address } = useAccount()
   const { checkUserBalance } = useValidateUserBalance(group, address)
-  const { fetchUsersFromSemaphoreContract } = useFetchUsers(group.id.toString(), false)
 
   const [isLoading, setIsLoading] = useState(false)
 
@@ -368,7 +365,7 @@ export const VoteForItemUI = ({ post, group }: { post: Item; group: Group }) => 
       const signal = utils.hexZeroPad('0x' + voteCmdNum.toString(16), 32)
       const extraNullifier = voteCmdNum.toString()
       let semaphoreGroup = new SemaphoreGroup(BigInt(groupId))
-      const users = await fetchUsersFromSemaphoreContract()
+      const users = await fetchUsersFromSemaphoreContract(groupId)
       users.forEach(u => semaphoreGroup.addMember(BigInt(u)))
       const userIdentity = new Identity(`${address}_${group.id}_anon`)
 

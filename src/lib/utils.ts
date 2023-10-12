@@ -4,7 +4,7 @@ import { create, IPFSHTTPClient } from 'ipfs-http-client'
 import { toBufferBE, toBufferLE } from 'bigint-buffer'
 import { buildBabyjub, buildPedersenHash } from 'circomlibjs'
 import { Identity } from '@semaphore-protocol/identity'
-import { forumContract } from '@/constant/const'
+import { forumContract, semaphoreContract } from '@/constant/const'
 
 const { groth16 } = require('snarkjs')
 
@@ -355,4 +355,8 @@ export const hasUserJoined = async (group, identityCommitment) => {
     console.log(error);
     return false
   }
+}
+
+export const fetchUsersFromSemaphoreContract = async (groupId) => {
+  return  semaphoreContract?.getGroupMembers(groupId?.toString())
 }
