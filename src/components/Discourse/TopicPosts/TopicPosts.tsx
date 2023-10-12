@@ -5,7 +5,7 @@ import { useAnimation } from 'framer-motion'
 import { RecursivePostRenderer } from '@components/Discourse/TopicPosts/RecursivePostRenderer'
 import { nestPosts } from '@components/Discourse/TopicPosts/helper'
 
-const TopicPosts = ({ topic, mutate }: { topic: Topic; mutate: (newPost: Post) => void }) => {
+const TopicPosts = ({ topic, mutate, readonly }: { topic: Topic; mutate: (newPost: Post) => void, readonly: boolean }) => {
   const postRefs = useRef<{ [key: number]: React.RefObject<HTMLDivElement> }>({})
   const [targetPostNumber, setTargetPostNumber] = useState<number | null>(null)
   const [postsInView, setPostsInView] = useState([])
@@ -43,6 +43,7 @@ const TopicPosts = ({ topic, mutate }: { topic: Topic; mutate: (newPost: Post) =
           setTargetPostNumber={setTargetPostNumber}
           addReplyToPosts={mutate}
           depth={0}
+          readonly={readonly}
         />
       ))}
     </div>

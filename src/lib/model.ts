@@ -80,5 +80,6 @@ export type DiscourseCommunity = {
   apiKey?: string,
   username?: string,
   endpoint?: string,
-  id?: number
+  id?: number,
+  readonly?: boolean
 }

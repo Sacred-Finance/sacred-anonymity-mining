@@ -227,6 +227,7 @@ export const NewPostForm = ({
     >
       {isEditable && !(isFormOpen && !showButtonWhenFormOpen) && (
         <PrimaryButton
+          disabled={isReadOnly}
           className={getClassNames(
             commonButtonClasses,
             {

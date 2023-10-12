@@ -14,10 +14,12 @@ const ReplyToDiscoursePost = ({
   post,
   formProps,
   addReplyToPosts,
+  readonly = false,
 }: {
   post: Topic['post_stream']['posts'][0]
   formProps?: Partial<NewPostFormProps>
   addReplyToPosts?: (newPost: Topic['post_stream']['posts'][0]) => void
+  readonly: boolean
 }) => {
   const { t } = useTranslation()
   const router = useRouter()
@@ -25,22 +27,22 @@ const ReplyToDiscoursePost = ({
   const editorReference = useRef<EditorJS>()
   const [description, setDescription] = useState<OutputData | null>(null)
   const [selectedToReveal, setSelectedToReveal] = useState(0)
-  const { fetchBalance } = useFetchBalance();
+  const { fetchBalance } = useFetchBalance()
   const onSubmit = async () => {
     if (!description) return toast.error(t('error.emptyPost'))
     let raw = OutputDataToMarkDown(description)
 
     if (selectedToReveal > 0) {
       try {
-        const balance = await fetchBalance();
+        const balance = await fetchBalance()
         if (balance) {
-          const percentageToReveal = balance * selectedToReveal / 100;
-          const toAppend = `<br><br><br><i>Sacred Bot: User has chosen to reveal ${percentageToReveal} tokens. </i>`;
-          raw = raw + toAppend;
+          const percentageToReveal = (balance * selectedToReveal) / 100
+          const toAppend = `<br><br><br><i>Sacred Bot: User has chosen to reveal ${percentageToReveal} tokens. </i>`
+          raw = raw + toAppend
         }
       } catch (error) {
-        console.error(error);
-        return;
+        console.error(error)
+        return
       }
     }
     try {
@@ -77,7 +79,7 @@ const ReplyToDiscoursePost = ({
       resetForm={() => {
         setDescription(null)
       }}
-      isReadOnly={false}
+      isReadOnly={readonly}
       isEditable={true}
       handleSubmit={onSubmit}
       openFormButtonText={'Reply'}

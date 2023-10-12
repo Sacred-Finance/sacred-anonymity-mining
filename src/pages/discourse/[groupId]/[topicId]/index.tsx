@@ -74,13 +74,14 @@ const Index = () => {
     <>
       {DiscourseCommunityBanner(loading, community)}
       <div className={clsx(' max-w-screen-6xl w-full space-y-6 sm:p-8 md:p-24')}>
-        {initialData && <PostToTopic topic={initialData} mutate={mutatePost} />}
+        {initialData && <PostToTopic topic={initialData} mutate={mutatePost} readonly={Boolean(+community?.readonly)} />}
 
         <PostContent post={topicData[0]} />
         {data?.length && (
           <TopicPosts
             topic={{ ...initialData, ...data, post_stream: { ...initialData?.post_stream, posts: topicData } } as Topic}
             mutate={mutatePost}
+            readonly={Boolean(+community?.readonly)}
           />
         )}
 

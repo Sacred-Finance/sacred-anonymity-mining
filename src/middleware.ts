@@ -5,7 +5,8 @@ interface Community {
   id: number
   apiKey: string
   username: string
-  endpoint: string
+  endpoint: string,
+  readonly: boolean
 }
 
 const communityCache: Map<number, Community> = new Map()
@@ -40,6 +41,7 @@ export async function middleware(request: NextRequest, res: NextResponse) {
               apiKey: community.apiKey,
               username: community.username,
               endpoint: community.endpoint,
+              readonly: community.readonly
             },
           })
         }

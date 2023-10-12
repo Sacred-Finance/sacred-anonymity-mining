@@ -8,20 +8,27 @@ import { CircularLoader } from '@/components/JoinCommunityButton'
 import _ from 'lodash'
 
 export const DiscourseCommunityBanner = (loading, community) => (
-  (<div className="mx-0 my-4 w-auto rounded-lg border border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-800">
+  <div className="mx-0 my-4 w-auto rounded-lg border border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-800">
     {loading ? (
       <CircularLoader className="mx-auto my-5 h-8 w-8" />
     ) : (
-      <>
+      <div className="relative">
+        {Boolean(+community?.readonly) && (
+          <div className="absolute right-0 mt-2 flex">
+            <span className="border-gray-500 border-r-1 ml-auto mr-2 rounded border bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-400">
+              Readonly
+            </span>
+          </div>
+        )}
         <img className="m-auto h-[10%] w-[10%] rounded-t-lg pt-2" src={community?.image} alt="" />
         <div className="p-3 text-center">
           <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{community?.name}</h5>
           <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">{community?.description}</p>
         </div>
-      </>
+      </div>
     )}
   </div>
-))
+)
 
 const Index = () => {
   const [topicList, setTopicList] = useState<TopicList>()

@@ -5,7 +5,8 @@ export const useFetchMetadata = (groupId) => {
   const [community, setCommunity] = useState<{
     name: string
     description: string
-    image: string
+    image: string,
+    readonly: boolean
   }>(null)
   const [loading, setLoading] = useState(false)
 
@@ -17,6 +18,7 @@ export const useFetchMetadata = (groupId) => {
         name: data['og:title'],
         description: data['og:description'],
         image: data['og:image'],
+        readonly: data['readonly'] ?? false
       })
       setLoading(false)
     }
