@@ -3,7 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import urlMetadata from 'url-metadata';
 const options = {
   max: 500, // Maximum of 500 items in the cache
-  ttl: 1000 * 60 * 60 * 24, // Items live for 1 day
+  ttl: 1000 * 60 * 5, // Items live for 5 minutes
   dispose: (value, key) => {
     // Optional: Add logic here to clean up anything if necessary
   },
