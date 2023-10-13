@@ -7,7 +7,6 @@
     "paths": {
       "@/*": ["./src/*"],
       "@components/*": ["./src/components/*"],
-      "@HOC/*": ["./src/HOC/*"],
       "@pages/*": ["./src/pages/*"],
       "@styles/*": ["./src/styles/*"]
     },
@@ -30,6 +29,6 @@
     "strictNullChecks": true
   },
 
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.jsx", "**/*.js", ".next/types/**/*.ts", "**/src/**/*.ts", "**/src/**/*.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.jsx", "**/*.js", ".next/types/**/*.ts"],
   "exclude": ["node_modules/**/*", ".next/**/*"]
 }

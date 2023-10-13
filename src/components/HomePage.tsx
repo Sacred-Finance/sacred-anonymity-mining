@@ -15,18 +15,20 @@ import {
 import { AnimatePresence, motion } from 'framer-motion'
 import clsx from 'clsx'
 import { Group } from '@/types/contract/ForumInterface'
-import { User } from '@/lib/model'
-import AllTopics from '@components/Discourse/AllTopics'
+import { DiscourseCommunity, User } from '@/lib/model'
 import { Tab } from '@headlessui/react'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
+import Communities from './Discourse/Communities'
 import { useRouter } from 'next/router'
 import { PrimaryButton } from '@components/buttons'
 
 interface HomeProps {
   isAdmin: boolean
+  communities: Group[],
+  discourseCommunities: DiscourseCommunity[]
   users: User[]
-  communities: Group[]
 }
+
 const tabClass = selected =>
   clsx(
     'w-full rounded text-sm font-medium nowrap py-2 px-4 text-center focus:outline-none transition duration-150',
@@ -139,7 +141,7 @@ function FilterButtons(props: { applyFilter: (filter: string) => void; currentFi
   )
 }
 
-function HomePage({ isAdmin = false, users, communities }: HomeProps) {
+function HomePage({ isAdmin = false, users, communities, discourseCommunities }: HomeProps) {
   // state
   const [localCommunities, setLocalCommunities] = useState<Group[]>(communities)
   const [searchTerm, setSearchTerm] = useState('')
@@ -275,7 +277,7 @@ function HomePage({ isAdmin = false, users, communities }: HomeProps) {
                   transition={{ duration: 0.5 }}
                   className="flex flex-wrap gap-4 xs:justify-center md:justify-start "
                 >
-                  <AllTopics />
+                  <Communities communities={discourseCommunities} />
                 </motion.div>
               </Tab.Panel>
             </Tab.Panels>

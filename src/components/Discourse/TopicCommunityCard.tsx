@@ -4,6 +4,7 @@ import { Topic } from '@components/Discourse/types'
 import { formatDistanceToNow } from '@/lib/utils'
 import clsx from 'clsx'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 
 const TimeSinceLastPost: React.FC<{ topic: Topic }> = ({ topic }) => (
   <li className="my-1">Last Post: {formatDistanceToNow(new Date(topic.last_posted_at))}</li>
@@ -16,10 +17,14 @@ const TimeSinceTopicCreated: React.FC<{ topic: Topic }> = ({ topic }) => (
 const TopicCommunityCard: React.FC<{ topic: Topic; variant?: 'banner' | 'default' }> = ({
   topic,
   variant = 'default',
-}) => (
-  <Link
+}) => {
+  const router = useRouter()
+  const { groupId } = router.query
+
+  return (
+    <Link
     key={topic.id}
-    href={`/discourse/${topic.id}`}
+    href={`/discourse/${groupId}/${topic.id}`}
     className={clsx(
       'relative block w-full max-w-lg flex-shrink-0 flex-grow transform rounded shadow transition-transform dark:shadow-white',
       variant === 'banner'
@@ -44,6 +49,7 @@ const TopicCommunityCard: React.FC<{ topic: Topic; variant?: 'banner' | 'default
       </div>
     </div>
   </Link>
-)
+  )
+}
 
 export default TopicCommunityCard

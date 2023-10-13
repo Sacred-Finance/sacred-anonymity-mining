@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Post } from '@components/Discourse/types'
+import { useRouter } from 'next/router'
 
 interface PostWithReplies extends Post {
   replies: Post[]
@@ -8,6 +9,8 @@ export const useFetchRepliesForPosts = (posts: Post[]) => {
   const [postsWithReplies, setPostsWithReplies] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const router = useRouter();
+  const { groupId } = router.query;
 
   useEffect(() => {
     const fetchReplies = async () => {
@@ -17,7 +20,7 @@ export const useFetchRepliesForPosts = (posts: Post[]) => {
           post => !post.hidden && !post.deleted_at && post.reply_count > 0
         )
         const fetchRepliesPromises = postsWithReplyCount.map(post =>
-          fetch(`/api/discourse/${post.id}/replies`).then(res => res.json())
+          fetch(`/api/discourse/${groupId}/${post.id}/replies`).then(res => res.json())
         )
         const repliesArrays = await Promise.all(fetchRepliesPromises)
         repliesArrays.forEach((replies, index) => {

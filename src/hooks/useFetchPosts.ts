@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import useSWR, { mutate } from 'swr'
 import fetcher, { getDiscourseData } from '@/lib/fetcher'
+import { useRouter } from 'next/router'
 
 export const useFetchPosts = posts => {
 
@@ -8,11 +9,13 @@ export const useFetchPosts = posts => {
 
   const post_ids: number[] = posts.map(post => post.id)
 
+  const router = useRouter()
+  const { groupId } = router.query
   const {
     data: postData,
     error,
     isLoading,
-  } = useSWR(post_ids.length ? `/api/discourse/${topic_id}/posts/${post_ids.join(',')}` : null, fetcher)
+  } = useSWR(post_ids.length ? `/api/discourse/${groupId}/${topic_id}/posts/${post_ids.join(',')}` : null, fetcher)
 
   if (error) console.log(error)
 

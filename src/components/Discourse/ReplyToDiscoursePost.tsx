@@ -7,40 +7,46 @@ import { useTranslation } from 'react-i18next'
 import EditorJS, { OutputData } from '@editorjs/editorjs'
 import { Post, Topic } from '@components/Discourse/types'
 import { useFetchBalance } from '@/hooks/useFetchBalance'
+import { useRouter } from 'next/router'
 import { mutate } from 'swr'
 
 const ReplyToDiscoursePost = ({
   post,
   formProps,
   addReplyToPosts,
+  readonly = false,
 }: {
   post: Topic['post_stream']['posts'][0]
   formProps?: Partial<NewPostFormProps>
   addReplyToPosts?: (newPost: Topic['post_stream']['posts'][0]) => void
+  readonly: boolean
 }) => {
   const { t } = useTranslation()
+  const router = useRouter()
+  const { groupId, topicId } = router.query
+  const editorReference = useRef<EditorJS>()
   const [description, setDescription] = useState<OutputData | null>(null)
   const [selectedToReveal, setSelectedToReveal] = useState(0)
-  const { fetchBalance } = useFetchBalance();
+  const { fetchBalance } = useFetchBalance()
   const onSubmit = async () => {
     if (!description) return toast.error(t('error.emptyPost'))
     let raw = OutputDataToMarkDown(description)
 
     if (selectedToReveal > 0) {
       try {
-        const balance = await fetchBalance();
+        const balance = await fetchBalance()
         if (balance) {
-          const percentageToReveal = balance * selectedToReveal / 100;
-          const toAppend = `<br><br><br><i>Sacred Bot: User has chosen to reveal ${percentageToReveal} tokens. </i>`;
-          raw = raw + toAppend;
+          const percentageToReveal = (balance * selectedToReveal) / 100
+          const toAppend = `<br><br><br><i>Sacred Bot: User has chosen to reveal ${percentageToReveal} tokens. </i>`
+          raw = raw + toAppend
         }
       } catch (error) {
-        console.error(error);
-        return;
+        console.error(error)
+        return
       }
     }
     try {
-      const newPost = await axios.post('/api/discourse/postToTopic', {
+      const newPost = await axios.post(`/api/discourse/${groupId}/postToTopic`, {
         topic_id: post.topic_id,
         reply_to_post_number: post.post_number,
         raw: raw,
@@ -56,7 +62,7 @@ const ReplyToDiscoursePost = ({
         addReplyToPosts(newPost.data.post as Topic['post_stream']['posts'][0])
       }
       // await mutate(`/api/discourse/${post.topic_id}`)
-      await mutate(`/api/discourse/${post.topic_id}/posts/${newPost.data.post.post_number}`) // load in post
+      await mutate(`/api/discourse/${groupId}/${post.topic_id}/posts/${newPost.data.post.post_number}`) // load in post
     } catch (error) {
       toast.error(t('alert.postCreateFailed'))
       console.error(error)
@@ -73,7 +79,7 @@ const ReplyToDiscoursePost = ({
       resetForm={() => {
         setDescription(null)
       }}
-      isReadOnly={false}
+      isReadOnly={readonly}
       isEditable={true}
       handleSubmit={onSubmit}
       openFormButtonText={'Reply'}

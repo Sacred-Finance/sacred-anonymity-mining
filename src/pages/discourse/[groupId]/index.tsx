@@ -1,98 +1,65 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import TopicCommunityCard from '@/components/Discourse/TopicCommunityCard'
+import { TopicList } from '@/components/Discourse/types'
+import axios from 'axios'
 import { useRouter } from 'next/router'
-import TopicPosts from '@components/Discourse/TopicPosts/TopicPosts'
-import fetcher from '@/lib/fetcher'
-import PostToTopic from '@components/Discourse/PostToTopic'
-import useSWR from 'swr'
-import { Post, PostStreamObject, Topic } from '@components/Discourse/types'
-import clsx from 'clsx'
+import { useFetchMetadata } from '@/hooks/discourse/useFetchMetadata'
+import { CircularLoader } from '@/components/JoinCommunityButton'
 import _ from 'lodash'
-import useSWRInfinite from 'swr/infinite'
-import { motion } from 'framer-motion'
-import { PostContent } from '@components/Discourse/TopicPosts/PostContent'
 
-const PAGE_SIZE = 20
+export const DiscourseCommunityBanner = (loading, community) => (
+  <div className="mx-0 my-4 w-auto rounded-lg border border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-800">
+    {loading ? (
+      <CircularLoader className="mx-auto my-5 h-8 w-8" />
+    ) : (
+      <div className="relative">
+        {Boolean(+community?.readonly) && (
+          <div className="absolute right-0 mt-2 flex">
+            <span className="border-gray-500 border-r-1 ml-auto mr-2 rounded border bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-400">
+              Readonly
+            </span>
+          </div>
+        )}
+        <img className="m-auto h-[10%] w-[10%] rounded-t-lg pt-2" src={community?.image} alt="" />
+        <div className="p-3 text-center">
+          <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{community?.name}</h5>
+          <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">{community?.description}</p>
+        </div>
+      </div>
+    )}
+  </div>
+)
 
 const Index = () => {
+  const [topicList, setTopicList] = useState<TopicList>()
   const router = useRouter()
   const { groupId } = router.query
-  const loaderRef = useRef(null)
-  const [postIds, setPostIds] = useState<number[]>([])
-
-  const { data: initialData } = useSWR<Topic>(
-    groupId
-      ? () => {
-          return `/api/discourse/${groupId}`
-        }
-      : null,
-    fetcher
-  )
+  const { community, loading } = useFetchMetadata(groupId)
 
   useEffect(() => {
-    if (initialData) {
-      setPostIds(initialData.post_stream.stream)
-    }
-  }, [initialData])
-
-  const { data, mutate, size, setSize, isValidating, isLoading, error } = useSWRInfinite<PostStreamObject>(
-    index => {
-      const postIdChunks = _.chunk(postIds, PAGE_SIZE)
-      return postIds.length && postIdChunks?.[index]?.length
-        ? `/api/discourse/${groupId}/posts/${postIdChunks[index].join(',')}&page=${index}`
-        : null
-    },
-    fetcher,
-    {
-      revalidateFirstPage: false,
-    }
-  )
-
-  if (error) {
-    return <>error</>
-  }
-  const mutatePost = (newPost: Post) => {
-    mutate(data => {
-      const newData = [...data]
-      const lastPage = newData[newData.length - 1]
-      const lastPagePosts = lastPage?.post_stream?.posts
-      if (lastPagePosts) {
-        lastPagePosts.push(newPost)
+    const fetchTopics = async () => {
+      try {
+        const response = await axios.get(`/api/discourse/${groupId}/topics`)
+        setTopicList(response.data.topic_list)
+      } catch (error) {
+        console.error(error)
       }
-      return newData
-    }, true)
-  }
+    }
+    fetchTopics()
+  }, [])
 
-  const isLoadingMore = isLoading || (isValidating && data && data.length === size)
-  const topicData = _.uniqBy(
-    _.merge(_.flatten(data?.map(d => d?.post_stream?.posts)), _.flatten(initialData?.post_stream?.posts)),
-    'id'
-  )
   return (
-    <div className={clsx(' max-w-screen-6xl w-full space-y-6 sm:p-8 md:p-24')}>
-      {initialData && <PostToTopic topic={initialData} mutate={mutatePost} />}
+    <>
+      {DiscourseCommunityBanner(loading, community)}
+      <div className='flex flex-wrap gap-4 xs:justify-center md:justify-start'>
+        {topicList?.topics?.map(topic => (
+          <TopicCommunityCard key={topic.id} topic={topic} variant={'default'} />
+        ))}
+      </div>
 
-      <PostContent post={topicData[0]} />
-      {data?.length && (
-        <TopicPosts
-          topic={{ ...initialData, ...data, post_stream: { ...initialData?.post_stream, posts: topicData } } as Topic}
-          mutate={mutatePost}
-        />
-      )}
-
-      <motion.div
-        onViewportEnter={() => {
-          setSize(size + 1)
-        }}
-        viewport={{ once: true }}
-        ref={loaderRef}
-      />
-      {isLoadingMore && (
-        <div className="flex items-center justify-center">
-          <div className="text-gray-500">Loading...</div>
-        </div>
-      )}
-    </div>
+    </>
   )
 }
 
 export default Index
+

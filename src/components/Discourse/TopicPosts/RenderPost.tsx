@@ -9,7 +9,7 @@ import _ from 'lodash'
 import { PostAuthorInformation } from '@components/Discourse/TopicPosts/PostAuthorInformation'
 import clsx from "clsx";
 
-export const RenderPost = ({ post, postRefs, setPostsInView, controls, setTargetPostNumber, addReplyToPosts, depth }) => {
+export const RenderPost = ({ post, postRefs, setPostsInView, controls, setTargetPostNumber, addReplyToPosts, depth, readonly=false }) => {
   const postRef = postRefs.current[post.post_number] || (postRefs.current[post.post_number] = useRef<HTMLDivElement>())
 
   const handleViewportEnter = () => {
@@ -52,7 +52,7 @@ export const RenderPost = ({ post, postRefs, setPostsInView, controls, setTarget
       </div>
 
       <PostContent post={post} />
-      <PostFooter post={post} addReplyToPosts={addReplyToPosts} />
+      <PostFooter post={post} addReplyToPosts={addReplyToPosts} readonly={readonly} />
     </motion.div>
   )
 }
