@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react'
-import { ethers, providers, utils } from 'ethers'
+import React, { useState } from 'react'
+import { ethers, utils } from 'ethers'
 import { erc20dummyABI, getRpcProvider, supportedChains, supportedChainsArray } from '@/constant/const'
 import { FieldArray, FormikProvider, useFormik } from 'formik'
 import { Chain } from 'wagmi'
@@ -10,13 +10,12 @@ import { polygonMumbai } from 'wagmi/chains'
 import { PictureUpload } from '@components/PictureUpload'
 import clsx from 'clsx'
 import { buttonVariants } from '@styles/classes'
-import { ChevronRightIcon, QuestionMarkCircleIcon } from '@heroicons/react/20/solid'
+import { QuestionMarkCircleIcon } from '@heroicons/react/20/solid'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useCreateCommunity } from '@/hooks/useCreateCommunity'
 import Link from 'next/link'
-import WithStandardLayout from '@components/HOC/WithStandardLayout'
-import { isImageFile } from '@pages/communities/[groupId]/edit'
 import Dropdown from '@/components/buttons/Dropdown/Dropdown'
+import TagInput from '@/components/TagInput/TagInput'
 
 export interface HandleSetImage {
   file: File | null
@@ -69,17 +68,7 @@ function CreateGroupFormUI({ onCreate }) {
   const handleDescriptionChange = e => {
     setGroupDescription(e.target.value)
   }
-  const handleTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // validate tags
-    try {
-      // spaces should be allowed
-      if (e.target.value.match(/^[a-zA-Z0-9, ]*$/)) {
-        setTags(e.target.value.split(','))
-      }
-    } catch (e) {
-      console.log(e)
-    }
-  }
+
   const handleSetImage = ({ file, imageType }: HandleSetImage) => {
     const setImage = imageType === 'logo' ? setLogoFile : setBannerFile
     const setUrl = imageType === 'logo' ? setLogoUrl : setBannerUrl
@@ -211,27 +200,7 @@ function CreateGroupFormUI({ onCreate }) {
       </div>
       <div className="flex flex-col space-y-4">
         <label className="text-lg">{t('placeholder.communityTags')}</label>
-        <div className={'flex gap-4'}>
-          {tags.map((tag, index) => (
-            <div key={index}>
-              {tag.trim() && (
-                <span
-                  key={index}
-                  className="rounded border border-gray-400 px-3 py-2 dark:border-gray-600 dark:bg-gray-700"
-                >
-                  {tag}
-                </span>
-              )}
-            </div>
-          ))}
-        </div>
-        <input
-          className="rounded border border-gray-400 px-3 py-2 focus:border-primary-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
-          placeholder={'tag1, tag2, tag3'}
-          type="text"
-          value={tags}
-          onChange={handleTagsChange}
-        />
+        <TagInput onChange={(t) => setTags(t)} selected={tags}/>
       </div>
       <div className="flex flex-col space-y-4">
         <label className="text-lg ">{t('placeholder.communityDescription')}</label>
