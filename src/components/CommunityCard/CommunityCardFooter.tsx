@@ -40,7 +40,7 @@ export const CommunityCardFooter = () => {
 
         <div className="flex items-center   rounded hover:bg-gray-300 dark:hover:bg-gray-600">
           <Image
-            title={`chain ${community.chainId} ${supportedChains[community.chainId].name}`}
+            title={`chain ${community.chainId} ${supportedChains?.[community?.chainId]?.name}`}
             src={chainLogos[community.chainId]}
             alt={'ChainLogo'}
             width={35}
