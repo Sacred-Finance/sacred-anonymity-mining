@@ -204,7 +204,7 @@ function CreateGroupFormUI({ onCreate }) {
           />
         </div>
 
-        <div className="relative inline-flex w-[200px] items-center gap-4">
+        <div className="relative inline-flex w-[300px] items-center gap-4">
           <div className="group relative w-60">
             <Dropdown
               options={supportedChainsArray.map(c => ({key: c.name, value: c}))}
@@ -258,7 +258,7 @@ function CreateGroupFormUI({ onCreate }) {
                       <div className="w-32">
                         <input
                           disabled={!reqMandatory}
-                          className="dark:ext-gray-700 w-full  rounded border border-gray-400 focus:border-primary-500 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+                          className=" w-full  rounded border border-gray-400 focus:border-primary-500 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
                           type="number"
                           min={0}
                           defaultValue={r.minAmount}

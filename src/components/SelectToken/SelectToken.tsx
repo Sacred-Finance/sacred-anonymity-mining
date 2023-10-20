@@ -23,7 +23,7 @@ const SelectToken = ({ chainId, selectedToken, onTokenSelect }: SelectTokenProps
       <button
         id="dropdownSearchButton"
         onClick={() => setOptionsVisible(!optionsVisible)}
-        className="inline-flex items-center w-full rounded-lg border px-4 py-2 text-center text-md font-medium focus:outline-none border-gray-400 dark:border-gray-300 dark:bg-gray-600"
+        className="inline-flex items-center w-full rounded-lg border px-4 py-2 text-center text-md font-medium focus:outline-none border-gray-400 dark:border-gray-600 dark:bg-gray-700"
         type="button"
       >
         <span className="flex items-center gap-2 dark:text-white">
