@@ -1,9 +1,8 @@
 import React, { ButtonHTMLAttributes } from 'react'
-import clsx from 'clsx'
-import { CircularLoader } from '@components/JoinCommunityButton'
+import { CircularLoader } from '@components/buttons/JoinCommunityButton'
 import { toast } from 'react-toastify'
 import { useTranslation } from 'next-i18next'
-import ToolTip from '@components/HOC/ToolTip'
+import { Button } from '@/shad/ui/button'
 
 export type PrimaryButtonProps = {
   children?: React.ReactNode
@@ -19,7 +18,7 @@ export type PrimaryButtonProps = {
   startIcon?: React.ReactNode
   loadingPosition?: 'start' | 'end'
   toolTip?: string | boolean
-  variant?: 'primary' | 'secondary' | 'minimal'
+  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
 } & ButtonHTMLAttributes<HTMLButtonElement>
 export function PrimaryButton({
   children,
@@ -29,7 +28,7 @@ export function PrimaryButton({
   isJoined,
   resetClasses,
   loadingPosition = 'end',
-  variant = 'primary',
+  variant = 'default',
   ...rest
 }: PrimaryButtonProps & ButtonHTMLAttributes<HTMLButtonElement>): JSX.Element {
   const { t } = useTranslation()
@@ -45,40 +44,30 @@ export function PrimaryButton({
     }
   }
 
-  const classes = {
-    primary:
-      'rounded-lg border bg-primary-500 px-4 py-2 text-white shadow-md transition duration-150 ease-in-out hover:brightness-125 focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-opacity-50 active:bg-primary-700 disabled:opacity-60',
-    secondary:
-      'rounded-lg border bg-white px-4 py-2 text-primary-500 shadow-md transition duration-150 ease-in-out hover:brightness-125 focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-opacity-50 active:bg-gray-100 disabled:opacity-60',
-    minimal:
-      'rounded-lg border bg-transparent px-4 py-2 text-primary-500 shadow-md transition duration-150 ease-in-out hover:brightness-125 focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-opacity-50 active:bg-gray-100 disabled:opacity-60',
-  }
-
   // filter out props that are spreadable to the button
   const buttonProps = Object.fromEntries(
     Object.entries(rest).filter(
-      ([key]) => !['toolTip', 'requirements', 'isConnected', 'isJoined', 'variant', 'loadingPosition', 'startIcon', 'endIcon'].includes(key)
+      ([key]) =>
+        ![
+          'toolTip',
+          'requirements',
+          'isConnected',
+          'isJoined',
+          'variant',
+          'loadingPosition',
+          'startIcon',
+          'endIcon',
+        ].includes(key)
     )
   )
 
   return (
-    <ToolTip tooltip={rest?.toolTip || false}>
-      <button
-        {...buttonProps}
-        disabled={rest.disabled || isLoading}
-        className={clsx(
-          !resetClasses && classes[variant],
-          !resetClasses && 'flex items-center gap-2 disabled:cursor-not-allowed',
-          rest.className
-        )}
-        onClick={wrappedOnClick}
-      >
-        {isLoading && loadingPosition === 'start' && <CircularLoader />}
-        {rest.startIcon && !isLoading && loadingPosition === 'start' && rest.startIcon}
-        {children}
-        {rest.endIcon && !isLoading && loadingPosition === 'end' && rest.endIcon}
-        {isLoading && loadingPosition === 'end' && <CircularLoader />}
-      </button>
-    </ToolTip>
+    <Button variant={variant} {...buttonProps} disabled={rest.disabled || isLoading} onClick={wrappedOnClick}>
+      {isLoading && loadingPosition === 'start' && <CircularLoader />}
+      {rest.startIcon && !isLoading && loadingPosition === 'start' && rest.startIcon}
+      {children}
+      {rest.endIcon && !isLoading && loadingPosition === 'end' && rest.endIcon}
+      {isLoading && loadingPosition === 'end' && <CircularLoader />}
+    </Button>
   )
 }

@@ -11,12 +11,12 @@ export default function Footer(): JSX.Element {
       <div className="container mx-auto px-6 py-8 lg:px-16">
         <div className="md:flex md:justify-between">
           <div className="mb-6 flex items-center md:mb-0">
-            <Logo invertTheme={true} className="mr-3 h-8" />
+            <Logo width={400} invertTheme={true} className="h- mr-3" />
           </div>
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
             {/* Follow Us Section */}
             <div>
-              <h2 className="mb-6 text-lg font-semibold text-gray-400">{t('footer.followUs')}</h2>
+              <h2 className="mb-6 text-xl font-semibold text-white">{t('footer.followUs')}</h2>
               <ul className="font-medium text-gray-500 dark:text-gray-400">
                 <li className="mb-4">
                   <a href="http://discord.gg/43spxvqqmJ" className="hover:text-purple-500">
@@ -43,7 +43,7 @@ export default function Footer(): JSX.Element {
 
             {/* Legal Section */}
             <div>
-              <h2 className="mb-6 text-lg font-semibold text-gray-400">{t('footer.legal')}</h2>
+              <h2 className="mb-6 text-xl font-semibold text-white">{t('footer.legal')}</h2>
               <ul className="font-medium text-gray-500 dark:text-gray-400">
                 <li className="mb-4">
                   <a
@@ -67,7 +67,7 @@ export default function Footer(): JSX.Element {
         </div>
         <hr className="my-6 border-gray-700 dark:border-gray-900 sm:mx-auto lg:my-8" />
         <div className="sm:flex sm:items-center sm:justify-between">
-          <span className="text-sm text-gray-500 dark:text-gray-400 sm:text-center">
+          <span className="text-sm text-gray-500 dark:text-white sm:text-center">
             © 2023 SacredLogos. All Rights Reserved.
           </span>
           {/* Add additional social icons if necessary */}

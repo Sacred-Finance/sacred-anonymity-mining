@@ -1,7 +1,7 @@
-import React, { memo, useEffect, useImperativeHandle, useRef, useState } from 'react'
+import React, { memo, useEffect, useRef, useState } from 'react'
 import EditorJS, { OutputData } from '@editorjs/editorjs'
 import clsx from 'clsx'
-import { CircularLoader } from '@components/JoinCommunityButton' // Consider renaming or reorganizing this if `CircularLoader` doesn't belong to a button component.
+import { CircularLoader } from '@components/buttons/JoinCommunityButton' // Consider renaming or reorganizing this if `CircularLoader` doesn't belong to a button component.
 import { EDITOR_TOOLS } from './editor-tool'
 
 type DivProps = {
@@ -28,7 +28,6 @@ const EditorBlock = ({
 }: Props) => {
   const [isReady, setIsReady] = useState(false)
   const ref = useRef<EditorJS | null>(null)
-
 
   useEffect(() => {
     if (ref.current || !holder) {

@@ -1,15 +1,15 @@
 import { useTranslation } from 'react-i18next'
-import React, { Dispatch, RefObject, SetStateAction, useCallback, useRef, useState } from 'react'
+import React, { Dispatch, SetStateAction, useCallback, useRef, useState } from 'react'
 import EditorJsRenderer from './editor-js/EditorJSRenderer'
 import { CancelButton, PrimaryButton } from './buttons'
 import { EyeIcon, PencilIcon } from '@heroicons/react/20/solid'
 import dynamic from 'next/dynamic'
 import clsx from 'clsx'
-import AnonymizeButton from '@components/buttons/AIAnonymiseButton'
 import Dropdown from './buttons/Dropdown/Dropdown'
 import { Tab } from '@headlessui/react'
-import { classes } from '@styles/classes'
 import { OutputData } from '@editorjs/editorjs'
+import { Input } from '@/shad/ui/input'
+import { Label } from '@/shad/ui/label'
 
 export interface EditorJsType {
   blocks: {
@@ -125,9 +125,7 @@ function ContentSection({
       <Tab.Panel className="rounded border-gray-200  ">
         <Editor
           divProps={{
-            className: clsx(
-              'z-50 w-full bg-white !text-black form-input h-full rounded-md shadow-md min-h-[35vh]'
-            ),
+            className: clsx('z-50 w-full bg-white !text-black form-input h-full rounded-md shadow-md min-h-[35vh]'),
           }}
           data={data}
           onChange={onChange}
@@ -219,25 +217,14 @@ export const NewPostForm = ({
       className={getClassNames(
         'flex flex-col space-y-4 sm:w-full',
         {
-          true: [c?.rootOpen, 'border-gray-500 border'],
+          true: [c?.rootOpen, 'border border-gray-500'],
           false: [c?.rootClosed, 'items-center'],
         },
         isFormOpen
       )}
     >
       {isEditable && !(isFormOpen && !showButtonWhenFormOpen) && (
-        <PrimaryButton
-          disabled={isReadOnly}
-          className={getClassNames(
-            commonButtonClasses,
-            {
-              true: [c?.openFormButtonOpen],
-              false: [c?.openFormButtonClosed],
-            },
-            isFormOpen
-          )}
-          onClick={handleOpen}
-        >
+        <PrimaryButton disabled={isReadOnly} onClick={handleOpen}>
           {isFormOpen ? 'Close' : openFormButtonText}
         </PrimaryButton>
       )}
@@ -255,12 +242,12 @@ export const NewPostForm = ({
         >
           <div className={clsx(c?.formBody)}>
             {itemType === 'post' && title !== false && (
-              <div className={'gap-2 flex flex-col'}>
-                <label htmlFor={'title'} className="text-md">
+              <div className={'flex flex-col gap-2'}>
+                <Label htmlFor={'title'} className="text-md">
                   Title (Max 60)
-                </label>
+                </Label>
 
-                <input
+                <Input
                   id={'title'}
                   disabled={isPreview}
                   className={clsx(
@@ -276,8 +263,8 @@ export const NewPostForm = ({
               </div>
             )}
             <Tab.Group>
-              <Tab.Panels className={'overflow-y-scroll max-h-[calc(50vh)]'}>
-                <div className="text-md">Content</div>
+              <Tab.Panels className={'max-h-[calc(50vh)] overflow-y-scroll'}>
+                <Label className="text-md">Content</Label>
                 <ContentSection
                   preview={isPreview}
                   data={description}

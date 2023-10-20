@@ -2,12 +2,7 @@ import React from 'react'
 import { Logo } from './Logo'
 import { NavBarButton } from '../components/buttons/NavBarButton'
 import { ThemeToggleButton } from './Theme'
-import {
-  ArrowLeftIcon,
-  ArrowsPointingInIcon,
-  ArrowsPointingOutIcon,
-  QuestionMarkCircleIcon,
-} from '@heroicons/react/20/solid'
+import { ArrowsPointingInIcon, ArrowsPointingOutIcon, QuestionMarkCircleIcon } from '@heroicons/react/20/solid'
 import ConnectWallet from './Connect/ConnectWallet'
 import clsx from 'clsx'
 
@@ -27,10 +22,10 @@ const Header = () => {
       <div className="flex items-center justify-between space-x-4">
         <NavBarButton href="/" className="">
           <div className="md:hidden">
-            <Logo />
+            <Logo width={200} />
           </div>
           <div className="hidden md:block">
-            <Logo className="h-[64px] w-[150px]" />
+            <Logo />
           </div>
         </NavBarButton>
 

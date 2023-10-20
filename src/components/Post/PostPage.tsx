@@ -1,31 +1,28 @@
-import { useActiveUser, useCommunityContext, useUserIfJoined, useUsers } from '@/contexts/CommunityProvider'
+import { useActiveUser, useUserIfJoined } from '@/contexts/CommunityProvider'
 import { useAccount } from 'wagmi'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
 import { useTranslation } from 'next-i18next'
-import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { useValidateUserBalance } from '@/utils/useValidateUserBalance'
 import { BigNumber, utils } from 'ethers'
 import { toast } from 'react-toastify'
 import { CommunityCard } from '@components/CommunityCard/CommunityCard'
 import { VoteDownButton, VoteUpButton } from '@components/buttons'
-import { useEditItem } from '@/hooks/useEditItem'
 import SummaryButton from '@components/buttons/AIPostSummaryButton'
 import { OutputDataToHTML } from '@components/Discourse/OutputDataToMarkDown'
 import { PostItem } from '@components/Post/PostItem'
-import { NewPostModal, PostComment, PostComments, TempComment } from '@components/Post/PostComments'
+import { NewPostModal, PostComment, TempComment } from '@components/Post/PostComments'
 import { Tab } from '@headlessui/react'
 import { PencilIcon } from '@heroicons/react/20/solid'
 import { useRouter } from 'next/router'
 import { ChatIcon, InfoIcon, PollIcon } from '@components/CommunityActionTabs'
-import clsx from 'clsx'
 import { NewPostForm, NewPostFormProps } from '@components/NewPostForm'
-import { OutputData } from '@editorjs/editorjs'
 import { useItemsSortedByVote } from '@/hooks/useItemsSortedByVote'
 import { SortByOption } from '@components/SortBy'
 import { Group, Item } from '@/types/contract/ForumInterface'
 import { CommentClass } from '@/lib/comment'
 import { Post } from '@/lib/post'
-import { ContentType, ItemCreationRequest, ReputationProofStruct, User } from '@/lib/model'
+import { ContentType, ItemCreationRequest, ReputationProofStruct } from '@/lib/model'
 import CreatePollUI from '@components/CreatePollUI'
 import ToolTip from '@components/HOC/ToolTip'
 import { Group as SemaphoreGroup } from '@semaphore-protocol/group'
@@ -34,10 +31,18 @@ import { UnirepUser } from '@/lib/unirep'
 import { useContentManagement } from '@/hooks/useContentManagement'
 import { createComment, vote } from '@/lib/api'
 import { generateProof } from '@semaphore-protocol/proof'
-import { createNote, fetchUsersFromSemaphoreContract, getBytes32FromIpfsHash, hashBytes, hashBytes2, uploadIPFS } from '@/lib/utils'
+import {
+  createNote,
+  fetchUsersFromSemaphoreContract,
+  getBytes32FromIpfsHash,
+  hashBytes,
+  hashBytes2,
+  uploadIPFS,
+} from '@/lib/utils'
 import { mutate } from 'swr'
 import { getGroupWithPostAndCommentData } from '@/lib/fetcher'
 import { emptyPollRequest } from '@/lib/item'
+import { ScrollArea } from '@/shad/ui/scroll-area'
 
 export function PostPage({
   comments,
@@ -84,14 +89,14 @@ export function PostPage({
     <div className="flex w-full flex-col bg-gray-100 transition-colors dark:bg-gray-800">
       <div className="flex-1 overflow-hidden">
         <div className="flex h-full flex-col md:flex-row">
-          <div className=" flex flex-col gap-4 overflow-y-scroll p-3 md:w-1/2">
+          <div className=" flex flex-col gap-4 p-3 md:w-1/2">
             <div className="sticky top-0 z-10 flex gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
               <VoteForItemUI post={post} group={community} />
               <SummaryButton postData={OutputDataToHTML(post?.description)} postTitle={post.title} />
             </div>
-            <div className="scrollbar max-h-[calc(90vh - 200px)] col-span-12 flex   w-full  flex-col gap-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
+            <ScrollArea className=" max-h-[calc(90vh - 200px)] col-span-12 flex   w-full  flex-col gap-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
               <PostItem post={post} group={community} />
-            </div>
+            </ScrollArea>
           </div>
 
           <div className=" flex flex-col gap-4 overflow-y-scroll p-3 md:w-1/2">
@@ -107,17 +112,17 @@ export function PostPage({
                     key={index}
                   >
                     {tooltip === 'Community Info' && (
-                      <ToolTip tooltip={tooltip}>
+                      <ToolTip tooltip={tooltip} buttonProps={{ variant: 'link', className: 'flex gap-4' }}>
                         <InfoIcon />
                       </ToolTip>
                     )}
                     {tooltip === 'Polls' && (
-                      <ToolTip tooltip={tooltip}>
+                      <ToolTip tooltip={tooltip} buttonProps={{ variant: 'link', className: 'flex gap-4' }}>
                         <PollIcon className="h-5 w-5" />
                       </ToolTip>
                     )}
                     {tooltip === 'All Replies' && (
-                      <ToolTip tooltip={tooltip}>
+                      <ToolTip tooltip={tooltip} buttonProps={{ variant: 'link', className: 'flex gap-4' }}>
                         <ChatIcon className="h-5 w-5" />
                       </ToolTip>
                     )}
@@ -160,7 +165,7 @@ export function PostPage({
                   {sortedCommentsData
                     .filter(comment => comment.kind == ContentType.POLL)
                     .map(comment => (
-                        <PostComment comment={comment} key={comment.id} />
+                      <PostComment comment={comment} key={comment.id} />
                     ))}
                 </Tab.Panel>
                 <Tab.Panel className="flex flex-col gap-4 ">

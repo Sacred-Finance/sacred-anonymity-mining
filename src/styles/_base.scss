@@ -1,62 +1,62 @@
-:root {
-  /* Primary Purple */
-  --primary: rgb(102, 3, 246);
-  --primary-light: rgb(153, 92, 239);
-  --primary-lighter: rgb(158, 101, 237);
-  --primary-lightest: rgb(255, 255, 255);
-  --primary-dark: rgb(92, 2, 218);
-  --primary-darker: rgb(82, 3, 196);
-  --primary-darkest: rgb(71, 4, 168);
-
-  /* Secondary color (complementary) */
-  --secondary-blue: rgb(0, 163, 255);
-  --secondary-blue-light: rgb(51, 184, 255);
-  --secondary-blue-lighter: rgb(102, 204, 255);
-  --secondary-blue-lightest: rgb(153, 225, 255);
-  --secondary-blue-dark: rgb(0, 142, 255);
-  --secondary-blue-darker: rgb(0, 122, 204);
-  --secondary-blue-darkest: rgb(0, 102, 153);
-
-  /* Background colors */
-  --background-light: rgb(255, 255, 255);
-  --background-dark: rgb(14, 16, 18);
-
-  /* Text colors */
-  --text-light: rgb(255, 255, 255);
-  --text-dark: rgb(14, 16, 18);
-
-  /* Border colors */
-  --border-light: rgb(211, 212, 213);
-  --border-dark: rgb(51, 53, 57);
-
-  --chakra-colors-dark-background: rgb(26, 26, 26) !important;
-}
-
-html,
-body,
-div#root {
-  width: 100%;
-}
-
-@media (max-width: 768px) {
-  html,
-  body,
-  div#root {
-    content: '';
-    display: table;
-    clear: both;
-    padding: 0;
-    margin: 0;
-  }
-}
-
-body {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-}
+//:root {
+//  /* Primary Purple */
+//  --primary: rgb(102, 3, 246);
+//  --primary-light: rgb(153, 92, 239);
+//  --primary-lighter: rgb(158, 101, 237);
+//  --primary-lightest: rgb(255, 255, 255);
+//  --primary-dark: rgb(92, 2, 218);
+//  --primary-darker: rgb(82, 3, 196);
+//  --primary-darkest: rgb(71, 4, 168);
+//
+//  /* Secondary color (complementary) */
+//  --secondary-blue: rgb(0, 163, 255);
+//  --secondary-blue-light: rgb(51, 184, 255);
+//  --secondary-blue-lighter: rgb(102, 204, 255);
+//  --secondary-blue-lightest: rgb(153, 225, 255);
+//  --secondary-blue-dark: rgb(0, 142, 255);
+//  --secondary-blue-darker: rgb(0, 122, 204);
+//  --secondary-blue-darkest: rgb(0, 102, 153);
+//
+//  /* Background colors */
+//  --background-light: rgb(255, 255, 255);
+//  --background-dark: rgb(14, 16, 18);
+//
+//  /* Text colors */
+//  --text-light: rgb(255, 255, 255);
+//  --text-dark: rgb(14, 16, 18);
+//
+//  /* Border colors */
+//  --border-light: rgb(211, 212, 213);
+//  --border-dark: rgb(51, 53, 57);
+//
+//  --chakra-colors-dark-background: rgb(26, 26, 26) !important;
+//}
+//
+//html,
+//body,
+//div#root {
+//  width: 100%;
+//}
+//
+//@media (max-width: 768px) {
+//  html,
+//  body,
+//  div#root {
+//    content: '';
+//    display: table;
+//    clear: both;
+//    padding: 0;
+//    margin: 0;
+//  }
+//}
+//
+//body {
+//  position: fixed;
+//  top: 0;
+//  left: 0;
+//  right: 0;
+//  bottom: 0;
+//}
 
 .codex-editor__redactor {
   width: 100%;
@@ -402,11 +402,5 @@ body {
 
   :hover::-webkit-scrollbar-thumb {
     visibility: visible;
-  }
-
-  .scrollbar {
-    scrollbar-color: white var(--primary-darker) !important;
-    scrollbar-width: thin !important;
-    scrollbar-face-color: var(--primary-darker) !important;
   }
 }

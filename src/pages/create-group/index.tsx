@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react'
-import { ethers, providers, utils } from 'ethers'
+import React, { useState } from 'react'
+import { ethers, utils } from 'ethers'
 import { erc20dummyABI, getRpcProvider, supportedChains, supportedChainsArray } from '@/constant/const'
 import { FieldArray, FormikProvider, useFormik } from 'formik'
 import { Chain } from 'wagmi'
@@ -10,12 +10,10 @@ import { polygonMumbai } from 'wagmi/chains'
 import { PictureUpload } from '@components/PictureUpload'
 import clsx from 'clsx'
 import { buttonVariants } from '@styles/classes'
-import { ChevronRightIcon, QuestionMarkCircleIcon } from '@heroicons/react/20/solid'
+import { QuestionMarkCircleIcon } from '@heroicons/react/20/solid'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useCreateCommunity } from '@/hooks/useCreateCommunity'
 import Link from 'next/link'
-import WithStandardLayout from '@components/HOC/WithStandardLayout'
-import { isImageFile } from '@pages/communities/[groupId]/edit'
 import Dropdown from '@/components/buttons/Dropdown/Dropdown'
 
 export interface HandleSetImage {
@@ -94,7 +92,7 @@ function CreateGroupFormUI({ onCreate }) {
     await formik.setFieldValue(`tokenRequirements.${i}.tokenAddress`, val, false)
     if (val) {
       if (utils.isAddress(val)) {
-        const p = getRpcProvider(selectedChain.id);
+        const p = getRpcProvider(selectedChain.id)
 
         const contract = new ethers.Contract(val, erc20dummyABI, p)
         const setNameNotFoundError = async () => {
@@ -192,7 +190,7 @@ function CreateGroupFormUI({ onCreate }) {
   return (
     <div
       className={clsx(
-        'w-full max-w-screen-xl space-y-6 rounded-lg text-primary-600 shadow dark:bg-gray-900 dark:text-gray-200 sm:p-8 md:p-12 '
+        'text-primary-600 w-full max-w-screen-xl space-y-6 rounded-lg shadow dark:bg-gray-900 dark:text-gray-200 sm:p-8 md:p-12 '
       )}
     >
       <div className="flex items-center justify-between py-4">
@@ -202,7 +200,7 @@ function CreateGroupFormUI({ onCreate }) {
       <div className="flex flex-col space-y-4">
         <label className="text-lg ">{t('placeholder.communityName')}</label>
         <input
-          className="form-input rounded border border-gray-400 px-3 py-2 focus:border-primary-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+          className="form-input focus:border-primary-500 rounded border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
           placeholder={'An awesome community name'}
           type="text"
           value={groupName}
@@ -226,7 +224,7 @@ function CreateGroupFormUI({ onCreate }) {
           ))}
         </div>
         <input
-          className="rounded border border-gray-400 px-3 py-2 focus:border-primary-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+          className="focus:border-primary-500 rounded border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
           placeholder={'tag1, tag2, tag3'}
           type="text"
           value={tags}
@@ -236,14 +234,14 @@ function CreateGroupFormUI({ onCreate }) {
       <div className="flex flex-col space-y-4">
         <label className="text-lg ">{t('placeholder.communityDescription')}</label>
         <textarea
-          className="h-20 rounded border border-gray-400 px-3 py-2 focus:border-primary-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+          className="focus:border-primary-500 h-20 rounded border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
           placeholder={t('placeholder.communityDescriptionContent') || ''}
           value={groupDescription}
           onChange={handleDescriptionChange}
         />
       </div>
 
-      <div className={'flex items-start gap-4 dark:text-primary-500 '}>
+      <div className={'dark:text-primary-500 flex items-start gap-4 '}>
         <PictureUpload
           uploadedImageUrl={bannerUrl}
           displayName={t('banner')}
@@ -260,7 +258,10 @@ function CreateGroupFormUI({ onCreate }) {
 
       <div className="flex items-center justify-between space-x-4">
         <div className="flex items-center space-x-4">
-          <ToolTip tooltip={t('toolTip.tokenGating.message') || ''}>
+          <ToolTip
+            tooltip={t('toolTip.tokenGating.message') || ''}
+            buttonProps={{ variant: 'secondary', className: 'flex gap-4' }}
+          >
             <QuestionMarkCircleIcon className="h-6 w-6" />
           </ToolTip>
 
@@ -271,7 +272,7 @@ function CreateGroupFormUI({ onCreate }) {
           <input
             type="checkbox"
             id="isChecked"
-            className="h-6 w-6 rounded border-2 border-primary-500 text-primary-500 focus:ring-0"
+            className="border-primary-500 text-primary-500 h-6 w-6 rounded border-2 focus:ring-0"
             checked={reqMandatory}
             onChange={e => {
               setReqMandatory(e.target.checked)
@@ -287,9 +288,9 @@ function CreateGroupFormUI({ onCreate }) {
         <div className="relative inline-flex w-[200px] items-center gap-4">
           <div className="group relative w-60">
             <Dropdown
-              options={supportedChainsArray.map(c => ({key: c.name, value: c}))}
-              selected={{key: selectedChain.name, value: selectedChain}}
-              onSelect={(v) => {
+              options={supportedChainsArray.map(c => ({ key: c.name, value: c }))}
+              selected={{ key: selectedChain.name, value: selectedChain }}
+              onSelect={v => {
                 selectChain(v)
                 formik.setFieldValue('tokenRequirements', [initialValues])
                 if (!reqMandatory) setReqMandatory(true)
@@ -299,7 +300,7 @@ function CreateGroupFormUI({ onCreate }) {
           </div>
 
           <button
-            className={clsx('flex aspect-1 h-10 w-10 items-center justify-center border p-3 text-xl')}
+            className={clsx('aspect-1 flex h-10 w-10 items-center justify-center border p-3 text-xl')}
             onClick={addReq}
           >
             +
@@ -324,7 +325,7 @@ function CreateGroupFormUI({ onCreate }) {
                     <motion.div
                       key={i}
                       layout
-                      className="flex items-center space-x-4 h-[80px]"
+                      className="flex h-[80px] items-center space-x-4"
                       initial={{ opacity: 0, y: 20, overflowY: 'visible' }}
                       animate={{ opacity: 1, y: 0, overflowY: 'hidden' }}
                       exit={{ opacity: 0, y: 20, overflowY: 'hidden' }}
@@ -338,16 +339,24 @@ function CreateGroupFormUI({ onCreate }) {
                         <input
                           disabled={!reqMandatory}
                           className={clsx(
-                            er[`tokenRequirements_${i}`] ? 'border-red-600 focus:border-red-600 focus:ring-0' : 'border-gray-300',
+                            er[`tokenRequirements_${i}`]
+                              ? 'border-red-600 focus:border-red-600 focus:ring-0'
+                              : 'border-gray-300',
                             er[`tokenRequirements_${i}`] && '',
-                            'w-full rounded-md borde px-3 py-2 text-gray-700 focus:outline-none')}
+                            'borde w-full rounded-md px-3 py-2 text-gray-700 focus:outline-none'
+                          )}
                           value={r.tokenAddress}
                           onChange={e => handleReqInput(e, i)}
                           name={`tokenRequirements.${i}.tokenAddress`}
                           placeholder={t('placeholder.tokenAddress')}
                           type="text"
                         />
-                        <small className={clsx('block absolute text-sm text-red-600', er[`tokenRequirements_${i}`] && 'visible')}>
+                        <small
+                          className={clsx(
+                            'absolute block text-sm text-red-600',
+                            er[`tokenRequirements_${i}`] && 'visible'
+                          )}
+                        >
                           {er[`tokenRequirements_${i}`]}
                         </small>
                       </div>
@@ -390,7 +399,7 @@ function CreateGroupFormUI({ onCreate }) {
                             remove(i)
                           }
                         }}
-                        className="border-red-500 flex aspect-1 h-11 w-11 items-center justify-center rounded border text-red-500 transition-colors hover:bg-red-500 hover:text-white focus:outline-none"
+                        className="aspect-1 flex h-11 w-11 items-center justify-center rounded border border-red-500 text-red-500 transition-colors hover:bg-red-500 hover:text-white focus:outline-none"
                       >
                         <RemoveIcon />
                       </button>

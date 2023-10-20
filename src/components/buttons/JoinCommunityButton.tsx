@@ -1,17 +1,17 @@
-import { User } from '../lib/model'
+import { User } from '../../lib/model'
 import { useAccount } from 'wagmi'
-import { useJoinCommunity } from '../hooks/useJoinCommunity'
+import { useJoinCommunity } from '../../hooks/useJoinCommunity'
 
 import React, { memo } from 'react'
-import { TosConfirmationWrapper } from './TermsOfService/TosConfirmationWrapper'
-import { useValidateUserBalance } from '../utils/useValidateUserBalance'
+import { TosConfirmationWrapper } from '../TermsOfService/TosConfirmationWrapper'
+import { useValidateUserBalance } from '../../utils/useValidateUserBalance'
 import { useTranslation } from 'next-i18next'
-import { useUserIfJoined } from '../contexts/CommunityProvider'
+import { useUserIfJoined } from '../../contexts/CommunityProvider'
 import { toast } from 'react-toastify'
 import { Group } from '@/types/contract/ForumInterface'
 import clsx from 'clsx'
-import { PrimaryButton } from './buttons'
-import {useConnectModal} from "@rainbow-me/rainbowkit";
+import { PrimaryButton } from './index'
+import { useConnectModal } from '@rainbow-me/rainbowkit'
 
 interface JoinButtonProps {
   community: Group
@@ -32,7 +32,7 @@ export function CircularLoader({ className }: { className?: string }) {
 }
 
 export const JoinCommunityButton = memo(({ community, hideIfJoined }: JoinButtonProps) => {
-  const { openConnectModal } = useConnectModal();
+  const { openConnectModal } = useConnectModal()
 
   const { groupId, name: groupName } = community
 
@@ -65,20 +65,7 @@ export const JoinCommunityButton = memo(({ community, hideIfJoined }: JoinButton
     setIsLoading(false)
   }
   const joinButton = (
-    <PrimaryButton
-      isLoading={isLoading}
-      onClick={join}
-      className={clsx(
-        // 3d topleft
-        'h-9 w-28',
-        'border border-transparent ',
-        `flex items-center justify-center !gap-1 rounded border text-sm transition-colors duration-200 `,
-        hasUserJoined
-          ? 'dark:bg-green-500/30 bg-green-500/70 text-sm text-black '
-          : 'bg-primary-500 text-white hover:bg-primary-500',
-        'disabled:opacity-50'
-      )}
-    >
+    <PrimaryButton isLoading={isLoading} onClick={join} variant={hasUserJoined ? 'secondary' : 'default'}>
       {hasUserJoined ? (
         <svg
           xmlns="http://www.w3.org/2000/svg"

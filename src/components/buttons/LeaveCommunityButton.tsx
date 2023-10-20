@@ -1,14 +1,12 @@
-import { User } from '../lib/model'
+import { User } from '../../lib/model'
 import { useAccount } from 'wagmi'
 
 import React, { memo } from 'react'
-import { TosConfirmationWrapper } from './TermsOfService/TosConfirmationWrapper'
 import { useTranslation } from 'next-i18next'
-import { useUserIfJoined } from '../contexts/CommunityProvider'
+import { useUserIfJoined } from '../../contexts/CommunityProvider'
 import { toast } from 'react-toastify'
 import { Group } from '@/types/contract/ForumInterface'
-import clsx from 'clsx'
-import { PrimaryButton } from './buttons'
+import { PrimaryButton } from './index'
 import { useLeaveCommunity } from '@/hooks/useLeaveCommunity'
 
 interface JoinButtonProps {
@@ -23,7 +21,7 @@ export const LeaveCommunityButton = memo(({ community }: JoinButtonProps) => {
   const { address } = useAccount()
   const hasUserJoined: User | undefined | false = useUserIfJoined(groupId as string | number)
 
-  const { leaveCommunity } = useLeaveCommunity({id: groupId})
+  const { leaveCommunity } = useLeaveCommunity({ id: groupId })
 
   const validateBeforeOpen = async (): Promise<boolean> => {
     if (!address) {
@@ -48,23 +46,11 @@ export const LeaveCommunityButton = memo(({ community }: JoinButtonProps) => {
     }
     setIsLoading(false)
   }
-  const leaveButton = (
-    <PrimaryButton
-      isLoading={isLoading}
-      onClick={leave}
-      className={clsx(
-        `flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold text-white transition-colors duration-200 `,
-        'bg-red-500 hover:bg-red-600',
-        'disabled:opacity-50'
-      )}
-    >
+
+  return (
+    <PrimaryButton isLoading={isLoading} onClick={leave} variant={'destructive'}>
       {t('button.leave', { count: hasUserJoined ? 0 : 1 })}
     </PrimaryButton>
-  )
-  return (
-    <>
-      {leaveButton}
-    </>
   )
 })
 

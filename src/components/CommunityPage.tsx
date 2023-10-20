@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useRef, useState } from 'react'
+import React, { Dispatch, SetStateAction, useState } from 'react'
 import { Post } from '@/lib/post'
 import { useActiveUser, useUserIfJoined, useUsers } from '@/contexts/CommunityProvider'
 import { useAccount } from 'wagmi'
@@ -14,8 +14,8 @@ import { PostList } from '@components/Post/PostList'
 import { Group, Item } from '@/types/contract/ForumInterface'
 import CreatePollUI from './CreatePollUI'
 import { useContentManagement } from '@/hooks/useContentManagement'
-import { CommunityCard } from '@components/CommunityCard/CommunityCard'
 import { NewPostModal } from '@components/Post/PostComments'
+import LoadingComponent from '@components/LoadingComponent'
 
 export function CommunityPage({ community, posts }: { community: Group; posts?: Item[] }) {
   const groupId = community.id.toString()
@@ -26,13 +26,18 @@ export function CommunityPage({ community, posts }: { community: Group; posts?: 
 
   const sortedData = useItemsSortedByVote([], posts, sortBy)
 
+  if (!community || !community?.id) return <LoadingComponent />
+
   return (
-    <div className="relative mt-6 flex min-h-screen gap-6 rounded-lg  p-6 transition-colors dark:bg-gray-800">
+    <div className="relative mt-6 flex min-h-screen gap-6 rounded-lg  p-6 transition-colors ">
       <div className="sticky top-0 flex w-full flex-col gap-6">
-        <div className="max-w-[450px]">
-          <CommunityCard community={community} isAdmin={false} variant={'banner'} />
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <h2 className="text-2xl font-semibold tracking-tight">{community.name}</h2>
+            <p className="text-sm text-muted-foreground">{community.groupDetails.description}</p>
+          </div>
         </div>
-        <div className="flex w-fit gap-4 rounded-lg bg-gray-200 p-4 dark:bg-gray-900">
+        <div className="flex w-fit gap-4 rounded-lg ">
           <CreatePollUI group={community} />
           <CreatePostUI group={community} />
         </div>
@@ -76,7 +81,6 @@ const CreatePostUI = ({ group }: { group: Group }) => {
       toast.error('Please enter a title and description', { toastId: 'missingTitleOrDesc' })
       return
     }
-
 
     const hasSufficientBalance = await checkUserBalance()
     if (!hasSufficientBalance) return
