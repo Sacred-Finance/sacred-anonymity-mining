@@ -16,6 +16,7 @@ import { useCreateCommunity } from '@/hooks/useCreateCommunity'
 import Link from 'next/link'
 import Dropdown from '@/components/buttons/Dropdown/Dropdown'
 import TagInput from '@/components/TagInput/TagInput'
+import SelectToken from '@/components/SelectToken/SelectToken'
 
 export interface HandleSetImage {
   file: File | null
@@ -38,7 +39,7 @@ function CreateGroupFormUI({ onCreate }) {
     tokenAddress: '',
     minAmount: 0,
     // maxAmount: 0,
-    token: '-',
+    token: '',
     decimals: 0,
   }
   const formik = useFormik({
@@ -78,60 +79,10 @@ function CreateGroupFormUI({ onCreate }) {
 
   const [selectedChain, setSelectedChain] = useState<Chain>(supportedChains[polygonMumbai.id])
 
-  const handleReqInput = async (e, i) => {
-    let val = e.target.value.trim()
-    await formik.setFieldValue(`tokenRequirements.${i}.tokenAddress`, val, false)
-    if (val) {
-      if (utils.isAddress(val)) {
-        const p = getRpcProvider(selectedChain.id);
-
-        const contract = new ethers.Contract(val, erc20dummyABI, p)
-        const setNameNotFoundError = async () => {
-          await formik.setFieldValue(`tokenRequirements.${i}.token`, '-', false)
-          setEr(e => {
-            return {
-              ...e,
-              [`tokenRequirements_${i}`]: 'Token name not found or Not supported with selected chain!',
-            }
-          })
-        }
-        Promise.all([contract?.symbol(), contract?.decimals()])
-          ?.then(async ([symbol, decimals]) => {
-            if (!symbol) {
-              await setNameNotFoundError()
-              return
-            }
-            await formik.setFieldValue(`tokenRequirements.${i}.token`, symbol, false)
-            await formik.setFieldValue(`tokenRequirements.${i}.decimals`, decimals, false)
-
-            setEr(e => {
-              const errors = { ...e }
-              delete errors[`tokenRequirements_${i}`]
-              return errors
-            })
-          })
-          .catch(async error => {
-            console.log(error)
-            await setNameNotFoundError()
-          })
-      } else {
-        setEr(e => {
-          return {
-            ...e,
-            [`tokenRequirements_${i}`]: 'Invalid token address',
-          }
-        })
-        await formik.setFieldValue(`tokenRequirements.${i}.token`, '-', false)
-      }
-    } else {
-      setEr(e => {
-        return {
-          ...e,
-          [`tokenRequirements_${i}`]: 'Required*',
-        }
-      })
-      await formik.setFieldValue(`tokenRequirements.${i}.token`, '-', false)
-    }
+  const onTokenSelect = (index, tokenAddress, symbol, decimals) => {
+    formik.setFieldValue(`tokenRequirements.${index}.tokenAddress`, tokenAddress)
+    formik.setFieldValue(`tokenRequirements.${index}.token`, symbol)
+    formik.setFieldValue(`tokenRequirements.${index}.decimals`, decimals)
   }
 
   const addReq = () => {
@@ -293,38 +244,21 @@ function CreateGroupFormUI({ onCreate }) {
                     <motion.div
                       key={i}
                       layout
-                      className="flex items-center space-x-4 h-[80px]"
+                      className="flex items-center space-x-4 h-auto"
                       initial={{ opacity: 0, y: 20, overflowY: 'visible' }}
                       animate={{ opacity: 1, y: 0, overflowY: 'hidden' }}
                       exit={{ opacity: 0, y: 20, overflowY: 'hidden' }}
                       transition={{ duration: 0.5 }}
                     >
-                      <p className="pt-2 font-bold ">{i + 1}.</p>
-                      <div className="relative flex-grow">
-                        <div className="text-blue-gray-500 absolute right-7 top-2/4 grid h-5 w-5 -translate-y-2/4 place-items-center">
-                          <span className="text-xs font-semibold text-gray-500">{r.token}</span>
-                        </div>
-                        <input
-                          disabled={!reqMandatory}
-                          className={clsx(
-                            er[`tokenRequirements_${i}`] ? 'border-red-600 focus:border-red-600 focus:ring-0' : 'border-gray-300',
-                            er[`tokenRequirements_${i}`] && '',
-                            'w-full rounded-md borde px-3 py-2 text-gray-700 focus:outline-none')}
-                          value={r.tokenAddress}
-                          onChange={e => handleReqInput(e, i)}
-                          name={`tokenRequirements.${i}.tokenAddress`}
-                          placeholder={t('placeholder.tokenAddress')}
-                          type="text"
-                        />
-                        <small className={clsx('block absolute text-sm text-red-600', er[`tokenRequirements_${i}`] && 'visible')}>
-                          {er[`tokenRequirements_${i}`]}
-                        </small>
+                      <p className="font-bold ">{i + 1}.</p>
+                      <div className="flex w-[400px]">
+                        <SelectToken chainId={selectedChain.id} selectedToken={r?.token} onTokenSelect={(address, symbol, decimals) => onTokenSelect(i, address, symbol, decimals)}/>
                       </div>
 
                       <div className="w-32">
                         <input
                           disabled={!reqMandatory}
-                          className="dark:ext-gray-700 w-full  rounded border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+                          className="dark:ext-gray-700 w-full  rounded border border-gray-400 focus:border-primary-500 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
                           type="number"
                           min={0}
                           defaultValue={r.minAmount}

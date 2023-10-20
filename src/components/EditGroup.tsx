@@ -22,6 +22,7 @@ import { Group } from '@/types/contract/ForumInterface'
 import RemoveGroup from '@components/RemoveGroup'
 import DeleteItemButton from '@components/buttons/DeleteItemButton'
 import { useValidatedImage } from '@components/CommunityCard/UseValidatedImage'
+import TagInput from './TagInput/TagInput'
 
 interface EditGroupProps {
   group: Group
@@ -91,18 +92,6 @@ export function EditGroup({ group }: EditGroupProps) {
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
 
       setGroupDescriptionState(e.target.value)
-  }
-
-  const handleTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // validate tags
-    try {
-      // spaces should be allowed
-      if (e.target.value.match(/^[a-zA-Z0-9, ]*$/)) {
-        setTags(e.target.value.split(','))
-      }
-    } catch (e) {
-      console.log(e)
-    }
   }
 
   const hidePreview = () => {
@@ -177,27 +166,7 @@ export function EditGroup({ group }: EditGroupProps) {
 
         <div className="flex flex-col space-y-4">
           <label className="text-lg text-gray-700 dark:text-gray-300">{t('placeholder.communityTags')}</label>
-          <div className={'flex gap-4'}>
-            {tags.map((tag, index) => (
-              <div key={index}>
-                {tag.trim() && (
-                  <span
-                    key={index}
-                    className="rounded border border-gray-300 bg-gray-200 px-3 py-2 text-gray-700 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300"
-                  >
-                    {tag}
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-          <input
-            className="focus:border-blue-500 rounded border px-3 py-2 text-gray-700 transition-colors focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:focus:border-blue-400"
-            placeholder={'tag1, tag2, tag3'}
-            type="text"
-            value={tags}
-            onChange={handleTagsChange}
-          />
+            <TagInput onChange={(t) => setTags(t)} selected={tags}/>
         </div>
 
         <div className="flex flex-col space-y-4">

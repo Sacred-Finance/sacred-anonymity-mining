@@ -11,6 +11,22 @@ module.exports = {
         protocol: 'https',
         hostname: 'ipfs.io',
       },
+      {
+        protocol: 'https',
+        hostname: 'raw.githubusercontent.com'
+      },
+      {
+        protocol: 'https',
+        hostname: 'assets.coingecko.com'
+      },
+      {
+        protocol: 'https',
+        hostname: 'cloudflare-ipfs.com'
+      },
+      {
+        protocol: 'https',
+        hostname: 'arweave.net'
+      }
     ],
     minimumCacheTTL: 60,
 
