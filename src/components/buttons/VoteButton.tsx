@@ -1,5 +1,3 @@
-import { DownVoteIcon, UpVoteIcon } from '@/constant/icons'
-import { CircularLoader } from '@components/JoinCommunityButton'
 import { PrimaryButton, PrimaryButtonProps } from '@components/buttons/PrimaryButton'
 import clsx from 'clsx'
 import { ReactNode } from 'react'
@@ -25,7 +23,7 @@ export const VoteUpButton = ({
     }}
     isConnected={props.isConnected}
     isJoined={props.isJoined}
-    variant={'minimal'}
+    variant={'link'}
   >
     <div className={'flex items-center gap-2 '}>
       <HandThumbUpIcon className={clsx('border-1 w-6 p-1 group-hover:fill-green-300')} stroke={'#a49f9f'} />
@@ -47,8 +45,7 @@ export const VoteDownButton = ({
     isConnected={props.isConnected}
     isJoined={props.isJoined}
     className={clsx(props.className)}
-    variant={'minimal'}
-
+    variant={'link'}
   >
     <div className={'flex items-center gap-2 '}>
       <HandThumbDownIcon className={clsx('border-1  w-6 p-1 group-hover:fill-red-300')} stroke={'#a49f9f'} />

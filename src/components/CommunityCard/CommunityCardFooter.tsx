@@ -1,13 +1,16 @@
-import { CircularLoader, JoinCommunityButton } from '../JoinCommunityButton'
-import React, { useState } from 'react'
+import React from 'react'
 import { useLocalCommunity } from './CommunityCard'
-import { LeaveCommunityButton } from '../LeaveCommunityButton'
 import { useUserIfJoined } from '@/contexts/CommunityProvider'
-import RemoveGroup from '../RemoveGroup'
 import { BookOpenIcon, UserIcon } from '@heroicons/react/20/solid'
 import Image from 'next/image'
 import { chainLogos, supportedChains } from '@/constant/const'
 import ToolTip from '@components/HOC/ToolTip'
+import { CardFooter } from '@/shad/ui/card'
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/shad/ui/hover-card'
+import { Button } from '@/shad/ui/button'
+import { InfoIcon } from '@components/CommunityActionTabs'
+import { CommunityCardBody } from '@components/CommunityCard/CommunityCardBody'
+import { LeaveJoinCommunityButton } from '@components/buttons/LeaveJoinCommunityButton'
 
 export const CommunityCardFooter = () => {
   const community = useLocalCommunity()
@@ -18,62 +21,38 @@ export const CommunityCardFooter = () => {
   if (!community) return null
 
   return (
-    <div className="flex h-10 items-center justify-between space-x-2 rounded-b-lg py-2 group-hover:z-10">
-      <RemoveGroup groupId={community.id} hidden={false} />
-
+    <CardFooter className={'flex justify-between'}>
       <div className="flex items-center gap-4 space-x-2 rounded">
-        <ToolTip tooltip={'# Users'}>
-          <p
-            className="flex items-center gap-1 rounded bg-gray-200 p-1 text-sm hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
-            title={'users'}
-          >
-            {userCount ?? 0} <UserIcon className="h-full w-4" />
-          </p>
+        <ToolTip tooltip={'# Users'} buttonProps={{ variant: 'outline', className: 'flex gap-2' }}>
+          {userCount ?? 0} <UserIcon className="h-full w-4" />
         </ToolTip>
-        <ToolTip tooltip={'posts'}>
-          <p className=" flex items-center gap-1 rounded bg-gray-200 p-1 text-sm hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600">
-            {posts.length}
-
-            <BookOpenIcon className="h-full w-4" />
-          </p>
+        <ToolTip tooltip={'posts'} buttonProps={{ variant: 'outline', className: 'flex gap-2' }}>
+          {posts.length}
+          <BookOpenIcon className="h-full w-4" />
         </ToolTip>
+        <HoverCard openDelay={500} closeDelay={250}>
+          <HoverCardTrigger asChild>
+            <Button variant="outline">
+              <InfoIcon />
+            </Button>
+          </HoverCardTrigger>
+          <HoverCardContent className="pointer-events-auto max-h-96 w-96 overflow-y-auto">
+            <div className="space-y-1">
+              <CommunityCardBody />
+              <span className="max-h-72 text-xs text-muted-foreground"> {community?.groupDetails?.description}</span>
+            </div>
+          </HoverCardContent>
+        </HoverCard>
 
-        <div className="flex items-center   rounded hover:bg-gray-300 dark:hover:bg-gray-600">
-          <Image
-            title={`chain ${community.chainId} ${supportedChains[community.chainId].name}`}
-            src={chainLogos[community.chainId]}
-            alt={'ChainLogo'}
-            width={35}
-            height={35}
-            className="rounded"
-          />
-        </div>
+        <ToolTip
+          tooltip={`chain ${community.chainId} ${supportedChains?.[community?.chainId]?.name}`}
+          buttonProps={{ variant: 'outline', className: 'flex gap-2' }}
+        >
+          <Image src={chainLogos[community.chainId]} alt={'ChainLogo'} width={35} height={35} className="rounded" />
+        </ToolTip>
       </div>
 
-      {community ? (
-        <React.Fragment>
-          {hasUserJoined ? (
-            <LeaveCommunityButton community={community} />
-          ) : (
-            <React.Fragment>
-              {hasUserJoined == null ? (
-                <CircularLoader />
-              ) : (
-                <JoinCommunityButton community={community} hideIfJoined={community.variant === 'banner'} />
-              )}
-            </React.Fragment>
-          )}
-        </React.Fragment>
-      ) : (
-        <svg className="h-5 w-5 animate-spin text-blue-600 dark:text-blue-400" viewBox="0 0 24 24">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-          <path
-            className="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-          />
-        </svg>
-      )}
-    </div>
+      <LeaveJoinCommunityButton community={community} hasUserJoined={hasUserJoined} />
+    </CardFooter>
   )
 }

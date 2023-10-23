@@ -2,12 +2,11 @@ import React from 'react'
 import { useLocalCommunity } from './CommunityCard'
 import clsx from 'clsx'
 import mobileLogo from '../../../public/logo.svg'
-import { MobileLogo } from '@components/Logo'
 import Image from 'next/image'
 import { User } from '@/lib/model'
 import { Group } from '@/types/contract/ForumInterface'
 import { useValidatedImage } from '@components/CommunityCard/UseValidatedImage'
-
+import { Avatar, AvatarFallback, AvatarImage } from '@/shad/ui/avatar'
 
 interface CommunityCardHeaderProps {
   isOwner?: boolean
@@ -18,21 +17,12 @@ export function CommunityLogo({ logoClasses }: { logoClasses?: string }) {
   const classes = clsx(logoClasses, 'relative !w-24 !h-24 rounded-full', community.showBackground ? 'opacity-0' : '')
 
   const logoSrc = useValidatedImage(community?.groupDetails?.logoCID)
+  console.log('logoSrc', logoSrc)
   return (
-    <div className={'rounded '}>
-      {logoSrc ? (
-        <Image
-          className={classes}
-          src={logoSrc ?? mobileLogo}
-          alt={'community logo'}
-          width={100}
-          height={100}
-          unoptimized
-        />
-      ) : (
-        <MobileLogo className={classes} />
-      )}
-    </div>
+    <Avatar>
+      <AvatarImage className={classes} src={mobileLogo} />
+      <AvatarFallback>CN</AvatarFallback>
+    </Avatar>
   )
 }
 
@@ -74,7 +64,7 @@ export function CommunityBanner(props: CommunityBannerParams) {
       ) : (
         <div
           className={clsx(
-            'col-span-full flex h-36 w-full items-center justify-center rounded-t bg-primary-500 text-xl font-semibold text-white',
+            'bg-primary-500 col-span-full flex h-36 w-full items-center justify-center rounded-t text-xl font-semibold text-white',
             props?.c?.banner
           )}
         >

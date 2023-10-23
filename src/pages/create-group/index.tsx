@@ -132,7 +132,7 @@ function CreateGroupFormUI({ onCreate }) {
   return (
     <div
       className={clsx(
-        'w-full max-w-screen-xl space-y-6 rounded-lg text-primary-600 shadow dark:bg-gray-900 dark:text-gray-200 sm:p-8 md:p-12 '
+        'text-primary-600 w-full max-w-screen-xl space-y-6 rounded-lg shadow dark:bg-gray-900 dark:text-gray-200 sm:p-8 md:p-12 '
       )}
     >
       <div className="flex items-center justify-between py-4">
@@ -142,7 +142,7 @@ function CreateGroupFormUI({ onCreate }) {
       <div className="flex flex-col space-y-4">
         <label className="text-lg ">{t('placeholder.communityName')}</label>
         <input
-          className="form-input rounded border border-gray-400 px-3 py-2 focus:border-primary-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+          className="form-input focus:border-primary-500 rounded border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
           placeholder={'An awesome community name'}
           type="text"
           value={groupName}
@@ -151,125 +151,131 @@ function CreateGroupFormUI({ onCreate }) {
       </div>
       <div className="flex flex-col space-y-4">
         <label className="text-lg">{t('placeholder.communityTags')}</label>
-        <TagInput onChange={(t) => setTags(t)} selected={tags}/>
-      </div>
-      <div className="flex flex-col space-y-4">
-        <label className="text-lg ">{t('placeholder.communityDescription')}</label>
-        <textarea
-          className="h-20 rounded border border-gray-400 px-3 py-2 focus:border-primary-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
-          placeholder={t('placeholder.communityDescriptionContent') || ''}
-          value={groupDescription}
-          onChange={handleDescriptionChange}
-        />
-      </div>
-
-      <div className={'flex items-start gap-4 dark:text-primary-500 '}>
-        <PictureUpload
-          uploadedImageUrl={bannerUrl}
-          displayName={t('banner')}
-          name={'banner'}
-          setImageFileState={handleSetImage}
-        />
-        <PictureUpload
-          uploadedImageUrl={logoUrl}
-          displayName={t('logo')}
-          name={'logo'}
-          setImageFileState={handleSetImage}
-        />
-      </div>
-
-      <div className="flex items-center justify-between space-x-4">
-        <div className="flex items-center space-x-4">
-          <ToolTip tooltip={t('toolTip.tokenGating.message') || ''}>
-            <QuestionMarkCircleIcon className="h-6 w-6" />
-          </ToolTip>
-
-          <label htmlFor={'isChecked'} className="text-lg font-semibold">
-            {t('toolTip.tokenGating.title')}
-          </label>
-
-          <input
-            type="checkbox"
-            id="isChecked"
-            className="h-6 w-6 rounded border-2 border-primary-500 text-primary-500 focus:ring-0"
-            checked={reqMandatory}
-            onChange={e => {
-              setReqMandatory(e.target.checked)
-              if (!e.target.checked) {
-                formik.setFieldValue('tokenRequirements', [])
-              } else {
-                formik.setFieldValue('tokenRequirements', [initialValues])
-              }
-            }}
+        <TagInput onChange={t => setTags(t)} selected={tags} />
+        <div className="flex flex-col space-y-4">
+          <label className="text-lg ">{t('placeholder.communityDescription')}</label>
+          <textarea
+            className="focus:border-primary-500 h-20 rounded border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+            placeholder={t('placeholder.communityDescriptionContent') || ''}
+            value={groupDescription}
+            onChange={handleDescriptionChange}
           />
         </div>
 
-        <div className="relative inline-flex w-[300px] items-center gap-4">
-          <div className="group relative w-60">
-            <Dropdown
-              options={supportedChainsArray.map(c => ({key: c.name, value: c}))}
-              selected={{key: selectedChain.name, value: selectedChain}}
-              onSelect={(v) => {
-                selectChain(v)
-                formik.setFieldValue('tokenRequirements', [initialValues])
-                if (!reqMandatory) setReqMandatory(true)
+        <div className={'dark:text-primary-500 flex items-start gap-4 '}>
+          <PictureUpload
+            uploadedImageUrl={bannerUrl}
+            displayName={t('banner')}
+            name={'banner'}
+            setImageFileState={handleSetImage}
+          />
+          <PictureUpload
+            uploadedImageUrl={logoUrl}
+            displayName={t('logo')}
+            name={'logo'}
+            setImageFileState={handleSetImage}
+          />
+        </div>
+
+        <div className="flex items-center justify-between space-x-4">
+          <div className="flex items-center space-x-4">
+            <ToolTip
+              tooltip={t('toolTip.tokenGating.message') || ''}
+              buttonProps={{ variant: 'secondary', className: 'flex gap-4' }}
+            >
+              <QuestionMarkCircleIcon className="h-6 w-6" />
+            </ToolTip>
+
+            <label htmlFor={'isChecked'} className="text-lg font-semibold">
+              {t('toolTip.tokenGating.title')}
+            </label>
+
+            <input
+              type="checkbox"
+              id="isChecked"
+              className="border-primary-500 text-primary-500 h-6 w-6 rounded border-2 focus:ring-0"
+              checked={reqMandatory}
+              onChange={e => {
+                setReqMandatory(e.target.checked)
+                if (!e.target.checked) {
+                  formik.setFieldValue('tokenRequirements', [])
+                } else {
+                  formik.setFieldValue('tokenRequirements', [initialValues])
+                }
               }}
-              disabled={!reqMandatory}
             />
           </div>
 
-          <button
-            className={clsx('flex aspect-1 h-10 w-10 items-center justify-center border p-3 text-xl')}
-            onClick={addReq}
-          >
-            +
-          </button>
+          <div className="relative inline-flex w-[300px] items-center gap-4">
+            <div className="group relative w-60">
+              <Dropdown
+                options={supportedChainsArray.map(c => ({ key: c.name, value: c }))}
+                selected={{ key: selectedChain.name, value: selectedChain }}
+                onSelect={v => {
+                  selectChain(v)
+                  formik.setFieldValue('tokenRequirements', [initialValues])
+                  if (!reqMandatory) setReqMandatory(true)
+                }}
+                disabled={!reqMandatory}
+              />
+            </div>
+
+            <button
+              className={clsx('aspect-1 flex h-10 w-10 items-center justify-center border p-3 text-xl')}
+              onClick={addReq}
+            >
+              +
+            </button>
+          </div>
         </div>
-      </div>
-      <hr className="" />
-      <FormikProvider value={formik}>
-        <AnimatePresence>
-          <motion.form onSubmit={submit}>
-            {formik.values.tokenRequirements.length === 0 && (
-              <div className="flex flex-col items-center justify-center space-y-4 rounded border border-gray-200 bg-gray-100 p-4">
-                <p className="text-sm font-semibold ">{t('placeholder.noTokenRequirements')}</p>
-              </div>
-            )}
+        <hr className="" />
+        <FormikProvider value={formik}>
+          <AnimatePresence>
+            <motion.form onSubmit={submit}>
+              {formik.values.tokenRequirements.length === 0 && (
+                <div className="flex flex-col items-center justify-center space-y-4 rounded border border-gray-200 bg-gray-100 p-4">
+                  <p className="text-sm font-semibold ">{t('placeholder.noTokenRequirements')}</p>
+                </div>
+              )}
 
-            <FieldArray
-              name="tokenRequirements"
-              render={({ remove }) => (
-                <div className="flex flex-col justify-center space-y-4 pb-2">
-                  {formik.values.tokenRequirements.map((r, i, arr) => (
-                    <motion.div
-                      key={i}
-                      layout
-                      className="flex items-center space-x-4 h-auto"
-                      initial={{ opacity: 0, y: 20, overflowY: 'visible' }}
-                      animate={{ opacity: 1, y: 0, overflowY: 'hidden' }}
-                      exit={{ opacity: 0, y: 20, overflowY: 'hidden' }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      <p className="font-bold ">{i + 1}.</p>
-                      <div className="flex w-[400px]">
-                        <SelectToken chainId={selectedChain.id} selectedToken={r?.token} onTokenSelect={(address, symbol, decimals) => onTokenSelect(i, address, symbol, decimals)}/>
-                      </div>
+              <FieldArray
+                name="tokenRequirements"
+                render={({ remove }) => (
+                  <div className="flex flex-col justify-center space-y-4 pb-2">
+                    {formik.values.tokenRequirements.map((r, i, arr) => (
+                      <motion.div
+                        key={i}
+                        layout
+                        className="flex h-auto items-center space-x-4"
+                        initial={{ opacity: 0, y: 20, overflowY: 'visible' }}
+                        animate={{ opacity: 1, y: 0, overflowY: 'hidden' }}
+                        exit={{ opacity: 0, y: 20, overflowY: 'hidden' }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        <p className="font-bold ">{i + 1}.</p>
+                        <div className="flex w-[400px]">
+                          <SelectToken
+                            chainId={selectedChain.id}
+                            selectedToken={r?.token}
+                            onTokenSelect={(address, symbol, decimals) => onTokenSelect(i, address, symbol, decimals)}
+                          />
+                        </div>
 
-                      <div className="w-32">
-                        <input
-                          disabled={!reqMandatory}
-                          className=" w-full  rounded border border-gray-400 focus:border-primary-500 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
-                          type="number"
-                          min={0}
-                          defaultValue={r.minAmount}
-                          value={r.minAmount}
-                          onChange={formik.handleChange}
-                          name={`tokenRequirements.${i}.minAmount`}
-                          placeholder={t('placeholder.minAmount')}
-                        />
-                      </div>
+                        <div className="w-32">
+                          <input
+                            disabled={!reqMandatory}
+                            className=" focus:border-primary-500  w-full rounded border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+                            type="number"
+                            min={0}
+                            defaultValue={r.minAmount}
+                            value={r.minAmount}
+                            onChange={formik.handleChange}
+                            name={`tokenRequirements.${i}.minAmount`}
+                            placeholder={t('placeholder.minAmount')}
+                          />
+                        </div>
 
-                      {/* <div className="w-32">
+                        {/* <div className="w-32">
                         <input
                           disabled={!reqMandatory}
                           className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
@@ -283,43 +289,44 @@ function CreateGroupFormUI({ onCreate }) {
                         />
                       </div> */}
 
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (arr.length > 1) {
-                            remove(i)
-                          } else {
-                            setReqMandatory(false)
-                            remove(i)
-                          }
-                        }}
-                        className="border-red-500 flex aspect-1 h-11 w-11 items-center justify-center rounded border text-red-500 transition-colors hover:bg-red-500 hover:text-white focus:outline-none"
-                      >
-                        <RemoveIcon />
-                      </button>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-            />
-          </motion.form>
-        </AnimatePresence>
-      </FormikProvider>
-      <div className={'flex flex-col justify-between space-x-0 py-2 md:flex-row md:space-x-2 md:py-4'}>
-        <Link
-          href="/"
-          className="rounded border-2 border-red-400 p-2 text-red-500 hover:bg-red-500 hover:text-white md:px-4"
-        >
-          Close
-        </Link>
-        <PrimaryButton
-          className={clsx(buttonVariants.primarySolid, 'border')}
-          disabled={isSubmitDisabled || isSubmitting}
-          onClick={submit}
-          isLoading={isSubmitting}
-        >
-          {t('button.create')}
-        </PrimaryButton>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (arr.length > 1) {
+                              remove(i)
+                            } else {
+                              setReqMandatory(false)
+                              remove(i)
+                            }
+                          }}
+                          className="aspect-1 flex h-11 w-11 items-center justify-center rounded border border-red-500 text-red-500 transition-colors hover:bg-red-500 hover:text-white focus:outline-none"
+                        >
+                          <RemoveIcon />
+                        </button>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+              />
+            </motion.form>
+          </AnimatePresence>
+        </FormikProvider>
+        <div className={'flex flex-col justify-between space-x-0 py-2 md:flex-row md:space-x-2 md:py-4'}>
+          <Link
+            href="/"
+            className="rounded border-2 border-red-400 p-2 text-red-500 hover:bg-red-500 hover:text-white md:px-4"
+          >
+            Close
+          </Link>
+          <PrimaryButton
+            className={clsx(buttonVariants.primarySolid, 'border')}
+            disabled={isSubmitDisabled || isSubmitting}
+            onClick={submit}
+            isLoading={isSubmitting}
+          >
+            {t('button.create')}
+          </PrimaryButton>
+        </div>
       </div>
     </div>
   )

@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react'
-import { Post } from '@/lib/post'
 import LoadingPage from '@components/LoadingComponent'
 import { CommunityPage } from '@components/CommunityPage'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
@@ -25,7 +24,7 @@ function Group() {
       })
       dispatch({
         type: 'SET_USERS',
-        payload: data?.users
+        payload: data?.users,
       })
     }
   }, [data?.group, data?.posts, data?.users, isValidating])
@@ -36,8 +35,7 @@ function Group() {
 
   group.id = ethers.BigNumber.from(group.id)
 
-
-  return <CommunityPage community={group} posts={posts}  />
+  return <CommunityPage community={group} posts={posts} />
 }
 
 export default Group

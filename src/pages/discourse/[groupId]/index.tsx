@@ -4,8 +4,7 @@ import { TopicList } from '@/components/Discourse/types'
 import axios from 'axios'
 import { useRouter } from 'next/router'
 import { useFetchMetadata } from '@/hooks/discourse/useFetchMetadata'
-import { CircularLoader } from '@/components/JoinCommunityButton'
-import _ from 'lodash'
+import { CircularLoader } from '@components/buttons/JoinCommunityButton'
 
 export const DiscourseCommunityBanner = (loading, community) => (
   <div className="mx-0 my-4 w-auto rounded-lg border border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-800">
@@ -15,7 +14,7 @@ export const DiscourseCommunityBanner = (loading, community) => (
       <div className="relative">
         {Boolean(+community?.readonly) && (
           <div className="absolute right-0 mt-2 flex">
-            <span className="border-gray-500 border-r-1 ml-auto mr-2 rounded border bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-400">
+            <span className="border-r-1 ml-auto mr-2 rounded border border-gray-500 bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-400">
               Readonly
             </span>
           </div>
@@ -51,15 +50,13 @@ const Index = () => {
   return (
     <>
       {DiscourseCommunityBanner(loading, community)}
-      <div className='flex flex-wrap gap-4 xs:justify-center md:justify-start'>
+      <div className="xs:justify-center flex flex-wrap gap-4 md:justify-start">
         {topicList?.topics?.map(topic => (
           <TopicCommunityCard key={topic.id} topic={topic} variant={'default'} />
         ))}
       </div>
-
     </>
   )
 }
 
 export default Index
-
