@@ -1,10 +1,9 @@
 import { DiscourseCommunity } from '@/lib/model'
-import { useEffect, useState } from 'react'
-import axios from 'axios'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useFetchMetadata } from '@/hooks/discourse/useFetchMetadata'
-import { CircularLoader } from '../JoinCommunityButton'
+import { CircularLoader } from '../buttons/JoinCommunityButton'
+
 const Community = ({ apiKey, username, endpoint, id, readonly }: DiscourseCommunity) => {
   const router = useRouter()
   const { groupId } = router.query
@@ -18,10 +17,10 @@ const Community = ({ apiKey, username, endpoint, id, readonly }: DiscourseCommun
         ) : (
           <>
             <div className="max-w-sm rounded-lg border border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-800">
-              <div className='relative'>
+              <div className="relative">
                 {Boolean(+readonly) && (
-                  <div className="absolute mt-1 flex right-0">
-                    <span className="border-gray-500 border-r-1 ml-auto mr-1 rounded border bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-400">
+                  <div className="absolute right-0 mt-1 flex">
+                    <span className="border-r-1 ml-auto mr-1 rounded border border-gray-500 bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-400">
                       Readonly
                     </span>
                   </div>

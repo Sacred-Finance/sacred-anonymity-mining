@@ -3,7 +3,7 @@ import { useUserIfJoined } from '@/contexts/CommunityProvider'
 import { useUnirepSignUp } from '@/hooks/useUnirepSignup'
 import { User } from '@/lib/model'
 import { useRouter } from 'next/router'
-import { CircularLoader } from '@components/JoinCommunityButton'
+import { CircularLoader } from '@components/buttons/JoinCommunityButton'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { AnimatePresence, motion } from 'framer-motion'
 
@@ -123,12 +123,17 @@ const TextComponent = () => {
 
   return (
     <AnimatePresence>
-      <motion.div initial="hidden" animate="visible" variants={containerVariants} className={'-mx-4 -mb-4 -z-2 text-white px-4  bg-gray-900 rounded-sm'}>
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+        className={'-z-2 -mx-4 -mb-4 rounded-sm bg-gray-900  px-4 text-white'}
+      >
         <div className="justify-center text-center">
           <motion.h1 variants={titleVariants} className="text-3xl font-semibold ">
             What is reputation?
           </motion.h1>
-          <div >
+          <div>
             <motion.p variants={paragraphVariants} className="text-start text-lg">
               Unirep is your ticket to a more secure and private online experience. Imagine proving your reputation
               without sacrificing your identity.

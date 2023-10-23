@@ -11,6 +11,9 @@ import { debounce } from 'lodash'
 import { OutputData } from '@editorjs/editorjs'
 import { Group, Item } from '@/types/contract/ForumInterface'
 import { useAccount } from 'wagmi'
+import { ScrollArea } from '@/shad/ui/scroll-area'
+import { Button } from '@/shad/ui/button'
+
 const Editor = dynamic(() => import('./editor-js/Editor'), {
   ssr: false,
 })
@@ -103,14 +106,7 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
   }
   return (
     <>
-      <PrimaryButton
-        className={clsx(
-          'w-fit',
-          'border-gray-500 border text-sm text-gray-500 transition-colors duration-150 hover:bg-gray-500 hover:text-white'
-        )}
-        type="button"
-        onClick={() => setShowModal(true)}
-      >
+      <PrimaryButton type="button" onClick={() => setShowModal(true)}>
         Create Poll
       </PrimaryButton>
       {showModal ? (
@@ -122,14 +118,14 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
                 {/*header*/}
                 <div className="flex items-start justify-between rounded-t border-b border-solid border-slate-200 p-5">
                   <h3 className="text-3xl font-semibold">Create Poll</h3>
-                  <button
+                  <Button
                     className="float-right  border-0 bg-transparent p-1 text-3xl font-semibold leading-none text-black opacity-5 outline-none focus:outline-none"
                     onClick={() => setShowModal(false)}
                   >
                     <span className="block h-6 w-6 bg-transparent text-2xl text-black opacity-5 outline-none focus:outline-none">
                       ×
                     </span>
-                  </button>
+                  </Button>
                 </div>
                 {/*body*/}
                 <div className="relative flex flex-col gap-4 p-6">
@@ -138,7 +134,7 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
                     {pollTypes.map((i, index) => (
                       <div key={index} className="flex gap-2">
                         <input
-                          className="checked:border-primary checked:after:border-primary checked:after:bg-primary checked:focus:border-primary dark:checked:border-primary dark:checked:after:border-primary dark:checked:after:bg-primary dark:checked:focus:border-primary relative float-left  h-5 w-5 appearance-none rounded-full border-2 border-solid border-neutral-300 before:pointer-events-none before:absolute before:h-4 before:w-4 before:scale-0 before:rounded-full before:bg-transparent before:opacity-0 before:shadow-[0px_0px_0px_13px_transparent] before:content-[''] after:absolute after:z-[1] after:block after:h-4 after:w-4 after:rounded-full after:content-[''] checked:before:opacity-[0.16] checked:after:absolute checked:after:left-1/2 checked:after:top-1/2 checked:after:h-[0.625rem] checked:after:w-[0.625rem] checked:after:rounded-full checked:after:content-[''] checked:after:[transform:translate(-50%,-50%)] hover:cursor-pointer hover:before:opacity-[0.04] hover:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:shadow-none focus:outline-none focus:ring-0 focus:before:scale-100 focus:before:opacity-[0.12] focus:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:before:transition-[box-shadow_0.2s,transform_0.2s] checked:focus:before:scale-100 checked:focus:before:shadow-[0px_0px_0px_13px_#3b71ca] checked:focus:before:transition-[box-shadow_0.2s,transform_0.2s] dark:border-neutral-600 dark:focus:before:shadow-[0px_0px_0px_13px_rgba(255,255,255,0.4)] dark:checked:focus:before:shadow-[0px_0px_0px_13px_#3b71ca]"
+                          className="relative float-left h-5 w-5 appearance-none rounded-full border-2 border-solid border-neutral-300 before:pointer-events-none  before:absolute before:h-4 before:w-4 before:scale-0 before:rounded-full before:bg-transparent before:opacity-0 before:shadow-[0px_0px_0px_13px_transparent] before:content-[''] after:absolute after:z-[1] after:block after:h-4 after:w-4 after:rounded-full after:content-[''] checked:border-primary checked:before:opacity-[0.16] checked:after:absolute checked:after:left-1/2 checked:after:top-1/2 checked:after:h-[0.625rem] checked:after:w-[0.625rem] checked:after:rounded-full checked:after:border-primary checked:after:bg-primary checked:after:content-[''] checked:after:[transform:translate(-50%,-50%)] hover:cursor-pointer hover:before:opacity-[0.04] hover:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:shadow-none focus:outline-none focus:ring-0 focus:before:scale-100 focus:before:opacity-[0.12] focus:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:before:transition-[box-shadow_0.2s,transform_0.2s] checked:focus:border-primary checked:focus:before:scale-100 checked:focus:before:shadow-[0px_0px_0px_13px_#3b71ca] checked:focus:before:transition-[box-shadow_0.2s,transform_0.2s] dark:border-neutral-600 dark:checked:border-primary dark:checked:after:border-primary dark:checked:after:bg-primary dark:focus:before:shadow-[0px_0px_0px_13px_rgba(255,255,255,0.4)] dark:checked:focus:border-primary dark:checked:focus:before:shadow-[0px_0px_0px_13px_#3b71ca]"
                           type="radio"
                           name={`POLL_TYPE`}
                           checked={i.value === pollType}
@@ -171,7 +167,7 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
                     />
                   </div>
 
-                  <div className="flex max-h-[calc(35vh)] w-full flex-col gap-2 overflow-y-scroll">
+                  <ScrollArea className="flex max-h-[calc(35vh)] w-full flex-col gap-2 ">
                     <label htmlFor={'content'} className="text-md">
                       Content
                     </label>
@@ -188,7 +184,7 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
                       placeholder={'Poll Description'}
                       holder={`create-poll`}
                     />
-                  </div>
+                  </ScrollArea>
 
                   {/* Rate Scale */}
                   {pollType == PollType.NUMERIC_RATING && (
@@ -242,7 +238,7 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
                               setOptions(newOptions)
                             }}
                             disabled={options.length <= 2}
-                            className="border-pink-500 rounded border  px-2 py-2 text-xs font-bold uppercase text-red-500 outline-none transition-all duration-150 ease-linear hover:bg-red-500 hover:text-white focus:outline-none active:bg-red-600 disabled:cursor-not-allowed disabled:opacity-25"
+                            className="rounded border border-pink-500  px-2 py-2 text-xs font-bold uppercase text-red-500 outline-none transition-all duration-150 ease-linear hover:bg-red-500 hover:text-white focus:outline-none active:bg-red-600 disabled:cursor-not-allowed disabled:opacity-25"
                             type="button"
                           >
                             <TrashIcon width={20} />
@@ -256,7 +252,7 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
                             }}
                             disabled={options.length >= 10 || index !== options.length - 1}
                             className={clsx(
-                              'border-pink-500 mr-1 rounded border px-2 py-2 text-xs font-bold uppercase text-gray-500 outline-none transition-all duration-150 ease-linear last:mr-0 hover:bg-gray-500 hover:text-white focus:outline-none active:bg-gray-600',
+                              'mr-1 rounded border border-pink-500 px-2 py-2 text-xs font-bold uppercase text-gray-500 outline-none transition-all duration-150 ease-linear last:mr-0 hover:bg-gray-500 hover:text-white focus:outline-none active:bg-gray-600',
                               options.length >= 10 || index !== options.length - 1
                                 ? 'hidden'
                                 : 'bg-green-500/90 text-white'

@@ -1,6 +1,6 @@
 import '@styles/style.scss'
 import type { AppProps } from 'next/app'
-import { ThemeProvider, useTheme } from 'next-themes'
+import { ThemeProvider } from 'next-themes'
 import { app } from '@/appConfig'
 import { useEffect, useRef } from 'react'
 import HeadGlobal from '@/components/HeadGlobal'
@@ -9,7 +9,7 @@ import { alchemyProvider } from 'wagmi/providers/alchemy'
 
 import { connectorsForWallets, darkTheme, RainbowKitProvider, Theme } from '@rainbow-me/rainbowkit'
 import { braveWallet, coinbaseWallet, injectedWallet, metaMaskWallet } from '@rainbow-me/rainbowkit/wallets'
-import { avalancheFuji, goerli, localhost, mainnet, polygonMumbai, sepolia } from 'wagmi/chains'
+import { goerli, localhost, mainnet, polygonMumbai, sepolia } from 'wagmi/chains'
 import { configureChains, createClient, WagmiConfig } from 'wagmi'
 import { publicProvider } from 'wagmi/providers/public'
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc'
@@ -25,24 +25,24 @@ import { merge } from 'lodash'
 function App({ Component, pageProps }: AppProps) {
   return (
     <ThemeProvider attribute={'class'} defaultTheme={'dark'} storageKey={'theme-color'}>
-        <Web3Wrapper>
-          <HeadGlobal />
-          <SWRConfig
-            value={{
-              revalidateOnFocus: false,
-              revalidateOnReconnect: false,
-              fetcher: (resource, init) =>
-                fetch(resource, init).then(res => {
-                  return res.json()
-                }),
-            }}
-          >
-            <StandardLayout>
-              <Component {...pageProps} />
-              <ToastContainer />
-            </StandardLayout>
-          </SWRConfig>
-        </Web3Wrapper>
+      <Web3Wrapper>
+        <HeadGlobal />
+        <SWRConfig
+          value={{
+            revalidateOnFocus: false,
+            revalidateOnReconnect: false,
+            fetcher: (resource, init) =>
+              fetch(resource, init).then(res => {
+                return res.json()
+              }),
+          }}
+        >
+          <StandardLayout>
+            <Component {...pageProps} />
+            <ToastContainer />
+          </StandardLayout>
+        </SWRConfig>
+      </Web3Wrapper>
     </ThemeProvider>
   )
 }
@@ -136,7 +136,6 @@ const myTheme = merge(darkTheme(), {
 
 // Web3Wrapper
 export function Web3Wrapper({ children }) {
-
   const didLoadRef = useRef(false)
   useEffect(() => {
     if (didLoadRef.current === false) {
