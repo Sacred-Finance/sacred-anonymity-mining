@@ -16,6 +16,7 @@ import CreatePollUI from './CreatePollUI'
 import { useContentManagement } from '@/hooks/useContentManagement'
 import { NewPostModal } from '@components/Post/PostComments'
 import LoadingComponent from '@components/LoadingComponent'
+import ReputationCard from './ReputationCard'
 
 export function CommunityPage({ community, posts }: { community: Group; posts?: Item[] }) {
   const groupId = community.id.toString()
@@ -29,19 +30,24 @@ export function CommunityPage({ community, posts }: { community: Group; posts?: 
   if (!community || !community?.id) return <LoadingComponent />
 
   return (
-    <div className="relative mt-6 flex min-h-screen gap-6 rounded-lg  p-6 transition-colors ">
-      <div className="sticky top-0 flex w-full flex-col gap-6">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <h2 className="text-2xl font-semibold tracking-tight">{community.name}</h2>
-            <p className="text-sm text-muted-foreground">{community.groupDetails.description}</p>
+    <div>
+      <div className='ml-6'>
+        <ReputationCard />
+      </div>
+      <div className="relative flex min-h-screen gap-6 rounded-lg  p-6 transition-colors ">
+        <div className="sticky top-0 flex w-full flex-col gap-6">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <h2 className="text-2xl font-semibold tracking-tight">{community.name}</h2>
+              <p className="text-sm text-muted-foreground">{community.groupDetails.description}</p>
+            </div>
           </div>
+          <div className="flex w-fit gap-4 rounded-lg ">
+            <CreatePollUI group={community} />
+            <CreatePostUI group={community} />
+          </div>
+          <PostList posts={sortedData} />
         </div>
-        <div className="flex w-fit gap-4 rounded-lg ">
-          <CreatePollUI group={community} />
-          <CreatePostUI group={community} />
-        </div>
-        <PostList posts={sortedData} />
       </div>
     </div>
   )

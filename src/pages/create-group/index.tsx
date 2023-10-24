@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { ethers, utils } from 'ethers'
-import { erc20dummyABI, getRpcProvider, supportedChains, supportedChainsArray } from '@/constant/const'
+import { chainLogos, supportedChains, supportedChainsArray } from '@/constant/const'
 import { FieldArray, FormikProvider, useFormik } from 'formik'
 import { Chain } from 'wagmi'
 import ToolTip from '@components/HOC/ToolTip'
@@ -209,8 +209,8 @@ function CreateGroupFormUI({ onCreate }) {
           <div className="relative inline-flex w-[300px] items-center gap-4">
             <div className="group relative w-60">
               <Dropdown
-                options={supportedChainsArray.map(c => ({ key: c.name, value: c }))}
-                selected={{ key: selectedChain.name, value: selectedChain }}
+                options={supportedChainsArray.map(c => ({ key: c.name, value: c, image: chainLogos[c.id] }))}
+                selected={{ key: selectedChain.name, value: selectedChain, image: chainLogos[selectedChain.id] }}
                 onSelect={v => {
                   selectChain(v)
                   formik.setFieldValue('tokenRequirements', [initialValues])
@@ -275,19 +275,7 @@ function CreateGroupFormUI({ onCreate }) {
                           />
                         </div>
 
-                        {/* <div className="w-32">
-                        <input
-                          disabled={!reqMandatory}
-                          className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none"
-                          type="number"
-                          min={0}
-                          defaultValue={r.maxAmount}
-                          value={r.maxAmount}
-                          onChange={formik.handleChange}
-                          name={`tokenRequirements.${i}.maxAmount`}
-                          placeholder={t('placeholder.maxAmount')}
-                        />
-                      </div> */}
+                        
 
                         <button
                           type="button"

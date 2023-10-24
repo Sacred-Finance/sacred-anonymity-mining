@@ -43,6 +43,7 @@ import { mutate } from 'swr'
 import { getGroupWithPostAndCommentData } from '@/lib/fetcher'
 import { emptyPollRequest } from '@/lib/item'
 import { ScrollArea } from '@/shad/ui/scroll-area'
+import ReputationCard from '../ReputationCard'
 
 export function PostPage({
   comments,
@@ -86,108 +87,113 @@ export function PostPage({
   }
 
   return (
-    <div className="flex w-full flex-col bg-gray-100 transition-colors dark:bg-gray-800">
-      <div className="flex-1 overflow-hidden">
-        <div className="flex h-full flex-col md:flex-row">
-          <div className=" flex flex-col gap-4 p-3 md:w-1/2">
-            <div className="sticky top-0 z-10 flex gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
-              <VoteForItemUI post={post} group={community} />
-              <SummaryButton postData={OutputDataToHTML(post?.description)} postTitle={post.title} />
+    <>
+      <div className="mb-6">
+        <ReputationCard />
+      </div>
+      <div className="flex w-full flex-col bg-gray-100 transition-colors dark:bg-gray-800">
+        <div className="flex-1 overflow-hidden">
+          <div className="flex h-full flex-col md:flex-row">
+            <div className=" flex flex-col gap-4 p-3 md:w-1/2">
+              <div className="sticky top-0 z-10 flex gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
+                <VoteForItemUI post={post} group={community} />
+                <SummaryButton postData={OutputDataToHTML(post?.description)} postTitle={post.title} />
+              </div>
+              <ScrollArea className=" max-h-[calc(90vh - 200px)] col-span-12 flex   w-full  flex-col gap-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
+                <PostItem post={post} group={community} />
+              </ScrollArea>
             </div>
-            <ScrollArea className=" max-h-[calc(90vh - 200px)] col-span-12 flex   w-full  flex-col gap-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
-              <PostItem post={post} group={community} />
-            </ScrollArea>
-          </div>
 
-          <div className=" flex flex-col gap-4 overflow-y-scroll p-3 md:w-1/2">
-            <Tab.Group onChange={handleTabChange} defaultIndex={selectedTab} selectedIndex={selectedTab}>
-              <Tab.List className="sticky top-0 z-10 flex gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
-                {['Community Info', 'Polls', 'All Replies'].map((tooltip, index) => (
-                  <Tab
-                    className={({ selected }) =>
-                      `flex rounded p-2 text-white ${
-                        selected ? 'bg-primary-600 dark:bg-primary-800' : 'bg-primary-300 dark:bg-gray-800'
-                      }`
-                    }
-                    key={index}
-                  >
-                    {tooltip === 'Community Info' && (
-                      <ToolTip tooltip={tooltip} buttonProps={{ variant: 'link', className: 'flex gap-4' }}>
-                        <InfoIcon />
-                      </ToolTip>
-                    )}
-                    {tooltip === 'Polls' && (
-                      <ToolTip tooltip={tooltip} buttonProps={{ variant: 'link', className: 'flex gap-4' }}>
-                        <PollIcon className="h-5 w-5" />
-                      </ToolTip>
-                    )}
-                    {tooltip === 'All Replies' && (
-                      <ToolTip tooltip={tooltip} buttonProps={{ variant: 'link', className: 'flex gap-4' }}>
-                        <ChatIcon className="h-5 w-5" />
-                      </ToolTip>
-                    )}
-                  </Tab>
-                ))}
-              </Tab.List>
-              {(selectedTab === 2 || selectedTab === 1) && (
-                <div className="sticky top-0 z-10 flex gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
-                  <div className={'flex gap-4'}>
-                    {selectedTab === 2 && <CreateCommentUI post={post} group={community} />}
-                    {(selectedTab === 1 || selectedTab === 2) && <CreatePollUI post={post} group={community} />}
-                  </div>
-                </div>
-              )}
-
-              <Tab.Panels
-                className={
-                  'scrollbar max-h-[calc(90vh - 200px)] col-span-12 flex w-full flex-col gap-4   rounded-xl  border bg-white p-3  dark:border-gray-700 dark:bg-gray-900  '
-                }
-              >
-                <Tab.Panel className="flex flex-col gap-4">
-                  <CommunityCard
-                    variant={'banner'}
-                    community={community}
-                    actions={[
-                      {
-                        label: 'Edit',
-                        icon: <PencilIcon className={'h-full w-4'} />,
-                        onClick: () => router.push(`/communities/${community?.groupId}/edit`),
-                      },
-                    ]}
-                  />
-                </Tab.Panel>
-                <Tab.Panel className="flex flex-col ">
-                  {!sortedCommentsData.length && (
-                    <div className="flex flex-col items-center justify-center gap-2">
-                      <div className="text-md">No Polls yet</div>
-                    </div>
-                  )}
-                  {sortedCommentsData
-                    .filter(comment => comment.kind == ContentType.POLL)
-                    .map(comment => (
-                      <PostComment comment={comment} key={comment.id} />
-                    ))}
-                </Tab.Panel>
-                <Tab.Panel className="flex flex-col gap-4 ">
-                  {sortedCommentsData.map(comment => (
-                    <>
-                      <PostComment comment={comment} key={comment.id} />
-
-                      <hr />
-                    </>
+            <div className=" flex flex-col gap-4 overflow-y-scroll p-3 md:w-1/2">
+              <Tab.Group onChange={handleTabChange} defaultIndex={selectedTab} selectedIndex={selectedTab}>
+                <Tab.List className="sticky top-0 z-10 flex gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
+                  {['Community Info', 'Polls', 'All Replies'].map((tooltip, index) => (
+                    <Tab
+                      className={({ selected }) =>
+                        `flex rounded p-2 text-white ${
+                          selected ? 'bg-primary-600 dark:bg-primary-800' : 'bg-primary-300 dark:bg-gray-800'
+                        }`
+                      }
+                      key={index}
+                    >
+                      {tooltip === 'Community Info' && (
+                        <ToolTip tooltip={tooltip} buttonProps={{ variant: 'link', className: 'flex gap-4' }}>
+                          <InfoIcon />
+                        </ToolTip>
+                      )}
+                      {tooltip === 'Polls' && (
+                        <ToolTip tooltip={tooltip} buttonProps={{ variant: 'link', className: 'flex gap-4' }}>
+                          <PollIcon className="h-5 w-5" />
+                        </ToolTip>
+                      )}
+                      {tooltip === 'All Replies' && (
+                        <ToolTip tooltip={tooltip} buttonProps={{ variant: 'link', className: 'flex gap-4' }}>
+                          <ChatIcon className="h-5 w-5" />
+                        </ToolTip>
+                      )}
+                    </Tab>
                   ))}
-                  {!sortedCommentsData.length && (
-                    <div className="flex flex-col items-center justify-center gap-2">
-                      <div className="text-md">No comments yet</div>
+                </Tab.List>
+                {(selectedTab === 2 || selectedTab === 1) && (
+                  <div className="sticky top-0 z-10 flex gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
+                    <div className={'flex gap-4'}>
+                      {selectedTab === 2 && <CreateCommentUI post={post} group={community} />}
+                      {(selectedTab === 1 || selectedTab === 2) && <CreatePollUI post={post} group={community} />}
                     </div>
-                  )}
-                </Tab.Panel>
-              </Tab.Panels>
-            </Tab.Group>
+                  </div>
+                )}
+
+                <Tab.Panels
+                  className={
+                    'scrollbar max-h-[calc(90vh - 200px)] col-span-12 flex w-full flex-col gap-4   rounded-xl  border bg-white p-3  dark:border-gray-700 dark:bg-gray-900  '
+                  }
+                >
+                  <Tab.Panel className="flex flex-col gap-4">
+                    <CommunityCard
+                      variant={'banner'}
+                      community={community}
+                      actions={[
+                        {
+                          label: 'Edit',
+                          icon: <PencilIcon className={'h-full w-4'} />,
+                          onClick: () => router.push(`/communities/${community?.groupId}/edit`),
+                        },
+                      ]}
+                    />
+                  </Tab.Panel>
+                  <Tab.Panel className="flex flex-col ">
+                    {!sortedCommentsData.length && (
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <div className="text-md">No Polls yet</div>
+                      </div>
+                    )}
+                    {sortedCommentsData
+                      .filter(comment => comment.kind == ContentType.POLL)
+                      .map(comment => (
+                        <PostComment comment={comment} key={comment.id} />
+                      ))}
+                  </Tab.Panel>
+                  <Tab.Panel className="flex flex-col gap-4 ">
+                    {sortedCommentsData.map(comment => (
+                      <>
+                        <PostComment comment={comment} key={comment.id} />
+
+                        <hr />
+                      </>
+                    ))}
+                    {!sortedCommentsData.length && (
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <div className="text-md">No comments yet</div>
+                      </div>
+                    )}
+                  </Tab.Panel>
+                </Tab.Panels>
+              </Tab.Group>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
 
