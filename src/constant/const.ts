@@ -4,7 +4,7 @@ import ForumABI from '../constant/abi/Forum.json'
 import { Forum } from '@/types/contract/Forum'
 import { SemaphoreEthers } from '@semaphore-protocol/data'
 
-export const mumbaiTestnetMaticContractAddress = `0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889`
+export const mumbaiTestnetMaticContractAddress = `0x0000000000000000000000000000000000001010`
 import { Address } from '@/types/common'
 
 export const SemaphoreContractAddress = process.env.NEXT_PUBLIC_SEMAPHORE_CONTRACT_ADDRESS as `0x${string}`
@@ -787,7 +787,7 @@ export const chainLogos: { [key: string]: string } = {
   [goerli.id]: '/goerli.png',
   [sepolia.id]: '/eth.png',
   [avalancheFuji.id]: '/avax.png',
-  [mainnet.id]: '/eth.svg',
+  [mainnet.id]: '/eth.png',
   [avalanche.id]: '/avax.png',
   [arbitrum.id]: '/arbitrum.png',
   [arbitrumGoerli.id]: '/arbitrum.png',

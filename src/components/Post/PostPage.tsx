@@ -43,6 +43,7 @@ import { mutate } from 'swr'
 import { getGroupWithPostAndCommentData } from '@/lib/fetcher'
 import { emptyPollRequest } from '@/lib/item'
 import { ScrollArea } from '@/shad/ui/scroll-area'
+import ReputationCard from '../ReputationCard'
 import AIDigestButton, { AIDigestContext } from '@components/buttons/AIPostDigestButton'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shad/ui/card'
 import EditorJsRenderer from '@components/editor-js/EditorJSRenderer'
@@ -114,6 +115,9 @@ export function PostPage({
         },
       }}
     >
+        <div className="mb-6">
+            <ReputationCard />
+        </div>
       <div className="flex w-full flex-col bg-gray-100 transition-colors dark:bg-gray-800">
         <div className="flex-1 overflow-hidden">
           <div className="flex h-full flex-col md:flex-row">
