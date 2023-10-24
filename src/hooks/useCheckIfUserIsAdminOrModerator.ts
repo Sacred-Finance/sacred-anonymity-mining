@@ -2,6 +2,7 @@ import { useContractRead } from 'wagmi'
 import { ForumContractAddress } from '../constant/const'
 import ForumABI from '../constant/abi/Forum.json'
 import { useState } from 'react'
+import {Address} from "@/types/common";
 
 export const useCheckIfUserIsAdminOrModerator = address => {
   const [isAdmin, setisAdmin] = useState<boolean | null>(null)
@@ -14,7 +15,7 @@ export const useCheckIfUserIsAdminOrModerator = address => {
     fetchStatus: isAdminFetchStatus,
   } = useContractRead({
     abi: ForumABI.abi,
-    address: ForumContractAddress as `0x${string}`,
+    address: ForumContractAddress as Address,
     functionName: 'isAdmin',
     args: [address],
     onError(err) {
@@ -33,7 +34,7 @@ export const useCheckIfUserIsAdminOrModerator = address => {
     fetchStatus: isModeratorFetchStatus,
   } = useContractRead({
     abi: ForumABI.abi,
-    address: ForumContractAddress as `0x${string}`,
+    address: ForumContractAddress as Address,
     functionName: 'isModerator',
     args: [address],
     onError(err) {

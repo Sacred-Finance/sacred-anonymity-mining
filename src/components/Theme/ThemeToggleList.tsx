@@ -59,20 +59,20 @@ export const ThemeToggleList = ({ noTabIndex = false }) => {
           />
         </Listbox.Button>
         <Listbox.Options as="div" ref={container}>
-          <ul className=" m-1 rounded-lg border border-slate-200/50 bg-slate-50/50 p-1.5 backdrop-blur dark:border-slate-800/50 dark:bg-slate-900/50">
+          <ul className=" rounded border border-slate-200/50 bg-slate-50/50 p-1.5 backdrop-blur dark:border-slate-800/50 dark:bg-slate-900/50">
             {settings.map(({ value, label, icon: Icon }) => (
               <Listbox.Option key={value} value={value} as={Fragment}>
                 {({ active, selected }) => (
                   <li
                     className={
-                      'flex cursor-pointer items-center rounded-md py-1 px-2' +
+                      'flex cursor-pointer items-center rounded py-1 px-2' +
                       (active ? ' bg-slate-200 dark:bg-slate-800' : '') +
                       (selected && value === 'light' ? ' text-red-500' : '') +
                       (selected && value === 'dark' ? ' text-yellow-500' : '')
                     }
                     tabIndex={0}
                   >
-                    <Icon className="mr-2 h-6 w-6" />
+                    <Icon className=" h-6 w-6" />
                     {label}
                   </li>
                 )}

@@ -5,10 +5,11 @@ import { PollType } from '@/lib/model'
 import { PrimaryButton } from './buttons'
 import { usePoll } from '@/hooks/usePoll'
 import { toast } from 'react-toastify'
-import { CircularLoader } from './JoinCommunityButton'
+import { CircularLoader } from './buttons/JoinCommunityButton'
 import clsx from 'clsx'
+import { Group, Item } from '@/types/contract/ForumInterface'
 
-export const PollUI = ({ id, groupId, post }) => {
+export const PollUI = ({ group, post }: { group: Group; post: Item }) => {
   const [answers, setAnswers] = React.useState([])
   const [results, setResults] = React.useState([])
   const [totalVotes, setTotalVotes] = React.useState(0)
@@ -21,7 +22,10 @@ export const PollUI = ({ id, groupId, post }) => {
   const [isFetching, setIsFetching] = React.useState(false)
   const [isLoading, setIsLoading] = React.useState(false)
 
-  const { submitPoll } = usePoll({ groupId })
+  const { submitPoll } = usePoll({ group })
+
+  const id = post.id
+
   useEffect(() => {
     fetchPollDetails()
   }, [id])
@@ -50,7 +54,7 @@ export const PollUI = ({ id, groupId, post }) => {
           results.forEach((result, index) => {
             emptyArray[index] = Number(result)
           })
-          setTotalVotes(emptyArray.reduce((a, b) => a + b))
+          if (emptyArray.length) setTotalVotes(emptyArray?.reduce((a, b) => a + b))
           return emptyArray
         })
         setAnswers(answersFromIPFS)
@@ -60,22 +64,22 @@ export const PollUI = ({ id, groupId, post }) => {
       })
   }
 
-  const onSubmitPoll = () => {
+  const onSubmitPoll = async () => {
     setIsLoading(true)
-    submitPoll(
+    await submitPoll({
       id,
-      answersToSubmit,
-      async data => {
+      pollData: answersToSubmit,
+      onErrorCallback: err => {
+        setIsLoading(false)
+        toast.error(err?.message ?? err)
+      },
+      onSuccessCallback: async data => {
         console.log(data)
         await fetchPollDetails()
         setIsLoading(false)
         toast.success('Poll submitted successfully')
       },
-      err => {
-        setIsLoading(false)
-        toast.error(err?.message ?? err)
-      }
-    )
+    })
   }
 
   const isVoteDisabled = () => {
@@ -89,7 +93,7 @@ export const PollUI = ({ id, groupId, post }) => {
   const VoteIndicator = ({ progress }) => {
     return (
       <div className="my-auto h-1 w-[90%] bg-neutral-200 dark:bg-neutral-600">
-        <div style={{width: `${progress}%`}} className={clsx(`h-1 bg-blue-500`)}></div>
+        <div style={{ width: `${progress}%` }} className={clsx(`h-1 bg-blue-500`)}></div>
       </div>
     )
   }
@@ -110,11 +114,11 @@ export const PollUI = ({ id, groupId, post }) => {
                   </label>
                 </div>
                 <div className="flex flex-row">
-                  <VoteIndicator progress={results[i] ? (results[i] / totalVotes * 100) : 0} />
+                  <VoteIndicator progress={results[i] ? (results[i] / totalVotes) * 100 : 0} />
                   <div className="ml-[8px]">
                     <input
                       disabled={pollExpired}
-                      className=" checked:border-primary checked:after:border-primary checked:after:bg-primary checked:focus:border-primary dark:checked:border-primary dark:checked:after:border-primary dark:checked:after:bg-primary dark:checked:focus:border-primary relative float-left mr-1 mt-0.5 h-5 w-5 appearance-none rounded-full border-2 border-solid border-neutral-300 before:pointer-events-none before:absolute before:h-4 before:w-4 before:scale-0 before:rounded-full before:bg-transparent before:opacity-0 before:shadow-[0px_0px_0px_13px_transparent] before:content-[''] after:absolute after:z-[1] after:block after:h-4 after:w-4 after:rounded-full after:content-[''] checked:before:opacity-[0.16] checked:after:absolute checked:after:left-1/2 checked:after:top-1/2 checked:after:h-[0.625rem] checked:after:w-[0.625rem] checked:after:rounded-full checked:after:content-[''] checked:after:[transform:translate(-50%,-50%)] hover:cursor-pointer hover:before:opacity-[0.04] hover:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:shadow-none focus:outline-none focus:ring-0 focus:before:scale-100 focus:before:opacity-[0.12] focus:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:before:transition-[box-shadow_0.2s,transform_0.2s] checked:focus:before:scale-100 checked:focus:before:shadow-[0px_0px_0px_13px_#3b71ca] checked:focus:before:transition-[box-shadow_0.2s,transform_0.2s] dark:border-neutral-600 dark:focus:before:shadow-[0px_0px_0px_13px_rgba(255,255,255,0.4)] dark:checked:focus:before:shadow-[0px_0px_0px_13px_#3b71ca]"
+                      className=" relative float-left mr-1 mt-0.5 h-5 w-5 appearance-none rounded-full border-2 border-solid border-neutral-300 before:pointer-events-none before:absolute before:h-4 before:w-4 before:scale-0 before:rounded-full before:bg-transparent before:opacity-0 before:shadow-[0px_0px_0px_13px_transparent] before:content-[''] after:absolute after:z-[1] after:block after:h-4 after:w-4 after:rounded-full after:content-[''] checked:border-primary checked:before:opacity-[0.16] checked:after:absolute checked:after:left-1/2 checked:after:top-1/2 checked:after:h-[0.625rem] checked:after:w-[0.625rem] checked:after:rounded-full checked:after:border-primary checked:after:bg-primary checked:after:content-[''] checked:after:[transform:translate(-50%,-50%)] hover:cursor-pointer hover:before:opacity-[0.04] hover:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:shadow-none focus:outline-none focus:ring-0 focus:before:scale-100 focus:before:opacity-[0.12] focus:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:before:transition-[box-shadow_0.2s,transform_0.2s] checked:focus:border-primary checked:focus:before:scale-100 checked:focus:before:shadow-[0px_0px_0px_13px_#3b71ca] checked:focus:before:transition-[box-shadow_0.2s,transform_0.2s] dark:border-neutral-600 dark:checked:border-primary dark:checked:after:border-primary dark:checked:after:bg-primary dark:focus:before:shadow-[0px_0px_0px_13px_rgba(255,255,255,0.4)] dark:checked:focus:border-primary dark:checked:focus:before:shadow-[0px_0px_0px_13px_#3b71ca]"
                       type="radio"
                       id={`inlineRadioOptions_${post.id}_${i}`}
                       name={`inlineRadioOptions_${post.id}_${i}`}
@@ -132,7 +136,6 @@ export const PollUI = ({ id, groupId, post }) => {
                 </div>
               </div>
             ))}
-
           {pollType == PollType.MULTI_ANSWER &&
             answers.map((answer, i) => (
               <div key={`${post.id}_${i}`} className="mb-[0.125rem] mr-4 min-h-[1.5rem] pl-[1.5rem]">
@@ -143,11 +146,11 @@ export const PollUI = ({ id, groupId, post }) => {
                   </label>
                 </div>
                 <div className="flex flex-row">
-                  <VoteIndicator progress={results[i] ? (results[i] / totalVotes * 100) : 0} />
+                  <VoteIndicator progress={results[i] ? (results[i] / totalVotes) * 100 : 0} />
                   <div className="ml-[8px]">
                     <input
                       disabled={pollExpired}
-                      className="checked:border-primary checked:bg-primary dark:checked:border-primary dark:checked:bg-primary relative float-left mr-[6px] mt-[0.15rem] h-[1.125rem] w-[1.125rem] appearance-none rounded-[0.25rem] border-[0.125rem] border-solid border-neutral-300 outline-none before:pointer-events-none before:absolute before:h-[0.875rem] before:w-[0.875rem] before:scale-0 before:rounded-full before:bg-transparent before:opacity-0 before:shadow-[0px_0px_0px_13px_transparent] before:content-[''] checked:before:opacity-[0.16] checked:after:absolute checked:after:-mt-px checked:after:ml-[0.25rem] checked:after:block checked:after:h-[0.8125rem] checked:after:w-[0.375rem] checked:after:rotate-45 checked:after:border-[0.125rem] checked:after:border-l-0 checked:after:border-t-0 checked:after:border-solid checked:after:border-white checked:after:bg-transparent checked:after:content-[''] hover:cursor-pointer hover:before:opacity-[0.04] hover:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:shadow-none focus:transition-[border-color_0.2s] focus:before:scale-100 focus:before:opacity-[0.12] focus:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:before:transition-[box-shadow_0.2s,transform_0.2s] focus:after:absolute focus:after:z-[1] focus:after:block focus:after:h-[0.875rem] focus:after:w-[0.875rem] focus:after:rounded-[0.125rem] focus:after:content-[''] checked:focus:before:scale-100 checked:focus:before:shadow-[0px_0px_0px_13px_#3b71ca] checked:focus:before:transition-[box-shadow_0.2s,transform_0.2s] checked:focus:after:-mt-px checked:focus:after:ml-[0.25rem] checked:focus:after:h-[0.8125rem] checked:focus:after:w-[0.375rem] checked:focus:after:rotate-45 checked:focus:after:rounded-none checked:focus:after:border-[0.125rem] checked:focus:after:border-l-0 checked:focus:after:border-t-0 checked:focus:after:border-solid checked:focus:after:border-white checked:focus:after:bg-transparent dark:border-neutral-600 dark:focus:before:shadow-[0px_0px_0px_13px_rgba(255,255,255,0.4)] dark:checked:focus:before:shadow-[0px_0px_0px_13px_#3b71ca]"
+                      className="relative float-left mr-[6px] mt-[0.15rem] h-[1.125rem] w-[1.125rem] appearance-none rounded-[0.25rem] border-[0.125rem] border-solid border-neutral-300 outline-none before:pointer-events-none before:absolute before:h-[0.875rem] before:w-[0.875rem] before:scale-0 before:rounded-full before:bg-transparent before:opacity-0 before:shadow-[0px_0px_0px_13px_transparent] before:content-[''] checked:border-primary checked:bg-primary checked:before:opacity-[0.16] checked:after:absolute checked:after:-mt-px checked:after:ml-[0.25rem] checked:after:block checked:after:h-[0.8125rem] checked:after:w-[0.375rem] checked:after:rotate-45 checked:after:border-[0.125rem] checked:after:border-l-0 checked:after:border-t-0 checked:after:border-solid checked:after:border-white checked:after:bg-transparent checked:after:content-[''] hover:cursor-pointer hover:before:opacity-[0.04] hover:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:shadow-none focus:transition-[border-color_0.2s] focus:before:scale-100 focus:before:opacity-[0.12] focus:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:before:transition-[box-shadow_0.2s,transform_0.2s] focus:after:absolute focus:after:z-[1] focus:after:block focus:after:h-[0.875rem] focus:after:w-[0.875rem] focus:after:rounded-[0.125rem] focus:after:content-[''] checked:focus:before:scale-100 checked:focus:before:shadow-[0px_0px_0px_13px_#3b71ca] checked:focus:before:transition-[box-shadow_0.2s,transform_0.2s] checked:focus:after:-mt-px checked:focus:after:ml-[0.25rem] checked:focus:after:h-[0.8125rem] checked:focus:after:w-[0.375rem] checked:focus:after:rotate-45 checked:focus:after:rounded-none checked:focus:after:border-[0.125rem] checked:focus:after:border-l-0 checked:focus:after:border-t-0 checked:focus:after:border-solid checked:focus:after:border-white checked:focus:after:bg-transparent dark:border-neutral-600 dark:checked:border-primary dark:checked:bg-primary dark:focus:before:shadow-[0px_0px_0px_13px_rgba(255,255,255,0.4)] dark:checked:focus:before:shadow-[0px_0px_0px_13px_#3b71ca]"
                       type="checkbox"
                       id={`inlineCheckboxOptions_${post.id}_${i}`}
                       checked={answersToSubmit[i] === 1}
@@ -163,7 +166,6 @@ export const PollUI = ({ id, groupId, post }) => {
                 </div>
               </div>
             ))}
-
           {pollType == PollType.NUMERIC_RATING &&
             answers.map((answer, i) => (
               <div key={`${post.id}_${i}`} className="mb-[0.125rem] mr-4 min-h-[1.5rem] pl-[1.5rem]">
@@ -174,7 +176,7 @@ export const PollUI = ({ id, groupId, post }) => {
                   </label>
                 </div>
                 <div className="flex flex-row">
-                  <VoteIndicator progress={results[i] ? (results[i] / totalVotes * 100)  : 0} />
+                  <VoteIndicator progress={results[i] ? (results[i] / totalVotes) * 100 : 0} />
                   <div className="">
                     {!pollExpired && (
                       <input
@@ -197,20 +199,18 @@ export const PollUI = ({ id, groupId, post }) => {
                 </div>
               </div>
             ))}
-          {!pollExpired && (
-            <PrimaryButton
-              className={clsx(
-                'w-fit',
-                'border-gray-500 border text-sm text-gray-500 transition-colors duration-150 hover:bg-gray-500 hover:text-white'
-              )}
-              type="button"
-              isLoading={isLoading}
-              onClick={onSubmitPoll}
-              disabled={isVoteDisabled()}
-            >
-              Vote
-            </PrimaryButton>
-          )}
+          <PrimaryButton
+            className={clsx(
+              'w-fit',
+              'border border-gray-500 text-sm text-gray-500 transition-colors duration-150 hover:bg-gray-500 hover:text-white'
+            )}
+            type="button"
+            isLoading={isLoading}
+            onClick={onSubmitPoll}
+            disabled={isVoteDisabled() || pollExpired}
+          >
+            {pollExpired ? 'Poll Expired' : 'Vote'}
+          </PrimaryButton>
         </div>
       )}
     </React.Fragment>

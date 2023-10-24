@@ -1,13 +1,14 @@
 import { Contract, ethers } from 'ethers'
-import { avalancheFuji, Chain, goerli, polygonMumbai, sepolia } from 'wagmi/chains'
+import { arbitrum, arbitrumGoerli, avalanche, avalancheFuji, Chain, goerli, mainnet, polygonMumbai, sepolia } from 'wagmi/chains'
 import ForumABI from '../constant/abi/Forum.json'
-import { Forum } from '@/types/contract/Forum';
-import { SemaphoreEthers } from "@semaphore-protocol/data"
+import { Forum } from '@/types/contract/Forum'
+import { SemaphoreEthers } from '@semaphore-protocol/data'
 
-export const mumbaiTestnetMaticContractAddress = `0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889`;
+export const mumbaiTestnetMaticContractAddress = `0x0000000000000000000000000000000000001010`
+import { Address } from '@/types/common'
 
-export const ForumContractAddress: `0x${string}` = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`
-export const SemaphoreContractAddress = process.env.NEXT_PUBLIC_SEMAPHORE_CONTRACT_ADDRESS as `0x${string}`;
+export const SemaphoreContractAddress = process.env.NEXT_PUBLIC_SEMAPHORE_CONTRACT_ADDRESS as `0x${string}`
+export const ForumContractAddress: Address = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as Address
 export const unirepAddress = process.env.NEXT_PUBLIC_UNIREP_ADDRESS
 
 export const attesterAddress = process.env.NEXT_PUBLIC_ATTESTER_ADDRESS
@@ -770,60 +771,94 @@ export const erc20dummyABI = [
   // "event Transfer(address indexed from, address indexed to, uint amount)"
 ]
 
-export const ipfsConfig = {
-  host: 'ipfs.infura.io',
-  port: 5001,
-  protocol: 'https',
-  headers: {
-    authorization:
-      'Basic ' +
-      Buffer.from(
-        process.env.NEXT_PUBLIC_INFURA_IPFS_PROJECT_ID + ':' + process.env.NEXT_PUBLIC_INFURA_IPFS_PROJECT_SECRET
-      ).toString('base64'),
-  },
-}
-
 export const supportedChains: { [key: string]: Chain } = {
   [polygonMumbai.id]: polygonMumbai,
   [goerli.id]: goerli,
   [sepolia.id]: sepolia,
+  [mainnet.id]: mainnet,
+  [avalanche.id]: avalanche,
+  [arbitrum.id]: arbitrum,
+  [avalancheFuji.id]: avalancheFuji,
+  [arbitrumGoerli.id]: arbitrumGoerli
+}
+
+export const chainLogos: { [key: string]: string } = {
+  [polygonMumbai.id]: '/poly.png',
+  [goerli.id]: '/goerli.png',
+  [sepolia.id]: '/eth.png',
+  [avalancheFuji.id]: '/avax.png',
+  [mainnet.id]: '/eth.png',
+  [avalanche.id]: '/avax.png',
+  [arbitrum.id]: '/arbitrum.png',
+  [arbitrumGoerli.id]: '/arbitrum.png',
 }
 
 export const supportedChainsArray = Object.keys(supportedChains).map(k => supportedChains[k])
 
 /** PROVIDERS */
 
-export const getRpcProvider = chainId => providerMap[chainId];
+export const getRpcProvider = (chainId: number) => providerMap[chainId]
 
 export const jsonRPCProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL, {
   name: polygonMumbai.name,
   chainId: polygonMumbai.id,
-});
+})
 
 export const jsonRPCProviderGoerli = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_GOERLI_URL, {
   name: goerli.name,
   chainId: goerli.id,
-} as any);
+} as any)
 
 export const jsonRPCProviderSepolia = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_SEPOLIA_URL, {
   name: sepolia.name,
   chainId: sepolia.id,
-});
+})
 
-const providerMap = {
+
+export const jsonRPCProviderMainnet = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_MAINNET_URL, {
+  name: mainnet.name,
+  chainId: mainnet.id,
+})
+
+export const jsonRPCProviderAvalancheMainnet = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_AVALANCHE_MAINNET_URL, {
+  name: avalanche.name,
+  chainId: avalanche.id,
+})
+
+export const jsonRPCProviderAvalancheFuji = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_AVALANCHE_FUJI_URL, {
+  name: avalancheFuji.name,
+  chainId: avalancheFuji.id,
+})
+
+export const jsonRPCProviderArbitrumMainnet = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_ARBITRUM_MAINNET_URL, {
+  name: arbitrum.name,
+  chainId: arbitrum.id,
+})
+
+export const jsonRPCProviderArbitrumGoerli = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_ARBITRUM_GOERLI_URL, {
+  name: arbitrumGoerli.name,
+  chainId: arbitrumGoerli.id,
+})
+
+export const providerMap = {
   [polygonMumbai.id]: jsonRPCProvider,
-  [avalancheFuji.id]: undefined,
+  [avalancheFuji.id]: jsonRPCProviderAvalancheFuji,
   [sepolia.id]: jsonRPCProviderSepolia,
   [goerli.id]: jsonRPCProviderGoerli,
-};
+  [mainnet.id]: jsonRPCProviderMainnet,
+  [avalanche.id]: jsonRPCProviderAvalancheMainnet,
+  [arbitrum.id]: jsonRPCProviderArbitrumMainnet,
+  [arbitrumGoerli.id]: jsonRPCProviderArbitrumGoerli
+}
 /** */
 
+const abiInterface = new ethers.utils.Interface(ForumABI.abi).functions
 
 /** CONTRACTS */
 
 export const forumContract = new Contract(ForumContractAddress, ForumABI.abi, jsonRPCProvider) as Forum
 
 export const semaphoreContract = new SemaphoreEthers(process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL, {
-  address: SemaphoreContractAddress
+  address: SemaphoreContractAddress,
 })
 /** */

@@ -54,7 +54,7 @@ const handleVoteItem = postInstance => async (voteType, itemType, itemId, upvote
   if (isNaN(itemId)) return
   try {
     if (itemType === POST_ITEM_TYPE) {
-      postInstance.updatePostsVote(postInstance, itemId, voteType, true)
+      postInstance.updatePostsVote({itemId : postInstance, voteType : itemId, confirmed : voteType, revert : true})
     }
   } catch (err) {
     console.error('Error in VoteItem event handler:', err)

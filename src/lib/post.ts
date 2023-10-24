@@ -10,10 +10,21 @@ import { mutate } from 'swr'
 import { UnirepUser } from './unirep'
 import { forumContract, jsonRPCProvider } from '@/constant/const'
 import { create, editContent, handleDeleteItem, updateContentVote } from '@/lib/item'
+import { Address } from '@/types/common'
 
 export const MIN_REP_POST = 0
 
-export const MIN_REP_VOTE = 0;
+export const MIN_REP_VOTE = 1
+
+interface CreatePost {
+  postContent: Partial<PostContent>
+  address: Address
+  users: User[]
+  postedByUser: User
+  groupId: string
+  setWaiting: Function
+  onIPFSUploadSuccess: (post, cid) => void
+}
 
 export class Post {
   id: string | undefined
@@ -45,15 +56,7 @@ export class Post {
     return `${this.groupId}_post_${this.id ?? postId}`
   }
 
-  async create(
-    postContent: PostContent,
-    address: string,
-    users: User[],
-    postedByUser: User,
-    groupId: string,
-    setWaiting: Function,
-    onIPFSUploadSuccess: (post, cid) => void
-  ) {
+  async create({ postContent, address, users, postedByUser, groupId, setWaiting, onIPFSUploadSuccess }: CreatePost) {
     return await create.call(
       this,
       postContent,
@@ -69,7 +72,7 @@ export class Post {
 
   async edit(
     postContent: PostContent,
-    address: string,
+    address: Address,
     itemId,
     postedByUser: User,
     groupId: string,

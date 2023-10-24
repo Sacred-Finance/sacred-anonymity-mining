@@ -1,4 +1,4 @@
-import { useContractReads } from 'wagmi'
+import {Address, useContractReads} from 'wagmi'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'react-toastify'
 import { erc20dummyABI } from '../constant/const'
@@ -16,7 +16,7 @@ interface ValidationResult {
   toastMessage: string
 }
 
-export const useValidateUserBalance = (community: Group | undefined, address: `0x${string}` | undefined) => {
+export const useValidateUserBalance = (community: Group | undefined, address: Address | undefined) => {
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
   const [fetchEnabled, setFetchEnabled] = useState(false)
 

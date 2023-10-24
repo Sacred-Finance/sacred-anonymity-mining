@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { NextApiResponse } from 'next/types'
+import { NextApiRequest, NextApiResponse } from 'next/types'
 import qs from 'qs'
 import { LRUCache } from 'lru-cache'
 
@@ -14,7 +14,7 @@ const options = {
 const cache = new LRUCache<string, any>(options)
 
 export const getHandler =
-  (res: NextApiResponse, shouldCache = false) =>
+  (req: NextApiRequest, res: NextApiResponse, shouldCache = false) =>
   async (url: string) => {
     try {
       if (shouldCache) {
@@ -23,7 +23,8 @@ export const getHandler =
           return res.json(cachedData)
         }
       }
-      const response = await axios.get(url, discourseAuthenticationHeaders())
+      const { apikey, username } = req.headers;
+      const response = await axios.get(url, discourseAuthenticationHeaders(apikey as string, username as string))
 
       if (shouldCache) {
         cache.set(url, response.data)
@@ -35,11 +36,12 @@ export const getHandler =
     }
   }
 
-export const postHandler = (res: NextApiResponse) => async (url: string, body: any) => {
+export const postHandler = (req: NextApiRequest, res: NextApiResponse) => async (url: string, body: any) => {
   try {
+    const { apikey, username } = req.headers;
     const response = await axios.post(url, JSON.stringify(body), {
       headers: {
-        ...discourseAuthenticationHeaders().headers,
+        ...discourseAuthenticationHeaders(apikey as string, username as string).headers,
         'Content-Type': 'application/json; charset=UTF-8',
         'Accept': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
@@ -74,11 +76,11 @@ export const gptPostHandler = async (url: string, body: any) => {
   }
 }
 
-export function discourseAuthenticationHeaders() {
+export function discourseAuthenticationHeaders(apiKey?: string, username?: string) {
   return {
     headers: {
-      'Api-Key': process.env.NEXT_PUBLIC_DISCOURSE_API_KEY,
-      'Api-Username': process.env.NEXT_PUBLIC_DISCOURSE_API_USERNAME,
+      'Api-Key': apiKey || process.env.NEXT_PUBLIC_DISCOURSE_API_KEY,
+      'Api-Username': username || process.env.NEXT_PUBLIC_DISCOURSE_API_USERNAME,
     },
   }
 }
