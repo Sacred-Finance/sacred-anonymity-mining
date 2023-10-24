@@ -8,8 +8,8 @@ import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { AnimatePresence, motion } from 'framer-motion'
 
 const cardClass =
-  'border-2 border-blue-600 shadow-lg rounded-lg  flex flex-col gap-2 p-4 relative justify-center items-center w-1/2 center overflow-hidden'
-const cardTitleClass = 'text-blue-700 text-2xl font-semibold flex gap-4 items-center mb-4'
+  'border-2 border-primary shadow-lg rounded-lg  flex flex-col gap-2 p-4 relative justify-center items-center w-full center overflow-hidden'
+const cardTitleClass = 'text-white-700 text-xl font-semibold flex gap-4 items-center leading-none'
 const cardLoadingIndicatorClass = 'w-4 h-4 absolute top-4 right-4 text-white'
 
 interface UnirepUserStats {
@@ -61,10 +61,10 @@ const ReputationCard = () => {
   return (
     <div className={cardClass}>
       <div className="flex items-center justify-between">
-        <h2 className={cardTitleClass}>Your Reputation</h2>
+        <h3 className={cardTitleClass}>Your Reputation</h3>
         {isUpdating && <CircularLoader className={cardLoadingIndicatorClass} />}
+        <p className="text-lg text-gray-700 pl-3 leading-none">{reputation?.posRep || 0} { ' ' } Points</p>
       </div>
-      <p className="text-lg text-gray-700">{reputation?.posRep || 0} Points</p>
       {lastUpdated && <p className="text-sm text-gray-500">Last updated: {timeSinceLastUpdate} seconds ago</p>}
       {/*<TextComponent />*/}
     </div>
