@@ -145,10 +145,10 @@ export function PostPage({
 
                 <Tab.Panels
                   className={
-                    'scrollbar max-h-[calc(90vh - 200px)] col-span-12 flex w-full flex-col gap-4   rounded-xl  border bg-white p-3  dark:border-gray-700 dark:bg-gray-900  '
+                    'scrollbar max-h-[calc(90vh - 200px)] col-span-12 flex w-full flex-col gap-4'
                   }
                 >
-                  <Tab.Panel className="flex flex-col gap-4">
+                  <Tab.Panel className="flex flex-col gap-4 mb-2 rounded-xl p-3 border bg-white dark:border-gray-700 dark:bg-gray-900">
                     <CommunityCard
                       variant={'banner'}
                       community={community}
@@ -170,16 +170,16 @@ export function PostPage({
                     {sortedCommentsData
                       .filter(comment => comment.kind == ContentType.POLL)
                       .map(comment => (
-                        <PostComment comment={comment} key={comment.id} />
+                        <div key={`comment_as_poll_${comment.id}`} className='mb-2 rounded-xl p-3 border bg-white dark:border-gray-700 dark:bg-gray-900'>
+                          <PostComment comment={comment} key={comment.id} />
+                        </div>
                       ))}
                   </Tab.Panel>
                   <Tab.Panel className="flex flex-col gap-4 ">
-                    {sortedCommentsData.map(comment => (
-                      <>
+                    {sortedCommentsData.filter(comment => comment.kind == ContentType.COMMENT).map(comment => (
+                      <div key={`comment_${comment.id}`} className='mb-2 rounded-xl p-3 border bg-white dark:border-gray-700 dark:bg-gray-900'>
                         <PostComment comment={comment} key={comment.id} />
-
-                        <hr />
-                      </>
+                      </div>
                     ))}
                     {!sortedCommentsData.length && (
                       <div className="flex flex-col items-center justify-center gap-2">
