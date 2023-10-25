@@ -29,7 +29,7 @@ const Editor = dynamic(() => import('../editor-js/Editor'), {
 export const PostItem = ({ post, group }: { post: Item; group: Group }) => {
   const { groupId, parentId, id, kind } = post
 
-  const postId = (kind == ContentType.POST || kind == ContentType.POLL) ? id : parentId
+  const postId = parentId && +parentId > 0 ? parentId : id
 
   const user = useUserIfJoined(post.groupId)
   const address = useAccount().address
@@ -175,7 +175,7 @@ export const PostItem = ({ post, group }: { post: Item; group: Group }) => {
               setIsContentEditing(value);
               if (value) {
                 setContentDescription(post.description);
-                setContentTitle(post.title);
+                setContentTitle && setContentTitle(post.title);
               }
             }}
             onClickCancel={() => setIsContentEditing(false)}

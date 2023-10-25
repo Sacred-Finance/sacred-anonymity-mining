@@ -38,7 +38,7 @@ export const useEditItem = ({
 } => {
   const { groupId, parentId, id, kind } = item
 
-  const postId = kind == ContentType.POST ? id : parentId
+  const postId = parentId && +parentId > 0 ? parentId : id
   const commentId = kind == ContentType.COMMENT ? id : null
   const pollId = kind == ContentType.POLL ? id : null
   const { address } = useAccount()
@@ -106,7 +106,7 @@ export const useEditItem = ({
         throw error
       }
     } else {
-      return itemType == 0 ?? itemType == 2
+      return (itemType == 0 || itemType == 2)
         ? postInstance?.edit(content, address, itemId, member as User, groupId, setIsLoading)
         : commentInstance?.edit(content, address, itemId, member as User, groupId, setIsLoading)
     }
