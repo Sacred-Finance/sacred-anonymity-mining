@@ -74,7 +74,7 @@ const CreatePostUI = ({ group }: { group: Group }) => {
 
   const { contentDescription, setContentDescription, tempContents, contentTitle, setTempContents, setContentTitle } =
     useContentManagement({
-      isPost: true,
+      isPostOrPoll: true,
       defaultContentDescription: undefined,
       defaultContentTitle: undefined,
     })

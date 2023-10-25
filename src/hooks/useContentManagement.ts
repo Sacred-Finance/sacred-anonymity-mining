@@ -2,7 +2,7 @@ import { Dispatch, SetStateAction, useState } from 'react'
 import { OutputData } from '@editorjs/editorjs'
 
 type ContentManagementConfig = {
-  isPost: boolean
+  isPostOrPoll: boolean
   defaultContentTitle?: string | null
   defaultContentDescription?: OutputData | null
 }
@@ -28,7 +28,7 @@ export function useContentManagement(config: ContentManagementConfig): ContentMa
   const [isContentEditable, setIsContentEditable] = useState(false)
   const [isContentEditing, setIsContentEditing] = useState(false)
 
-  if (config.isPost) {
+  if (config.isPostOrPoll) {
     return {
       contentTitle,
       setContentTitle,
