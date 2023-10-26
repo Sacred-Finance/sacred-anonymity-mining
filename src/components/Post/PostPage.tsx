@@ -59,7 +59,7 @@ export function PostPage({
   const postId = post.id
   const { address } = useAccount()
 
-  const { fetchIsAdmin, fetchIsModerator } = useCheckIfUserIsAdminOrModerator(address)
+  const { isAdmin, fetchIsAdmin, fetchIsModerator } = useCheckIfUserIsAdminOrModerator(address)
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -152,13 +152,7 @@ export function PostPage({
                     <CommunityCard
                       variant={'banner'}
                       community={community}
-                      actions={[
-                        {
-                          label: 'Edit',
-                          icon: <PencilIcon className={'h-full w-4'} />,
-                          onClick: () => router.push(`/communities/${community?.groupId}/edit`),
-                        },
-                      ]}
+                      isAdmin={isAdmin || false}
                     />
                   </Tab.Panel>
                   <Tab.Panel className="flex flex-col ">

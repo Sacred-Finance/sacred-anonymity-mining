@@ -228,5 +228,5 @@ const checkIfPostIsEditable = async ({
   const generatedNote = await createNote(userPosting)
   const generatedNoteAsBigNumber = BigNumber.from(generatedNote).toString()
   const noteBigNumber = BigNumber.from(post.note).toString()
-  return generatedNoteAsBigNumber === noteBigNumber || canDelete
+  return (generatedNoteAsBigNumber === noteBigNumber) || canDelete
 }
