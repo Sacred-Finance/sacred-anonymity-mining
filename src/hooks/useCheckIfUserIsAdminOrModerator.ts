@@ -1,10 +1,10 @@
 import { useContractRead } from 'wagmi'
 import { ForumContractAddress } from '../constant/const'
 import ForumABI from '../constant/abi/Forum.json'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {Address} from "@/types/common";
 
-export const useCheckIfUserIsAdminOrModerator = address => {
+export const useCheckIfUserIsAdminOrModerator = (address, checkOnInit = false) => {
   const [isAdmin, setisAdmin] = useState<boolean | null>(null)
   const [isModerator, setIsModerator] = useState<boolean | null>(null)
   const {
@@ -46,6 +46,15 @@ export const useCheckIfUserIsAdminOrModerator = address => {
     },
     enabled: false,
   })
+
+  useEffect(() => {
+    if (checkOnInit && address) {
+      console.log('checkOnInit', checkOnInit)
+      fetchIsAdmin()
+      fetchIsModerator()
+    }
+  }, [checkOnInit])
+
   return {
     isAdmin,
     isModerator,

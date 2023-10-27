@@ -5,10 +5,14 @@ import { useRouter } from 'next/router'
 import React, { useEffect } from 'react'
 import useSWR from 'swr'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
+import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
+import { useAccount } from 'wagmi'
 
 function Home({ communitiesData, users, discourseCommunities }) {
   const router = useRouter()
-  const pageRef = React.useRef(null)
+  const pageRef = React.useRef(null);
+  const { address } = useAccount()
+  const { isAdmin, isModerator } = useCheckIfUserIsAdminOrModerator(address, true)
 
   useEffect(() => {
     if (pageRef.current) {
@@ -38,7 +42,7 @@ function Home({ communitiesData, users, discourseCommunities }) {
     return <div>Error: {error.message}</div>
   }
   // if (!communitiesData) return <LoadingComponent/>
-  return <HomePage isAdmin={false} discourseCommunities={discourseCommunities} />
+  return <HomePage isAdmin={isAdmin || isModerator || false} discourseCommunities={discourseCommunities} />
 }
 
 export const getServerSideProps = async () => {
