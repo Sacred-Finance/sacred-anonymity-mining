@@ -170,7 +170,7 @@ export function PostPage({
                       ))}
                   </Tab.Panel>
                   <Tab.Panel className="flex flex-col gap-4 ">
-                    {sortedCommentsData.filter(comment => comment.kind == ContentType.COMMENT).map(comment => (
+                    {sortedCommentsData.map(comment => (
                       <div key={`comment_${comment.id}`} className='mb-2 rounded-xl p-3 border bg-white dark:border-gray-700 dark:bg-gray-900'>
                         <PostComment comment={comment} key={comment.id} />
                       </div>
