@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { NextApiRequest, NextApiResponse } from 'next/types'
-import qs from 'qs'
 import { LRUCache } from 'lru-cache'
+import pako, { deflate } from 'pako'
 
 const options = {
   max: 500, // Maximum of 500 items in the cache
@@ -23,7 +23,7 @@ export const getHandler =
           return res.json(cachedData)
         }
       }
-      const { apikey, username } = req.headers;
+      const { apikey, username } = req.headers
       const response = await axios.get(url, discourseAuthenticationHeaders(apikey as string, username as string))
 
       if (shouldCache) {
@@ -38,7 +38,7 @@ export const getHandler =
 
 export const postHandler = (req: NextApiRequest, res: NextApiResponse) => async (url: string, body: any) => {
   try {
-    const { apikey, username } = req.headers;
+    const { apikey, username } = req.headers
     const response = await axios.post(url, JSON.stringify(body), {
       headers: {
         ...discourseAuthenticationHeaders(apikey as string, username as string).headers,
@@ -55,17 +55,31 @@ export const postHandler = (req: NextApiRequest, res: NextApiResponse) => async 
 
 export const gptPostHandler = async (url: string, body: any) => {
   try {
-    const response = await axios.post(url, body, {
+   return  fetch(url, {
+      method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Content-Encoding': 'deflate',
         'origin': 'https://app.sacredprotocol.com',
       },
+      body: deflate(JSON.stringify(body)),
     })
-    {
-    }
-    return response.data
+      .then(async response => {
+        const message = await response.json()
+        let messageDisplay = 'oops - something went wrong'
+        if (message) {
+          if (message.html) {
+            messageDisplay = message.html
+          } else {
+            messageDisplay = JSON.stringify(message, null, 2)
+          }
+
+          return messageDisplay
+        } else {
+          return JSON.stringify(message, null, 2) //show the error as a string
+        }
+      })
+      .catch(error => console.log(error))
   } catch (error) {
     if (error.response) {
       // The request was made and the server responded with a status code that falls out of the range of 2xx

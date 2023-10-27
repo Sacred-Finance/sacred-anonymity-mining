@@ -9,60 +9,58 @@ import { EditorJsType } from '@components/NewPostForm'
 import { CancelButton } from '@components/buttons/CancelButton'
 
 interface AnonymizeButtonProps {
-  postData: EditorJsType
-  postTitle?: string
-  setDescription: (value: EditorJsType) => void
-  refToUpdateOnChange: React.MutableRefObject<() => void>
+  postData: EditorJsType;
+  postTitle?: string;
+  setDescription: (value: EditorJsType) => void;
+  refToUpdateOnChange: React.MutableRefObject<() => void>;
 }
 
 function convertEditorJsTypeToString(postData: EditorJsType) {
-  let result = ''
+  let result = '';
   for (let i = 0; i < postData?.blocks?.length; i++) {
-    result += postData.blocks[i].data.text
+    result += postData.blocks[i].data.text;
   }
-  return result
+  return result;
 }
 
 const AnonymizeButton: React.FC<AnonymizeButtonProps> = ({
-  postData,
-  postTitle,
-  setDescription,
-  refToUpdateOnChange,
-}) => {
-  const { isLoading, data, error, fetchData } = useGPTServerAnalysis({
+                                                           postData,
+                                                           postTitle,
+                                                           setDescription,
+                                                           refToUpdateOnChange,
+                                                         }) => {
+  const [analysis] = useGPTServerAnalysis([{
     postData: convertEditorJsTypeToString(postData),
     template: Template.Anonymize,
-  })
-  const [showModal, setShowModal] = React.useState(!isLoading && data)
+  }]);
+  const { isLoading, data, error, fetchData } = analysis;
+  const [showModal, setShowModal] = React.useState(!isLoading && data);
 
   const toggleModal = () => {
-    setShowModal(!showModal)
+    setShowModal(!showModal);
   }
 
   React.useEffect(() => {
     if (data) {
-      console.log(data)
-      setShowModal(true)
+      console.log(data);
+      setShowModal(true);
     }
-  }, [data])
+  }, [data]);
 
   const useThis = () => {
-    setDescription(description => {
-      return {
-        time: description.time,
-        blocks: [
-          {
-            type: 'paragraph',
-            data: {
-              text: data.anonymized,
-            },
+    setDescription(description => ({
+      time: description.time,
+      blocks: [
+        {
+          type: 'paragraph',
+          data: {
+            text: data.anonymized,
           },
-        ],
-        version: description.version,
-      }
-    })
+        },
+      ],
+      version: description.version,
+    }));
 
-    // TODO: this is a hack to get Editorjs to render changes. consider revisions later.
     refToUpdateOnChange?.current?.render?.({
       blocks: [
         {
@@ -72,10 +70,10 @@ const AnonymizeButton: React.FC<AnonymizeButtonProps> = ({
           },
         },
       ],
-    })
-    if (refToUpdateOnChange?.current) refToUpdateOnChange?.current
-    toggleModal()
-  }
+    });
+
+    toggleModal();
+  };
 
   return (
     <div
