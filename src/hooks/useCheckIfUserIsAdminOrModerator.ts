@@ -56,8 +56,8 @@ export const useCheckIfUserIsAdminOrModerator = (address, checkOnInit = false) =
   }, [checkOnInit])
 
   return {
-    isAdmin,
-    isModerator,
+    isAdmin: address && isAdmin,
+    isModerator: address && isModerator,
     fetchIsAdmin,
     fetchIsModerator,
     isLoading: isLoadingAdmin || isLoadingModerator,
