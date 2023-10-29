@@ -12,6 +12,7 @@ import { TrashIcon, PlusCircleIcon } from '@heroicons/react/20/solid'
 import { PrimaryButton } from '@/components/buttons'
 import { toast } from 'react-toastify'
 import LoadingComponent from '@/components/LoadingComponent'
+import clsx from 'clsx'
 
 const Access: React.FC = () => {
   const { address } = useAccount()
@@ -155,9 +156,6 @@ const Access: React.FC = () => {
     const patternError = value && !/^0x[a-fA-F0-9]{40}$/g.test(value)
     return (
       <>
-        <label className="sr-only mb-2 text-sm font-medium text-gray-900 dark:text-white">
-          Search
-        </label>
         <div className="relative">
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
             <PlusCircleIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
@@ -173,13 +171,15 @@ const Access: React.FC = () => {
           />
           <PrimaryButton
             type="button"
-            className="absolute bottom-2.5 right-2.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-primary dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+            className="absolute bottom-2.5 right-2.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-primary dark:hover:bg-primary-700 dark:focus:ring-primary-800 top-[7px]"
             onClick={() => onSubmit(value)} disabled={!Boolean(value) || Boolean(patternError)}
             isLoading={isAddingAdmin || isAddingMod}
           >
             Add
           </PrimaryButton>
         </div>
+        {<div className={clsx([patternError ? 'visible text-red-800' : 'invisible', 'mt-0'])}>{t('formErrors.enterValidAddress')}</div>}
+
       </>
     )
   }
@@ -225,7 +225,7 @@ const Access: React.FC = () => {
   }
   return (
     <div className="">
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3">
         <h1 className="text-left text-[22px] font-bold" color={'primary.500'}>
           Admins
         </h1>
