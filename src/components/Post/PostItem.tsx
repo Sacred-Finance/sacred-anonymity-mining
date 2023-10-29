@@ -96,6 +96,7 @@ export const PostItem = ({ post, group }: { post: Item; group: Group }) => {
     setIsContentEditable,
     contentTitle,
     setContentTitle,
+    clearContent
   } = useContentManagement({
     isPostOrPoll: isTypeOfPost || isTypeOfPoll,
     defaultContentDescription: post.description || { blocks: post.blocks },
@@ -149,7 +150,7 @@ export const PostItem = ({ post, group }: { post: Item; group: Group }) => {
               readOnly={!isContentEditing}
               onChange={val => setContentDescription(val)}
               placeholder={t('placeholder.enterPostContent') as string}
-              data={(isTypeOfPost || isTypeOfPoll) ? post.description : post}
+              data={post?.description ? post.description : post}
               divProps={{
                 className:
                   'rounded-md bg-gray-100 dark:bg-gray-800 dark:!text-white p-4 focus:outline-none focus:ring-2 focus:ring-primary-dark',

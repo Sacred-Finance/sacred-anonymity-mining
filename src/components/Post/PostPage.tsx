@@ -339,7 +339,7 @@ const CreateCommentUI = ({ group, post }: { group: Group; post: Item }) => {
     return true
   }
 
-  const { contentDescription, setContentDescription, tempContents, contentTitle, setTempContents, setContentTitle } =
+  const { contentDescription, setContentDescription, tempContents, contentTitle, setTempContents, setContentTitle, clearContent } =
     useContentManagement({
       isPost: false,
       defaultContentDescription: undefined,
@@ -416,7 +416,8 @@ const CreateCommentUI = ({ group, post }: { group: Group; post: Item }) => {
         pollRequest: emptyPollRequest,
       }).then(async res => {
         await mutate(getGroupWithPostAndCommentData(groupId, post.id))
-        toast.success('Comment created successfully')
+        toast.success('Comment created successfully');
+        clearContent()
         return res
       })
       setIsLoading(false)

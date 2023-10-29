@@ -18,6 +18,7 @@ type ContentManagementResult = {
   setIsContentEditable: Dispatch<SetStateAction<boolean>>
   isContentEditing: boolean
   setIsContentEditing: Dispatch<SetStateAction<boolean>>
+  clearContent: () => void
 }
 export function useContentManagement(config: ContentManagementConfig): ContentManagementResult {
   const [contentTitle, setContentTitle] = useState<string | null>(config.defaultContentTitle || null)
@@ -27,6 +28,12 @@ export function useContentManagement(config: ContentManagementConfig): ContentMa
   const [tempContents, setTempContents] = useState([])
   const [isContentEditable, setIsContentEditable] = useState(false)
   const [isContentEditing, setIsContentEditing] = useState(false)
+
+  const clearContent = () => {
+    setContentTitle(null)
+    setContentDescription(null)
+    console.log('Data Cleared')
+  }
 
   if (config.isPostOrPoll) {
     return {
@@ -40,6 +47,7 @@ export function useContentManagement(config: ContentManagementConfig): ContentMa
       setIsContentEditable,
       isContentEditing,
       setIsContentEditing,
+      clearContent
     }
   } else {
     return {
@@ -51,6 +59,7 @@ export function useContentManagement(config: ContentManagementConfig): ContentMa
       setIsContentEditable,
       isContentEditing,
       setIsContentEditing,
+      clearContent
     }
   }
 }
