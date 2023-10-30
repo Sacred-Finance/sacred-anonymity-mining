@@ -335,6 +335,7 @@ export async function augmentGroupData(rawGroupData: RawGroupData, forPaths = fa
 }
 
 function serializeRawItemData(rawItemData: RawItemData): Item {
+  console.log('rawItemData', rawItemData)
   return {
     kind: rawItemData.kind.toString(),
     id: rawItemData.id.toString(),

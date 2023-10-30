@@ -68,13 +68,13 @@ const CreatePostUI = ({ group }: { group: Group }) => {
   const validateRequirements = () => {
     if (!address) return toast.error(t('alert.connectWallet'), { toastId: 'connectWallet' })
     if (!user) return toast.error(t('toast.error.notJoined'), { type: 'error', toastId: 'min' })
-
+    
     return true
   }
 
-  const { contentDescription, setContentDescription, tempContents, contentTitle, setTempContents, setContentTitle } =
+  const { contentDescription, setContentDescription, tempContents, contentTitle, setTempContents, setContentTitle, clearContent } =
     useContentManagement({
-      isPost: true,
+      isPostOrPoll: true,
       defaultContentDescription: undefined,
       defaultContentTitle: undefined,
     })
@@ -111,6 +111,8 @@ const CreatePostUI = ({ group }: { group: Group }) => {
 
       if (status === 200) {
         setIsLoading(false)
+        clearContent()
+
       } else {
         setIsLoading(false)
       }

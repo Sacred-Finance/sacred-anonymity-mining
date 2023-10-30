@@ -38,6 +38,7 @@ export const CommunityCard = ({
   community,
   variant = 'default',
   actions = [false],
+  isAdmin = false,
 }: {
   community: Group & { variant?: 'default' | 'banner' }
   isAdmin?: boolean
@@ -82,14 +83,14 @@ export const CommunityCard = ({
               </Link>
               <SpeedDial
                 actions={[
-                  isOwner
+                  (isAdmin || isOwner)
                     ? {
                         label: 'Edit',
                         icon: <PencilIcon className={'h-full w-4'} />,
                         onClick: () => router.push(`/communities/${community?.groupId}/edit`),
                       }
                     : false,
-                  <RemoveGroup groupId={community.id} hidden={false} />,
+                    (isAdmin || isOwner) && <RemoveGroup groupId={community.id} hidden={false} />,
                   ...actions,
                 ]}
               />

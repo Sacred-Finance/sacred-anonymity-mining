@@ -68,17 +68,18 @@ export const ContentActions = ({
               isLoading={isLoading}
               disabled={!item || (!item.description?.blocks?.length && !item.blocks?.length)}
               onClick={() => save()}
-              startIcon={<PaperAirplaneIcon className="h-4 w-4" />}
+              startIcon={<PaperAirplaneIcon className="h-4 w-4 mr-1" />}
               loadingPosition={'start'}
             >
               {t('button.save')}
             </PrimaryButton>
             <PrimaryButton
               className={clsx(
-                'bg-red-500 text-white hover:bg-red-600',
-                'border-gray-500 border text-sm text-gray-500 transition-colors duration-150 hover:bg-gray-500 hover:text-white'
+                'bg-red-500 hover:bg-red-600',
+                'border text-sm transition-colors duration-150 hover:bg-gray-500 hover:text-white',
+                'text-slate-200'
               )}
-              startIcon={<XCircleIcon className="h-4 w-4" />}
+              startIcon={<XCircleIcon className="h-4 w-4 mr-1" />}
               loadingPosition={'start'}
               onClick={() => onClickCancel()}
             >

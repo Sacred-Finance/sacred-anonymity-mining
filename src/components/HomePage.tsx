@@ -171,8 +171,8 @@ function HomePage({ isAdmin = false, discourseCommunities }: HomeProps) {
                 {(filteredCommunities.length ? filteredCommunities : communities)
                   .filter(community => community.userCount >= 2)
                   .map(community => (
-                    <div className="col-span-2 grid items-start gap-6 lg:col-span-1">
-                      <CommunityCard key={community.groupId} community={community} />
+                    <div key={community.groupId} className="col-span-2 grid items-start gap-6 lg:col-span-1">
+                      <CommunityCard  community={community} isAdmin={isAdmin || false} />
                     </div>
                   ))}
               </div>
@@ -190,8 +190,8 @@ function HomePage({ isAdmin = false, discourseCommunities }: HomeProps) {
                 {(filteredCommunities.length ? filteredCommunities : communities)
                   .filter(community => community.userCount < 2)
                   .map(community => (
-                    <div className="col-span-2 grid items-start gap-6 lg:col-span-1">
-                      <CommunityCard key={community.groupId} community={community} />
+                    <div key={community.groupId} className="col-span-2 grid items-start gap-6 lg:col-span-1">
+                      <CommunityCard community={community} isAdmin={isAdmin || false} />
                     </div>
                   ))}
               </div>

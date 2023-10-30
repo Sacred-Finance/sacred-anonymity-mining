@@ -29,7 +29,7 @@ const Editor = dynamic(() => import('../editor-js/Editor'), {
 export const PostItem = ({ post, group }: { post: Item; group: Group }) => {
   const { groupId, parentId, id, kind } = post
 
-  const postId = kind == ContentType.POST || kind == ContentType.POST ? id : parentId
+  const postId = parentId && +parentId > 0 ? parentId : id
 
   const user = useUserIfJoined(post.groupId)
   const address = useAccount().address
@@ -55,7 +55,7 @@ export const PostItem = ({ post, group }: { post: Item; group: Group }) => {
     if (!address || !user) return
 
     try {
-      if (isTypeOfPost) {
+      if (isTypeOfPost || isTypeOfPoll) {
         if (!contentTitle) {
           toast.error(t('alert.emptyTitle'))
         }
@@ -96,8 +96,9 @@ export const PostItem = ({ post, group }: { post: Item; group: Group }) => {
     setIsContentEditable,
     contentTitle,
     setContentTitle,
+    clearContent
   } = useContentManagement({
-    isPost: isTypeOfPost,
+    isPostOrPoll: isTypeOfPost || isTypeOfPoll,
     defaultContentDescription: post.description || { blocks: post.blocks },
     defaultContentTitle: post.title,
   })
@@ -117,10 +118,9 @@ export const PostItem = ({ post, group }: { post: Item; group: Group }) => {
 
   return (
     <div>
-      {isTypeOfPoll && <PollUI group={group} post={post} />}
 
       <div className="flex flex-col gap-2">
-        {isTypeOfPost && (
+        {(isTypeOfPost || isTypeOfPoll) && (
           <div className="flex flex-col gap-4">
             {isContentEditing && (
               <input
@@ -142,7 +142,7 @@ export const PostItem = ({ post, group }: { post: Item; group: Group }) => {
         <div className="flex flex-col gap-4">
           {!isContentEditing ? (
             <EditorJsRenderer
-              data={isTypeOfPost ? post.description : { blocks: post.blocks || post?.description?.blocks }}
+              data={(isTypeOfPost || isTypeOfPoll) ? post.description : { blocks: post.blocks || post?.description?.blocks }}
             />
           ) : (
             <Editor
@@ -150,7 +150,7 @@ export const PostItem = ({ post, group }: { post: Item; group: Group }) => {
               readOnly={!isContentEditing}
               onChange={val => setContentDescription(val)}
               placeholder={t('placeholder.enterPostContent') as string}
-              data={isTypeOfPost ? post.description : post}
+              data={post?.description ? post.description : post}
               divProps={{
                 className:
                   'rounded-md bg-gray-100 dark:bg-gray-800 dark:!text-white p-4 focus:outline-none focus:ring-2 focus:ring-primary-dark',
@@ -158,6 +158,9 @@ export const PostItem = ({ post, group }: { post: Item; group: Group }) => {
             />
           )}
         </div>
+
+        {isTypeOfPoll && <PollUI group={group} post={post} />}
+
 
         <div className="sticky bottom-0 flex items-center justify-between gap-4">
           <ContentActions
@@ -169,7 +172,13 @@ export const PostItem = ({ post, group }: { post: Item; group: Group }) => {
             save={() => saveEditedPost()}
             groupId={groupId}
             isAdminOrModerator={isAdminOrModerator}
-            setIsContentEditing={setIsContentEditing}
+            setIsContentEditing={(value) => {
+              setIsContentEditing(value);
+              if (value) {
+                setContentDescription(post.description);
+                setContentTitle && setContentTitle(post.title);
+              }
+            }}
             onClickCancel={() => setIsContentEditing(false)}
             isLoading={isLoading}
             hidden={false}
@@ -220,5 +229,5 @@ const checkIfPostIsEditable = async ({
   const generatedNote = await createNote(userPosting)
   const generatedNoteAsBigNumber = BigNumber.from(generatedNote).toString()
   const noteBigNumber = BigNumber.from(post.note).toString()
-  return generatedNoteAsBigNumber === noteBigNumber || canDelete
+  return (generatedNoteAsBigNumber === noteBigNumber) || canDelete
 }

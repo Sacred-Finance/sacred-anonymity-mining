@@ -2,7 +2,7 @@ import { Dispatch, SetStateAction, useState } from 'react'
 import { OutputData } from '@editorjs/editorjs'
 
 type ContentManagementConfig = {
-  isPost: boolean
+  isPostOrPoll: boolean
   defaultContentTitle?: string | null
   defaultContentDescription?: OutputData | null
 }
@@ -18,6 +18,7 @@ type ContentManagementResult = {
   setIsContentEditable: Dispatch<SetStateAction<boolean>>
   isContentEditing: boolean
   setIsContentEditing: Dispatch<SetStateAction<boolean>>
+  clearContent: () => void
 }
 export function useContentManagement(config: ContentManagementConfig): ContentManagementResult {
   const [contentTitle, setContentTitle] = useState<string | null>(config.defaultContentTitle || null)
@@ -28,7 +29,13 @@ export function useContentManagement(config: ContentManagementConfig): ContentMa
   const [isContentEditable, setIsContentEditable] = useState(false)
   const [isContentEditing, setIsContentEditing] = useState(false)
 
-  if (config.isPost) {
+  const clearContent = () => {
+    setContentTitle(null)
+    setContentDescription(null)
+    console.log('Data Cleared')
+  }
+
+  if (config.isPostOrPoll) {
     return {
       contentTitle,
       setContentTitle,
@@ -40,6 +47,7 @@ export function useContentManagement(config: ContentManagementConfig): ContentMa
       setIsContentEditable,
       isContentEditing,
       setIsContentEditing,
+      clearContent
     }
   } else {
     return {
@@ -51,6 +59,7 @@ export function useContentManagement(config: ContentManagementConfig): ContentMa
       setIsContentEditable,
       isContentEditing,
       setIsContentEditing,
+      clearContent
     }
   }
 }

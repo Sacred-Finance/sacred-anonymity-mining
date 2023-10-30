@@ -64,13 +64,13 @@ export function PostPage({
   const postId = post.id
   const { address } = useAccount()
 
+  const { isAdmin, fetchIsAdmin, fetchIsModerator } = useCheckIfUserIsAdminOrModerator(address)
   const [swotResponse, setSwotResponse] = React.useState('')
   const [causalChainResponse, setCausalChainResponse] = React.useState('')
   const [secondOrderResponse, setSecondOrderResponse] = React.useState('')
   const [unbiasedCritiqueResponse, setUnbiasedCritiqueResponse] = React.useState('')
   const [prosAndConsResponse, setProsAndConsResponse] = React.useState('')
 
-  const { fetchIsAdmin, fetchIsModerator } = useCheckIfUserIsAdminOrModerator(address)
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -189,20 +189,14 @@ export function PostPage({
 
                 <Tab.Panels
                   className={
-                    'scrollbar max-h-[calc(90vh - 200px)] col-span-12 flex w-full flex-col gap-4   rounded-xl  border bg-white p-3  dark:border-gray-700 dark:bg-gray-900  '
+                    'scrollbar max-h-[calc(90vh - 200px)] col-span-12 flex w-full flex-col gap-4'
                   }
                 >
-                  <Tab.Panel className="flex flex-col gap-4">
+                  <Tab.Panel className="flex flex-col gap-4 mb-2 rounded-xl p-3 border bg-white dark:border-gray-700 dark:bg-gray-900">
                     <CommunityCard
                       variant={'banner'}
                       community={community}
-                      actions={[
-                        {
-                          label: 'Edit',
-                          icon: <PencilIcon className={'h-full w-4'} />,
-                          onClick: () => router.push(`/communities/${community?.groupId}/edit`),
-                        },
-                      ]}
+                      isAdmin={isAdmin || false}
                     />
                   </Tab.Panel>
                   <Tab.Panel className="flex flex-col ">
@@ -214,15 +208,16 @@ export function PostPage({
                     {sortedCommentsData
                       .filter(comment => comment.kind == ContentType.POLL)
                       .map(comment => (
-                        <PostComment comment={comment} key={comment.id} />
+                        <div key={`comment_as_poll_${comment.id}`} className='mb-2 rounded-xl p-3 border bg-white dark:border-gray-700 dark:bg-gray-900'>
+                          <PostComment comment={comment} key={comment.id} />
+                        </div>
                       ))}
                   </Tab.Panel>
                   <Tab.Panel className="flex flex-col gap-4 ">
                     {sortedCommentsData.map(comment => (
-                      <>
+                      <div key={`comment_${comment.id}`} className='mb-2 rounded-xl p-3 border bg-white dark:border-gray-700 dark:bg-gray-900'>
                         <PostComment comment={comment} key={comment.id} />
-                        <hr />
-                      </>
+                      </div>
                     ))}
                     {!sortedCommentsData.length && (
                       <div className="flex flex-col items-center justify-center gap-2">
@@ -344,7 +339,7 @@ const CreateCommentUI = ({ group, post }: { group: Group; post: Item }) => {
     return true
   }
 
-  const { contentDescription, setContentDescription, tempContents, contentTitle, setTempContents, setContentTitle } =
+  const { contentDescription, setContentDescription, tempContents, contentTitle, setTempContents, setContentTitle, clearContent } =
     useContentManagement({
       isPost: false,
       defaultContentDescription: undefined,
@@ -421,7 +416,8 @@ const CreateCommentUI = ({ group, post }: { group: Group; post: Item }) => {
         pollRequest: emptyPollRequest,
       }).then(async res => {
         await mutate(getGroupWithPostAndCommentData(groupId, post.id))
-        toast.success('Comment created successfully')
+        toast.success('Comment created successfully');
+        clearContent()
         return res
       })
       setIsLoading(false)
