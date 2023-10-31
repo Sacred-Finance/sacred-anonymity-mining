@@ -64,13 +64,14 @@ export function PostPage({
   const postId = post.id
   const { address } = useAccount()
 
-  const { state: {isAdmin, isModerator} } = useCommunityContext()
+  const {
+    state: { isAdmin, isModerator },
+  } = useCommunityContext()
   const [swotResponse, setSwotResponse] = React.useState('')
   const [causalChainResponse, setCausalChainResponse] = React.useState('')
   const [secondOrderResponse, setSecondOrderResponse] = React.useState('')
   const [unbiasedCritiqueResponse, setUnbiasedCritiqueResponse] = React.useState('')
   const [prosAndConsResponse, setProsAndConsResponse] = React.useState('')
-
 
   const [tempComments, setTempComments] = useState<TempComment[]>([])
 
@@ -104,9 +105,9 @@ export function PostPage({
         },
       }}
     >
-        <div className="mb-6">
-            <ReputationCard />
-        </div>
+      <div className="mb-6">
+        <ReputationCard />
+      </div>
       <div className="flex w-full flex-col bg-gray-100 transition-colors dark:bg-gray-800">
         <div className="flex-1 overflow-hidden">
           <div className="flex h-full flex-col md:flex-row">
@@ -122,7 +123,7 @@ export function PostPage({
             <div className=" flex flex-col gap-4 overflow-y-scroll p-3 md:w-1/2">
               <Tab.Group onChange={handleTabChange} defaultIndex={selectedTab} selectedIndex={selectedTab}>
                 <Tab.List className="sticky top-0 z-10 flex gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
-                  {['Community Info', 'Polls', 'All Replies', 'AI'].map((tooltip, index) => (
+                  {['All Replies', 'Polls', 'AI', 'Community Info'].map((tooltip, index) => (
                     <Tab
                       className={({ selected }) =>
                         `bg-primary-300 flex rounded p-1 text-white dark:bg-gray-950 ${
@@ -155,7 +156,7 @@ export function PostPage({
                   ))}
                 </Tab.List>
 
-                {selectedTab === 3 && (
+                {selectedTab === 2 && (
                   <>
                     <span className={'inline-flex items-center gap-2 text-[10px] text-yellow-700'}>
                       <ExclamationCircleIcon className={'w-4'} />
@@ -167,44 +168,23 @@ export function PostPage({
                   </>
                 )}
 
-                {(selectedTab === 2 || selectedTab === 1) && (
+                {(selectedTab === 0 || selectedTab === 1) && (
                   <div className="sticky top-0 z-10 flex gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
                     <div className={'flex gap-4'}>
-                      {selectedTab === 2 && <CreateCommentUI post={post} group={community} />}
-                      {(selectedTab === 1 || selectedTab === 2) && <CreatePollUI post={post} group={community} />}
+                      {selectedTab === 0 && <CreateCommentUI post={post} group={community} />}
+                      {(selectedTab === 1 || selectedTab === 0) && <CreatePollUI post={post} group={community} />}
                     </div>
                   </div>
                 )}
 
-                <Tab.Panels
-                  className={
-                    'scrollbar max-h-[calc(90vh - 200px)] col-span-12 flex w-full flex-col gap-4'
-                  }
-                >
-                  <Tab.Panel className="flex flex-col gap-4 mb-2 rounded-xl p-3 border bg-white dark:border-gray-700 dark:bg-gray-900">
-                    <CommunityCard
-                      variant={'banner'}
-                      community={community}
-                      isAdmin={isAdmin || false}
-                    />
-                  </Tab.Panel>
-                  <Tab.Panel className="flex flex-col ">
-                    {!sortedCommentsData.length && (
-                      <div className="flex flex-col items-center justify-center gap-2">
-                        <div className="text-md">No Polls yet</div>
-                      </div>
-                    )}
-                    {sortedCommentsData
-                      .filter(comment => comment.kind == ContentType.POLL)
-                      .map(comment => (
-                        <div key={`comment_as_poll_${comment.id}`} className='mb-2 rounded-xl p-3 border bg-white dark:border-gray-700 dark:bg-gray-900'>
-                          <PostComment comment={comment} key={comment.id} />
-                        </div>
-                      ))}
-                  </Tab.Panel>
+                <Tab.Panels className={'scrollbar max-h-[calc(90vh - 200px)] col-span-12 flex w-full flex-col gap-4'}>
+                  {/* Comments / Replies */}
                   <Tab.Panel className="flex flex-col gap-4 ">
                     {sortedCommentsData.map(comment => (
-                      <div key={`comment_${comment.id}`} className='mb-2 rounded-xl p-3 border bg-white dark:border-gray-700 dark:bg-gray-900'>
+                      <div
+                        key={`comment_${comment.id}`}
+                        className="mb-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900"
+                      >
                         <PostComment comment={comment} key={comment.id} />
                       </div>
                     ))}
@@ -215,12 +195,32 @@ export function PostPage({
                     )}
                   </Tab.Panel>
 
+                  {/* Polls */}
+                  <Tab.Panel className="flex flex-col ">
+                    {!sortedCommentsData.length && (
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <div className="text-md">No Polls yet</div>
+                      </div>
+                    )}
+                    {sortedCommentsData
+                      .filter(comment => comment.kind == ContentType.POLL)
+                      .map(comment => (
+                        <div
+                          key={`comment_as_poll_${comment.id}`}
+                          className="mb-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900"
+                        >
+                          <PostComment comment={comment} key={comment.id} />
+                        </div>
+                      ))}
+                  </Tab.Panel>
+
+                  {/* AI Tab */}
                   <Tab.Panel className="flex flex-col gap-4">
                     <Accordion type="single" collapsible className="w-full">
                       <AccordionItem value="swot">
                         <AccordionTrigger>
                           <span className={'inline-flex gap-4'}>
-                         <CheckCircle className={swotResponse ? 'text-green-500' : 'text-gray-500'} />    SWOT
+                            <CheckCircle className={swotResponse ? 'text-green-500' : 'text-gray-500'} /> SWOT
                           </span>
                         </AccordionTrigger>
                         <AccordionContent>
@@ -277,6 +277,11 @@ export function PostPage({
                       </AccordionItem>
                     </Accordion>
                   </Tab.Panel>
+
+                  {/* Community Tab */}
+                  <Tab.Panel className="mb-2 flex flex-col gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
+                    <CommunityCard variant={'banner'} community={community} isAdmin={isAdmin || false} />
+                  </Tab.Panel>
                 </Tab.Panels>
               </Tab.Group>
             </div>
@@ -328,12 +333,19 @@ const CreateCommentUI = ({ group, post }: { group: Group; post: Item }) => {
     return true
   }
 
-  const { contentDescription, setContentDescription, tempContents, contentTitle, setTempContents, setContentTitle, clearContent } =
-    useContentManagement({
-      isPost: false,
-      defaultContentDescription: undefined,
-      defaultContentTitle: undefined,
-    })
+  const {
+    contentDescription,
+    setContentDescription,
+    tempContents,
+    contentTitle,
+    setTempContents,
+    setContentTitle,
+    clearContent,
+  } = useContentManagement({
+    isPost: false,
+    defaultContentDescription: undefined,
+    defaultContentTitle: undefined,
+  })
 
   const addComment: () => Promise<void> = async () => {
     if (validateRequirements() !== true) return
@@ -405,7 +417,7 @@ const CreateCommentUI = ({ group, post }: { group: Group; post: Item }) => {
         pollRequest: emptyPollRequest,
       }).then(async res => {
         await mutate(getGroupWithPostAndCommentData(groupId, post.id))
-        toast.success('Comment created successfully');
+        toast.success('Comment created successfully')
         clearContent()
         return res
       })
@@ -439,7 +451,7 @@ const CreateCommentUI = ({ group, post }: { group: Group; post: Item }) => {
 }
 
 export const VoteForItemUI = ({ post, postId, group }: { post: Item; postId: string; group: Group }) => {
-  const groupId = group.id.toString()
+  const groupId = group?.id?.toString()
   const user = useUserIfJoined(groupId)
   const { t } = useTranslation()
   const { address } = useAccount()
