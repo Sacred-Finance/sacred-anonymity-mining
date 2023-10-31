@@ -14,7 +14,10 @@ export const Logo = ({
   className?: string
   width?: number
 }) => {
+  const [mounted, setMounted] = React.useState(false)
   const { resolvedTheme } = useTheme()
+  React.useEffect(() => setMounted(true), [])
+  if (!mounted) return null
   return (
     <Image
       src={resolvedTheme === 'dark' || invertTheme ? logoLight : logo}
