@@ -1,6 +1,6 @@
 import React, { Dispatch, SetStateAction, useState } from 'react'
 import { Post } from '@/lib/post'
-import { useActiveUser, useUserIfJoined, useUsers } from '@/contexts/CommunityProvider'
+import { useActiveUser, useCommunityContext, useUserIfJoined, useUsers } from '@/contexts/CommunityProvider'
 import { useAccount } from 'wagmi'
 import { useTranslation } from 'react-i18next'
 import { SortByOption } from '@components/SortBy'
@@ -17,6 +17,7 @@ import { useContentManagement } from '@/hooks/useContentManagement'
 import { NewPostModal } from '@components/Post/PostComments'
 import LoadingComponent from '@components/LoadingComponent'
 import ReputationCard from './ReputationCard'
+import { CommunityCard } from './CommunityCard/CommunityCard'
 
 export function CommunityPage({ community, posts }: { community: Group; posts?: Item[] }) {
   const groupId = community.id.toString()
@@ -26,6 +27,7 @@ export function CommunityPage({ community, posts }: { community: Group; posts?: 
   const [sortBy, setSortBy] = useState<SortByOption>('highest')
 
   const sortedData = useItemsSortedByVote([], posts, sortBy)
+  const { state: { isAdmin, isModerator } } = useCommunityContext()
 
   if (!community || !community?.id) return <LoadingComponent />
 
@@ -36,12 +38,8 @@ export function CommunityPage({ community, posts }: { community: Group; posts?: 
       </div>
       <div className="relative flex min-h-screen gap-6 rounded-lg  p-6 transition-colors ">
         <div className="sticky top-0 flex w-full flex-col gap-6">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <h2 className="text-2xl font-semibold tracking-tight">{community.name}</h2>
-              <p className="text-sm text-muted-foreground">{community.groupDetails.description}</p>
-            </div>
-          </div>
+          <CommunityCard variant={'banner'} community={community} isAdmin={isAdmin} />
+
           <div className="flex w-fit gap-4 rounded-lg ">
             <CreatePollUI group={community} />
             <CreatePostUI group={community} />
@@ -68,13 +66,13 @@ const CreatePostUI = ({ group }: { group: Group }) => {
   const validateRequirements = () => {
     if (!address) return toast.error(t('alert.connectWallet'), { toastId: 'connectWallet' })
     if (!user) return toast.error(t('toast.error.notJoined'), { type: 'error', toastId: 'min' })
-
+    
     return true
   }
 
-  const { contentDescription, setContentDescription, tempContents, contentTitle, setTempContents, setContentTitle } =
+  const { contentDescription, setContentDescription, tempContents, contentTitle, setTempContents, setContentTitle, clearContent } =
     useContentManagement({
-      isPost: true,
+      isPostOrPoll: true,
       defaultContentDescription: undefined,
       defaultContentTitle: undefined,
     })
@@ -111,6 +109,8 @@ const CreatePostUI = ({ group }: { group: Group }) => {
 
       if (status === 200) {
         setIsLoading(false)
+        clearContent()
+
       } else {
         setIsLoading(false)
       }

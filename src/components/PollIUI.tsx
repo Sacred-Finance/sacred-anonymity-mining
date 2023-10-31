@@ -93,7 +93,7 @@ export const PollUI = ({ group, post }: { group: Group; post: Item }) => {
   const VoteIndicator = ({ progress }) => {
     return (
       <div className="my-auto h-1 w-[90%] bg-neutral-200 dark:bg-neutral-600">
-        <div style={{ width: `${progress}%` }} className={clsx(`h-1 bg-blue-500`)}></div>
+        <div style={{ width: `${progress}%` }} className={clsx(`h-1 bg-primary`)}></div>
       </div>
     )
   }
@@ -106,7 +106,7 @@ export const PollUI = ({ group, post }: { group: Group; post: Item }) => {
         <div className="justify-left flex flex-col justify-items-center">
           {pollType == PollType.SINGLE_ANSWER &&
             answers.map((answer, i) => (
-              <div key={`${post.id}_${i}`} className="mb-[0.125rem] mr-4 min-h-[1.5rem] pl-[1.5rem]">
+              <div key={`${post.id}_${i}`} className="mb-[0.125rem] mr-4 min-h-[1.5rem]">
                 <div className="flex flex-row">
                   <label className="w-[85%]">{answer}</label>
                   <label className="w-[5%] text-end">
@@ -138,7 +138,7 @@ export const PollUI = ({ group, post }: { group: Group; post: Item }) => {
             ))}
           {pollType == PollType.MULTI_ANSWER &&
             answers.map((answer, i) => (
-              <div key={`${post.id}_${i}`} className="mb-[0.125rem] mr-4 min-h-[1.5rem] pl-[1.5rem]">
+              <div key={`${post.id}_${i}`} className="mb-[0.125rem] mr-4 min-h-[1.5rem]">
                 <div className="flex flex-row">
                   <label className="w-[85%]">{answer}</label>
                   <label className="w-[5%] text-end">
@@ -168,7 +168,7 @@ export const PollUI = ({ group, post }: { group: Group; post: Item }) => {
             ))}
           {pollType == PollType.NUMERIC_RATING &&
             answers.map((answer, i) => (
-              <div key={`${post.id}_${i}`} className="mb-[0.125rem] mr-4 min-h-[1.5rem] pl-[1.5rem]">
+              <div key={`${post.id}_${i}`} className="mb-[0.125rem] mr-4 min-h-[1.5rem]">
                 <div className="flex flex-row">
                   <label className="w-[85%]">{answer}</label>
                   <label className="w-[5%] text-start">
@@ -201,8 +201,8 @@ export const PollUI = ({ group, post }: { group: Group; post: Item }) => {
             ))}
           <PrimaryButton
             className={clsx(
-              'w-fit',
-              'border border-gray-500 text-sm text-gray-500 transition-colors duration-150 hover:bg-gray-500 hover:text-white'
+              'w-fit my-2',
+              'border border-gray-500 text-sm text-slate-200 transition-colors duration-150 hover:bg-gray-500 hover:text-white dark:text-slate-200'
             )}
             type="button"
             isLoading={isLoading}

@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { Group, Item } from '@/types/contract/ForumInterface'
 import { PostItem } from '@components/Post/PostItem'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
+import { VoteForItemUI } from './PostPage'
 
 export interface TempComment {
   id: string
@@ -43,11 +44,13 @@ export const PostComment = ({ comment }: { comment: Item }) => {
       {comment && <PostItem post={comment} group={community} />}
       <div className="pt-3 text-gray-600 dark:text-gray-400">
         <div
-          className="flex gap-4"
+          className="flex gap-4 items-center"
           style={{
             visibility: commentIsConfirmed(comment.id) ? 'visible' : 'hidden',
           }}
         >
+          <VoteForItemUI postId={comment.parentId} post={comment} group={community} />
+
           <p className="inline-block text-sm">
             🕛{' '}
             {comment?.description?.time || comment?.time

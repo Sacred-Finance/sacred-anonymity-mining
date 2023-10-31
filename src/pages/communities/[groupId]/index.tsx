@@ -6,12 +6,14 @@ import { ethers } from 'ethers'
 import useSWR from 'swr'
 import { useRouter } from 'next/router'
 import fetcher, { getGroupWithPostData } from '@/lib/fetcher'
+import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
 
 function Group() {
   const router = useRouter()
   const { groupId, postId } = router.query
   const { data, error, isValidating } = useSWR(getGroupWithPostData(groupId), fetcher)
   const { dispatch } = useCommunityContext()
+  useCheckIfUserIsAdminOrModerator(true)
 
   useEffect(() => {
     if (data && !isValidating && !error && !data?.error) {

@@ -12,7 +12,8 @@ interface Community {
 const communityCache: Map<number, Community> = new Map()
 
 export async function middleware(request: NextRequest, res: NextResponse) {
-  if (await isAuthValid(request)) {
+  /** Disable for time being */
+  // if (await isAuthValid(request)) {
     const pathname = request.nextUrl.pathname
 
     if (pathname.startsWith('/api/discourse')) {
@@ -48,9 +49,9 @@ export async function middleware(request: NextRequest, res: NextResponse) {
       }
     }
     return NextResponse.next()
-  }
+  // }
 
-  return NextResponse.rewrite(request.nextUrl.origin, { status: 401 })
+  // return NextResponse.rewrite(request.nextUrl.origin, { status: 401 })
 }
 
 function isNumber(value: any): boolean {

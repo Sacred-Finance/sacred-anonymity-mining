@@ -30,7 +30,7 @@ const EditorJsRenderer = ({ data, isHtml = false, className }: Props) => {
   }
 
   return (
-    <div className={clsx('select:text-primary-400 prose-lg max-w-full ', className)}>
+    <div className={clsx('select:text-primary-400 prose-lg overflow-y-hidden', className)}>
       {html.map((item, index) => {
         if (typeof item === 'string') {
           return <div dangerouslySetInnerHTML={{ __html: item }} key={index}></div>

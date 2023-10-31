@@ -6,13 +6,13 @@ import EditorJsRenderer from '@components/editor-js/EditorJSRenderer'
 import clsx from 'clsx'
 import { Template } from '@pages/api/gpt-server/logos-ai'
 import { EditorJsType } from '@components/NewPostForm'
-import { CancelButton } from '@components/buttons/CancelButton'
 
 interface AnonymizeButtonProps {
   postData: EditorJsType
   postTitle?: string
   setDescription: (value: EditorJsType) => void
-  refToUpdateOnChange: React.MutableRefObject<() => void>
+  handleUpdate: (arg) => void
+  refToUpdateOnChange?: React.MutableRefObject<EditorJsType>
 }
 
 function convertEditorJsTypeToString(postData: EditorJsType) {
@@ -29,10 +29,13 @@ const AnonymizeButton: React.FC<AnonymizeButtonProps> = ({
   setDescription,
   refToUpdateOnChange,
 }) => {
-  const { isLoading, data, error, fetchData } = useGPTServerAnalysis({
-    postData: convertEditorJsTypeToString(postData),
-    template: Template.Anonymize,
-  })
+  const [analysis] = useGPTServerAnalysis([
+    {
+      postData: convertEditorJsTypeToString(postData),
+      template: Template.Anonymize,
+    },
+  ])
+  const { isLoading, data, error, fetchData } = analysis
   const [showModal, setShowModal] = React.useState(!isLoading && data)
 
   const toggleModal = () => {
@@ -46,36 +49,21 @@ const AnonymizeButton: React.FC<AnonymizeButtonProps> = ({
     }
   }, [data])
 
-  const useThis = () => {
-    setDescription(description => {
-      return {
-        time: description.time,
-        blocks: [
-          {
-            type: 'paragraph',
-            data: {
-              text: data.anonymized,
-            },
-          },
-        ],
-        version: description.version,
-      }
-    })
-
-    // TODO: this is a hack to get Editorjs to render changes. consider revisions later.
-    refToUpdateOnChange?.current?.render?.({
+  const useThis = React.useCallback(() => {
+    setDescription({
+      time: new Date().getTime(),
+      version: '2.22.2',
       blocks: [
         {
           type: 'paragraph',
           data: {
-            text: data.anonymized,
+            text: JSON.parse(data)?.anonymized,
           },
         },
       ],
     })
-    if (refToUpdateOnChange?.current) refToUpdateOnChange?.current
     toggleModal()
-  }
+  }, [data, refToUpdateOnChange, postData])
 
   return (
     <div
@@ -96,31 +84,22 @@ const AnonymizeButton: React.FC<AnonymizeButtonProps> = ({
             ? 'View summary'
             : 'Summarize post'
         }
+        variant="outlined"
         endIcon={<SparklesIcon className={clsx('h-5 w-5', data ? 'text-white' : 'text-blue-500')} height={20} />}
         isLoading={isLoading}
-        className={clsx(
-          'flex items-center gap-2 rounded px-2 py-1 text-blue-500 outline outline-2  outline-blue-500 hover:bg-blue-600 hover:text-white focus:outline-none',
-          data ? 'bg-blue-500 text-white' : ''
-        )}
       >
         {data ? 'Anonymized' : 'Anonymize'}
       </PrimaryButton>
 
       {showModal && (
-        <div className="fixed inset-0 z-[52] flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 z-[52] flex items-center justify-center bg-black/50">
           <div
-            className="relative w-1/2 overflow-y-auto rounded-lg bg-white p-8 text-center"
+            className="relative flex min-h-[400px] w-1/2 flex-col justify-between overflow-y-auto rounded-lg bg-gray-950 p-4"
             onClick={e => {
               e.stopPropagation()
             }}
           >
-            <button onClick={toggleModal} className="absolute right-2 top-2 text-gray-400 hover:text-gray-600">
-              Close
-            </button>
-
             <span className={'text-xl font-bold '}>{!postTitle ? 'Anonymized Text' : postTitle}</span>
-            <br />
-            <br />
             {error && (
               <>
                 <div className="text-red-500">{error}</div>
@@ -128,35 +107,47 @@ const AnonymizeButton: React.FC<AnonymizeButtonProps> = ({
               </>
             )}
 
-            <div className={'flex'}>
-              <div className={'flex flex-col'}>
-                Original
-                <EditorJsRenderer
-                  data={data ? convertEditorJsTypeToString(postData) : 'Loading summary...'}
-                  isHtml={true}
-                />
+            {/*linear gradient*/}
+            <div
+              className="flex gap-4
+            rounded-lg bg-secondary/50 bg-opacity-50 bg-gradient-to-r from-50% via-50% to-100% p-2
+            "
+            >
+              <div className={'flex flex-col border  bg-secondary/50 p-2'}>
+                <span className={'text-xl  uppercase'}>Original</span>
+                <span className={''}>
+                  <EditorJsRenderer
+                    data={data ? convertEditorJsTypeToString(postData) : 'Loading summary...'}
+                    isHtml={true}
+                  />
+                </span>
               </div>
-              <div className={'flex flex-col'}>
-                Anonymized
-                <EditorJsRenderer data={data ? data.anonymized : 'Loading summary...'} isHtml={true} />
+              <div className={'flex flex-col border bg-secondary/50 p-2'}>
+                <span className={'text-xl uppercase'}>Anonymized</span>
+                <EditorJsRenderer data={data ? JSON.parse(data)?.anonymized : 'Loading summary...'} isHtml={true} />
               </div>
             </div>
-            <CancelButton
-              className="float-left border transition-colors duration-150"
-              onClick={() => {
-                toggleModal()
-                fetchData()
-              }}
-            >
-              Retry Anonymization
-            </CancelButton>
-            <PrimaryButton
-              className="float-right border border-gray-300 bg-primary-500 text-white transition-colors duration-150"
-              disabled={!data?.anonymized}
-              onClick={useThis}
-            >
-              Use This
-            </PrimaryButton>
+
+            <div className={'flex justify-between gap-4'}>
+              <PrimaryButton variant={'destructive'} onClick={toggleModal}>
+                Close
+              </PrimaryButton>
+              <PrimaryButton
+                className={'text-white'}
+                endIcon={<SparklesIcon className={clsx('h-5 w-5', data ? 'text-white' : 'text-primary')} height={20} />}
+                variant={'outline'}
+                onClick={() => {
+                  toggleModal()
+                  fetchData()
+                }}
+              >
+                Retry Anonymization
+              </PrimaryButton>
+
+              <PrimaryButton variant={'default'} disabled={!data} onClick={useThis}>
+                Update Message
+              </PrimaryButton>
+            </div>
           </div>
         </div>
       )}

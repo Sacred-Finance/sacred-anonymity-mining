@@ -2,7 +2,7 @@ import React, { createContext, ReactNode, useContext, useReducer, useMemo, useEf
 import { User } from '@/lib/model'
 import { ethers } from 'ethers'
 import { Identity } from '@semaphore-protocol/identity'
-import _ from 'lodash'
+import _, { isBoolean } from 'lodash'
 import { useAccount } from 'wagmi'
 import { useIdentity } from '@/hooks/useIdentity'
 import { Group, Item } from '@/types/contract/ForumInterface'
@@ -35,7 +35,9 @@ type State = {
   users: User[]
   usersGrouped: { [key: string]: User[] }
   activeCommunity: ActiveCommunity | ActiveDiscourseCommunity
-  activePost: ActivePost
+  activePost: ActivePost,
+  isAdmin: boolean,
+  isModerator: boolean,
 }
 
 type Action =
@@ -48,6 +50,7 @@ type Action =
   // a new type for active community, and will store community details, post list, and comments for each post
   | { type: 'SET_ACTIVE_COMMUNITY'; payload: ActiveCommunity | ActiveDiscourseCommunity }
   | { type: 'SET_ACTIVE_POST'; payload: ActivePost }
+  | { type: 'SET_USER_ACCESS'; payload: { isAdmin?: boolean, isModerator?: boolean } }
 
 const initialState: State = {
   communities: [],
@@ -62,6 +65,8 @@ const initialState: State = {
     post: {} as Item,
     comments: [] as Item[],
   },
+  isAdmin: false,
+  isModerator: false,
 }
 
 function reducer(state: State, action: Action): State {
@@ -148,6 +153,16 @@ function reducer(state: State, action: Action): State {
         users: state.users.filter(u => u.identityCommitment !== action.payload.identityCommitment),
         usersGrouped: updatedUsersGrouped,
         communities: updatedCommunities,
+      }
+
+      case 'SET_USER_ACCESS': {
+        const isAdmin = isBoolean(action.payload.isAdmin) ? action.payload.isAdmin : state.isAdmin;
+        const isModerator = isBoolean(action.payload.isModerator) ? action.payload.isModerator : state.isModerator;
+        return {
+          ...state,
+          isAdmin,
+          isModerator
+        }
       }
     default:
       return state

@@ -116,7 +116,7 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
               {/*content*/}
               <div className="relative flex w-full flex-col rounded border-0 bg-white shadow-lg outline-none focus:outline-none dark:bg-gray-800">
                 {/*header*/}
-                <div className="flex items-start justify-between rounded-t border-b border-solid border-slate-200 p-5">
+                <div className="flex items-start justify-between rounded-t border-b border-solid border-slate-200 dark:border-gray-600 p-5">
                   <h3 className="text-3xl font-semibold">Create Poll</h3>
                   <Button
                     className="float-right  border-0 bg-transparent p-1 text-3xl font-semibold leading-none text-black opacity-5 outline-none focus:outline-none"
@@ -156,10 +156,9 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
                     </label>
                     <input
                       //highlight on click
+                      className=" focus:border-primary-500  w-full rounded border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
                       onClick={e => e.currentTarget.select()}
                       maxLength={60}
-                      id={'title'}
-                      className={`${clsx(classes.input)}`}
                       placeholder={'Poll Title'}
                       type="text"
                       value={title}
@@ -174,7 +173,7 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
                     <Editor
                       divProps={{
                         className: clsx(
-                          'z-50 bg-white !text-black w-full h-full rounded-md shadow-md overflow-y-visible form-textarea'
+                          'mt-2 z-50 bg-white text-black w-full h-full rounded-md shadow-md overflow-y-visible form-textarea dark:border-gray-600 dark:bg-gray-700'
                         ),
                       }}
                       id={'content'}
@@ -192,7 +191,7 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
                       <div className="flex w-full flex-col gap-4">
                         <div className="text-md">Rate Scale From</div>
                         <input
-                          className={`${clsx(classes.input)}`}
+                          className=" focus:border-primary-500  w-full rounded border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
                           placeholder={'Rate Scale From'}
                           type="number"
                           value={rateScaleFrom}
@@ -202,7 +201,7 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
                       <div className="flex w-full flex-col gap-4">
                         <div className="text-md">Rate Scale To</div>
                         <input
-                          className={`${clsx(classes.input)}`}
+                          className=" focus:border-primary-500  w-full rounded border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
                           placeholder={'Rate Scale To'}
                           type="number"
                           value={rateScaleTo}
@@ -220,7 +219,7 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
                         <div className="flex items-center gap-2" key={index}>
                           <input
                             tabIndex={index}
-                            className={`${clsx(classes.input)}`}
+                            className=" focus:border-primary-500  w-full rounded border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
                             placeholder={'Option'}
                             type="text"
                             value={option}
@@ -254,7 +253,7 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
                             className={clsx(
                               'mr-1 rounded border border-pink-500 px-2 py-2 text-xs font-bold uppercase text-gray-500 outline-none transition-all duration-150 ease-linear last:mr-0 hover:bg-gray-500 hover:text-white focus:outline-none active:bg-gray-600',
                               options.length >= 10 || index !== options.length - 1
-                                ? 'hidden'
+                                ? 'invisible'
                                 : 'bg-green-500/90 text-white'
                             )}
                             type="button"
@@ -269,7 +268,7 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
                   <div className="flex w-full flex-col gap-4">
                     <div className="text-md">Duration (In Hours)</div>
                     <input
-                      className={`${clsx(classes.input)}`}
+                      className=" focus:border-primary-500  w-full rounded border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
                       placeholder={'In Hours, 1 Week = 168 Hours'}
                       type="number"
                       value={duration}
@@ -279,7 +278,7 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
                 </div>
 
                 {/*footer*/}
-                <div className="flex items-center justify-end rounded-b border-t border-solid border-slate-200 p-6">
+                <div className="flex items-center justify-end rounded-b border-t border-solid border-slate-200 dark:border-gray-600 p-6">
                   <button
                     className="background-transparent   px-6 py-2 text-sm font-bold uppercase text-red-500 outline-none transition-all duration-150 ease-linear focus:outline-none"
                     type="button"

@@ -4,9 +4,9 @@ import { useTranslation } from 'next-i18next'
 import { TrashIcon } from '@heroicons/react/20/solid'
 import { useRemoveGroup } from '@/hooks/useRemoveGroup'
 import { useAccount } from 'wagmi'
-import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
 import { CircularLoader } from './buttons/JoinCommunityButton'
 import { Button } from '@/shad/ui/button'
+import { useCommunityContext } from '@/contexts/CommunityProvider'
 
 interface RemoveGroupProps {
   groupId: number
@@ -18,12 +18,8 @@ const RemoveGroup: React.FC<RemoveGroupProps> = ({ groupId, hidden }) => {
   const { writeAsync } = useRemoveGroup(groupId)
 
   const { address } = useAccount()
-  const { isAdmin, fetchIsAdmin } = useCheckIfUserIsAdminOrModerator(address)
+  const { state: { isAdmin, isModerator } } = useCommunityContext()
   const [isLoading, setIsLoading] = React.useState(false)
-
-  useEffect(() => {
-    fetchIsAdmin()
-  }, [address])
 
   const onClick = () => {
     setIsLoading(true)
@@ -38,7 +34,7 @@ const RemoveGroup: React.FC<RemoveGroupProps> = ({ groupId, hidden }) => {
 
   return (
     <>
-      {isAdmin && (
+      {(isAdmin || isModerator) && (
         <Button
           variant={'destructive'}
           id="edit-community-button"
