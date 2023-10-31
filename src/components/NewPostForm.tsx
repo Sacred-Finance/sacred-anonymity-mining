@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import React, { Dispatch, SetStateAction, useCallback, useRef, useState } from 'react'
+import React, { cloneElement, Dispatch, SetStateAction, useCallback, useRef, useState } from 'react'
 import EditorJsRenderer from './editor-js/EditorJSRenderer'
 import { CancelButton, PrimaryButton } from './buttons'
 import { EyeIcon, PencilIcon } from '@heroicons/react/20/solid'
@@ -7,9 +7,10 @@ import dynamic from 'next/dynamic'
 import clsx from 'clsx'
 import Dropdown from './buttons/Dropdown/Dropdown'
 import { Tab } from '@headlessui/react'
-import { OutputData } from '@editorjs/editorjs'
+import EditorJS, { OutputData } from '@editorjs/editorjs'
 import { Input } from '@/shad/ui/input'
 import { Label } from '@/shad/ui/label'
+import AnonymizeButton from '@components/buttons/AIAnonymiseButton'
 
 export interface EditorJsType {
   blocks: {
@@ -24,37 +25,7 @@ const Editor = dynamic(() => import('./editor-js/Editor'), {
   ssr: false,
 })
 
-interface ToggleButtonProps {
-  setIsPreview: (isPreview: boolean) => void
-  isPreview: boolean
-  showText?: boolean
-  disabled?: boolean
-}
 
-function EditorTabs({ setIsPreview }: ToggleButtonProps) {
-  return (
-    <div>
-      <Tab.List className="flex items-center gap-4 text-sm">
-        <Tab onClick={() => setIsPreview(false)} className={clsx('flex items-center gap-1 border p-2')}>
-          {({ selected }) => (
-            <div className={clsx('contents', selected && 'text-primary-600')}>
-              <PencilIcon className="h-4 w-4" />
-              Edit
-            </div>
-          )}
-        </Tab>
-        <Tab onClick={() => setIsPreview(true)} className={clsx('flex items-center gap-1 border  p-2')}>
-          {({ selected }) => (
-            <div className={clsx('contents', selected && 'text-primary-600')}>
-              <EyeIcon className="h-4 w-4" />
-              Preview
-            </div>
-          )}
-        </Tab>
-      </Tab.List>
-    </div>
-  )
-}
 
 export interface NewPostFormProps {
   editorId: string
@@ -101,8 +72,6 @@ export interface NewPostFormProps {
 const getClassNames = (base, customClassNames, condition) => {
   return clsx(base, condition ? customClassNames?.true : customClassNames?.false)
 }
-
-const commonButtonClasses = 'border-gray-500 border text-sm text-gray-500 transition-colors duration-150'
 
 function ContentSection({
   data,
@@ -168,6 +137,7 @@ export const NewPostForm = ({
   const [isPreview, setIsPreview] = useState(false)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const inputRef = useRef(null)
+  const contentRef = useRef(null)
   const [error, setError] = useState<string | null>(null)
 
   const handleSubmitAction = useCallback(async () => {
@@ -264,7 +234,25 @@ export const NewPostForm = ({
             )}
             <Tab.Group>
               <Tab.Panels className={'max-h-[calc(50vh)] overflow-y-scroll'}>
-                <Label className="text-md">Content</Label>
+                <div className={'flex justify-between'}>
+                  <Label className="text-md">Content</Label>
+                  <div className={''}>
+                    <AnonymizeButton
+                      setDescription={description => {
+                        setDescription(description)
+                        setError(null)
+                        setIsFormOpen(false)
+
+                        // todo this is a hack to make the form open again after the anonymize button is clicked - need to fix this
+                        setTimeout(() => {
+                          setIsFormOpen(true)
+                        }, 100)
+                      }}
+                      postData={description}
+                    />
+                  </div>
+                </div>
+
                 <ContentSection
                   preview={isPreview}
                   data={description}
@@ -277,12 +265,11 @@ export const NewPostForm = ({
                   placeholder={placeholder}
                   holder={editorId}
                 />
-
-                {/*<AnonymizeButton setDescription={setDescription}  postData={description}  />*/}
               </Tab.Panels>
             </Tab.Group>
 
             {error && <p className={clsx('text-red-500')}>{error}</p>}
+
             <FormButtons
               disableSubmit={disableSubmit}
               handleClose={handleClose}
@@ -291,6 +278,7 @@ export const NewPostForm = ({
               submitButtonText={submitButtonText}
               t={t}
               c={c}
+              refToUpdateOnChange={inputRef}
               tokenBalanceReveal={tokenBalanceReveal}
             />
 
@@ -313,12 +301,12 @@ const FormButtons = ({
   tokenBalanceReveal,
 }) => (
   <div className="flex justify-between">
-    <CancelButton
-      className={clsx(c?.cancelButton, 'bg-red-400 text-white hover:bg-opacity-80 hover:text-white')}
+    <PrimaryButton
       onClick={handleClose}
+      variant={'destructive'}
     >
       {t('button.closeForm')}
-    </CancelButton>
+    </PrimaryButton>
     <div className="flex flex-row items-center gap-2">
       {tokenBalanceReveal && (
         <Dropdown
@@ -329,7 +317,6 @@ const FormButtons = ({
         />
       )}
       <PrimaryButton
-        className={clsx(c?.submitButton, 'hover:bg-opacity-80')}
         onClick={handleSubmitAction}
         isLoading={isSubmitting}
         disabled={isSubmitting || disableSubmit}
