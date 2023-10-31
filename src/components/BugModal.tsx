@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { CustomModal } from '@components/CustomModal'
 import { BugAntIcon, ExclamationCircleIcon, HandRaisedIcon } from '@heroicons/react/20/solid'
-import { SideItem } from '@components/SideBar'
 import { motion } from 'framer-motion'
 import clsx from 'clsx'
 import { PrimaryButton } from './buttons/PrimaryButton'

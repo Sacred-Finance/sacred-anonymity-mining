@@ -160,8 +160,7 @@ function HomePage({ isAdmin = false, discourseCommunities }: HomeProps) {
         <TabsContent value="logos" className="border-none p-0 outline-none">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <h2 className="text-2xl font-semibold tracking-tight">Most Popular</h2>
-              <p className="text-sm text-muted-foreground">More than 2 users</p>
+              <h2 className="text-2xl font-semibold tracking-tight">Communities</h2>
             </div>
           </div>
           <Separator className="my-4" />
@@ -169,26 +168,6 @@ function HomePage({ isAdmin = false, discourseCommunities }: HomeProps) {
             <ScrollArea className={'h-full'}>
               <div className="grid-cols-1 items-start justify-center gap-6 rounded-lg p-0 md:grid md:p-8 lg:grid-cols-2 xl:grid-cols-3">
                 {(filteredCommunities.length ? filteredCommunities : communities)
-                  .filter(community => community.userCount >= 2)
-                  .map(community => (
-                    <div key={community.groupId} className="col-span-2 grid items-start gap-6 lg:col-span-1">
-                      <CommunityCard  community={community} isAdmin={isAdmin || false} />
-                    </div>
-                  ))}
-              </div>
-              <ScrollBar orientation="vertical" />
-            </ScrollArea>
-          </div>
-          <div className="mt-6 space-y-1">
-            <h2 className="text-2xl font-semibold tracking-tight">New Communities</h2>
-            <p className="text-sm text-muted-foreground">Less than 2 users</p>
-          </div>
-          <Separator className="my-4" />
-          <div className="relative">
-            <ScrollArea className={'h-full'}>
-              <div className="grid-cols-1 items-start justify-center gap-6 rounded-lg p-0 md:grid md:p-8 lg:grid-cols-2 xl:grid-cols-3">
-                {(filteredCommunities.length ? filteredCommunities : communities)
-                  .filter(community => community.userCount < 2)
                   .map(community => (
                     <div key={community.groupId} className="col-span-2 grid items-start gap-6 lg:col-span-1">
                       <CommunityCard community={community} isAdmin={isAdmin || false} />
