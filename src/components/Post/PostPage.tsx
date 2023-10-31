@@ -1,4 +1,4 @@
-import { useActiveUser, useUserIfJoined } from '@/contexts/CommunityProvider'
+import { useActiveUser, useCommunityContext, useUserIfJoined } from '@/contexts/CommunityProvider'
 import { useAccount } from 'wagmi'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
 import { useTranslation } from 'next-i18next'
@@ -64,24 +64,13 @@ export function PostPage({
   const postId = post.id
   const { address } = useAccount()
 
-  const { isAdmin, fetchIsAdmin, fetchIsModerator } = useCheckIfUserIsAdminOrModerator(address)
+  const { state: {isAdmin, isModerator} } = useCommunityContext()
   const [swotResponse, setSwotResponse] = React.useState('')
   const [causalChainResponse, setCausalChainResponse] = React.useState('')
   const [secondOrderResponse, setSecondOrderResponse] = React.useState('')
   const [unbiasedCritiqueResponse, setUnbiasedCritiqueResponse] = React.useState('')
   const [prosAndConsResponse, setProsAndConsResponse] = React.useState('')
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await fetchIsAdmin()
-        await fetchIsModerator()
-      } catch (error) {
-        console.error('Failed to fetch user roles:', error)
-      }
-    }
-    fetchData()
-  }, [postId, address])
 
   const [tempComments, setTempComments] = useState<TempComment[]>([])
 
@@ -123,7 +112,7 @@ export function PostPage({
           <div className="flex h-full flex-col md:flex-row">
             <div className=" flex flex-col gap-4 p-3 md:w-1/2">
               <div className="sticky top-0 z-10 flex gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
-                <VoteForItemUI post={post} group={community} />
+                <VoteForItemUI postId={post.id} post={post} group={community} />
               </div>
               <ScrollArea className=" max-h-[calc(90vh - 200px)] col-span-12 flex   w-full  flex-col gap-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
                 <PostItem post={post} group={community} />
@@ -449,10 +438,9 @@ const CreateCommentUI = ({ group, post }: { group: Group; post: Item }) => {
   return <NewPostForm {...propsForNewPost} />
 }
 
-export const VoteForItemUI = ({ post, group }: { post: Item; group: Group }) => {
+export const VoteForItemUI = ({ post, postId, group }: { post: Item; postId: string; group: Group }) => {
   const groupId = group.id.toString()
   const user = useUserIfJoined(groupId)
-  const activeUser = useActiveUser({ groupId: groupId })
   const { t } = useTranslation()
   const { address } = useAccount()
   const { checkUserBalance } = useValidateUserBalance(group, address)
@@ -518,7 +506,7 @@ export const VoteForItemUI = ({ post, group }: { post: Item; group: Group }) => 
         voteProofData
       )
         .then(async res => {
-          await mutate(getGroupWithPostAndCommentData(groupId, post.id))
+          await mutate(getGroupWithPostAndCommentData(groupId, postId))
           toast.success('Vote created successfully')
           setIsLoading(false)
           return res
@@ -539,7 +527,7 @@ export const VoteForItemUI = ({ post, group }: { post: Item; group: Group }) => 
     <>
       <VoteUpButton
         isConnected={!!address}
-        isJoined={!!activeUser}
+        isJoined={user ? true : false}
         isLoading={isLoading}
         onClick={e => voteForPost(Number(post.id), 0)}
         disabled={isLoading || !address}
@@ -548,7 +536,7 @@ export const VoteForItemUI = ({ post, group }: { post: Item; group: Group }) => 
       </VoteUpButton>
       <VoteDownButton
         isConnected={!!address}
-        isJoined={!!activeUser}
+        isJoined={user ? true : false}
         isLoading={isLoading}
         onClick={e => voteForPost(Number(post.id), 1)}
         disabled={isLoading || !address}
