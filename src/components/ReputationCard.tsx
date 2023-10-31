@@ -65,7 +65,7 @@ const ReputationCard = () => {
         {isUpdating && <CircularLoader className={cardLoadingIndicatorClass} />}
         <p className="text-lg text-gray-700 pl-3 leading-none">{reputation?.posRep || 0} { ' ' } Points</p>
       </div>
-      {lastUpdated && <p className="text-sm text-gray-500">Last updated: {timeSinceLastUpdate} seconds ago</p>}
+      {/* {lastUpdated && <p className="text-sm text-gray-500">Last updated: {timeSinceLastUpdate} seconds ago</p>} */}
       {/*<TextComponent />*/}
     </div>
   )

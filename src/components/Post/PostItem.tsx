@@ -1,8 +1,7 @@
 import { useRouter } from 'next/router'
-import { useUserIfJoined } from '@/contexts/CommunityProvider'
+import { useCommunityContext, useUserIfJoined } from '@/contexts/CommunityProvider'
 import React, { useEffect, useRef, useState } from 'react'
 import { useAccount } from 'wagmi'
-import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
 import { Identity } from '@semaphore-protocol/identity'
 import { createNote } from '@/lib/utils'
 import { BigNumber } from 'ethers'
@@ -33,11 +32,11 @@ export const PostItem = ({ post, group }: { post: Item; group: Group }) => {
 
   const user = useUserIfJoined(post.groupId)
   const address = useAccount().address
-  const { isAdmin, isModerator } = useCheckIfUserIsAdminOrModerator(address)
-  const canDelete = isAdmin || isModerator || false
+  const { state: { isAdmin, isModerator } } = useCommunityContext()
   const [isLoading, setIsLoading] = useState(false)
 
   const { t } = useTranslation()
+
 
   const isAdminOrModerator = isAdmin || isModerator
 
@@ -96,7 +95,7 @@ export const PostItem = ({ post, group }: { post: Item; group: Group }) => {
     setIsContentEditable,
     contentTitle,
     setContentTitle,
-    clearContent
+    clearContent,
   } = useContentManagement({
     isPostOrPoll: isTypeOfPost || isTypeOfPoll,
     defaultContentDescription: post.description || { blocks: post.blocks },
@@ -104,21 +103,19 @@ export const PostItem = ({ post, group }: { post: Item; group: Group }) => {
   })
 
   useEffect(() => {
-    if (!user || !post || !address || isNaN(groupId)) return
     updateIsPostEditable({
       post,
       user,
       address,
       setIsPostEditable: setIsContentEditable,
-      canDelete,
+      canDelete: isAdminOrModerator,
     })
-  }, [user, post, isAdminOrModerator, address, groupId, canDelete])
+  }, [user, post, isAdminOrModerator, address, groupId])
 
   const isPostPage = !isNaN(postId)
 
   return (
     <div>
-
       <div className="flex flex-col gap-2">
         {(isTypeOfPost || isTypeOfPoll) && (
           <div className="flex flex-col gap-4">
@@ -142,7 +139,9 @@ export const PostItem = ({ post, group }: { post: Item; group: Group }) => {
         <div className="flex flex-col gap-4">
           {!isContentEditing ? (
             <EditorJsRenderer
-              data={(isTypeOfPost || isTypeOfPoll) ? post.description : { blocks: post.blocks || post?.description?.blocks }}
+              data={
+                isTypeOfPost || isTypeOfPoll ? post.description : { blocks: post.blocks || post?.description?.blocks }
+              }
             />
           ) : (
             <Editor
@@ -161,7 +160,6 @@ export const PostItem = ({ post, group }: { post: Item; group: Group }) => {
 
         {isTypeOfPoll && <PollUI group={group} post={post} />}
 
-
         <div className="sticky bottom-0 flex items-center justify-between gap-4">
           <ContentActions
             item={post}
@@ -172,11 +170,11 @@ export const PostItem = ({ post, group }: { post: Item; group: Group }) => {
             save={() => saveEditedPost()}
             groupId={groupId}
             isAdminOrModerator={isAdminOrModerator}
-            setIsContentEditing={(value) => {
-              setIsContentEditing(value);
+            setIsContentEditing={value => {
+              setIsContentEditing(value)
               if (value) {
-                setContentDescription(post.description);
-                setContentTitle && setContentTitle(post.title);
+                setContentDescription(post.description)
+                setContentTitle && setContentTitle(post.title)
               }
             }}
             onClickCancel={() => setIsContentEditing(false)}
@@ -210,6 +208,8 @@ const updateIsPostEditable = async ({
       canDelete,
     })
     setIsPostEditable(isEditable)
+  } else {
+    setIsPostEditable(false)
   }
 }
 

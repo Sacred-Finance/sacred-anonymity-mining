@@ -19,7 +19,7 @@ const Access: React.FC = () => {
   const navigate = useRouter()
   const { t } = useTranslation()
 
-  const { isAdmin, isModerator, fetchIsAdmin } = useCheckIfUserIsAdminOrModerator(address, true)
+  const { isAdmin, isModerator, fetchIsAdmin } = useCheckIfUserIsAdminOrModerator(true)
   const { isFetching, isLoading, admins, moderators, fetchAdmins, fetchModerators } = useFetchAdminsAndModerators()
 
   useEffect(() => {
