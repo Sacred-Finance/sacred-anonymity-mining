@@ -24,17 +24,15 @@ function NoCommunities(props: { searchTerm: string }) {
   if (!props.searchTerm) {
     return (
       <>
-        <div className="col-span-full flex w-full flex-col items-center justify-center space-y-4">
           <motion.h2
             layout
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="animate-pulse text-3xl font-semibold  dark:text-gray-200"
+            className="animate-pulse h-screen text-3xl font-semibold  dark:text-gray-200"
           >
             Loading
           </motion.h2>
-        </div>
       </>
     )
   }
