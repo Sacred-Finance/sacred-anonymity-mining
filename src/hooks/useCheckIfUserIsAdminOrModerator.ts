@@ -63,6 +63,9 @@ export const useCheckIfUserIsAdminOrModerator = (checkOnInit = false) => {
   useEffect(() => {
     if (!address) {
       dispatch({ type: 'SET_USER_ACCESS', payload: {isModerator: false, isAdmin: false} })
+    } else {
+      fetchIsAdmin()
+      fetchIsModerator()
     }
   }, [address])
 
