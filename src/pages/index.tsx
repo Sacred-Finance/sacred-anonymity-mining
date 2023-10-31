@@ -6,13 +6,12 @@ import React, { useEffect } from 'react'
 import useSWR from 'swr'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
-import { useAccount } from 'wagmi'
 
 function Home({ communitiesData, users, discourseCommunities }) {
   const router = useRouter()
   const pageRef = React.useRef(null);
-  const { address } = useAccount()
-  const { isAdmin, isModerator } = useCheckIfUserIsAdminOrModerator(address, true)
+  const { state: {isAdmin, isModerator} } = useCommunityContext();
+  useCheckIfUserIsAdminOrModerator(true)
 
   useEffect(() => {
     if (pageRef.current) {

@@ -8,13 +8,15 @@ import fetcher, { getGroupWithPostAndCommentData } from '@/lib/fetcher'
 import { useRouter } from 'next/router'
 import LoadingComponent from '@components/LoadingComponent'
 import { CommentClass } from '@/lib/comment'
+import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
 
 function PostIndex() {
   const { dispatch } = useCommunityContext()
   const router = useRouter()
   const { groupId, postId } = router.query
 
-  const { data, error, isLoading } = useSWR(getGroupWithPostAndCommentData(groupId, postId), fetcher)
+  const { data, error, isLoading } = useSWR(getGroupWithPostAndCommentData(groupId, postId), fetcher);
+  useCheckIfUserIsAdminOrModerator(true)
 
   useEffect(() => {
     const { group, post, comments } = data || {}
