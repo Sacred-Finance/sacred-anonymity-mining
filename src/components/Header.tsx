@@ -1,64 +1,51 @@
 import React from 'react'
-import { useTranslation } from 'next-i18next'
-import { DynamicLogo } from './Logo'
+import { Logo } from './Logo'
 import { NavBarButton } from '../components/buttons/NavBarButton'
 import { ThemeToggleButton } from './Theme'
-import { PlusCircleIcon, QuestionMarkCircleIcon } from '@heroicons/react/20/solid'
+import { ArrowsPointingInIcon, ArrowsPointingOutIcon, QuestionMarkCircleIcon } from '@heroicons/react/20/solid'
 import ConnectWallet from './Connect/ConnectWallet'
-import { buttonVariants, primaryButtonStyle } from '../styles/classes'
 import clsx from 'clsx'
-import Link from 'next/link'
-import { useConnectModal } from '@rainbow-me/rainbowkit'
-import { useAccount } from 'wagmi'
 
 const Header = () => {
-  const { t } = useTranslation()
-  const { openConnectModal } = useConnectModal()
-  const { isConnected } = useAccount()
+  const [menuOpen, setMenuOpen] = React.useState(false)
 
   return (
     <nav
       id={'header'}
-      className="my-1 grid grid-cols-1 items-center justify-items-center gap-1 p-2 dark:bg-gray-900  md:grid-cols-6"
+      className={clsx(
+        'flex  p-4 text-gray-800 dark:bg-gray-900 dark:text-white',
+        menuOpen
+          ? 'fixed inset-0 z-50 flex flex-col items-center justify-evenly bg-gray-900/50 p-12 '
+          : 'relative items-center justify-between'
+      )}
     >
-      <div className="flex h-full items-center justify-start justify-items-center">
-        <NavBarButton href="/" className="h-full">
-          <div className="h-full md:hidden">
-            <DynamicLogo className="h-10" />
+      <div className="flex items-center justify-between space-x-4">
+        <NavBarButton href="/" className="">
+          <div className="md:hidden">
+            <Logo width={200} />
           </div>
           <div className="hidden md:block">
-            <DynamicLogo className="h-[64px] w-[150px]" />
+            <Logo />
           </div>
         </NavBarButton>
-      </div>
 
-      <div className="col-span-2 flex items-center gap-8">
-        <Link
-          onClick={e => {
-            if (!isConnected) {
-              if (openConnectModal) {
-                openConnectModal()
-              }
-              e.preventDefault()
-              return
-            }
-          }}
-          href={'/create-group'}
-          className={clsx(primaryButtonStyle, buttonVariants.primarySolid)}
-        >
-          <div className="flex gap-2 ">
-            <PlusCircleIcon className="h-6 w-6" /> {t('toolTip.createCommunity')}
-          </div>
-        </Link>
+        <div className="flex items-center space-x-4 sm:flex md:hidden">
+          {!menuOpen ? (
+            <ArrowsPointingOutIcon className="h-8 w-8" onClick={() => setMenuOpen(!menuOpen)} />
+          ) : (
+            <ArrowsPointingInIcon className="h-8 w-8" onClick={() => setMenuOpen(!menuOpen)} />
+          )}
+        </div>
       </div>
-
-      <div className="col-span-2 ">
+      <div className={clsx('flex items-center gap-2', menuOpen ? 'flex gap-4' : 'hidden md:flex')}>
         <ConnectWallet />
-      </div>
-
-      <div className="flex items-center justify-end gap-2">
-        <NavBarButton href="https://www.thatsacred.place/help" target="_blank" rel="noopener noreferrer">
-          <QuestionMarkCircleIcon className="w-8" />
+        <NavBarButton
+          href="https://www.thatsacred.place/help"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-gray-600 dark:text-gray-300"
+        >
+          <QuestionMarkCircleIcon className="h-8 w-8" />
         </NavBarButton>
         <ThemeToggleButton />
       </div>

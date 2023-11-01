@@ -2,6 +2,7 @@ import { useContractRead, useContractWrite } from "wagmi";
 import { ForumContractAddress } from "../constant/const";
 import ForumABI from "../constant/abi/Forum.json";
 import { useState } from "react";
+import {Address} from "@/types/common";
 
 export const useFetchAdminsAndModerators = () => {
   const {
@@ -11,7 +12,7 @@ export const useFetchAdminsAndModerators = () => {
     isFetched: isAdminFetched,
   } = useContractRead({
     abi: ForumABI.abi,
-    address: ForumContractAddress as `0x${string}`,
+    address: ForumContractAddress as Address,
     functionName: "getAdmins",
     onError(err) {
       setAdmins([]);
@@ -29,7 +30,7 @@ export const useFetchAdminsAndModerators = () => {
     isFetched: isModeratorFetched,
   } = useContractRead({
     abi: ForumABI.abi,
-    address: ForumContractAddress as `0x${string}`,
+    address: ForumContractAddress as Address,
     functionName: "getModerators",
     onError(err) {
       setModerators([]);

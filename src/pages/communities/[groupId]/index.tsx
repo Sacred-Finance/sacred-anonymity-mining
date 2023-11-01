@@ -1,20 +1,19 @@
 import React, { useEffect } from 'react'
-import { Post } from '@/lib/post'
 import LoadingPage from '@components/LoadingComponent'
 import { CommunityPage } from '@components/CommunityPage'
-import WithStandardLayout from '@components/HOC/WithStandardLayout'
-import { useLoaderContext } from '@/contexts/LoaderContext'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { ethers } from 'ethers'
-import useSWR, { useSWRConfig } from 'swr'
+import useSWR from 'swr'
 import { useRouter } from 'next/router'
 import fetcher, { getGroupWithPostData } from '@/lib/fetcher'
+import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
 
 function Group() {
   const router = useRouter()
   const { groupId, postId } = router.query
   const { data, error, isValidating } = useSWR(getGroupWithPostData(groupId), fetcher)
   const { dispatch } = useCommunityContext()
+  useCheckIfUserIsAdminOrModerator(true)
 
   useEffect(() => {
     if (data && !isValidating && !error && !data?.error) {
@@ -27,11 +26,10 @@ function Group() {
       })
       dispatch({
         type: 'SET_USERS',
-        payload: data?.users
+        payload: data?.users,
       })
     }
   }, [data?.group, data?.posts, data?.users, isValidating])
-
   if (error) return <div>Error: {error.message}</div>
   if (!data) return <LoadingPage />
 
@@ -39,9 +37,7 @@ function Group() {
 
   group.id = ethers.BigNumber.from(group.id)
 
-  const postInstance = group && new Post(undefined, group.groupId.toString())
-
-  return <CommunityPage community={group} posts={posts} postId={postId as string} postInstance={postInstance as Post} />
+  return <CommunityPage community={group} posts={posts} />
 }
 
-export default WithStandardLayout(Group)
+export default Group

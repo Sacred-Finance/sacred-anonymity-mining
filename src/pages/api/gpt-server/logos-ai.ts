@@ -16,8 +16,16 @@ export enum Template {
   SecondOrder = 'SecondOrder',
   CausalChain = 'CausalChain',
   SWOT = 'SWOT',
+  Sentiment = 'Sentiment',
   Highlight = 'Highlight', //final step
   CleanMarkdown = 'CleanMarkdown', //final step
+  Truncate = 'Truncate', //final step
+  Summarize_ToSimpleMarkdown = 'Summarize_ToSimpleMarkdown', //final step
+  ProsAndCons_ToSimpleMarkdown = 'ProsAndCons_ToSimpleMarkdown', //final step
+  SWOT_ToSimpleMarkdown = 'SWOT_ToSimpleMarkdown', //final step
+  CausalChain_ToSimpleMarkdown = 'CausalChain_ToSimpleMarkdown', //final step
+  SecondOrder_ToSimpleMarkdown = 'SecondOrder_ToSimpleMarkdown', //final step
+  UnbiasedCritique_ToSimpleMarkdown = 'UnbiasedCritique_ToSimpleMarkdown', //final step
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -29,7 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(400).json({ error: 'Text is required' })
       }
       const url = `${process.env.NEXT_LOGOS_AI_API_URL}/analysis`
-      const responseData = await gptPostHandler(url, { text: text, mode:mode})
+      const responseData = await gptPostHandler(url, { text: text, mode: mode })
       return res.status(200).json(responseData)
     } else {
       res.setHeader('Allow', ['POST'])

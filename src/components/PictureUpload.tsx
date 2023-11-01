@@ -46,7 +46,7 @@ export const PictureUpload = (props: {
     <>
       <div
         ref={imageRef}
-        className={`relative  rounded-2xl border-2 border-dashed border-gray-300 bg-gray-100 hover:bg-primary-300  hover:text-white`}
+        className={`relative  rounded-2xl border-2 border-dashed border-gray-300 bg-gray-100 hover:bg-primary-300  hover:text-white dark:bg-gray-900`}
       >
         {props.uploadedImageUrl ? (
           <>
@@ -83,7 +83,7 @@ export const PictureUpload = (props: {
           </>
         ) : (
           <div
-            className={`group flex h-52 w-full cursor-pointer items-center justify-center  rounded-2xl border-2 border-dashed border-gray-300 bg-gray-100 px-6 hover:bg-primary-300  hover:text-white`}
+            className={`group flex h-52 w-full cursor-pointer items-center justify-center  rounded-2xl border-2 border-dashed border-gray-300 bg-gray-100 dark:bg-gray-900 px-6 hover:bg-primary-300  hover:text-white`}
             onClick={openFileUpload}
             onMouseOver={() => setHovered(hovered + 45)}
             onMouseLeave={() => setHovered(hovered + 45)}

@@ -1,21 +1,22 @@
 import React, { useEffect } from 'react'
 import { Post } from '@/lib/post'
-import WithStandardLayout from '@components/HOC/WithStandardLayout'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
-import { PostPage } from '@components/PostPage'
+import { PostPage } from '@components/Post/PostPage'
 import { ethers } from 'ethers'
 import useSWR from 'swr'
 import fetcher, { getGroupWithPostAndCommentData } from '@/lib/fetcher'
 import { useRouter } from 'next/router'
 import LoadingComponent from '@components/LoadingComponent'
 import { CommentClass } from '@/lib/comment'
+import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
 
 function PostIndex() {
   const { dispatch } = useCommunityContext()
   const router = useRouter()
   const { groupId, postId } = router.query
 
-  const { data, error, isLoading } = useSWR(getGroupWithPostAndCommentData(groupId, postId), fetcher)
+  const { data, error, isLoading } = useSWR(getGroupWithPostAndCommentData(groupId, postId), fetcher);
+  useCheckIfUserIsAdminOrModerator(true)
 
   useEffect(() => {
     const { group, post, comments } = data || {}
@@ -47,9 +48,6 @@ function PostIndex() {
 
   return (
     <PostPage
-      kind={post.kind}
-      postId={post.id}
-      groupId={group.groupId}
       postInstance={postInstance}
       post={post}
       community={group}
@@ -59,4 +57,4 @@ function PostIndex() {
   )
 }
 
-export default WithStandardLayout(PostIndex)
+export default (PostIndex)

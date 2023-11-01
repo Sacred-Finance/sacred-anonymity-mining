@@ -1,10 +1,8 @@
 import React, { ButtonHTMLAttributes } from 'react'
-import clsx from 'clsx'
-import { primaryButtonStyle } from '../../styles/classes'
-import { CircularProgress } from '@components/CircularProgress'
-import { CircularLoader } from '@components/JoinCommunityButton'
+import { CircularLoader } from '@components/buttons/JoinCommunityButton'
 import { toast } from 'react-toastify'
 import { useTranslation } from 'next-i18next'
+import { Button } from '@/shad/ui/button'
 
 export type PrimaryButtonProps = {
   children?: React.ReactNode
@@ -19,8 +17,9 @@ export type PrimaryButtonProps = {
   endIcon?: React.ReactNode
   startIcon?: React.ReactNode
   loadingPosition?: 'start' | 'end'
+  toolTip?: string | boolean
+  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
 } & ButtonHTMLAttributes<HTMLButtonElement>
-
 export function PrimaryButton({
   children,
   isLoading,
@@ -29,42 +28,46 @@ export function PrimaryButton({
   isJoined,
   resetClasses,
   loadingPosition = 'end',
+  variant = 'default',
   ...rest
 }: PrimaryButtonProps & ButtonHTMLAttributes<HTMLButtonElement>): JSX.Element {
   const { t } = useTranslation()
   const wrappedOnClick = e => {
-    if (requirements?.needsConnected) {
-      if (!isConnected) {
-        return toast.error(t('alert.connectWallet'), { toastId: 'connectWallet' })
-      }
+    if (requirements?.needsConnected && !isConnected) {
+      return toast.error(t('alert.connectWallet'), { toastId: 'connectWallet' })
     }
-    if (requirements?.needsJoined) {
-      if (!isJoined) {
-        return toast(t('alert.pleaseJoin'), { toastId: 'joinCommunity' })
-      }
+    if (requirements?.needsJoined && !isJoined) {
+      return toast(t('alert.pleaseJoin'), { toastId: 'joinCommunity' })
     }
     if (rest.onClick) {
       rest.onClick(e)
     }
   }
+
+  // filter out props that are spreadable to the button
+  const buttonProps = Object.fromEntries(
+    Object.entries(rest).filter(
+      ([key]) =>
+        ![
+          'toolTip',
+          'requirements',
+          'isConnected',
+          'isJoined',
+          'variant',
+          'loadingPosition',
+          'startIcon',
+          'endIcon',
+        ].includes(key)
+    )
+  )
+
   return (
-    <button
-      {...rest}
-      disabled={rest.disabled || isLoading}
-      className={clsx(
-        'hover:bg-opacity-90',
-        !resetClasses && primaryButtonStyle,
-        !resetClasses && 'flex items-center gap-3  disabled:opacity-50',
-        'cursor-pointer disabled:cursor-not-allowed',
-        rest.className
-      )}
-      onClick={wrappedOnClick}
-    >
+    <Button variant={variant} {...buttonProps} disabled={rest.disabled || isLoading} onClick={wrappedOnClick}>
       {isLoading && loadingPosition === 'start' && <CircularLoader />}
       {rest.startIcon && !isLoading && loadingPosition === 'start' && rest.startIcon}
       {children}
       {rest.endIcon && !isLoading && loadingPosition === 'end' && rest.endIcon}
       {isLoading && loadingPosition === 'end' && <CircularLoader />}
-    </button>
+    </Button>
   )
 }

@@ -23,10 +23,6 @@ export const useFetchUsers = (groupId, loadOnInit = true,) => {
     return await forumContract?.groupUsers(groupId)
   }
 
-  const fetchUsersFromSemaphoreContract = async () => {
-    return await semaphoreContract?.getGroupMembers(groupId?.toString())
-  }
-
   const fetchUsers = async () => {
     if (!forumContract || !provider) {
       console.error('Forum contract not found or provider not found')
@@ -65,5 +61,5 @@ export const useFetchUsers = (groupId, loadOnInit = true,) => {
     if (loadOnInit) fetchUsers()
   }, [groupId])
 
-  return { fetchUsers, fetchUsersFromContract, fetchUsersFromSemaphoreContract }
+  return { fetchUsers, fetchUsersFromContract }
 }

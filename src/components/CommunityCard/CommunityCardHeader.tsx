@@ -1,83 +1,85 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { useLocalCommunity } from './CommunityCard'
-import { ethers } from 'ethers'
-import _ from 'lodash'
 import clsx from 'clsx'
 import mobileLogo from '../../../public/logo.svg'
-import { MobileLogo } from '@components/Logo'
-import { ItemContainer } from '@components/CommunityCard/CommunityCardBody'
+import Image from 'next/image'
+import { User } from '@/lib/model'
+import { Group } from '@/types/contract/ForumInterface'
+import { useValidatedImage } from '@components/CommunityCard/UseValidatedImage'
+import { Avatar, AvatarFallback, AvatarImage } from '@/shad/ui/avatar'
 
-export const CommunityCardHeader = ({
-  srcBannerOverride = undefined,
-  srcLogoOverride = undefined,
-}: {
-  srcBannerOverride?: string
-  srcLogoOverride?: string
-}) => {
+interface CommunityCardHeaderProps {
+  isOwner?: boolean
+}
+
+export function CommunityLogo({ logoClasses }: { logoClasses?: string }) {
   const community = useLocalCommunity()
-  const [bannerSrc, setBannerSrc] = useState('')
-  const [logoSrc, setLogoSrc] = useState('')
+  const classes = clsx(logoClasses, 'relative !w-24 !h-24 rounded-full', community.showBackground ? 'opacity-0' : '')
 
-  // Validate banner
-  useEffect(() => {
-    if (!community?.groupDetails.bannerCID) return
-    const image = new Image()
-    image.src = community?.groupDetails.bannerCID
-      ? `https://ipfs.io/ipfs/${community?.groupDetails.bannerCID.toString()}`
-      : ''
-    image.onerror = () => setBannerSrc('') // Fallback to empty string if image is invalid
-    image.onload = () => setBannerSrc(image.src)
-  }, [community?.groupDetails.bannerCID])
-
-  // Validate logo
-  useEffect(() => {
-    const image = new Image()
-    if (!community?.groupDetails.logoCID) return
-
-    image.src = community?.groupDetails.logoCID ? `https://ipfs.io/ipfs/${community.groupDetails.logoCID}` : ''
-    image.onerror = () => setLogoSrc('') // Fallback to empty string if image is invalid
-    image.onload = () => setLogoSrc(image.src)
-  }, [community?.groupDetails.logoCID])
-
-  const isBanner = community?.variant === 'banner'
+  const logoSrc = useValidatedImage(community?.groupDetails?.logoCID)
+  console.log('logoSrc', logoSrc)
   return (
-    <div className="relative grid grid-cols-8 items-center justify-items-center">
-      {srcBannerOverride || bannerSrc ? (
-        <>
-          <img
-            className={clsx(
-              'col-span-full  h-36 w-full rounded-t-lg object-cover',
-              isBanner ? 'max-full bottom-0 left-0 top-0 z-0 h-max rounded-b-lg opacity-90' : ''
-            )}
-            src={srcBannerOverride ?? bannerSrc}
-            alt={mobileLogo}
-          />
-        </>
-      ) : (
-        <div className="col-span-full flex h-36 w-full items-center justify-center rounded-t-lg bg-primary-500 text-xl font-semibold text-white">
-          {community?.name}
-        </div>
-      )}
+    <Avatar>
+      <AvatarImage className={classes} src={mobileLogo} />
+      <AvatarFallback>CN</AvatarFallback>
+    </Avatar>
+  )
+}
 
-      {srcLogoOverride || logoSrc ? (
-        <img
-          className="relative col-span-2  -mt-10 h-24  w-24 rounded-full border-4 border-white shadow-lg"
-          src={srcLogoOverride ?? logoSrc ?? mobileLogo}
-          alt={mobileLogo}
+interface CommunityBannerClasses {
+  banner: string
+  name: string
+}
+
+interface CommunityBannerParams {
+  srcBannerOverride: string | undefined
+  bannerSrc: string | undefined
+  inputs: string
+  banner: boolean
+  community: Group & { variant?: 'default' | 'banner'; user: User | false | undefined }
+  c?: CommunityBannerClasses
+}
+
+export function CommunityBanner(props: CommunityBannerParams) {
+  return (
+    <>
+      {props.srcBannerOverride || props.bannerSrc ? (
+        <Image
+          className={clsx(
+            props.inputs,
+            props.banner && 'max-full bottom-0 left-0 top-0 z-0 h-max rounded-b object-cover opacity-90',
+            props?.c?.banner
+          )}
+          src={props.srcBannerOverride ?? props.bannerSrc}
+          alt={'community Banner Image'}
+          sizes="100vw"
+          style={{
+            width: '100%',
+          }}
+          width={500}
+          height={500}
+          unoptimized
+          priority
         />
       ) : (
-        <MobileLogo className="relative col-span-2 -mt-10 h-24 w-24 rounded-full  border-4 border-white bg-white/80 p-4 shadow-lg" />
-      )}
-
-      {community?.groupDetails?.description && community.groupDetails.description !== community.name && !isBanner && (
         <div
           className={clsx(
-            'absolute bottom-0 left-[25%] col-span-6 me-2 max-h-[30px] w-fit overflow-y-hidden rounded border bg-gray-50 p-1  hover:z-50 hover:max-h-full hover:w-auto'
+            'bg-primary-500 col-span-full flex h-36 w-full items-center justify-center rounded-t text-xl font-semibold text-white',
+            props?.c?.banner
           )}
         >
-          <p className="text-sm">{community?.groupDetails?.description}</p>
+          {props.community?.name}
         </div>
       )}
+    </>
+  )
+}
+export const CommunityCardHeader: React.FC<CommunityCardHeaderProps> = ({ isOwner }) => {
+  const community = useLocalCommunity()
+
+  return (
+    <div className={'h-10'}>
+      <span className={'m-2 w-full text-center'}>{community.name}</span>
     </div>
   )
 }

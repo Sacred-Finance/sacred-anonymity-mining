@@ -5,7 +5,7 @@ import { UnirepUser } from '../lib/unirep'
 
 export const useUnirepSignUp = ({ name, groupId }) => {
   const { address } = useAccount()
-  const [unirepUser, setUnirepUser] = useState<UnirepUser>()
+  const [unirepUser, setUnirepUser] = useState<UnirepUser | null>(null)
 
   useEffect(() => {
     if (!address || !name || !groupId) return
@@ -13,14 +13,12 @@ export const useUnirepSignUp = ({ name, groupId }) => {
     const generatedIdentity = new Identity(`${address}_${groupId}_${name}`)
     try {
       const unirepUser = new UnirepUser(generatedIdentity)
-      console.log(unirepUser)
+
       setUnirepUser(unirepUser)
     } catch (error) {
       console.log(error)
     }
   }, [address, groupId, name])
-
-
 
   return unirepUser
 }

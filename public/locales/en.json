@@ -81,6 +81,8 @@
   },
   "members": "Members",
   "alert": {
+    "emptyTitle": "Title cannot be empty",
+    "emptyContent": "Content cannot be empty",
     "connectWallet": "Please connect your wallet",
     "pleaseJoin": "Please join the community",
     "deleteSuccess": "Deleted successfully",
@@ -91,6 +93,8 @@
     "commentEditSuccess": "Comment edited successfully",
     "commentDeleteSuccess": "Comment deleted successfully",
     "commentDeleteFailed": "Comment Delete Failed, Try Again!",
+    "commentCreateSuccess": "Comment created successfully",
+
     "postDeleteSuccess": "Post deleted successfully",
     "postDeleteFailed": "Post Delete Failed, Try Again!",
     "postCreateSuccess": "Post created successfully",
@@ -112,7 +116,7 @@
     "fillAllFields": "Please fill all the fields"
   },
   "noResultsFound": "No results found",
-  "noPostsFound": "No posts found",
+  "noPostsFound": "Be the first to post in this community!",
   "noCommentsFound": "Be the first to comment on this post!",
   "pageNotFound": "Page not found",
   "redirecting": "Redirecting",
