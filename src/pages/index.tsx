@@ -41,7 +41,7 @@ function Home({ communitiesData, users, discourseCommunities }) {
     return <div>Error: {error.message}</div>
   }
   // if (!communitiesData) return <LoadingComponent/>
-  return <HomePage isAdmin={isAdmin || isModerator || false} discourseCommunities={discourseCommunities} />
+  return <HomePage isLoading={isLoading} isAdmin={isAdmin || isModerator || false} discourseCommunities={discourseCommunities} />
 }
 
 export const getServerSideProps = async () => {
