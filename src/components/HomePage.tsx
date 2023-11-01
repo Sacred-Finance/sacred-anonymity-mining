@@ -17,11 +17,13 @@ import { ScrollArea, ScrollBar } from '@/shad/ui/scroll-area'
 
 interface HomeProps {
   isAdmin: boolean
+  isLoading: boolean
   discourseCommunities: DiscourseCommunity[]
 }
 
-function NoCommunities(props: { searchTerm: string }) {
-  if (!props.searchTerm) {
+function NoCommunities(props: {isLoading: boolean, searchTerm: string }) {
+  const router = useRouter()
+  if (props.isLoading) {
     return (
       <>
           <motion.h2
@@ -37,7 +39,6 @@ function NoCommunities(props: { searchTerm: string }) {
     )
   }
 
-  const router = useRouter()
   return (
     <>
       <div className="col-span-full flex w-full flex-col items-center justify-center space-y-4">
@@ -82,7 +83,7 @@ function NoCommunities(props: { searchTerm: string }) {
   )
 }
 
-function HomePage({ isAdmin = false, discourseCommunities }: HomeProps) {
+function HomePage({ isLoading = false, isAdmin = false, discourseCommunities }: HomeProps) {
   const { state } = useCommunityContext()
   const { communities, users } = state
 
@@ -127,8 +128,8 @@ function HomePage({ isAdmin = false, discourseCommunities }: HomeProps) {
     return debounce(handleSearchChange, communities.length ? 400 : 0)
   }, [communities])
 
-  if (!communities.length) {
-    return <NoCommunities searchTerm={searchTerm} />
+  if (isLoading || !communities.length) {
+    return <NoCommunities isLoading={isLoading} searchTerm={searchTerm} />
   }
   return (
     <>
