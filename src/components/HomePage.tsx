@@ -21,23 +21,23 @@ interface HomeProps {
 }
 
 function NoCommunities(props: { searchTerm: string }) {
+  const router = useRouter()
   if (!props.searchTerm) {
     return (
       <>
-          <motion.h2
-            layout
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-            className="animate-pulse h-screen text-3xl font-semibold  dark:text-gray-200"
-          >
-            Loading
-          </motion.h2>
+        <motion.h2
+          layout
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="h-screen animate-pulse text-3xl font-semibold  dark:text-gray-200"
+        >
+          Loading
+        </motion.h2>
       </>
     )
   }
 
-  const router = useRouter()
   return (
     <>
       <div className="col-span-full flex w-full flex-col items-center justify-center space-y-4">
@@ -71,7 +71,6 @@ function NoCommunities(props: { searchTerm: string }) {
           transition={{ duration: 0.5, delay: 0.4 }}
           className="rounded bg-purple-500 px-4 py-2 font-bold text-white shadow dark:bg-purple-700 dark:text-gray-200"
           onClick={() => {
-            // link to create community page /create
             router.push('/create-group')
           }}
         >
@@ -89,7 +88,6 @@ function HomePage({ isAdmin = false, discourseCommunities }: HomeProps) {
   // state
   const [filteredCommunities, setFilteredCommunities] = useState<Group[]>(communities)
   const [searchTerm, setSearchTerm] = useState('')
-  const [currentFilter, setCurrentFilter] = useState('Alphabetical')
   const [selectedIndex, setSelectedIndex] = useLocalStorage('communityTab', 0)
   const router = useRouter()
 
@@ -164,13 +162,10 @@ function HomePage({ isAdmin = false, discourseCommunities }: HomeProps) {
           <Separator className="my-4" />
           <div className="relative">
             <ScrollArea className={'h-full'}>
-              <div className="grid-cols-1 items-start justify-center gap-6 rounded-lg p-0 md:grid md:p-8 lg:grid-cols-2 xl:grid-cols-3">
-                {(filteredCommunities.length ? filteredCommunities : communities)
-                  .map(community => (
-                    <div key={community.groupId} className="col-span-2 grid items-start gap-6 lg:col-span-1">
-                      <CommunityCard community={community} isAdmin={isAdmin || false} />
-                    </div>
-                  ))}
+              <div className="grid-cols-auto flex grow flex-col items-stretch justify-center gap-6 rounded-lg p-0 md:grid md:items-start md:p-8 lg:grid-cols-2 xl:grid-cols-3">
+                {(filteredCommunities.length ? filteredCommunities : communities).map(community => (
+                  <CommunityCard community={community} isAdmin={isAdmin || false} />
+                ))}
               </div>
               <ScrollBar orientation="vertical" />
             </ScrollArea>
