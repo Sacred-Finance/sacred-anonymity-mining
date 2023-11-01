@@ -8,6 +8,7 @@ import { CircularLoader } from '@components/buttons/JoinCommunityButton'
 import { Button } from '@/shad/ui/button'
 
 const analysisLabelsAndTypes = [
+  { key: Template.Summarize_ToSimpleMarkdown, label: 'Summarize', setter: 'setSummarizeResponse' },
   { key: Template.SWOT_ToSimpleMarkdown, label: 'SWOT', setter: 'setSwotResponse' },
   { key: Template.CausalChain_ToSimpleMarkdown, label: 'Causal Chain', setter: 'setCausalChainResponse' },
   { key: Template.SecondOrder_ToSimpleMarkdown, label: 'Second Order', setter: 'setSecondOrderResponse' },
@@ -21,6 +22,7 @@ const analysisLabelsAndTypes = [
 
 const initialState = {
   responses: {
+    summarizeResponse: '',
     swotResponse: '',
     causalChainResponse: '',
     secondOrderResponse: '',
@@ -28,6 +30,7 @@ const initialState = {
     prosAndConsResponse: '',
   },
   setResponses: {
+    setSummarizeResponse: data => {},
     setSwotResponse: data => {},
     setCausalChainResponse: data => {},
     setSecondOrderResponse: data => {},
@@ -42,6 +45,7 @@ export const useAIDigest = () => useContext(AIDigestContext)
 const AIDigestButton = ({
   postData,
   enabled = {
+    Summarize_ToSimpleMarkdown: true,
     SWOT_ToSimpleMarkdown: true,
     CausalChain_ToSimpleMarkdown: true,
     SecondOrder_ToSimpleMarkdown: true,
@@ -64,20 +68,7 @@ const AIDigestButton = ({
     })
   }, [analyses])
 
-  const AnalysisComponent = () => (
-    <div className="flex flex-col">
-      {analysisLabelsAndTypes.map(type =>
-        enabled[type.key] ? (
-          <div key={type.key} className="flex flex-row items-center">
-            <div className="mr-2">
-              <CheckBadgeIcon className="h-4 w-4" />
-            </div>
-            <div>{type.label}</div>
-          </div>
-        ) : null
-      )}
-    </div>
-  )
+
 
   const handleFetchData = () => {
     analyses
