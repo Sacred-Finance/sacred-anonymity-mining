@@ -6,6 +6,15 @@ import EditorJsRenderer from '@components/editor-js/EditorJSRenderer'
 import clsx from 'clsx'
 import { Template } from '@pages/api/gpt-server/logos-ai'
 import { EditorJsType } from '@components/NewPostForm'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/shad/ui/dialog'
 
 interface AnonymizeButtonProps {
   postData: EditorJsType
@@ -74,83 +83,55 @@ const AnonymizeButton: React.FC<AnonymizeButtonProps> = ({
         }
       }}
     >
-      <PrimaryButton
-        onClick={data ? toggleModal : fetchData}
-        disabled={isLoading || postData?.blocks?.length < 1}
-        title={
-          postData?.blocks?.length < 5
-            ? 'Post content too short to summarize'
-            : data
-            ? 'View summary'
-            : 'Summarize post'
-        }
-        variant="outlined"
-        endIcon={<SparklesIcon className={clsx('h-5 w-5', data ? 'text-white' : 'text-blue-500')} height={20} />}
-        isLoading={isLoading}
-      >
-        {data ? 'Anonymized' : 'Anonymize'}
-      </PrimaryButton>
-
-      {showModal && (
-        <div className="fixed inset-0 z-[52] flex items-center justify-center bg-black/50">
-          <div
-            className="relative flex min-h-[400px] w-1/2 flex-col justify-between overflow-y-auto rounded-lg bg-gray-950 p-4"
-            onClick={e => {
-              e.stopPropagation()
-            }}
+      <Dialog>
+        <DialogTrigger>
+          <PrimaryButton
+            onClick={data ? toggleModal : fetchData}
+            disabled={isLoading || postData?.blocks?.length < 1}
+            title={
+              postData?.blocks?.length < 5
+                ? 'Post content too short to summarize'
+                : data
+                ? 'View summary'
+                : 'Summarize post'
+            }
+            variant="outlined"
+            endIcon={<SparklesIcon className={clsx('h-5 w-5', data ? 'text-blue-300' : 'text-blue-500')} height={20} />}
+            isLoading={isLoading}
           >
-            <span className={'text-xl font-bold '}>{!postTitle ? 'Anonymized Text' : postTitle}</span>
-            {error && (
-              <>
-                <div className="text-red-500">{error}</div>
-                <div className="text-gray-500">Please try again later.</div>
-              </>
-            )}
-
-            {/*linear gradient*/}
-            <div
-              className="flex gap-4
-            rounded-lg bg-secondary/50 bg-opacity-50 bg-gradient-to-r from-50% via-50% to-100% p-2
-            "
+            {data ? 'Anonymized' : 'Anonymize'}
+          </PrimaryButton>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle> {!postTitle ? 'Anonymized Text' : postTitle}</DialogTitle>
+            <DialogDescription>
+              <EditorJsRenderer data={data ? JSON.parse(data)?.anonymized : 'Loading summary...'} isHtml={true} />
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className={'flex flex-shrink-0 grow gap-1'}>
+            <PrimaryButton
+              disabled={!data || isLoading}
+              endIcon={
+                <SparklesIcon className={clsx('h-5 w-5', data ? 'text-blue-500' : 'text-primary')} height={20} />
+              }
+              isLoading={isLoading}
+              variant={'secondary'}
+              className={''}
+              onClick={() => {
+                toggleModal()
+                fetchData()
+              }}
             >
-              <div className={'flex flex-col border  bg-secondary/50 p-2'}>
-                <span className={'text-xl  uppercase'}>Original</span>
-                <span className={''}>
-                  <EditorJsRenderer
-                    data={data ? convertEditorJsTypeToString(postData) : 'Loading summary...'}
-                    isHtml={true}
-                  />
-                </span>
-              </div>
-              <div className={'flex flex-col border bg-secondary/50 p-2'}>
-                <span className={'text-xl uppercase'}>Anonymized</span>
-                <EditorJsRenderer data={data ? JSON.parse(data)?.anonymized : 'Loading summary...'} isHtml={true} />
-              </div>
-            </div>
+              {data && 'Retry Anonymization'}
+            </PrimaryButton>
 
-            <div className={'flex justify-between gap-4'}>
-              <PrimaryButton variant={'destructive'} onClick={toggleModal}>
-                Close
-              </PrimaryButton>
-              <PrimaryButton
-                className={'text-white'}
-                endIcon={<SparklesIcon className={clsx('h-5 w-5', data ? 'text-white' : 'text-primary')} height={20} />}
-                variant={'outline'}
-                onClick={() => {
-                  toggleModal()
-                  fetchData()
-                }}
-              >
-                Retry Anonymization
-              </PrimaryButton>
-
-              <PrimaryButton variant={'default'} disabled={!data} onClick={useThis}>
-                Update Message
-              </PrimaryButton>
-            </div>
-          </div>
-        </div>
-      )}
+            <PrimaryButton variant={'default'} disabled={!data || isLoading} onClick={useThis}>
+              Update Message
+            </PrimaryButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

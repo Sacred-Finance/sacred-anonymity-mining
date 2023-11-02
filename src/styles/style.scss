@@ -60,3 +60,26 @@
     @apply bg-background text-foreground;
   }
 }
+
+.codex-editor {
+  * svg {
+    @apply rounded bg-accent text-foreground;
+  }
+  .ce-toolbar,
+  .ce-inline-toolbar {
+    //@apply bg-input;
+    @apply dark:border-accent dark:bg-accent dark:text-accent;
+  }
+  * input,
+  * textarea,
+  * select {
+    @apply rounded bg-accent px-2 text-accent-foreground;
+  }
+
+  *::selection {
+    @apply bg-primary text-primary-foreground;
+  }
+}
+.ce-block--selected .ce-block__content {
+  @apply bg-primary/20;
+}

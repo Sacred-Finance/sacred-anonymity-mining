@@ -14,6 +14,7 @@ export default function StandardLayout({ children }) {
           <div className="h-full px-4 py-6 lg:px-8">{children}</div>
         </div>
       </div>
+        <div className=" flex flex-col h-full flex-grow" />
       <Footer />
     </div>
   )
