@@ -27,13 +27,15 @@ export function CommunityPage({ community, posts }: { community: Group; posts?: 
   const [sortBy, setSortBy] = useState<SortByOption>('highest')
 
   const sortedData = useItemsSortedByVote([], posts, sortBy)
-  const { state: { isAdmin, isModerator } } = useCommunityContext()
+  const {
+    state: { isAdmin, isModerator },
+  } = useCommunityContext()
 
   if (!community || !community?.id) return <LoadingComponent />
 
   return (
     <div>
-      <div className='ml-6'>
+      <div className="ml-6">
         <ReputationCard />
       </div>
       <div className="relative flex min-h-screen gap-6 rounded-lg  p-6 transition-colors ">
@@ -66,16 +68,23 @@ const CreatePostUI = ({ group }: { group: Group }) => {
   const validateRequirements = () => {
     if (!address) return toast.error(t('alert.connectWallet'), { toastId: 'connectWallet' })
     if (!user) return toast.error(t('toast.error.notJoined'), { type: 'error', toastId: 'min' })
-    
+
     return true
   }
 
-  const { contentDescription, setContentDescription, tempContents, contentTitle, setTempContents, setContentTitle, clearContent } =
-    useContentManagement({
-      isPostOrPoll: true,
-      defaultContentDescription: undefined,
-      defaultContentTitle: undefined,
-    })
+  const {
+    contentDescription,
+    setContentDescription,
+    tempContents,
+    contentTitle,
+    setTempContents,
+    setContentTitle,
+    clearContent,
+  } = useContentManagement({
+    isPostOrPoll: true,
+    defaultContentDescription: undefined,
+    defaultContentTitle: undefined,
+  })
 
   const addPost: () => Promise<void> = async () => {
     if (validateRequirements() !== true) return
@@ -110,7 +119,6 @@ const CreatePostUI = ({ group }: { group: Group }) => {
       if (status === 200) {
         setIsLoading(false)
         clearContent()
-
       } else {
         setIsLoading(false)
       }
@@ -126,7 +134,7 @@ const CreatePostUI = ({ group }: { group: Group }) => {
     description: contentDescription,
     setDescription: setContentDescription,
     handleSubmit: addPost,
-    showButtonWhenFormOpen: true,
+    showButtonWhenFormOpen: false,
     setTitle: setContentTitle as Dispatch<SetStateAction<string | null>>,
     resetForm: () => {},
     isReadOnly: false,

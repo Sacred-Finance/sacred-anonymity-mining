@@ -1,19 +1,17 @@
 import { useActiveUser, useCommunityContext, useUserIfJoined } from '@/contexts/CommunityProvider'
 import { useAccount } from 'wagmi'
-import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
 import { useTranslation } from 'next-i18next'
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import React, { Dispatch, SetStateAction, useState } from 'react'
 import { useValidateUserBalance } from '@/utils/useValidateUserBalance'
 import { BigNumber, utils } from 'ethers'
 import { toast } from 'react-toastify'
 import { CommunityCard } from '@components/CommunityCard/CommunityCard'
 import { VoteDownButton, VoteUpButton } from '@components/buttons'
-import SummaryButton from '@components/buttons/AIPostSummaryButton'
 import { OutputDataToHTML } from '@components/Discourse/OutputDataToMarkDown'
 import { PostItem } from '@components/Post/PostItem'
 import { NewPostModal, PostComment, TempComment } from '@components/Post/PostComments'
 import { Tab } from '@headlessui/react'
-import { ExclamationCircleIcon, PencilIcon } from '@heroicons/react/20/solid'
+import { ExclamationCircleIcon } from '@heroicons/react/20/solid'
 import { useRouter } from 'next/router'
 import { ChatIcon, InfoIcon, PollIcon } from '@components/CommunityActionTabs'
 import { NewPostForm, NewPostFormProps } from '@components/NewPostForm'
@@ -45,10 +43,10 @@ import { emptyPollRequest } from '@/lib/item'
 import { ScrollArea } from '@/shad/ui/scroll-area'
 import ReputationCard from '../ReputationCard'
 import AIDigestButton, { AIDigestContext } from '@components/buttons/AIPostDigestButton'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shad/ui/card'
 import EditorJsRenderer from '@components/editor-js/EditorJSRenderer'
-import { Check, CheckCircle, WandIcon } from 'lucide-react'
+import { CheckCircle, WandIcon } from 'lucide-react'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/shad/ui/accordion'
+import { Card } from '@/shad/ui/card'
 
 export function PostPage({
   comments,
@@ -67,6 +65,7 @@ export function PostPage({
   const {
     state: { isAdmin, isModerator },
   } = useCommunityContext()
+  const [summarizeResponse, setSummarizeResponse] = React.useState('')
   const [swotResponse, setSwotResponse] = React.useState('')
   const [causalChainResponse, setCausalChainResponse] = React.useState('')
   const [secondOrderResponse, setSecondOrderResponse] = React.useState('')
@@ -76,8 +75,6 @@ export function PostPage({
   const [tempComments, setTempComments] = useState<TempComment[]>([])
 
   const [commentsSortBy, setCommentsSortBy] = useState<SortByOption>('highest')
-
-  const router = useRouter()
 
   const sortedCommentsData = useItemsSortedByVote(tempComments, comments, commentsSortBy)
 
@@ -91,6 +88,7 @@ export function PostPage({
       value={{
         responses: {
           swotResponse,
+          summarizeResponse,
           causalChainResponse,
           secondOrderResponse,
           unbiasedCritiqueResponse,
@@ -98,6 +96,7 @@ export function PostPage({
         },
         setResponses: {
           setSwotResponse,
+          setSummarizeResponse,
           setCausalChainResponse,
           setSecondOrderResponse,
           setUnbiasedCritiqueResponse,
@@ -108,10 +107,10 @@ export function PostPage({
       <div className="mb-6">
         <ReputationCard />
       </div>
-      <div className="flex w-full flex-col bg-gray-100 transition-colors dark:bg-gray-800">
-        <div className="flex-1 overflow-hidden">
-          <div className="flex h-full flex-col md:flex-row">
-            <div className=" flex flex-col gap-4 p-3 md:w-1/2">
+      <Card className="flex h-screen min-h-full w-full grow flex-col rounded-lg border-0 bg-gradient-to-r from-background  from-25% to-background to-75% backdrop-blur-3xl  transition-colors  ">
+        <div className="flex-1 overflow-hidden ">
+          <div className="flex h-full grow flex-col justify-stretch md:flex-row ">
+            <div className=" flex flex-col gap-4 p-3 md:w-1/2 ">
               <div className="sticky top-0 z-10 flex gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
                 <VoteForItemUI postId={post.id} post={post} group={community} />
               </div>
@@ -119,37 +118,54 @@ export function PostPage({
                 <PostItem post={post} group={community} />
               </ScrollArea>
             </div>
-
-            <div className=" flex flex-col gap-4 overflow-y-scroll p-3 md:w-1/2">
+            <div className=" flex h-full grow flex-col gap-4 p-3 md:w-1/2">
               <Tab.Group onChange={handleTabChange} defaultIndex={selectedTab} selectedIndex={selectedTab}>
                 <Tab.List className="sticky top-0 z-10 flex gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
                   {['All Replies', 'Polls', 'AI', 'Community Info'].map((tooltip, index) => (
                     <Tab
                       className={({ selected }) =>
-                        `bg-primary-300 flex rounded p-1 text-white dark:bg-gray-950 ${
-                          selected && ' ring-[1px] ring-primary'
-                        }`
+                        `  rounded bg-secondary text-secondary-foreground  ${selected && ' ring-[1px] ring-primary'}`
                       }
                       key={index}
                     >
                       {tooltip === 'Community Info' && (
-                        <ToolTip tooltip={tooltip} buttonProps={{ variant: 'link', className: 'flex gap-4' }}>
-                          <InfoIcon />
+                        <ToolTip
+                          tooltip={tooltip}
+                          buttonProps={{
+                            variant: 'link',
+                          }}
+                        >
+                          <InfoIcon className={'h-7 w-7'} />
                         </ToolTip>
                       )}
                       {tooltip === 'Polls' && (
-                        <ToolTip tooltip={tooltip} buttonProps={{ variant: 'link', className: 'flex gap-4' }}>
-                          <PollIcon className="h-5 w-5" />
+                        <ToolTip
+                          tooltip={tooltip}
+                          buttonProps={{
+                            variant: 'link',
+                          }}
+                        >
+                          <PollIcon className={'h-7 w-7 '} />
                         </ToolTip>
                       )}
                       {tooltip === 'All Replies' && (
-                        <ToolTip tooltip={tooltip} buttonProps={{ variant: 'link', className: 'flex gap-4' }}>
-                          <ChatIcon className="h-5 w-5" />
+                        <ToolTip
+                          tooltip={tooltip}
+                          buttonProps={{
+                            variant: 'link',
+                          }}
+                        >
+                          <ChatIcon className={'h-7 w-7'} />
                         </ToolTip>
                       )}
                       {tooltip === 'AI' && (
-                        <ToolTip tooltip={tooltip} buttonProps={{ variant: 'link', className: 'flex gap-4' }}>
-                          <WandIcon />
+                        <ToolTip
+                          tooltip={tooltip}
+                          buttonProps={{
+                            variant: 'link',
+                          }}
+                        >
+                          <WandIcon className={'h-7 w-7'} />
                         </ToolTip>
                       )}
                     </Tab>
@@ -157,7 +173,7 @@ export function PostPage({
                 </Tab.List>
 
                 {selectedTab === 2 && (
-                  <>
+                  <div className={'mb-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900'}>
                     <span className={'inline-flex items-center gap-2 text-[10px] text-yellow-700'}>
                       <ExclamationCircleIcon className={'w-4'} />
                       These processes may take 1-2 minutes
@@ -165,7 +181,7 @@ export function PostPage({
                     <div className={'flex gap-2'}>
                       <AIDigestButton postData={OutputDataToHTML(post?.description)} postTitle={post.title} />
                     </div>
-                  </>
+                  </div>
                 )}
 
                 {(selectedTab === 0 || selectedTab === 1) && (
@@ -177,7 +193,7 @@ export function PostPage({
                   </div>
                 )}
 
-                <Tab.Panels className={'scrollbar max-h-[calc(90vh - 200px)] col-span-12 flex w-full flex-col gap-4'}>
+                <Tab.Panels className={'scrollbar col-span-12 flex w-full flex-col gap-4'}>
                   {/* Comments / Replies */}
                   <Tab.Panel className="flex flex-col gap-4 ">
                     {sortedCommentsData.map(comment => (
@@ -216,7 +232,21 @@ export function PostPage({
 
                   {/* AI Tab */}
                   <Tab.Panel className="flex flex-col gap-4">
-                    <Accordion type="single" collapsible className="w-full">
+                    <Accordion
+                      type="single"
+                      collapsible
+                      className="mb-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900"
+                    >
+                      <AccordionItem value="summarize">
+                        <AccordionTrigger>
+                          <span className={'inline-flex gap-4'}>
+                            <CheckCircle className={summarizeResponse ? 'text-green-500' : 'text-gray-500'} /> Summarize
+                          </span>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <EditorJsRenderer data={summarizeResponse} isHtml={true} />
+                        </AccordionContent>
+                      </AccordionItem>
                       <AccordionItem value="swot">
                         <AccordionTrigger>
                           <span className={'inline-flex gap-4'}>
@@ -287,7 +317,7 @@ export function PostPage({
             </div>
           </div>
         </div>
-      </div>
+      </Card>
     </AIDigestContext.Provider>
   )
 }
@@ -435,7 +465,7 @@ const CreateCommentUI = ({ group, post }: { group: Group; post: Item }) => {
     description: contentDescription,
     setDescription: setContentDescription,
     handleSubmit: addComment,
-    showButtonWhenFormOpen: true,
+    showButtonWhenFormOpen: false,
     setTitle: setContentTitle as Dispatch<SetStateAction<string | null>>,
     resetForm: () => {},
     isReadOnly: false,

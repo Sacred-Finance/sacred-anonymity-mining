@@ -1,16 +1,17 @@
 import { useTranslation } from 'react-i18next'
-import React, { cloneElement, Dispatch, SetStateAction, useCallback, useRef, useState } from 'react'
-import EditorJsRenderer from './editor-js/EditorJSRenderer'
-import { CancelButton, PrimaryButton } from './buttons'
-import { EyeIcon, PencilIcon } from '@heroicons/react/20/solid'
+import React, { Dispatch, SetStateAction, useCallback, useRef, useState } from 'react'
+import { PrimaryButton } from './buttons'
 import dynamic from 'next/dynamic'
 import clsx from 'clsx'
 import Dropdown from './buttons/Dropdown/Dropdown'
 import { Tab } from '@headlessui/react'
-import EditorJS, { OutputData } from '@editorjs/editorjs'
+import { OutputData } from '@editorjs/editorjs'
 import { Input } from '@/shad/ui/input'
 import { Label } from '@/shad/ui/label'
 import AnonymizeButton from '@components/buttons/AIAnonymiseButton'
+import { Card, CardContent, CardFooter, CardHeader } from '@/shad/ui/card'
+import { cn } from '@/shad/lib/utils'
+import { ScrollArea } from '@/shad/ui/scroll-area'
 
 export interface EditorJsType {
   blocks: {
@@ -24,8 +25,6 @@ const percentageToReveal = [0, 25, 50, 75, 100]
 const Editor = dynamic(() => import('./editor-js/Editor'), {
   ssr: false,
 })
-
-
 
 export interface NewPostFormProps {
   editorId: string
@@ -90,24 +89,18 @@ function ContentSection({
   holder: string
 }) {
   return (
-    <>
-      <Tab.Panel className="rounded border-gray-200  ">
-        <Editor
-          divProps={{
-            className: clsx('z-50 w-full bg-white !text-black form-input h-full rounded-md shadow-md min-h-[35vh]'),
-          }}
-          data={data}
-          onChange={onChange}
-          readOnly={readOnly}
-          placeholder={placeholder}
-          holder={holder}
-        />
-      </Tab.Panel>
-      <Tab.Panel className="rounded border-gray-200">
-        <div className={clsx('text-sm text-gray-400', inputs)}>Nothing to preview yet</div>
-        <EditorJsRenderer data={data} />
-      </Tab.Panel>
-    </>
+    <ScrollArea className="h-[500px] w-full rounded-xl border bg-gray-950/10   p-4 ">
+      <Editor
+        divProps={{
+          className: cn('z-50 w-full form-input h-full rounded-md bg-gradient-to-r  min-h-[15vh]'),
+        }}
+        data={data}
+        onChange={onChange}
+        readOnly={readOnly}
+        placeholder={placeholder || 'Start writing here...'}
+        holder={holder}
+      />
+    </ScrollArea>
   )
 }
 
@@ -137,7 +130,6 @@ export const NewPostForm = ({
   const [isPreview, setIsPreview] = useState(false)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const inputRef = useRef(null)
-  const contentRef = useRef(null)
   const [error, setError] = useState<string | null>(null)
 
   const handleSubmitAction = useCallback(async () => {
@@ -183,7 +175,7 @@ export const NewPostForm = ({
   }, [descriptionLength])
 
   return (
-    <div
+    <Card
       className={getClassNames(
         'flex flex-col space-y-4 sm:w-full',
         {
@@ -202,7 +194,7 @@ export const NewPostForm = ({
       {isFormOpen && (
         <div
           className={getClassNames(
-            'min-w-[400px] p-2',
+            'flex min-w-[400px] flex-col gap-2 p-2',
             {
               true: c?.formContainerOpen,
               false: c?.formContainerClosed,
@@ -210,49 +202,31 @@ export const NewPostForm = ({
             isFormOpen
           )}
         >
-          <div className={clsx(c?.formBody)}>
-            {itemType === 'post' && title !== false && (
-              <div className={'flex flex-col gap-2'}>
-                <Label htmlFor={'title'} className="text-md">
-                  Title (Max 60)
-                </Label>
+          {itemType === 'post' && title !== false && (
+            <CardContent className={'flex flex-col gap-2'}>
+              <Label htmlFor={'title'} className="text-md">
+                Title (Max 60)
+              </Label>
 
-                <Input
-                  id={'title'}
-                  disabled={isPreview}
-                  className={clsx(
-                    'w-full rounded border-gray-200 p-1 text-base transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-gray-100'
-                  )}
-                  ref={inputRef}
-                  placeholder={
-                    t(itemType !== 'post' ? 'placeholder.enterComment' : 'placeholder.enterPostTitle') as string
-                  }
-                  value={title}
-                  onChange={e => setTitle(e.target.value)}
-                />
-              </div>
-            )}
-            <Tab.Group>
-              <Tab.Panels className={'max-h-[calc(50vh)] overflow-y-scroll'}>
-                <div className={'flex justify-between'}>
-                  <Label className="text-md">Content</Label>
-                  <div className={''}>
-                    <AnonymizeButton
-                      setDescription={description => {
-                        setDescription(description)
-                        setError(null)
-                        setIsFormOpen(false)
-
-                        // todo this is a hack to make the form open again after the anonymize button is clicked - need to fix this
-                        setTimeout(() => {
-                          setIsFormOpen(true)
-                        }, 100)
-                      }}
-                      postData={description}
-                    />
-                  </div>
-                </div>
-
+              <Input
+                id={'title'}
+                disabled={isPreview}
+                className=" w-full rounded-xl border bg-gray-950/10   p-4 "
+                ref={inputRef}
+                placeholder={
+                  t(itemType !== 'post' ? 'placeholder.enterComment' : 'placeholder.enterPostTitle') as string
+                }
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+              />
+            </CardContent>
+          )}
+          <Tab.Group>
+            <Tab.Panels>
+              <CardHeader className={'flex justify-between'}>
+                <Label className="text-md">Content</Label>
+              </CardHeader>
+              <CardContent>
                 <ContentSection
                   preview={isPreview}
                   data={description}
@@ -265,28 +239,42 @@ export const NewPostForm = ({
                   placeholder={placeholder}
                   holder={editorId}
                 />
-              </Tab.Panels>
-            </Tab.Group>
+              </CardContent>
+            </Tab.Panels>
+          </Tab.Group>
 
-            {error && <p className={clsx('text-red-500')}>{error}</p>}
+          {error && <p className={clsx('text-red-500')}>{error}</p>}
 
-            <FormButtons
-              disableSubmit={disableSubmit}
-              handleClose={handleClose}
-              handleSubmitAction={handleSubmitAction}
-              isSubmitting={isSubmitting}
-              submitButtonText={submitButtonText}
-              t={t}
-              c={c}
-              refToUpdateOnChange={inputRef}
-              tokenBalanceReveal={tokenBalanceReveal}
+          <FormButtons
+            disableSubmit={disableSubmit}
+            handleClose={handleClose}
+            handleSubmitAction={handleSubmitAction}
+            isSubmitting={isSubmitting}
+            submitButtonText={submitButtonText}
+            t={t}
+            c={c}
+            refToUpdateOnChange={inputRef}
+            tokenBalanceReveal={tokenBalanceReveal}
+          >
+            <AnonymizeButton
+              setDescription={description => {
+                setDescription(description)
+                setError(null)
+                setIsFormOpen(false)
+
+                // todo this is a hack to make the form open again after the anonymize button is clicked - need to fix this
+                setTimeout(() => {
+                  setIsFormOpen(true)
+                }, 100)
+              }}
+              postData={description}
             />
+          </FormButtons>
 
-            {isSubmitted && <p>Form submitted successfully!</p>}
-          </div>
+          {isSubmitted && <p>Form submitted successfully!</p>}
         </div>
       )}
-    </div>
+    </Card>
   )
 }
 
@@ -299,12 +287,10 @@ const FormButtons = ({
   c,
   disableSubmit,
   tokenBalanceReveal,
+  children,
 }) => (
-  <div className="flex justify-between">
-    <PrimaryButton
-      onClick={handleClose}
-      variant={'destructive'}
-    >
+  <CardFooter className="flex justify-between">
+    <PrimaryButton onClick={handleClose} variant={'destructive'}>
       {t('button.closeForm')}
     </PrimaryButton>
     <div className="flex flex-row items-center gap-2">
@@ -316,13 +302,11 @@ const FormButtons = ({
           disabled={false}
         />
       )}
-      <PrimaryButton
-        onClick={handleSubmitAction}
-        isLoading={isSubmitting}
-        disabled={isSubmitting || disableSubmit}
-      >
+      {children}
+
+      <PrimaryButton onClick={handleSubmitAction} isLoading={isSubmitting} disabled={isSubmitting || disableSubmit}>
         {submitButtonText}
       </PrimaryButton>
     </div>
-  </div>
+  </CardFooter>
 )
