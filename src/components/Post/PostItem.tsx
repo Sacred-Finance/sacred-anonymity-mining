@@ -58,10 +58,10 @@ export const PostItem = ({ post, group }: { post: Item; group: Group }) => {
         if (!contentTitle) {
           toast.error(t('alert.emptyTitle'))
         }
-        if (!contentDescription || !contentDescription.blocks?.length) {
+        if (!contentDescription || !contentDescription?.length) {
           toast.error(t('alert.emptyContent'))
         }
-        if (!contentTitle || !contentDescription || !contentDescription.blocks?.length)
+        if (!contentTitle || !contentDescription || !contentDescription?.length)
           return toast.error(t('alert.emptyContent'))
       }
 
@@ -140,12 +140,11 @@ export const PostItem = ({ post, group }: { post: Item; group: Group }) => {
           {!isContentEditing ? (
             <EditorJsRenderer
               data={
-                isTypeOfPost || isTypeOfPoll ? post.description : { blocks: post.blocks || post?.description?.blocks }
+                post.description
               }
             />
           ) : (
             <Editor
-              holder={`${post?.id}_${isTypeOfPost ? 'post' : 'comment'}`}
               readOnly={!isContentEditing}
               onChange={val => setContentDescription(val)}
               placeholder={t('placeholder.enterPostContent') as string}

@@ -12,6 +12,7 @@ import AnonymizeButton from '@components/buttons/AIAnonymiseButton'
 import { Card, CardContent, CardFooter, CardHeader } from '@/shad/ui/card'
 import { cn } from '@/shad/lib/utils'
 import { ScrollArea } from '@/shad/ui/scroll-area'
+import { PartialBlock } from '@blocknote/core'
 
 export interface EditorJsType {
   blocks: {
@@ -30,8 +31,8 @@ export interface NewPostFormProps {
   editorId: string
   title: string | false
   setTitle: Dispatch<SetStateAction<string | null>>
-  description: OutputData | null
-  setDescription: (value: EditorJsType) => void
+  description: PartialBlock[]
+  setDescription: (value: PartialBlock[]) => void
   resetForm: (isEdited: boolean) => void
   isReadOnly: boolean
   isEditable: boolean
@@ -81,9 +82,9 @@ function ContentSection({
   holder,
 }: {
   preview: boolean
-  data: OutputData | null
+  data: PartialBlock[]
   inputs: string | undefined
-  onChange: (value: EditorJsType) => void
+  onChange: (value: PartialBlock[]) => void
   readOnly: boolean
   placeholder: string | undefined
   holder: string
@@ -98,7 +99,6 @@ function ContentSection({
         onChange={onChange}
         readOnly={readOnly}
         placeholder={placeholder || 'Start writing here...'}
-        holder={holder}
       />
     </ScrollArea>
   )
@@ -134,7 +134,7 @@ export const NewPostForm = ({
 
   const handleSubmitAction = useCallback(async () => {
     try {
-      if (!description?.blocks?.length) {
+      if (!description?.length) {
         setError('Please enter content')
         return
       }
@@ -160,10 +160,11 @@ export const NewPostForm = ({
     setIsFormOpen(false)
   }
 
+  // TODO: We need to find a way to find the length of the description for blocknote editor
   const descriptionLength = React.useMemo(() => {
-    return description?.blocks?.reduce((acc, block) => {
+    return description?.reduce((acc, block) => {
       try {
-        return acc + block.data.text.length
+        return acc + (block.content.length ?? '')
       } catch (error) {
         return acc
       }

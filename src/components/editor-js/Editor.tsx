@@ -1,8 +1,9 @@
-import React, { memo, useEffect, useRef, useState } from 'react'
-import EditorJS, { OutputData } from '@editorjs/editorjs'
-import clsx from 'clsx'
-import { CircularLoader } from '@components/buttons/JoinCommunityButton' // Consider renaming or reorganizing this if `CircularLoader` doesn't belong to a button component.
-import { EDITOR_TOOLS } from './editor-tool'
+import React, { memo } from 'react'
+import { BlockNoteEditor, PartialBlock } from "@blocknote/core";
+import { BlockNoteView, useBlockNote } from "@blocknote/react";
+import "@blocknote/core/style.css";
+import { uploadImageToIPFS } from '@/lib/utils'
+import { useTheme } from 'next-themes'
 
 type DivProps = {
   className?: string
@@ -10,9 +11,8 @@ type DivProps = {
 }
 
 type Props = {
-  data?: OutputData
-  onChange(val: OutputData): void
-  holder: string
+  data?: PartialBlock[]
+  onChange?: (val: PartialBlock[]) => void
   placeholder?: string
   readOnly?: boolean
   divProps?: DivProps
@@ -21,62 +21,27 @@ type Props = {
 const EditorBlock = ({
   data,
   onChange,
-  holder,
-  divProps = {},
-  placeholder = 'Start writing your post...',
   readOnly = false,
 }: Props) => {
-  const [isReady, setIsReady] = useState(false)
-  const ref = useRef<EditorJS | null>(null)
-
-  useEffect(() => {
-    if (ref.current || !holder) {
-      return
-    }
-
-    const editor = new EditorJS({
-      holder,
-      inlineToolbar: true,
-      hideToolbar: false,
-      tools: { ...EDITOR_TOOLS },
-      readOnly,
-      placeholder,
-      data,
-      async onChange(api) {
-        if (!readOnly) {
-          const savedData = await api.saver.save()
-          onChange(savedData)
-        }
-      },
-      onReady() {
-        if (readOnly) {
-          const el = document.getElementById(holder)
-          const inputs = el?.getElementsByTagName('input') || []
-          const textareas = el?.getElementsByTagName('textarea') || []
-
-          ;[...inputs, ...textareas].forEach(input => input.setAttribute('readonly', 'readonly'))
-        }
-        setIsReady(true)
-      },
-    })
-
-    ref.current = editor
-
-    // Cleanup function for the effect.
-    return () => {
-      editor.destroy()
-    }
-    // just holder
-  }, [holder])
+  const { systemTheme, theme, setTheme } = useTheme();
+  const currentTheme = theme === 'system' ? systemTheme : theme;
+  const editor: BlockNoteEditor = useBlockNote({
+    initialContent: data,
+    uploadFile: uploadImageToIPFS,
+    onEditorContentChange(editor) {
+      onChange && onChange(editor.topLevelBlocks)
+    },
+    domAttributes: {
+      editor: {
+        class: 'editor'
+      }
+    },
+    editable: !readOnly
+  });
 
   return (
     <>
-      <div
-        {...divProps}
-        className={clsx(isReady ? 'prose-lg h-full w-full text-black dark:text-white' : 'hidden', divProps.className)}
-        id={holder}
-      />
-      {!isReady && <CircularLoader className={'h-12'} />}
+      <BlockNoteView editor={editor} theme={currentTheme} />
     </>
   )
 }

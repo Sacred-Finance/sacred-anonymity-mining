@@ -380,7 +380,7 @@ const CreateCommentUI = ({ group, post }: { group: Group; post: Item }) => {
   const addComment: () => Promise<void> = async () => {
     if (validateRequirements() !== true) return
     if (!contentDescription) {
-      toast.error('Please enter a title and description', { toastId: 'missingTitleOrDesc' })
+      toast.error('Please enter description', { toastId: 'missingTitleOrDesc' })
       return
     }
     const hasSufficientBalance = await checkUserBalance()
@@ -388,7 +388,7 @@ const CreateCommentUI = ({ group, post }: { group: Group; post: Item }) => {
 
     setIsLoading(true)
     let currentDate = new Date()
-    const _message = currentDate.getTime() + '#' + JSON.stringify(contentDescription)
+    const _message = currentDate.getTime() + '#' + JSON.stringify({title: '', description: contentDescription, createdAt: currentDate.getTime(), updatedAt: currentDate.getTime()})
 
     const cid = await uploadIPFS(_message)
     if (!cid) {

@@ -55,7 +55,7 @@ export async function handleDeleteItem(address: string, postedByUser: User, item
 // todo: create works, but it fails in either the caching, or updating the UI after its made - fix currently is refreshing the page.
 export async function create(content, type, address, users, postedByUser, groupId, setWaiting, onIPFSUploadSuccess) {
   let currentDate = new Date()
-  const message = currentDate.getTime().toString() + '#' + JSON.stringify(content)
+  const message = currentDate.getTime().toString() + '#' + JSON.stringify({...content, createdAt: currentDate.getTime(), updatedAt: currentDate.getTime()})
 
   try {
     const cid = await uploadIPFS(message)
@@ -142,7 +142,7 @@ export async function create(content, type, address, users, postedByUser, groupI
 
 export async function editContent(type, content, address: string, itemId, postedByUser: User) {
   let currentDate = new Date()
-  const message = currentDate.getTime().toString() + '#' + JSON.stringify(content)
+  const message = currentDate.getTime().toString() + '#' + JSON.stringify({...content, createdAt: currentDate.getTime(), updatedAt: currentDate.getTime()})
   console.log(`Editing your anonymous ${type}...`)
   let cid
   try {

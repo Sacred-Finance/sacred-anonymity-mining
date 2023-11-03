@@ -48,7 +48,7 @@ export const usePoll = ({  group }: { group: Group }) => {
   }: Poll): Promise<any> => {
     try {
       let currentDate = new Date()
-      const _message = currentDate.getTime() + '#' + JSON.stringify(content)
+      const _message = currentDate.getTime() + '#' + JSON.stringify({...content, createdAt: currentDate.getTime(), updatedAt: currentDate.getTime()})
 
       const cid = await uploadIPFS(_message)
       if (!cid) {

@@ -69,6 +69,7 @@ export const useEditItem = ({
 
     if (isAdminOrModerator) {
       let currentDate = new Date()
+      content = { ...content, createdAt: currentDate.getTime(), updatedAt: currentDate.getTime() }
       const post = JSON.stringify(content)
       const message = currentDate.getTime().toString() + '#' + post
       console.log(`Editing your anonymous post...`)

@@ -53,8 +53,8 @@ export const PostComment = ({ comment }: { comment: Item }) => {
 
           <p className="inline-block text-sm">
             🕛{' '}
-            {comment?.description?.time || comment?.time
-              ? formatDistanceToNow(new Date(comment?.description?.time || comment?.time).getTime())
+            {comment?.description?.time || comment?.createdAt
+              ? formatDistanceToNow(new Date(comment?.description?.time || comment?.createdAt).getTime())
               : '-'}
           </p>
         </div>

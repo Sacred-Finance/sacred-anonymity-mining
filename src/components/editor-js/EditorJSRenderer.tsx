@@ -1,12 +1,16 @@
 import { OutputData } from '@editorjs/editorjs'
 import React, {memo} from 'react'
 import clsx from 'clsx'
-
+import dynamic from 'next/dynamic'
+import { PartialBlock } from '@blocknote/core'
+const Editor = dynamic(() => import('../editor-js/Editor'), {
+  ssr: false,
+})
 const editorJsHtml = require('editorjs-html')
 const EditorJsToHtml = editorJsHtml()
 
 interface Props {
-  data?: OutputData | string
+  data?: PartialBlock[] | string
   isHtml?: boolean
   className?: string
 }
@@ -22,6 +26,8 @@ const EditorJsRenderer = ({ data, isHtml = false, className }: Props) => {
     html = [data]
   } else if (data && 'blocks' in data && Array.isArray(data.blocks) && data.blocks.length) {
     html = EditorJsToHtml?.parse(data) as (string | JSX.Element)[]
+  } else if (data && Array.isArray(data) && data.length) {
+    return <Editor data={data as PartialBlock[]} readOnly={true} onChange={() => {}}  />
   }
 
   if (!Array.isArray(html)) {

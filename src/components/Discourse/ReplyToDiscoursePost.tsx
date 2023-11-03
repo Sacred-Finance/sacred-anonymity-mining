@@ -1,14 +1,13 @@
-import React, { useRef, useState } from 'react'
+import React, { useState } from 'react'
 import { NewPostForm, NewPostFormProps } from '@components/NewPostForm'
 import axios from 'axios'
 import { toast } from 'react-toastify'
-import { OutputDataToMarkDown } from '@components/Discourse/OutputDataToMarkDown'
 import { useTranslation } from 'react-i18next'
-import EditorJS, { OutputData } from '@editorjs/editorjs'
-import { Post, Topic } from '@components/Discourse/types'
+import { Topic } from '@components/Discourse/types'
 import { useFetchBalance } from '@/hooks/useFetchBalance'
 import { useRouter } from 'next/router'
 import { mutate } from 'swr'
+import { PartialBlock } from '@blocknote/core'
 
 const ReplyToDiscoursePost = ({
   post,
@@ -24,13 +23,14 @@ const ReplyToDiscoursePost = ({
   const { t } = useTranslation()
   const router = useRouter()
   const { groupId, topicId } = router.query
-  const editorReference = useRef<EditorJS>()
-  const [description, setDescription] = useState<OutputData | null>(null)
+  const [description, setDescription] = useState<PartialBlock[] | null>(null)
   const [selectedToReveal, setSelectedToReveal] = useState(0)
   const { fetchBalance } = useFetchBalance()
   const onSubmit = async () => {
     if (!description) return toast.error(t('error.emptyPost'))
-    let raw = OutputDataToMarkDown(description)
+    const { BlockNoteEditor } = await import('@blocknote/core')
+    const e = new BlockNoteEditor()
+    let raw = await e.blocksToMarkdown(description)
 
     if (selectedToReveal > 0) {
       try {

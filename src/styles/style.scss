@@ -61,6 +61,11 @@
   }
 }
 
+.editor {
+  background-color: transparent !important;
+  border: 1px solid var(--border) !important;
+}
+
 .codex-editor {
   * svg {
     @apply rounded bg-accent text-foreground;

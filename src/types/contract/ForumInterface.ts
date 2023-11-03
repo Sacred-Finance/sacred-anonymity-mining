@@ -1,6 +1,7 @@
 import { BigNumber, ethers } from 'ethers'
 import {OutputData} from "@editorjs/editorjs";
 import {OutputBlockData} from "@editorjs/editorjs/types/data-formats/output-data";
+import { PartialBlock } from '@blocknote/core';
 
 export interface Admins {
   _admins: string[]
@@ -403,7 +404,7 @@ export type Item = {
   // The following are not part of the contract
   createdAt: Date
   title?: string
-  description?: OutputData | undefined
+  description?: PartialBlock[]
   // blocks?: OutputBlockData[] | undefined
 }
 

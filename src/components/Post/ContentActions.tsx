@@ -66,7 +66,7 @@ export const ContentActions = ({
             <PrimaryButton
               className=" bg-blue-500 text-sm text-white hover:bg-blue-600"
               isLoading={isLoading}
-              disabled={!item || (!item.description?.blocks?.length && !item.blocks?.length)}
+              disabled={!item || (!item.description?.length)}
               onClick={() => save()}
               startIcon={<PaperAirplaneIcon className="h-4 w-4 mr-1" />}
               loadingPosition={'start'}

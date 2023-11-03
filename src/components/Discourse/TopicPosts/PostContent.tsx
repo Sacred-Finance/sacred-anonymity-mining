@@ -1,6 +1,6 @@
-import React from 'react'
-import parse from 'html-react-parser'
-
+import React, { use, useEffect, useState } from 'react'
+import dynamic from 'next/dynamic'
+const Editor = dynamic(() => import('@/components/editor-js/Editor'), {ssr: false})
 // PostContent component
 export const PostContent = ({ post }) => (
   <div className="rounded-lg bg-white p-6 shadow-md transition-colors duration-300 dark:bg-gray-900">
@@ -31,9 +31,20 @@ export const PostContent = ({ post }) => (
 
 // Cooked component
 function Cooked(props: { post: any }) {
+  const [blocks, setBlocks] = useState<any[]>([])
+  useEffect(() => {
+    convertHTMLToBloakc(props.post?.cooked)
+  }, [props.post?.cooked])
+  const convertHTMLToBloakc = async (html: string) => {
+    if (!html) return
+    const { BlockNoteEditor } = await import('@blocknote/core');
+    const e = new BlockNoteEditor();
+    const blocks = await e.HTMLToBlocks(html);
+    setBlocks(blocks);
+  }
   return (
     <div className="mb-4 leading-relaxed text-gray-800 dark:text-gray-300">
-      {props?.post?.cooked ? parse(props?.post?.cooked) : null}
+      {props?.post?.cooked && blocks?.length ? <Editor data={blocks} readOnly={true} /> : null}
     </div>
   )
 }

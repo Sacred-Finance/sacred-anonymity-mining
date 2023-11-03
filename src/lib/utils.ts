@@ -148,17 +148,17 @@ export const getStringFromBytes32 = (bytes32Hex: string): string => {
   return ethers.utils.parseBytes32String(bytes32Hex)
 }
 
-export const uploadImageToIPFS = async (message: File): Promise<string | null> => {
+export const uploadImageToIPFS = async (message: File): Promise<string> => {
   if (!ipfs || !message) {
-    return null
+    return ''
   }
   try {
     const result = await ipfs.add(message)
     console.log('ipfs image upload result', result)
-    return result.path
+    return `https://ipfs.io/ipfs/${result.path}`
   } catch (err) {
     console.error('Error pinning file to IPFS', err)
-    return null
+    return ''
   }
 }
 

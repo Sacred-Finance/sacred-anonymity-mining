@@ -1,13 +1,12 @@
 import axios from 'axios'
 import { Post, Topic } from '@components/Discourse/types'
 import React, { useRef, useState } from 'react'
-import EditorJS, { OutputData } from '@editorjs/editorjs'
 import { useTranslation } from 'react-i18next'
 import { NewPostForm } from '@components/NewPostForm'
 import { toast } from 'react-toastify'
-import { OutputDataToMarkDown } from '@components/Discourse/OutputDataToMarkDown'
 import { useFetchBalance } from '@/hooks/useFetchBalance'
 import { useRouter } from 'next/router'
+import { PartialBlock } from '@blocknote/core'
 
 const PostToTopic = ({
   topic,
@@ -20,14 +19,16 @@ const PostToTopic = ({
 }) => {
   console.log('topic', readonly)
   const { t } = useTranslation()
-  const [description, setDescription] = useState<OutputData | null>(null)
+  const [description, setDescription] = useState<PartialBlock[] | null>(null)
   const [selectedToReveal, setSelectedToReveal] = useState(0)
   const { fetchBalance } = useFetchBalance()
   const router = useRouter()
   const { groupId } = router.query
   const onSubmit = async () => {
     if (!description) return toast.error(t('error.emptyPost'))
-    let raw = OutputDataToMarkDown(description)
+    const { BlockNoteEditor } = await import('@blocknote/core')
+    const e = new BlockNoteEditor()
+    let raw = await e.blocksToMarkdown(description)
 
     if (selectedToReveal > 0) {
       try {

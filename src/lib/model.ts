@@ -2,6 +2,7 @@ import { OutputData } from '@editorjs/editorjs'
 import { BigNumberish } from 'ethers'
 import { Requirement as ContractRequirement } from '@/types/contract/ForumInterface'
 import { Identity } from '@semaphore-protocol/identity'
+import { PartialBlock } from '@blocknote/core'
 
 export interface Requirement extends ContractRequirement {
   name?: string
@@ -38,11 +39,12 @@ export interface PostOrComment {
   kind: ContentType
   groupId: number
   createdAt: number
+  updatedAt?: number
 }
 
 export interface PostContent extends PostOrComment {
   title?: string
-  description: OutputData
+  description: PartialBlock[]
 }
 
 export type ReputationProofStruct = {

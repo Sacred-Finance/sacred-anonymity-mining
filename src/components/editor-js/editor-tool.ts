@@ -98,11 +98,11 @@ export const EDITOR_TOOLS: EditorConfig['tools'] = {
          */
         uploadByFile(file) {
           // your own uploading logic here
-          return uploadImageToIPFS(file).then(hash => {
+          return uploadImageToIPFS(file).then(url => {
             return {
               success: 1,
               file: {
-                url: `https://ipfs.io/ipfs/${hash}`,
+                url
                 // any other image data you want to store, such as width, height, color, extension, etc
               },
             }
