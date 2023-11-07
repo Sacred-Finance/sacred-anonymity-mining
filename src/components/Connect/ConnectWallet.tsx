@@ -8,5 +8,5 @@ interface Props {
 export default function ConnectWallet({ show = 'always' }: Props) {
   const { isConnected } = useAccount()
   if ((show === 'connected' && !isConnected) || (show === 'disconnected' && isConnected)) return null
-  return <ConnectButton chainStatus={'none'}  />
+  return <ConnectButton chainStatus={'full'}   />
 }
