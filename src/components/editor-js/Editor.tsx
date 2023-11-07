@@ -39,9 +39,32 @@ const EditorBlock = ({
     editable: !readOnly
   });
 
+  /** Custom Paste Event for pasting image */
+  const onPaste = async (event) => {
+    event.preventDefault()
+    const clipboardItems = await navigator.clipboard.read();
+    for (const clipboardItem of clipboardItems) {
+      const imageType = clipboardItem.types.find(type => type.startsWith('image/')) ?? []
+      if (imageType) {
+        const blob = await clipboardItem.getType(imageType);
+        const blockLength = editor.topLevelBlocks.length
+        editor.uploadFile && editor?.uploadFile(blob).then((url) => {
+          editor.insertBlocks([{
+            type: 'image',
+            props: {
+              url,
+              caption: '',
+            }
+          }], editor.topLevelBlocks[blockLength - 1], 'after')
+        })
+      }
+    }
+
+  }
+
   return (
     <>
-      <BlockNoteView editor={editor} theme={currentTheme} />
+      <BlockNoteView onPaste={onPaste} editor={editor} theme={currentTheme} />
     </>
   )
 }
