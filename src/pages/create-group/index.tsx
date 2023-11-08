@@ -307,7 +307,6 @@ function CreateGroupFormUI({ onCreate }) {
             Close
           </Link>
           <PrimaryButton
-            className={clsx(buttonVariants.primarySolid, 'border')}
             disabled={isSubmitDisabled || isSubmitting}
             onClick={submit}
             isLoading={isSubmitting}
