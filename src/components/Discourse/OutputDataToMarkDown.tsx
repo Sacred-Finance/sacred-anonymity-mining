@@ -56,7 +56,7 @@ export function OutputDataToMarkDown(description: OutputData) {
   }, '')
 }
 
-export const OutputDataToHTML = (description: OutputData) => {
+export const OutputDataToHTML = (description: OutputData | undefined) => {
   var convertedHtml = ''
   description?.blocks?.map(block => {
     switch (block.type) {

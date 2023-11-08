@@ -12,7 +12,6 @@ import { PostItem } from '@components/Post/PostItem'
 import { NewPostModal, PostComment, TempComment } from '@components/Post/PostComments'
 import { Tab } from '@headlessui/react'
 import { ExclamationCircleIcon } from '@heroicons/react/20/solid'
-import { useRouter } from 'next/router'
 import { ChatIcon, InfoIcon, PollIcon } from '@components/CommunityActionTabs'
 import { NewPostForm, NewPostFormProps } from '@components/NewPostForm'
 import { useItemsSortedByVote } from '@/hooks/useItemsSortedByVote'
@@ -43,10 +42,54 @@ import { emptyPollRequest } from '@/lib/item'
 import { ScrollArea } from '@/shad/ui/scroll-area'
 import ReputationCard from '../ReputationCard'
 import AIDigestButton, { AIDigestContext } from '@components/buttons/AIPostDigestButton'
-import EditorJsRenderer from '@components/editor-js/EditorJSRenderer'
-import { CheckCircle, WandIcon } from 'lucide-react'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/shad/ui/accordion'
+import { WandIcon } from 'lucide-react'
 import { Card } from '@/shad/ui/card'
+import { DynamicAccordion } from '@components/Post/DynamicAccordion'
+import { Record } from 'immutable'
+import { Template } from '@pages/api/gpt-server/logos-ai'
+import { Checkbox } from '@/shad/ui/checkbox'
+import { Label } from '@/shad/ui/label'
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/shad/ui/hover-card'
+import clsx from 'clsx'
+
+const analysisLabelsAndTypes = [
+  {
+    key: Template.Summarize_ToSimpleMarkdown,
+    label: 'Summarize',
+    setter: 'setSummarizeResponse',
+    description: 'Summarize the post in 1-2 sentences',
+  },
+  {
+    key: Template.SWOT_ToSimpleMarkdown,
+    label: 'SWOT',
+    setter: 'setSwotResponse',
+    description: 'Strengths, Weaknesses, Opportunities, Threats',
+  },
+  {
+    key: Template.CausalChain_ToSimpleMarkdown,
+    label: 'Causal Chain',
+    setter: 'setCausalChainResponse',
+    description: 'What are the causes and effects of this post?',
+  },
+  {
+    key: Template.SecondOrder_ToSimpleMarkdown,
+    label: 'Second Order',
+    setter: 'setSecondOrderResponse',
+    description: 'Consider the second order effects of this post',
+  },
+  {
+    key: Template.UnbiasedCritique_ToSimpleMarkdown,
+    label: 'Unbiased Critique',
+    setter: 'setUnbiasedCritiqueResponse',
+    description: 'Provide an unbiased critique of this post',
+  },
+  {
+    key: Template.ProsAndCons_ToSimpleMarkdown,
+    label: 'Pros and Cons',
+    setter: 'setProsAndConsResponse',
+    description: 'Highlight the pros and cons of this post',
+  },
+]
 
 export function PostPage({
   comments,
@@ -59,11 +102,8 @@ export function PostPage({
   community: Group
   commentInstance: CommentClass
 }) {
-  const postId = post.id
-  const { address } = useAccount()
-
   const {
-    state: { isAdmin, isModerator },
+    state: { isAdmin },
   } = useCommunityContext()
   const [summarizeResponse, setSummarizeResponse] = React.useState('')
   const [swotResponse, setSwotResponse] = React.useState('')
@@ -71,6 +111,15 @@ export function PostPage({
   const [secondOrderResponse, setSecondOrderResponse] = React.useState('')
   const [unbiasedCritiqueResponse, setUnbiasedCritiqueResponse] = React.useState('')
   const [prosAndConsResponse, setProsAndConsResponse] = React.useState('')
+
+  const [enabled, setEnabled] = React.useState({
+    swot: false,
+    summarize: true,
+    causalChain: true,
+    secondOrder: true,
+    unbiasedCritique: true,
+    prosAndCons: true,
+  })
 
   const [tempComments, setTempComments] = useState<TempComment[]>([])
 
@@ -108,23 +157,27 @@ export function PostPage({
         <ReputationCard />
       </div>
       <Card className="flex h-screen min-h-full w-full grow flex-col rounded-lg border-0 bg-gradient-to-r from-background  from-25% to-background to-75% backdrop-blur-3xl  transition-colors  ">
-        <div className="flex-1 overflow-hidden ">
+        <ScrollArea className="flex-1 overflow-hidden ">
           <div className="flex h-full grow flex-col justify-stretch md:flex-row ">
             <div className=" flex flex-col gap-4 p-3 md:w-1/2 ">
               <div className="sticky top-0 z-10 flex gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
                 <VoteForItemUI postId={post.id} post={post} group={community} />
               </div>
-              <ScrollArea className=" max-h-[calc(90vh - 200px)] col-span-12 flex   w-full  flex-col gap-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
+              <div className="dark:bg-gray-900 p-2 dark:border-gray-700 border rounded-xl ">
+
+              <ScrollArea className="max-h-[calc(90vh - 200px)] col-span-12 flex   w-full  flex-col gap-2  bg-white p-3  dark:bg-gray-950/20 dark:border-gray-950/80 rounded border">
                 <PostItem post={post} group={community} />
               </ScrollArea>
+
+              </div>
             </div>
-            <div className=" flex h-full grow flex-col gap-4 p-3 md:w-1/2">
+            <div className=" flex h-full grow flex-col gap-4 p-3 md:w-1/2 overflow-y-auto">
               <Tab.Group onChange={handleTabChange} defaultIndex={selectedTab} selectedIndex={selectedTab}>
                 <Tab.List className="sticky top-0 z-10 flex gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
                   {['All Replies', 'Polls', 'AI', 'Community Info'].map((tooltip, index) => (
                     <Tab
                       className={({ selected }) =>
-                        `  rounded bg-secondary text-secondary-foreground  ${selected && ' ring-[1px] ring-primary'}`
+                        `  rounded bg-secondary text-secondary-foreground  dark:bg-gray-950/50 ${selected && ' ring-[1px] ring-primary'}`
                       }
                       key={index}
                     >
@@ -171,15 +224,50 @@ export function PostPage({
                     </Tab>
                   ))}
                 </Tab.List>
-
                 {selectedTab === 2 && (
-                  <div className={'mb-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900'}>
-                    <span className={'inline-flex items-center gap-2 text-[10px] text-yellow-700'}>
-                      <ExclamationCircleIcon className={'w-4'} />
-                      These processes may take 1-2 minutes
-                    </span>
-                    <div className={'flex gap-2'}>
-                      <AIDigestButton postData={OutputDataToHTML(post?.description)} postTitle={post.title} />
+                  <div className="mb-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
+                    <div className="grid grid-cols-2 gap-4 md:grid-cols-2 xl:grid-cols-3 ">
+                      {analysisLabelsAndTypes.map((analysis, index) => (
+                        <div
+                          key={analysis.key}
+                          className={clsx(
+                              'flex grow justify-between rounded-xl border p-2  dark:border-gray-700/80 dark:bg-gray-950/20 ',
+                              'hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-105'
+                          )}
+                        >
+                          <label
+                            htmlFor={analysis.key}
+                            className={clsx(
+                              'relative flex flex-col gap-2',
+                            )}
+                          >
+                            <span className=" text-gray-700 dark:text-gray-300 ">{analysis.label}</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-300">{analysis.description}</span>
+                            <Checkbox
+                              className="absolute  right-0 top-0 rounded-full"
+                              id={analysis.key}
+                              checked={enabled[analysis.key]}
+                              onChange={() =>
+                                setEnabled({
+                                  ...enabled,
+                                  [analysis.key]: !enabled[analysis.key],
+                                })
+                              }
+                            />
+                          </label>
+                        </div>
+                      ))}
+
+                      <div className="col-span-2 flex items-center gap-2 text-[10px] text-yellow-700">
+                        <ExclamationCircleIcon className="h-4 w-4" />
+                        These processes may take 1-2 minutes
+                      </div>
+
+                      <AIDigestButton
+                          postData={OutputDataToHTML(post?.description)}
+                          postTitle={post.title}
+                          enabled={enabled}
+                      />
                     </div>
                   </div>
                 )}
@@ -196,116 +284,57 @@ export function PostPage({
                 <Tab.Panels className={'scrollbar col-span-12 flex w-full flex-col gap-4'}>
                   {/* Comments / Replies */}
                   <Tab.Panel className="flex flex-col gap-4 ">
-                    {sortedCommentsData.map(comment => (
-                      <div
-                        key={`comment_${comment.id}`}
-                        className="mb-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900"
-                      >
-                        <PostComment comment={comment} key={comment.id} />
-                      </div>
-                    ))}
-                    {!sortedCommentsData.length && (
-                      <div className="flex flex-col items-center justify-center gap-2">
-                        <div className="text-md">No comments yet</div>
-                      </div>
-                    )}
-                  </Tab.Panel>
-
-                  {/* Polls */}
-                  <Tab.Panel className="flex flex-col ">
-                    {!sortedCommentsData.length && (
-                      <div className="flex flex-col items-center justify-center gap-2">
-                        <div className="text-md">No Polls yet</div>
-                      </div>
-                    )}
-                    {sortedCommentsData
-                      .filter(comment => comment.kind == ContentType.POLL)
-                      .map(comment => (
+                    <ScrollArea>
+                      {sortedCommentsData.map(comment => (
                         <div
-                          key={`comment_as_poll_${comment.id}`}
+                          key={`comment_${comment.id}`}
                           className="mb-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900"
                         >
                           <PostComment comment={comment} key={comment.id} />
                         </div>
                       ))}
+                      {!sortedCommentsData.length && (
+                        <div className="flex flex-col items-center justify-center gap-2">
+                          <div className="text-md">No comments yet</div>
+                        </div>
+                      )}
+                    </ScrollArea>
                   </Tab.Panel>
 
-                  {/* AI Tab */}
+                  {/* Polls */}
+                  <Tab.Panel className="flex flex-col ">
+                    <ScrollArea>
+                      {!sortedCommentsData.length && (
+                        <div className="flex flex-col items-center justify-center gap-2">
+                          <div className="text-md">No Polls yet</div>
+                        </div>
+                      )}
+                      {sortedCommentsData
+                        .filter(comment => comment.kind == ContentType.POLL)
+                        .map(comment => (
+                          <div
+                            key={`comment_as_poll_${comment.id}`}
+                            className="mb-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900"
+                          >
+                            <PostComment comment={comment} key={comment.id} />
+                          </div>
+                        ))}
+                    </ScrollArea>
+                  </Tab.Panel>
+
                   <Tab.Panel className="flex flex-col gap-4">
-                    <Accordion
-                      type="single"
-                      collapsible
-                      className="mb-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900"
-                    >
-                      <AccordionItem value="summarize">
-                        <AccordionTrigger>
-                          <span className={'inline-flex gap-4'}>
-                            <CheckCircle className={summarizeResponse ? 'text-green-500' : 'text-gray-500'} /> Summarize
-                          </span>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <EditorJsRenderer data={summarizeResponse} isHtml={true} />
-                        </AccordionContent>
-                      </AccordionItem>
-                      <AccordionItem value="swot">
-                        <AccordionTrigger>
-                          <span className={'inline-flex gap-4'}>
-                            <CheckCircle className={swotResponse ? 'text-green-500' : 'text-gray-500'} /> SWOT
-                          </span>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <EditorJsRenderer data={swotResponse} isHtml={true} />
-                        </AccordionContent>
-                      </AccordionItem>
-
-                      <AccordionItem value="causalChain">
-                        <AccordionTrigger>
-                          <span className={'inline-flex gap-4'}>
-                            <CheckCircle className={causalChainResponse ? 'text-green-500' : 'text-gray-500'} />
-                            Causal Chain{' '}
-                          </span>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <EditorJsRenderer data={causalChainResponse} isHtml={true} />
-                        </AccordionContent>
-                      </AccordionItem>
-
-                      <AccordionItem value="secondOrder">
-                        <AccordionTrigger>
-                          <span className={'inline-flex gap-4'}>
-                            <CheckCircle className={secondOrderResponse ? 'text-green-500' : 'text-gray-500'} />
-                            Second Order{' '}
-                          </span>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <EditorJsRenderer data={secondOrderResponse} isHtml={true} />
-                        </AccordionContent>
-                      </AccordionItem>
-
-                      <AccordionItem value="unbiasedCritique">
-                        <AccordionTrigger>
-                          <span className={'inline-flex gap-4'}>
-                            <CheckCircle className={unbiasedCritiqueResponse ? 'text-green-500' : 'text-gray-500'} />
-                            Unbiased Critique
-                          </span>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <EditorJsRenderer data={unbiasedCritiqueResponse} isHtml={true} />
-                        </AccordionContent>
-                      </AccordionItem>
-
-                      <AccordionItem value="prosAndCons">
-                        <AccordionTrigger>
-                          <span className={'inline-flex gap-4'}>
-                            <CheckCircle className={prosAndConsResponse ? 'text-green-500' : 'text-gray-500'} />
-                            Pros and Cons{' '}
-                          </span>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <EditorJsRenderer data={prosAndConsResponse} isHtml={true} />
-                        </AccordionContent>
-                      </AccordionItem>
-                    </Accordion>
+                    <ScrollArea>
+                      <DynamicAccordion
+                        responses={{
+                          swotResponse,
+                          summarizeResponse,
+                          causalChainResponse,
+                          secondOrderResponse,
+                          unbiasedCritiqueResponse,
+                          prosAndConsResponse,
+                        }}
+                      />
+                    </ScrollArea>
                   </Tab.Panel>
 
                   {/* Community Tab */}
@@ -316,7 +345,7 @@ export function PostPage({
               </Tab.Group>
             </div>
           </div>
-        </div>
+        </ScrollArea>
       </Card>
     </AIDigestContext.Provider>
   )

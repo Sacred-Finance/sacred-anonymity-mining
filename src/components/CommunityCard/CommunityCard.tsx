@@ -102,17 +102,19 @@ export const CommunityCard = ({
           </CardDescription>
         </CardHeader>
 
-        <CardContent>
           {(bannerSrc ?? mobileLogo) && (
-            <Image
+              <CardContent>
+
+              <Image
               className=" -z-1 pointer-events-none h-full w-full rounded-lg object-cover opacity-5"
               src={bannerSrc ?? mobileLogo}
               alt={'community logo'}
               fill={true}
               unoptimized
             />
+              </CardContent>
+
           )}
-        </CardContent>
 
         <CommunityCardFooter />
         {/*<CardOverlay />*/}

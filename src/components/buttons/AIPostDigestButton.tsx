@@ -1,11 +1,10 @@
 import React, { useContext, useEffect } from 'react'
 import { useGPTServerAnalysis } from '@/hooks/useGPTServerAnalysis'
-import { CheckBadgeIcon, SparklesIcon } from '@heroicons/react/20/solid'
+import { SparklesIcon } from '@heroicons/react/20/solid'
 import clsx from 'clsx'
-import ToolTip from '@components/HOC/ToolTip'
 import { Template } from '@pages/api/gpt-server/logos-ai'
 import { CircularLoader } from '@components/buttons/JoinCommunityButton'
-import { Button } from '@/shad/ui/button'
+import { PrimaryButton } from '@components/buttons/PrimaryButton'
 
 const analysisLabelsAndTypes = [
   { key: Template.Summarize_ToSimpleMarkdown, label: 'Summarize', setter: 'setSummarizeResponse' },
@@ -52,6 +51,16 @@ const AIDigestButton = ({
     UnbiasedCritique_ToSimpleMarkdown: true,
     ProsAndCons_ToSimpleMarkdown: true,
   },
+}: {
+  postData: string
+  enabled?: {
+    Summarize_ToSimpleMarkdown?: boolean
+    SWOT_ToSimpleMarkdown?: boolean
+    CausalChain_ToSimpleMarkdown?: boolean
+    SecondOrder_ToSimpleMarkdown?: boolean
+    UnbiasedCritique_ToSimpleMarkdown?: boolean
+    ProsAndCons_ToSimpleMarkdown?: boolean
+  }
 }) => {
   const { setResponses } = useAIDigest()
 
@@ -68,8 +77,6 @@ const AIDigestButton = ({
     })
   }, [analyses])
 
-
-
   const handleFetchData = () => {
     analyses
       .filter((analysis, index) => enabled[analysisLabelsAndTypes[index].key])
@@ -80,27 +87,28 @@ const AIDigestButton = ({
   const anyResponses = analyses.some(analysis => analysis.data)
 
   useEffect(() => {
+    // @ts-ignore
     window.onbeforeunload = anyLoading ? () => true : undefined
   }, [anyLoading])
 
   return (
-    <div className="relative w-full">
-      <Button
-        variant={'outline'}
+      <PrimaryButton
+        variant={'default'}
+        className={ctaClass}
         onClick={handleFetchData}
         disabled={anyLoading || postData.length < 25 || anyResponses}
         isLoading={anyLoading}
       >
-
         AI Digest{' '}
         {!anyLoading ? (
-          <SparklesIcon className={clsx('h-5 w-5', anyResponses ? 'text-white' : 'text-blue-500')} height={20} />
+          <SparklesIcon className={clsx('h-5 w-5', anyResponses ? 'text-white' : 'text-white')} height={20} />
         ) : (
           <CircularLoader />
         )}
-      </Button>
-    </div>
+      </PrimaryButton>
   )
 }
+
+const ctaClass = 'text-sm !bg-primary-400 !text-primary-foreground hover:!bg-primary-500 hover:!text-primary-foreground'
 
 export default AIDigestButton
