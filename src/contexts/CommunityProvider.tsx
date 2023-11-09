@@ -7,7 +7,7 @@ import { useAccount } from 'wagmi'
 import { useIdentity } from '@/hooks/useIdentity'
 import { Group, Item } from '@/types/contract/ForumInterface'
 import { Topic } from '@components/Discourse/types'
-import { hasUserJoined } from '@/lib/utils'
+import { createNote, hasUserJoined } from '@/lib/utils'
 
 export type CommunityId = string | number | ethers.BigNumber
 type CommunityContextType = {
@@ -35,9 +35,9 @@ type State = {
   users: User[]
   usersGrouped: { [key: string]: User[] }
   activeCommunity: ActiveCommunity | ActiveDiscourseCommunity
-  activePost: ActivePost,
-  isAdmin: boolean,
-  isModerator: boolean,
+  activePost: ActivePost
+  isAdmin: boolean
+  isModerator: boolean
 }
 
 type Action =
@@ -50,7 +50,7 @@ type Action =
   // a new type for active community, and will store community details, post list, and comments for each post
   | { type: 'SET_ACTIVE_COMMUNITY'; payload: ActiveCommunity | ActiveDiscourseCommunity }
   | { type: 'SET_ACTIVE_POST'; payload: ActivePost }
-  | { type: 'SET_USER_ACCESS'; payload: { isAdmin?: boolean, isModerator?: boolean } }
+  | { type: 'SET_USER_ACCESS'; payload: { isAdmin?: boolean; isModerator?: boolean } }
 
 const initialState: State = {
   communities: [],
@@ -155,15 +155,15 @@ function reducer(state: State, action: Action): State {
         communities: updatedCommunities,
       }
 
-      case 'SET_USER_ACCESS': {
-        const isAdmin = isBoolean(action.payload.isAdmin) ? action.payload.isAdmin : state.isAdmin;
-        const isModerator = isBoolean(action.payload.isModerator) ? action.payload.isModerator : state.isModerator;
-        return {
-          ...state,
-          isAdmin,
-          isModerator
-        }
+    case 'SET_USER_ACCESS': {
+      const isAdmin = isBoolean(action.payload.isAdmin) ? action.payload.isAdmin : state.isAdmin
+      const isModerator = isBoolean(action.payload.isModerator) ? action.payload.isModerator : state.isModerator
+      return {
+        ...state,
+        isAdmin,
+        isModerator,
       }
+    }
     default:
       return state
   }
@@ -254,6 +254,34 @@ export function useUserIfJoined(communityId: string | number): User | false {
   // }
 
   return userJoined
+}
+
+export function useCommunitiesCreatedByUser() {
+  const { state } = useCommunityContext()
+  const { address: userAddress } = useAccount()
+  const [communitiesJoined, setCommunitiesJoined] = React.useState<Group[]>([])
+
+  useEffect(() => {
+    filterCommunitiesCreatedByUser()
+  }, [userAddress, state.communities?.length])
+
+  const filterCommunitiesCreatedByUser = async () => {
+    if (userAddress && state.communities?.length) {
+      const communitiesJoined: Group[] = []
+      for (let i = 0; i < state.communities.length; i++) {
+        const generatedIdentity = new Identity(`${userAddress}`)
+        const generatedNote = (await createNote(generatedIdentity)).toString()
+        if (state.communities[i].note === generatedNote) {
+          communitiesJoined.push(state.communities[i])
+        }
+      }
+      setCommunitiesJoined(communitiesJoined)
+    } else {
+      setCommunitiesJoined([])
+    }
+  }
+
+  return { communitiesJoined }
 }
 
 export const addAvatarToUser = (user: User) => {
