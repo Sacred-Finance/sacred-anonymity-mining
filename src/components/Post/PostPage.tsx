@@ -48,6 +48,7 @@ import { DynamicAccordion } from '@components/Post/DynamicAccordion'
 import { Checkbox } from '@/shad/ui/checkbox'
 import clsx from 'clsx'
 import { analysisLabelsAndTypes } from '@components/Post/AiAccordionConfig'
+import { AnalysisCheckboxComponent } from '@components/Post/AiAnalysisCheckboxComponent'
 
 export const AIDigestContext = React.createContext<{
   enabled: { [key: string]: boolean }
@@ -78,8 +79,8 @@ export function PostPage({
     state: { isAdmin },
   } = useCommunityContext()
 
-  const [responses, setResponses] = useState<{ [key: string]: string }>({})
   const [enabled, setEnabled] = useState<{ [key: string]: boolean }>({})
+  const [responses, setResponses] = useState<{ [key: string]: string }>({})
 
   useEffect(() => {
     const initialEnabled = {}
@@ -104,8 +105,8 @@ export function PostPage({
     <AIDigestContext.Provider
       value={{
         enabled,
-        responses: responses,
         setEnabled,
+        responses,
         setResponses,
       }}
     >
@@ -181,38 +182,8 @@ export function PostPage({
 
                   <Tab.Panel className="flex flex-col gap-4">
                     <div className="mb-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
-                      <div className="grid grid-cols-2 gap-4 md:grid-cols-2 xl:grid-cols-3 ">
-                        {analysisLabelsAndTypes.map((analysis, index) => (
-                          <div
-                            key={analysis.key}
-                            className={clsx(
-                              'rounded-xl border p-2  dark:border-gray-700/80 dark:bg-gray-950/20 ',
-                              'hover:scale-105 hover:bg-gray-100 dark:hover:bg-gray-800 '
-                            )}
-                          >
-                            <label htmlFor={analysis.key} className={clsx('relative flex flex-col gap-2')}>
-                              <span className=" text-gray-700 dark:text-gray-300 ">{analysis.label}</span>
-                              <span className="text-xs text-gray-500 dark:text-gray-300">{analysis.description}</span>
-                              <Checkbox
-                                className="absolute  right-0 top-0 rounded-full"
-                                id={analysis.key}
-                                checked={enabled[analysis.key]}
-                                onChange={() =>
-                                  setEnabled({
-                                    ...enabled,
-                                    [analysis.key]: !enabled[analysis.key],
-                                  })
-                                }
-                              />
-                            </label>
-                          </div>
-                        ))}
-
-                        <div className="col-span-2 flex items-center gap-2 text-[10px] text-yellow-700">
-                          <ExclamationCircleIcon className="h-4 w-4" />
-                          These processes may take 1-2 minutes
-                        </div>
-
+                      <div className={'grid grid-cols-2 gap-4 md:grid-cols-2 xl:grid-cols-3'}>
+                        <AnalysisCheckboxComponent />
                         <AIDigestButton postData={OutputDataToHTML(post?.description)} />
                       </div>
                     </div>

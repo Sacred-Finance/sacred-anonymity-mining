@@ -35,23 +35,50 @@ const analysisLabelsAndTypes = [
     enabled: true,
   },
 ]
-
-const analysesOptions = analysisLabelsAndTypes.map(({ key }) => ({
-  template: key,
-  postData: '',
-}))
-
 const AIDigestButton = ({ postData }: { postData: string }) => {
-  const {  enabled } = useAIDigest()
+  const { enabled, responses, setResponses } = useAIDigest()
+
+  const analysesOptions = analysisLabelsAndTypes
+    .filter(analysis => enabled[analysis.key])
+    .map(({ key }) => ({
+      template: key,
+      postData: postData,
+    }))
+
   const analyses = useGPTServerAnalysis(analysesOptions)
 
   const handleFetchData = () => {
-    const enabledAnalyses = analyses.filter((analysis, index) => analysisLabelsAndTypes[index].enabled)
-    enabledAnalyses.forEach(analysis => analysis.fetchData())
+    analyses.forEach(analysis => {
+      analysis.fetchData(data => {
+        // Custom setter function that merges new data with existing responses
+        setResponses(prevResponses => ({
+          ...prevResponses,
+          [analysis.template]: data,
+        }))
+      })
+    })
+  }
+
+  const getButtonText = () => {
+    const enabledAnalyses = analysisLabelsAndTypes.filter(({ key }) => enabled[key])
+    const allResponses = enabledAnalyses.every(({ key }) => responses[key])
+    if (allResponses) {
+      return 'Digest Complete'
+    } else if (enabledAnalyses.length === 1) {
+      return enabledAnalyses[0].label
+    } else if (enabledAnalyses.length > 1) {
+      return `AI Digest (${enabledAnalyses.length})`
+    } else {
+      return 'Select Analyses'
+    }
   }
 
   const anyLoading = analyses.some(analysis => analysis.isLoading)
-  const anyResponses = analyses.some(analysis => analysis.data)
+  const allResponses = analyses.every(analysis => analysis?.data?.length)
+  // also disabled if there are no enabled options that have not been responded to
+  const disabled = analysesOptions
+    .filter(({ template }) => enabled[template])
+    .every(({ template }) => responses[template])
 
   useEffect(() => {
     // @ts-ignore
@@ -63,15 +90,11 @@ const AIDigestButton = ({ postData }: { postData: string }) => {
       variant={'default'}
       className={ctaClass}
       onClick={handleFetchData}
-      disabled={anyLoading || postData.length < 25 || anyResponses}
+      disabled={anyLoading || postData.length < 25 || allResponses || disabled}
       isLoading={anyLoading}
+      endIcon={<SparklesIcon className={'h-5 w-5 text-white'} height={20} />}
     >
-      AI Digest{' '}
-      {!anyLoading ? (
-        <SparklesIcon className={clsx('h-5 w-5', anyResponses ? 'text-white' : 'text-white')} height={20} />
-      ) : (
-        <CircularLoader />
-      )}
+      {getButtonText()}
     </PrimaryButton>
   )
 }

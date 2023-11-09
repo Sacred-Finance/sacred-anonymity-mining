@@ -10,12 +10,12 @@ function AiAccordionItem({ config, responses }: { config: AiAccordionConfig; res
     <AccordionItem value={config.key}>
       <AccordionTrigger>
         <span className={'inline-flex gap-4'}>
-          <CheckCircle className={responses[config.responseKey] ? 'text-green-500' : 'text-gray-500'} />
+          <CheckCircle className={responses[config.key] ? 'text-green-500' : 'text-gray-500'} />
           {config.label}
         </span>
       </AccordionTrigger>
       <AccordionContent>
-        <EditorJsRenderer data={responses[config.responseKey]} isHtml={true} />
+        <EditorJsRenderer data={responses[config.key]} isHtml={true} />
       </AccordionContent>
     </AccordionItem>
   )
@@ -24,6 +24,8 @@ function AiAccordionItem({ config, responses }: { config: AiAccordionConfig; res
 // Parent component where the AiAccordionItem is used
 export function DynamicAccordion() {
   const { responses, setResponses, setEnabled, enabled } = useAIDigest()
+
+    console.log('responses', responses)
 
   return (
     <Accordion
