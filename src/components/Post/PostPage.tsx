@@ -1,7 +1,7 @@
 import { useActiveUser, useCommunityContext, useUserIfJoined } from '@/contexts/CommunityProvider'
 import { useAccount } from 'wagmi'
 import { useTranslation } from 'next-i18next'
-import React, { Dispatch, SetStateAction, useState } from 'react'
+import React, { Dispatch, SetStateAction, useContext, useEffect, useState } from 'react'
 import { useValidateUserBalance } from '@/utils/useValidateUserBalance'
 import { BigNumber, utils } from 'ethers'
 import { toast } from 'react-toastify'
@@ -12,7 +12,6 @@ import { PostItem } from '@components/Post/PostItem'
 import { NewPostModal, PostComment, TempComment } from '@components/Post/PostComments'
 import { Tab } from '@headlessui/react'
 import { ExclamationCircleIcon } from '@heroicons/react/20/solid'
-import { useRouter } from 'next/router'
 import { ChatIcon, InfoIcon, PollIcon } from '@components/CommunityActionTabs'
 import { NewPostForm, NewPostFormProps } from '@components/NewPostForm'
 import { useItemsSortedByVote } from '@/hooks/useItemsSortedByVote'
@@ -42,11 +41,28 @@ import { getGroupWithPostAndCommentData } from '@/lib/fetcher'
 import { emptyPollRequest } from '@/lib/item'
 import { ScrollArea } from '@/shad/ui/scroll-area'
 import ReputationCard from '../ReputationCard'
-import AIDigestButton, { AIDigestContext } from '@components/buttons/AIPostDigestButton'
-import EditorJsRenderer from '@components/editor-js/EditorJSRenderer'
-import { CheckCircle, WandIcon } from 'lucide-react'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/shad/ui/accordion'
+import AIDigestButton from '@components/buttons/AIPostDigestButton'
+import { WandIcon } from 'lucide-react'
 import { Card } from '@/shad/ui/card'
+import { DynamicAccordion } from '@components/Post/DynamicAccordion'
+import { Checkbox } from '@/shad/ui/checkbox'
+import clsx from 'clsx'
+import { analysisLabelsAndTypes } from '@components/Post/AiAccordionConfig'
+import { AnalysisCheckboxComponent } from '@components/Post/AiAnalysisCheckboxComponent'
+
+export const AIDigestContext = React.createContext<{
+  enabled: { [key: string]: boolean }
+  setEnabled: { [key: string]: React.Dispatch<React.SetStateAction<boolean>> }
+  responses: { [key: string]: string }
+  setResponses: { [key: string]: React.Dispatch<React.SetStateAction<string>> }
+}>({
+  enabled: {},
+  setEnabled: {},
+  responses: {},
+  setResponses: {},
+})
+
+export const useAIDigest = () => useContext(AIDigestContext)
 
 export function PostPage({
   comments,
@@ -59,18 +75,20 @@ export function PostPage({
   community: Group
   commentInstance: CommentClass
 }) {
-  const postId = post.id
-  const { address } = useAccount()
-
   const {
-    state: { isAdmin, isModerator },
+    state: { isAdmin },
   } = useCommunityContext()
-  const [summarizeResponse, setSummarizeResponse] = React.useState('')
-  const [swotResponse, setSwotResponse] = React.useState('')
-  const [causalChainResponse, setCausalChainResponse] = React.useState('')
-  const [secondOrderResponse, setSecondOrderResponse] = React.useState('')
-  const [unbiasedCritiqueResponse, setUnbiasedCritiqueResponse] = React.useState('')
-  const [prosAndConsResponse, setProsAndConsResponse] = React.useState('')
+
+  const [enabled, setEnabled] = useState<{ [key: string]: boolean }>({})
+  const [responses, setResponses] = useState<{ [key: string]: string }>({})
+
+  useEffect(() => {
+    const initialEnabled = {}
+    analysisLabelsAndTypes.forEach(({ key }) => {
+      initialEnabled[key] = true
+    })
+    setEnabled(initialEnabled)
+  }, [])
 
   const [tempComments, setTempComments] = useState<TempComment[]>([])
 
@@ -86,116 +104,48 @@ export function PostPage({
   return (
     <AIDigestContext.Provider
       value={{
-        responses: {
-          swotResponse,
-          summarizeResponse,
-          causalChainResponse,
-          secondOrderResponse,
-          unbiasedCritiqueResponse,
-          prosAndConsResponse,
-        },
-        setResponses: {
-          setSwotResponse,
-          setSummarizeResponse,
-          setCausalChainResponse,
-          setSecondOrderResponse,
-          setUnbiasedCritiqueResponse,
-          setProsAndConsResponse,
-        },
+        enabled,
+        setEnabled,
+        responses,
+        setResponses,
       }}
     >
       <div className="mb-6">
         <ReputationCard />
       </div>
       <Card className="flex h-screen min-h-full w-full grow flex-col rounded-lg border-0 bg-gradient-to-r from-background  from-25% to-background to-75% backdrop-blur-3xl  transition-colors  ">
-        <div className="flex-1 overflow-hidden ">
+        <ScrollArea className="flex-1 overflow-hidden ">
           <div className="flex h-full grow flex-col justify-stretch md:flex-row ">
             <div className=" flex flex-col gap-4 p-3 md:w-1/2 ">
               <div className="sticky top-0 z-10 flex gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
                 <VoteForItemUI postId={post.id} post={post} group={community} />
               </div>
-              <ScrollArea className=" max-h-[calc(90vh - 200px)] col-span-12 flex   w-full  flex-col gap-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
-                <PostItem post={post} group={community} />
-              </ScrollArea>
+              <div className="rounded-xl border p-2 dark:border-gray-700 dark:bg-gray-900 ">
+                <ScrollArea
+                  className="col-span-12 flex max-h-[80vh]   w-full  flex-col gap-2  rounded border  bg-black/5 bg-white
+                p-3
+               dark:border-gray-950/80 dark:bg-gray-950/20"
+                >
+                  <PostItem post={post} group={community} />
+                </ScrollArea>
+              </div>
             </div>
-            <div className=" flex h-full grow flex-col gap-4 p-3 md:w-1/2">
+            <div className=" flex h-full grow flex-col gap-4 overflow-y-auto p-3 md:w-1/2">
               <Tab.Group onChange={handleTabChange} defaultIndex={selectedTab} selectedIndex={selectedTab}>
                 <Tab.List className="sticky top-0 z-10 flex gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
-                  {['All Replies', 'Polls', 'AI', 'Community Info'].map((tooltip, index) => (
-                    <Tab
-                      className={({ selected }) =>
-                        `  rounded bg-secondary text-secondary-foreground  ${selected && ' ring-[1px] ring-primary'}`
-                      }
-                      key={index}
-                    >
-                      {tooltip === 'Community Info' && (
-                        <ToolTip
-                          tooltip={tooltip}
-                          buttonProps={{
-                            variant: 'link',
-                          }}
-                        >
-                          <InfoIcon className={'h-7 w-7'} />
-                        </ToolTip>
-                      )}
-                      {tooltip === 'Polls' && (
-                        <ToolTip
-                          tooltip={tooltip}
-                          buttonProps={{
-                            variant: 'link',
-                          }}
-                        >
-                          <PollIcon className={'h-7 w-7 '} />
-                        </ToolTip>
-                      )}
-                      {tooltip === 'All Replies' && (
-                        <ToolTip
-                          tooltip={tooltip}
-                          buttonProps={{
-                            variant: 'link',
-                          }}
-                        >
-                          <ChatIcon className={'h-7 w-7'} />
-                        </ToolTip>
-                      )}
-                      {tooltip === 'AI' && (
-                        <ToolTip
-                          tooltip={tooltip}
-                          buttonProps={{
-                            variant: 'link',
-                          }}
-                        >
-                          <WandIcon className={'h-7 w-7'} />
-                        </ToolTip>
-                      )}
-                    </Tab>
+                  {Object.entries(tabData).map(([name, Icon], index) => (
+                    <TooltipTab key={index} name={name} Icon={Icon} />
                   ))}
                 </Tab.List>
-
-                {selectedTab === 2 && (
-                  <div className={'mb-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900'}>
-                    <span className={'inline-flex items-center gap-2 text-[10px] text-yellow-700'}>
-                      <ExclamationCircleIcon className={'w-4'} />
-                      These processes may take 1-2 minutes
-                    </span>
-                    <div className={'flex gap-2'}>
-                      <AIDigestButton postData={OutputDataToHTML(post?.description)} postTitle={post.title} />
-                    </div>
-                  </div>
-                )}
-
-                {(selectedTab === 0 || selectedTab === 1) && (
-                  <div className="sticky top-0 z-10 flex gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
-                    <div className={'flex gap-4'}>
-                      {selectedTab === 0 && <CreateCommentUI post={post} group={community} />}
-                      {(selectedTab === 1 || selectedTab === 0) && <CreatePollUI post={post} group={community} />}
-                    </div>
-                  </div>
-                )}
-
                 <Tab.Panels className={'scrollbar col-span-12 flex w-full flex-col gap-4'}>
                   {/* Comments / Replies */}
                   <Tab.Panel className="flex flex-col gap-4 ">
+                    <div className="sticky top-0 z-10 flex gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
+                      <div className={'flex gap-4'}>
+                        {selectedTab === 0 && <CreateCommentUI post={post} group={community} />}
+                        {(selectedTab === 1 || selectedTab === 0) && <CreatePollUI post={post} group={community} />}
+                      </div>
+                    </div>
                     {sortedCommentsData.map(comment => (
                       <div
                         key={`comment_${comment.id}`}
@@ -230,82 +180,14 @@ export function PostPage({
                       ))}
                   </Tab.Panel>
 
-                  {/* AI Tab */}
                   <Tab.Panel className="flex flex-col gap-4">
-                    <Accordion
-                      type="single"
-                      collapsible
-                      className="mb-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900"
-                    >
-                      <AccordionItem value="summarize">
-                        <AccordionTrigger>
-                          <span className={'inline-flex gap-4'}>
-                            <CheckCircle className={summarizeResponse ? 'text-green-500' : 'text-gray-500'} /> Summarize
-                          </span>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <EditorJsRenderer data={summarizeResponse} isHtml={true} />
-                        </AccordionContent>
-                      </AccordionItem>
-                      <AccordionItem value="swot">
-                        <AccordionTrigger>
-                          <span className={'inline-flex gap-4'}>
-                            <CheckCircle className={swotResponse ? 'text-green-500' : 'text-gray-500'} /> SWOT
-                          </span>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <EditorJsRenderer data={swotResponse} isHtml={true} />
-                        </AccordionContent>
-                      </AccordionItem>
-
-                      <AccordionItem value="causalChain">
-                        <AccordionTrigger>
-                          <span className={'inline-flex gap-4'}>
-                            <CheckCircle className={causalChainResponse ? 'text-green-500' : 'text-gray-500'} />
-                            Causal Chain{' '}
-                          </span>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <EditorJsRenderer data={causalChainResponse} isHtml={true} />
-                        </AccordionContent>
-                      </AccordionItem>
-
-                      <AccordionItem value="secondOrder">
-                        <AccordionTrigger>
-                          <span className={'inline-flex gap-4'}>
-                            <CheckCircle className={secondOrderResponse ? 'text-green-500' : 'text-gray-500'} />
-                            Second Order{' '}
-                          </span>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <EditorJsRenderer data={secondOrderResponse} isHtml={true} />
-                        </AccordionContent>
-                      </AccordionItem>
-
-                      <AccordionItem value="unbiasedCritique">
-                        <AccordionTrigger>
-                          <span className={'inline-flex gap-4'}>
-                            <CheckCircle className={unbiasedCritiqueResponse ? 'text-green-500' : 'text-gray-500'} />
-                            Unbiased Critique
-                          </span>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <EditorJsRenderer data={unbiasedCritiqueResponse} isHtml={true} />
-                        </AccordionContent>
-                      </AccordionItem>
-
-                      <AccordionItem value="prosAndCons">
-                        <AccordionTrigger>
-                          <span className={'inline-flex gap-4'}>
-                            <CheckCircle className={prosAndConsResponse ? 'text-green-500' : 'text-gray-500'} />
-                            Pros and Cons{' '}
-                          </span>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <EditorJsRenderer data={prosAndConsResponse} isHtml={true} />
-                        </AccordionContent>
-                      </AccordionItem>
-                    </Accordion>
+                    <div className="mb-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
+                      <div className={'grid grid-cols-2 gap-4 md:grid-cols-2 xl:grid-cols-3'}>
+                        <AnalysisCheckboxComponent />
+                        <AIDigestButton postData={OutputDataToHTML(post?.description)} />
+                      </div>
+                    </div>
+                    <DynamicAccordion />
                   </Tab.Panel>
 
                   {/* Community Tab */}
@@ -316,12 +198,29 @@ export function PostPage({
               </Tab.Group>
             </div>
           </div>
-        </div>
+        </ScrollArea>
       </Card>
     </AIDigestContext.Provider>
   )
 }
+const tabData = {
+  'All Replies': ChatIcon,
+  'Polls': PollIcon,
+  'AI': WandIcon,
+  'Community Info': InfoIcon,
+}
 
+const TooltipTab = ({ name, Icon }) => (
+  <Tab
+    className={({ selected }) =>
+      `rounded bg-secondary text-secondary-foreground dark:bg-gray-950/50 ${selected ? 'ring-[1px] ring-primary' : ''}`
+    }
+  >
+    <ToolTip tooltip={name} buttonProps={{ variant: 'link' }}>
+      <Icon className={'h-7 w-7'} />
+    </ToolTip>
+  </Tab>
+)
 interface HandleVoteParams {
   e: any
   vote: 'upvote' | 'downvote'

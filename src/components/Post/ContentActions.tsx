@@ -1,9 +1,8 @@
 import DeleteItemButton from '@components/buttons/DeleteItemButton'
-import { CancelButton, PrimaryButton } from '@components/buttons'
+import { PrimaryButton } from '@components/buttons'
 import { PaperAirplaneIcon, PencilIcon, XCircleIcon, XMarkIcon } from '@heroicons/react/20/solid'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { PostOrComment } from '@/lib/model'
 import { Item } from '@/types/contract/ForumInterface'
 import clsx from 'clsx'
 
