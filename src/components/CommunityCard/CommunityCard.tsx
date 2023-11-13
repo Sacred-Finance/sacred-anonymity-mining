@@ -107,7 +107,7 @@ export const CommunityCard = ({
             </div>
           </CardTitle>
         </CardHeader>
-        <CardContent className={'pt-4'}>
+        <CardContent className={'pt-2 pb-0 min-h-[120px]'}>
           {bannerSrc && (
             <Image
               className=" -z-1 pointer-events-none h-full w-full rounded-lg object-cover opacity-40 transition-opacity duration-300 ease-in-out group-hover:opacity-80"
