@@ -1,7 +1,7 @@
 import { CommunityCard } from '@/components/CommunityCard/CommunityCard'
 import { PostItem } from '@/components/Post/PostItem'
 import { PostList } from '@/components/Post/PostList'
-import { useCommunitiesCreatedByUser, useCommunityContext } from '@/contexts/CommunityProvider'
+import { useCommunitiesCreatedByUser, useCommunitiesJoinedByUser, useCommunityContext } from '@/contexts/CommunityProvider'
 import { useFetchItemsCreatedByUser } from '@/hooks/useFetchItemsCreatedByUser'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shad/ui/tabs'
 import { BigNumber } from 'ethers'
@@ -19,22 +19,33 @@ const Account = () => {
     if (!communitiesData) return
     dispatch({ type: 'SET_COMMUNITIES', payload: communitiesData.map(c => ({ ...c, id: BigNumber.from(c.id) })) })
   }, [data])
-  const { communitiesJoined } = useCommunitiesCreatedByUser()
+  const { communitiesCreated } = useCommunitiesCreatedByUser()
+  const { communitiesJoined } = useCommunitiesJoinedByUser()
   const { polls, posts, comments } = useFetchItemsCreatedByUser()
 
   return (
-    <Tabs defaultValue="communities" className="h-full space-y-6">
+    <Tabs defaultValue="communities_created" className="h-full space-y-6">
       <div className="space-between flex flex-wrap items-center gap-2">
         <TabsList>
-          <TabsTrigger value="communities" className="relative">
-            Communities
+          <TabsTrigger value="communities_created" className="relative">
+            Communities Created
+          </TabsTrigger>
+          <TabsTrigger value="communities_joined" className="relative">
+            Communities Joined
           </TabsTrigger>
           <TabsTrigger value="posts">Posts</TabsTrigger>
           <TabsTrigger value="polls">Polls</TabsTrigger>
           <TabsTrigger value="comments">Comments</TabsTrigger>
         </TabsList>
       </div>
-      <TabsContent value="communities" className="border-none p-0 outline-none">
+      <TabsContent value="communities_created" className="border-none p-0 outline-none">
+        <div className="grid-cols-auto flex grow flex-col items-stretch justify-center gap-6 rounded-lg p-0 md:grid md:items-start md:p-8 lg:grid-cols-2 xl:grid-cols-3">
+          {communitiesCreated.map(community => (
+            <CommunityCard key={community.id} community={community} />
+          ))}
+        </div>
+      </TabsContent>
+      <TabsContent value="communities_joined" className="border-none p-0 outline-none">
         <div className="grid-cols-auto flex grow flex-col items-stretch justify-center gap-6 rounded-lg p-0 md:grid md:items-start md:p-8 lg:grid-cols-2 xl:grid-cols-3">
           {communitiesJoined.map(community => (
             <CommunityCard key={community.id} community={community} />

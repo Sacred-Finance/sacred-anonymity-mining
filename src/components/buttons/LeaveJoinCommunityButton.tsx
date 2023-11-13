@@ -7,12 +7,12 @@ import { CircularLoader, JoinCommunityButton } from '@components/buttons/JoinCom
 export function LeaveJoinCommunityButton(props: {
   community: Group & {
     variant?: 'default' | 'banner'
-    user: User | false | undefined
+    user: User | boolean | undefined
     setShowBackground: React.Dispatch<React.SetStateAction<boolean>>
     showBackground: boolean
     bannerSrc: string | undefined
   }
-  hasUserJoined: User | false
+  hasUserJoined: User | boolean
 }) {
   return (
     <>
