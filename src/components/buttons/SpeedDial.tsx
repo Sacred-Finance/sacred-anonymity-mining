@@ -50,29 +50,42 @@ export const SpeedDial: React.FC<SpeedDialProps> = ({ actions, onHover, onOpen }
           <div className="space-y-2">
             <h4 className="font-medium leading-none">Actions</h4>
           </div>
-          <div className="space-y-2">
-            {actions.map(action => {
-              if (typeof action === 'object' && action.icon && action.label && action.onClick) {
-                return (
-                  <Button
-                    key={action.label}
-                    variant="secondary"
-                    onClick={action.onClick}
-                    className={'flex w-full items-center gap-2'}
-                  >
-                    {action.label}
-                    {action.icon}
-                  </Button>
-                )
-              } else if (action) {
-                return <div className="flex w-full justify-center">{action}</div>
-              } else {
-                return null
-              }
-            })}
-          </div>
+          <ActionButtons actions={actions} />
         </div>
       </PopoverContent>
     </Popover>
   )
 }
+const ActionButton = ({ action }) => {
+  if (!action) return null
+
+  if (typeof action === 'object' && action.icon && action.label && action.onClick) {
+    return (
+      <Button
+        key={action.label}
+        variant="secondary"
+        onClick={action.onClick}
+        className="flex w-full items-center gap-2"
+      >
+        {action.label}
+        {action.icon}
+      </Button>
+    )
+  } else {
+    return (
+      <div key={action.label} className="flex w-full justify-center">
+        {action}
+      </div>
+    )
+  }
+}
+
+const ActionButtons = ({ actions }) => (
+  <div className="space-y-2">
+    {actions.map((action,key) => (
+      <ActionButton key={key} action={action} />
+    ))}
+  </div>
+)
+
+// Usage in your component
