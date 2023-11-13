@@ -7,6 +7,7 @@ import { Identity } from '@semaphore-protocol/identity'
 import { ethers } from 'ethers'
 import { groupBy } from 'lodash'
 import { useEffect, useState } from 'react'
+import { toast } from 'react-toastify'
 import { useAccount } from 'wagmi'
 
 export const useFetchItemsCreatedByUser = () => {
@@ -21,6 +22,13 @@ export const useFetchItemsCreatedByUser = () => {
       .queryFilter(forumContract.filters.NewItem(), 0, 'latest')
       .then(async res => {
         const items: Item[] = []
+        const itemsCreatedByMe = []
+
+        /**
+         * This loop is implemented separately rather than iterating over res directly once
+         * because we need to wait for the note to be created before we can compare it to the note and if we do it in the same loop
+         * we will have to wait for the note to be created for all items before we can compare it to the note also it throws webassemby related error
+         */
         for (const item of res) {
           const decodedItem = item.decode?.(item.data, item.topics)
           const identity = new Identity(`${address}_${Number(decodedItem.groupId)}_anon`)
@@ -30,16 +38,22 @@ export const useFetchItemsCreatedByUser = () => {
             decodedItem.contentCID !== ethers.constants.HashZero &&
             note.toString() === decodedItem.note.toString()
           ) {
-            const rawItemData = await forumContract.itemAt(Number(decodedItem.id))
-            const item = await augmentItemData(rawItemData)
-            console.log(item)
-            items.push(item)
+            itemsCreatedByMe.push(decodedItem)
           }
         }
+        const data = itemsCreatedByMe.map(async (decodedItem: any) => {
+          const rawItemData = await forumContract.itemAt(Number(decodedItem.id))
+          const item = await augmentItemData(rawItemData)
+          return Promise.resolve(items.push(item))
+        })
+
+        await Promise.all(data)
+
         setItemsGrouped(groupBy(items, 'kind'))
       })
       .catch(err => {
         console.log(err)
+        toast.error(err.message ?? err)
         setItemsGrouped({
           [ContentType.POST]: [],
           [ContentType.COMMENT]: [],
