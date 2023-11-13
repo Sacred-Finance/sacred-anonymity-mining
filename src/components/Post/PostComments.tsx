@@ -1,6 +1,6 @@
 import React from 'react'
-import { commentIsConfirmed, formatDistanceToNow } from '@/lib/utils'
-import { motion } from 'framer-motion'
+import { commentIsConfirmed } from '@/lib/utils'
+import { formatDistanceToNow } from 'date-fns'
 import { Group, Item } from '@/types/contract/ForumInterface'
 import { PostItem } from '@components/Post/PostItem'
 import { useCommunityContext } from '@/contexts/CommunityProvider'

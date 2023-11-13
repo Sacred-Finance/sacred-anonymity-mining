@@ -1,4 +1,3 @@
-import axios from 'axios'
 import { ethers, utils } from 'ethers'
 import { create, IPFSHTTPClient } from 'ipfs-http-client'
 import { toBufferBE, toBufferLE } from 'bigint-buffer'
@@ -10,8 +9,6 @@ const { groth16 } = require('snarkjs')
 
 let ipfs: IPFSHTTPClient
 let babyJub, pedersen
-
-const gatewayURL = 'https://ipfs.io/ipfs'
 
 const pedersenHash = data => BigInt(babyJub.F.toString(babyJub.unpackPoint(pedersen.hash(data))[0]))
 
@@ -57,29 +54,6 @@ export const generateGroth16Proof = async (input, wasmFile, zkeyFileName) => {
   return await convertProofToSolidityInput(_proof, _publicSignals)
 }
 
-export const getPublicSignals = async (input, wasmFile, zkeyFileName) => {
-  try {
-    console.log('input', input)
-    const { publicSignals } = await groth16.fullProve(input, wasmFile, zkeyFileName)
-    console.log('publicSignals', publicSignals)
-    return publicSignals
-  } catch (error) {
-    console.error(error)
-  }
-}
-export const getContent2 = async (CID: string) => {
-  console.log(CID + ' loading')
-
-  return axios.get(`${gatewayURL}/${CID}`).then(({ data }) => {
-    const indexMark = data.indexOf('#')
-    console.log(CID + ' loaded')
-    if (indexMark >= 0) {
-      return data.substring(indexMark + 1)
-    }
-    return ''
-  })
-}
-
 export const getContent = async (CID: string) => {
   if (!ipfs) {
     console.log('ipfs not started')
@@ -119,8 +93,7 @@ export const getIpfsHashFromBytes32 = (bytes32Hex: string): string => {
   // and cut off leading "0x"
   const hashHex = '1220' + bytes32Hex.slice(2)
   const hashBytes = Buffer.from(hashHex, 'hex')
-  const hashStr = utils.base58.encode(hashBytes)
-  return hashStr
+  return utils.base58.encode(hashBytes)
 }
 
 export const getBytes32FromIpfsHash = (ipfsListing: string): string => {
@@ -181,17 +154,6 @@ export const numToBuffer = (number, size, endianess): Buffer => {
   }
 }
 
-// export const createNote = async (cid: BigInt, identity:BigInt) => {
-//   const cidBuffer = numToBuffer(cid, 32, 'le')
-//   const image = Buffer.concat([cidBuffer, numToBuffer(identity, 32, 'le')])
-//   if(!babyJub) {
-//     babyJub = await buildBabyjub()
-//   }
-//   if(!pedersen)
-//     pedersen = await buildPedersenHash();
-//   return pedersenHash(image)
-// }
-
 // note is a Buffer of 64 bytes based on the identity of the user or the content
 export const createNote = async (identity: Identity) => {
   const trapdoor = identity.getTrapdoor() //getTrapDoor is not a function, error on posting a comment
@@ -242,15 +204,6 @@ export const startIPFS = async () => {
 
 export const commentIsConfirmed = (id: string) => {
   // if confirmed, the id is an  integer stored in the contract instead of just an ipfs hash
-  if (/^\d+$/.test(id)) {
-    return true
-  } else {
-    return false
-  }
-}
-
-export const postIsConfirmed = id => {
-  // if confirmed, the id is an integer/object stored in the contract instead of just an ipfs hash
   if (/^\d+$/.test(id)) {
     return true
   } else {
@@ -315,48 +268,15 @@ export const removeDuplicates = (array, prop: string) => {
   })
 }
 
-export function formatDistanceToNow(date) {
-  const now = new Date()
-  // @ts-ignore
-  const diffInSeconds = Math.floor((now - date) / 1000)
-
-  let prefix = ''
-  let suffix = ''
-  let value = ''
-
-  if (now > date) {
-    prefix = 'about'
-    suffix = 'ago'
-  } else if (now < date) {
-    prefix = 'in about'
-  }
-
-  if (diffInSeconds < 60) {
-    value = `${diffInSeconds} seconds`
-  } else if (diffInSeconds < 3600) {
-    value = `${Math.floor(diffInSeconds / 60)} minutes`
-  } else if (diffInSeconds < 86400) {
-    value = `${Math.floor(diffInSeconds / 3600)} hours`
-  } else if (diffInSeconds < 2592000) {
-    value = `${Math.floor(diffInSeconds / 86400)} days`
-  } else if (diffInSeconds < 31536000) {
-    value = `${Math.floor(diffInSeconds / 2592000)} months`
-  } else {
-    value = `${Math.floor(diffInSeconds / 31536000)} years`
-  }
-
-  return `${prefix} ${value} ${suffix}`.trim()
-}
-
 export const hasUserJoined = async (group, identityCommitment) => {
   try {
-    return await forumContract.isMemberJoined(group, identityCommitment);
+    return await forumContract.isMemberJoined(group, identityCommitment)
   } catch (error) {
-    console.log(error);
+    console.log(error)
     return false
   }
 }
 
-export const fetchUsersFromSemaphoreContract = async (groupId) => {
-  return  semaphoreContract?.getGroupMembers(groupId?.toString())
+export const fetchUsersFromSemaphoreContract = async groupId => {
+  return semaphoreContract?.getGroupMembers(groupId?.toString())
 }

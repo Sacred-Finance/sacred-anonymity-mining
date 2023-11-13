@@ -1,7 +1,7 @@
 // Topic.tsx
 import React from 'react'
 import { Topic } from '@components/Discourse/types'
-import { formatDistanceToNow } from '@/lib/utils'
+import { formatDistanceToNow } from 'date-fns'
 import clsx from 'clsx'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
