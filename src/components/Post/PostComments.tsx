@@ -30,7 +30,7 @@ export const NewPostModal: {
   submitButton:
     'bg-green-500 text-white border-none rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-600 ',
   formContainerOpen:
-    'bg-white dark:bg-gray-900 p-6 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg w-full max-w-3xl ',
+    'bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg w-full max-w-3xl ',
   openFormButtonOpen: 'self-end hidden',
   openFormButtonClosed:
     'h-full bg-primary-500 text-white rounded-md hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600',

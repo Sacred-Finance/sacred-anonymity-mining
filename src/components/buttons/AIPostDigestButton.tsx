@@ -1,106 +1,104 @@
 import React, { useContext, useEffect } from 'react'
 import { useGPTServerAnalysis } from '@/hooks/useGPTServerAnalysis'
-import { CheckBadgeIcon, SparklesIcon } from '@heroicons/react/20/solid'
+import { SparklesIcon } from '@heroicons/react/20/solid'
 import clsx from 'clsx'
-import ToolTip from '@components/HOC/ToolTip'
 import { Template } from '@pages/api/gpt-server/logos-ai'
 import { CircularLoader } from '@components/buttons/JoinCommunityButton'
-import { Button } from '@/shad/ui/button'
+import { PrimaryButton } from '@components/buttons/PrimaryButton'
+import { AIDigestContext, useAIDigest } from '@components/Post/PostPage'
 
 const analysisLabelsAndTypes = [
-  { key: Template.Summarize_ToSimpleMarkdown, label: 'Summarize', setter: 'setSummarizeResponse' },
-  { key: Template.SWOT_ToSimpleMarkdown, label: 'SWOT', setter: 'setSwotResponse' },
-  { key: Template.CausalChain_ToSimpleMarkdown, label: 'Causal Chain', setter: 'setCausalChainResponse' },
-  { key: Template.SecondOrder_ToSimpleMarkdown, label: 'Second Order', setter: 'setSecondOrderResponse' },
+  { key: Template.Summarize_ToSimpleMarkdown, label: 'Summarize', setter: 'setSummarizeResponse', enabled: true },
+  { key: Template.SWOT_ToSimpleMarkdown, label: 'SWOT', setter: 'setSwotResponse', enabled: true },
+  {
+    key: Template.CausalChain_ToSimpleMarkdown,
+    label: 'Causal Chain',
+    setter: 'setCausalChainResponse',
+    enabled: true,
+  },
+  {
+    key: Template.SecondOrder_ToSimpleMarkdown,
+    label: 'Second Order',
+    setter: 'setSecondOrderResponse',
+    enabled: true,
+  },
   {
     key: Template.UnbiasedCritique_ToSimpleMarkdown,
     label: 'Unbiased Critique',
     setter: 'setUnbiasedCritiqueResponse',
+    enabled: true,
   },
-  { key: Template.ProsAndCons_ToSimpleMarkdown, label: 'Pros and Cons', setter: 'setProsAndConsResponse' },
+  {
+    key: Template.ProsAndCons_ToSimpleMarkdown,
+    label: 'Pros and Cons',
+    setter: 'setProsAndConsResponse',
+    enabled: true,
+  },
 ]
+const AIDigestButton = ({ postData }: { postData: string }) => {
+  const { enabled, responses, setResponses } = useAIDigest()
 
-const initialState = {
-  responses: {
-    summarizeResponse: '',
-    swotResponse: '',
-    causalChainResponse: '',
-    secondOrderResponse: '',
-    unbiasedCritiqueResponse: '',
-    prosAndConsResponse: '',
-  },
-  setResponses: {
-    setSummarizeResponse: data => {},
-    setSwotResponse: data => {},
-    setCausalChainResponse: data => {},
-    setSecondOrderResponse: data => {},
-    setUnbiasedCritiqueResponse: data => {},
-    setProsAndConsResponse: data => {},
-  },
-}
-
-export const AIDigestContext = React.createContext(initialState)
-export const useAIDigest = () => useContext(AIDigestContext)
-
-const AIDigestButton = ({
-  postData,
-  enabled = {
-    Summarize_ToSimpleMarkdown: true,
-    SWOT_ToSimpleMarkdown: true,
-    CausalChain_ToSimpleMarkdown: true,
-    SecondOrder_ToSimpleMarkdown: true,
-    UnbiasedCritique_ToSimpleMarkdown: true,
-    ProsAndCons_ToSimpleMarkdown: true,
-  },
-}) => {
-  const { setResponses } = useAIDigest()
-
-  const analysesOptions = analysisLabelsAndTypes.map(type => ({
-    postData,
-    template: type.key,
-  }))
+  const analysesOptions = analysisLabelsAndTypes
+    .filter(analysis => enabled[analysis.key])
+    .map(({ key }) => ({
+      template: key,
+      postData: postData,
+    }))
 
   const analyses = useGPTServerAnalysis(analysesOptions)
 
-  useEffect(() => {
-    analysisLabelsAndTypes.forEach((type, index) => {
-      if (analyses[index]?.data) setResponses[type.setter](analyses[index].data)
-    })
-  }, [analyses])
-
-
-
   const handleFetchData = () => {
-    analyses
-      .filter((analysis, index) => enabled[analysisLabelsAndTypes[index].key])
-      .forEach(analysis => analysis.fetchData())
+    analyses.forEach(analysis => {
+      analysis.fetchData(data => {
+        // Custom setter function that merges new data with existing responses
+        setResponses(prevResponses => ({
+          ...prevResponses,
+          [analysis.template]: data,
+        }))
+      })
+    })
+  }
+
+  const getButtonText = () => {
+    const enabledAnalyses = analysisLabelsAndTypes.filter(({ key }) => enabled[key])
+    const allResponses = enabledAnalyses.every(({ key }) => responses[key])
+    if (allResponses) {
+      return 'Digest Complete'
+    } else if (enabledAnalyses.length === 1) {
+      return enabledAnalyses[0].label
+    } else if (enabledAnalyses.length > 1) {
+      return `AI Digest (${enabledAnalyses.length})`
+    } else {
+      return 'Select Analyses'
+    }
   }
 
   const anyLoading = analyses.some(analysis => analysis.isLoading)
-  const anyResponses = analyses.some(analysis => analysis.data)
+  const allResponses = analyses.every(analysis => analysis?.data?.length)
+  // also disabled if there are no enabled options that have not been responded to
+  const disabled = analysesOptions
+    .filter(({ template }) => enabled[template])
+    .every(({ template }) => responses[template])
 
   useEffect(() => {
+    // @ts-ignore
     window.onbeforeunload = anyLoading ? () => true : undefined
   }, [anyLoading])
 
   return (
-    <div className="relative w-full">
-      <Button
-        variant={'outline'}
-        onClick={handleFetchData}
-        disabled={anyLoading || postData.length < 25 || anyResponses}
-        isLoading={anyLoading}
-      >
-
-        AI Digest{' '}
-        {!anyLoading ? (
-          <SparklesIcon className={clsx('h-5 w-5', anyResponses ? 'text-white' : 'text-blue-500')} height={20} />
-        ) : (
-          <CircularLoader />
-        )}
-      </Button>
-    </div>
+    <PrimaryButton
+      variant={'default'}
+      className={ctaClass}
+      onClick={handleFetchData}
+      disabled={anyLoading || postData.length < 25 || allResponses || disabled}
+      isLoading={anyLoading}
+      endIcon={<SparklesIcon className={'h-5 w-5 text-white'} height={20} />}
+    >
+      {getButtonText()}
+    </PrimaryButton>
   )
 }
+
+const ctaClass = 'text-sm !bg-primary-400 !text-primary-foreground hover:!bg-primary-500 hover:!text-primary-foreground'
 
 export default AIDigestButton

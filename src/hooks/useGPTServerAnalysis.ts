@@ -1,27 +1,24 @@
-import { useState } from 'react';
-import axios from 'axios';
-import { Template } from '@pages/api/gpt-server/logos-ai';
+import { useState } from 'react'
+import axios from 'axios'
+import { Template } from '@pages/api/gpt-server/logos-ai'
 
 interface GPTServerAnalysisOptions {
-  postData: string;
-  template: Template;
+  postData: string
+  template: Template
 }
 
 interface GPTServerAnalysisResponse {
-  isLoading: boolean;
-  data: any;
-  error: string | null;
-  fetchData: () => Promise<void>;
+  isLoading: boolean
+  data: any
+  error: string | null
+  fetchData: (setter: (data: any) => void) => Promise<void>
 }
-
-export const useGPTServerAnalysis = (
-    analyses: GPTServerAnalysisOptions[]
-): GPTServerAnalysisResponse[] => {
+export const useGPTServerAnalysis = (analyses: GPTServerAnalysisOptions[]): GPTServerAnalysisResponse[] => {
   const [isLoading, setIsLoading] = useState<boolean[]>(Array(analyses.length).fill(false));
   const [data, setData] = useState<any[]>(Array(analyses.length).fill(null));
   const [error, setError] = useState<string | null[]>(Array(analyses.length).fill(null));
 
-  const fetchData = async (index: number) => {
+  const fetchData = async (index: number, setDataFunction?: (data: any) => void) => {
     setIsLoading(prev => {
       const newArr = [...prev];
       newArr[index] = true;
@@ -38,11 +35,18 @@ export const useGPTServerAnalysis = (
         text: analyses[index].postData,
         mode: analyses[index].template,
       });
-      setData(prev => {
-        const newArr = [...prev];
-        newArr[index] = response?.data;
-        return newArr;
-      });
+
+      const newData = response?.data;
+
+      if (setDataFunction) {
+        setDataFunction(newData);
+      } else {
+        setData(prev => {
+          const newArr = [...prev];
+          newArr[index] = newData;
+          return newArr;
+        });
+      }
     } catch (e) {
       setError(prev => {
         const newArr = [...prev];
@@ -59,9 +63,10 @@ export const useGPTServerAnalysis = (
   };
 
   return analyses.map((_, index) => ({
+    template: analyses[index].template,
     isLoading: isLoading[index],
     data: data[index],
     error: error[index],
-    fetchData: () => fetchData(index),
+    fetchData: (setDataFunction?: (data: any) => void) => fetchData(index, setDataFunction),
   }));
-};
+}
