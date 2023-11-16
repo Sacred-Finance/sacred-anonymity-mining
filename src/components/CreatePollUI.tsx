@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import clsx from 'clsx'
 import { classes } from '@/styles/classes'
 import { PlusIcon, TrashIcon } from '@heroicons/react/20/solid'
@@ -58,6 +58,15 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
       value: 2,
     },
   ]
+
+  // fix body scroll when popup is open
+  useEffect(() => {
+    if (showModal) {
+      document.body.style.overflow = 'hidden'; 
+    } else {
+      document.body.style.overflow = 'unset'; 
+    }
+  }, [showModal])
 
   const submit = async () => {
     if (!address) {
