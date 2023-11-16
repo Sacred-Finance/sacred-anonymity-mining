@@ -302,7 +302,7 @@ const CreateCommentUI = ({ group, post }: { group: Group; post: Item }) => {
     users.forEach(u => semaphoreGroup.addMember(BigInt(u)))
 
     try {
-      const userIdentity = new Identity(`${address}_${group.id}_${activeUser?.name || 'anon'}`)
+      const userIdentity = new Identity(`${address}`)
 
       console.log('userIdentity', userIdentity)
 
@@ -409,7 +409,7 @@ export const VoteForItemUI = ({ post, postId, group }: { post: Item; postId: str
       let semaphoreGroup = new SemaphoreGroup(BigInt(groupId))
       const users = await fetchUsersFromSemaphoreContract(groupId)
       users.forEach(u => semaphoreGroup.addMember(BigInt(u)))
-      const userIdentity = new Identity(`${address}_${group.id}_anon`)
+      const userIdentity = new Identity(`${address}`)
 
       const unirepUser = new UnirepUser(userIdentity)
       await unirepUser.updateUserState()

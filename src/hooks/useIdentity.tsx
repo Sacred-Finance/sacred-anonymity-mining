@@ -14,12 +14,7 @@ export const useIdentity = ({ groupId, postId }: Created = { groupId: undefined,
       return
     }
 
-    let identityString = address
-    if (groupId) {
-      // const generatedIdentity = new Identity(`${address}_${c.groupId}_${u.name}`)
-      identityString = `${identityString}_${groupId}_anon`
-    }
-    return new Identity(identityString)
+    return new Identity(address)
   } catch (e) {
     console.error('error in useIdentity', e)
     return new Identity()

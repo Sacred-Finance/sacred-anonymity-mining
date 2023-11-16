@@ -231,7 +231,7 @@ export function useUserIfJoined(communityId: string | number): User | false {
 
   const checkIfUserHasJoined = async () => {
     if (userAddress) {
-      const generatedIdentity = new Identity(`${userAddress}_${communityId}_anon`)
+      const generatedIdentity = new Identity(`${userAddress}`)
       const userJoined = await hasUserJoined(Number(communityId), generatedIdentity.getCommitment().toString())
       if (userJoined) {
         setUserJoined({

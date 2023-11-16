@@ -225,7 +225,7 @@ const checkIfPostIsEditable = async ({
   userName: string
   canDelete: boolean
 }): Promise<boolean> => {
-  const userPosting = new Identity(`${address}_${post.groupId}_${userName}`)
+  const userPosting = new Identity(`${address}`)
   const generatedNote = await createNote(userPosting)
   const generatedNoteAsBigNumber = BigNumber.from(generatedNote).toString()
   const noteBigNumber = BigNumber.from(post.note).toString()

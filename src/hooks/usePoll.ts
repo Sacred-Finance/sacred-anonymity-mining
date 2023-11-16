@@ -60,7 +60,7 @@ export const usePoll = ({  group }: { group: Group }) => {
       const users = await fetchUsersFromSemaphoreContract(group.id)
       let semaphoreGroup = new SemaphoreGroup(group.id)
       users.forEach(u => semaphoreGroup.addMember(BigInt(u)))
-      const userIdentity = new Identity(`${address}_${group.id}_${activeUser?.name || 'anon'}`)
+      const userIdentity = new Identity(`${address}`)
 
       const unirepUser = new UnirepUser(userIdentity)
       await unirepUser.updateUserState()
@@ -152,7 +152,7 @@ export const usePoll = ({  group }: { group: Group }) => {
       let semaphoreGroup = new SemaphoreGroup(group.id)
       const users = await fetchUsersFromSemaphoreContract(group.id)
       users.forEach(u => semaphoreGroup.addMember(BigInt(u)))
-      const userIdentity = new Identity(`${address}_${group.id}_anon`)
+      const userIdentity = new Identity(`${address}`)
 
       const unirepUser = new UnirepUser(userIdentity)
       await unirepUser.updateUserState()

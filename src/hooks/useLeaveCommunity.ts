@@ -16,7 +16,7 @@ export const useLeaveCommunity = ({ id }) => {
   const leaveCommunity = async () => {
     console.log('Leaving group...')
 
-    const userIdentity = new Identity(`${address}_${id}_anon`)
+    const userIdentity = new Identity(`${address}`)
     let group = new Group(id);
     const users = await fetchUsersFromSemaphoreContract(id);
     users.forEach(u => group.addMember(BigInt(u)))

@@ -25,7 +25,7 @@ export const useJoinCommunity = () => {
 
       const actionFn = async () => {
         const username = 'anon'
-        const freshUser = new Identity(`${address}_${groupId}_${username}`)
+        const freshUser = new Identity(`${address}`)
         const note = await createNote(freshUser)
         try {
           // Attempt to join the community

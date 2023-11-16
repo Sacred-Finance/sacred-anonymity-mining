@@ -80,7 +80,7 @@ export const useEditItem = ({
         }
         console.log(`IPFS CID: ${cid}`)
         const signal = getBytes32FromIpfsHash(cid)
-        const userPosting = new Identity(`${address}_${groupId}_${member?.name}`)
+        const userPosting = new Identity(`${address}`)
         let input = {
           trapdoor: userPosting.getTrapdoor(),
           note: BigInt(note),

@@ -24,7 +24,7 @@ export const emptyPollRequest = {
 export async function handleDeleteItem(address: string, postedByUser: User, itemId) {
   try {
     let signal = ethers.constants.HashZero
-    const userPosting = new Identity(`${address}_${this.groupId}_${postedByUser?.name}`)
+    const userPosting = new Identity(`${address}`)
     const note = await createNote(userPosting)
 
     const item = await forumContract.itemAt(itemId)
@@ -65,7 +65,7 @@ export async function create(content, type, address, users, postedByUser, groupI
     onIPFSUploadSuccess(content, cid)
 
     const signal = getBytes32FromIpfsHash(cid)
-    const userPosting = new Identity(`${address}_${this.groupId}_${postedByUser?.name || 'anon'}`)
+    const userPosting = new Identity(`${address}`)
     const unirepUser = new UnirepUser(userPosting)
     await unirepUser.updateUserState()
     const userState = await unirepUser.getUserState()
@@ -152,7 +152,7 @@ export async function editContent(type, content, address: string, itemId, posted
     }
     const signal = getBytes32FromIpfsHash(cid)
 
-    const userPosting = new Identity(`${address}_${this.groupId}_${postedByUser?.name}`)
+    const userPosting = new Identity(`${address}`)
     const note = await createNote(userPosting)
 
     const item = await forumContract.itemAt(itemId)
