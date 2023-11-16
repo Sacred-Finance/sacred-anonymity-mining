@@ -19,16 +19,16 @@ export const PostList = ({ posts }: { posts: Item[] }) => {
     }
 
     return (
-      <Card key={p.id}>
+      <Card key={p.id} className={'flex flex-col justify-between'}>
         <CardHeader>
           <PostTitle post={p} title={p.title} onPostPage={false} id={''} />
         </CardHeader>
 
-        <CardContent className={'line-clamp-4  h-32'}>
-          <EditorJsRenderer data={p.description} />
+        <CardContent className={' overflow-hidden'}>
+          <EditorJsRenderer data={p.description} className={'line-clamp-4'} />
         </CardContent>
 
-        <CardFooter className={'flex items-center'}>
+        <CardFooter className={'justify-self-end items-end'}>
           <Badge className="flex gap-4">
             {p.childIds.length} <BookOpenIcon className="h-full w-4" />
           </Badge>
@@ -41,8 +41,8 @@ export const PostList = ({ posts }: { posts: Item[] }) => {
     <div className="flex flex-wrap gap-2">
       {renderedPosts?.length === 0 && <NoPosts />}
 
-      <ScrollArea className={'h-full h-screen'}>
-        <div className="hidden items-start justify-center gap-6 rounded-lg p-8 md:grid lg:grid-cols-2 xl:grid-cols-3">
+      <ScrollArea className={'h-full'}>
+        <div className="hidden items-stretch justify-center gap-6 rounded-lg  md:grid lg:grid-cols-2 xl:grid-cols-3">
           {renderedPosts === undefined ? <CircularLoader /> : <>{renderedPosts}</>}
         </div>
         <ScrollBar orientation="vertical" />

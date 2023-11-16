@@ -51,6 +51,7 @@ export const CommunityCard = ({
   const { isOwner } = useCheckIsOwner(community, address)
   const [showBackground, setShowBackground] = useState(false)
   const bannerSrc = useValidatedImage(community?.groupDetails?.bannerCID)
+  const logoSrc = useValidatedImage(community?.groupDetails?.logoCID)
 
   if (!community || !community?.id) return <></>
 
@@ -61,12 +62,21 @@ export const CommunityCard = ({
       <Card
         onMouseLeave={() => setShowBackground(false)}
         onClick={() => setShowBackground(false)}
-        className={'relative bg-gray-300/20 dark:bg-gray-800/50'}
+        className={
+          'group relative flex flex-col justify-between overflow-hidden rounded-lg bg-gray-300/20 dark:bg-gray-800/50  divide-y divide-gray-300/20 dark:divide-gray-800/50'
+        }
       >
-        <CardHeader className={'flex'}>
-          <CardTitle>
-            {' '}
-            <div className="flex items-center justify-between">
+        <CardHeader className={'relative z-10  flex w-full flex-col   py-2  '}>
+          <CardTitle className={'flex w-full items-center justify-between gap-4'}>
+            <Image
+              className="pointer-events-none  z-10 aspect-[1] h-[75px] w-[75px] rounded-full opacity-75"
+              src={logoSrc || mobileLogo}
+              alt={'community banner'}
+              width={75}
+              height={75}
+              unoptimized
+            />
+            <div className="flex w-full items-center justify-between rounded-md">
               <Link
                 onClick={e => {
                   // if the background is visible we dont want to navigate
@@ -83,35 +93,36 @@ export const CommunityCard = ({
               </Link>
               <SpeedDial
                 actions={[
-                  (isAdmin || isOwner)
+                  isAdmin || isOwner
                     ? {
                         label: 'Edit',
                         icon: <PencilIcon className={'h-full w-4'} />,
                         onClick: () => router.push(`/communities/${community?.groupId}/edit`),
                       }
                     : false,
-                    (isAdmin || isOwner) && <RemoveGroup groupId={community.id} hidden={false} />,
+                  (isAdmin || isOwner) && <RemoveGroup groupId={community.id} hidden={false} />,
                   ...actions,
                 ]}
               />
             </div>
-            <Separator className="my-4" />
           </CardTitle>
-          <CardDescription className={'line-clamp-2 h-24'}>
-            <ScrollArea>{community?.groupDetails?.description}</ScrollArea>
-          </CardDescription>
         </CardHeader>
-
-        <CardContent>
-          {(bannerSrc ?? mobileLogo) && (
+        <CardContent className={'pt-2 pb-0 min-h-[120px]'}>
+          {bannerSrc && (
             <Image
-              className=" -z-1 pointer-events-none h-full w-full rounded-lg object-cover opacity-5"
-              src={bannerSrc ?? mobileLogo}
-              alt={'community logo'}
+              className=" -z-1 pointer-events-none h-full w-full rounded-lg object-cover opacity-40 transition-opacity duration-300 ease-in-out group-hover:opacity-80"
+              src={bannerSrc}
+              alt={'community banner'}
               fill={true}
               unoptimized
             />
           )}
+
+          <ScrollArea className={'h-full rounded p-1 transition-colors duration-500 delay-300 hover:bg-card'}>
+            <CardDescription className={'z-10  h-24  text-base leading-snug text-card-foreground'}>
+              {community?.groupDetails?.description}
+            </CardDescription>
+          </ScrollArea>
         </CardContent>
 
         <CommunityCardFooter />

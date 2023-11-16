@@ -79,7 +79,7 @@ const PostToTopic = ({
             editor: 'border rounded py-1 px-2 bg-white dark:bg-gray-800',
             submitButton: 'bg-green-500 text-white border-none rounded hover:bg-green-600',
             formContainerOpen:
-              'bg-white dark:bg-gray-800 p-4 border border-gray-300 dark:border-gray-700 rounded shadow-lg w-full max-w-3xl',
+              'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded shadow-lg w-full max-w-3xl',
             openFormButtonOpen: 'bg-primary-500 text-white opacity-0 hover:bg-primary-600',
           }}
           editorId={`${topic?.id}_post`}
