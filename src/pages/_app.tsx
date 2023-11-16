@@ -22,6 +22,9 @@ import { SWRConfig } from 'swr'
 import StandardLayout from '@components/HOC/StandardLayout'
 import { merge } from 'lodash'
 
+import { ParticleNetwork } from '@particle-network/auth'
+import { particleWallet } from '@particle-network/rainbowkit-ext'
+
 function App({ Component, pageProps }: AppProps) {
   return (
     <ThemeProvider attribute={'class'} defaultTheme={'dark'} storageKey={'theme-color'}>
@@ -99,9 +102,19 @@ const { chains, provider, webSocketProvider } = configureChains(
   { stallTimeout: stallTimeout, pollingInterval: stallTimeout }
 )
 
+new ParticleNetwork({
+  appId: process.env.NEXT_PUBLIC_PARTICLE_APP_ID || '',
+  clientKey: process.env.NEXT_PUBLIC_PARTICLE_CLIENT_KEY || '',
+  projectId: process.env.NEXT_PUBLIC_PARTICLE_PROJECT_ID || '',
+})
+
 const otherWallets = [
   braveWallet({ chains }),
   // ledgerWallet({ chains }),
+  particleWallet({ chains, authType: 'google' }),
+  particleWallet({ chains, authType: 'facebook' }),
+  particleWallet({ chains, authType: 'apple' }),
+  particleWallet({ chains }),
   coinbaseWallet({ chains, appName: app.name }),
   // rainbowWallet({ chains }),
   //   walletConnectWallet({ chains }),
