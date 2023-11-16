@@ -23,6 +23,8 @@ import RemoveGroup from '@components/RemoveGroup'
 import DeleteItemButton from '@components/buttons/DeleteItemButton'
 import { useValidatedImage } from '@components/CommunityCard/UseValidatedImage'
 import TagInput from './TagInput/TagInput'
+import { Card, CardContent } from '@/shad/ui/card'
+import { useCommunityContext } from '@/contexts/CommunityProvider'
 
 interface EditGroupProps {
   group: Group
@@ -32,7 +34,9 @@ export function EditGroup({ group }: EditGroupProps) {
   const { address } = useAccount()
   const {} = useProvider()
   const { t } = useTranslation()
-
+  const {
+    state: { isAdmin, isModerator },
+  } = useCommunityContext()
   const handleUpdateStateAfterEdit = useFetchCommunitiesByIds([Number(group.groupId)], false)
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
@@ -40,9 +44,12 @@ export function EditGroup({ group }: EditGroupProps) {
   const [groupDescriptionState, setGroupDescriptionState] = useState<string>('')
   const [bannerFile, setBannerFile] = useState<File | null>(null)
   const [logoFile, setLogoFile] = useState<File | null>(null)
-  const [bannerUrl, setBannerUrl] = useState<string | null>(null)
-  const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const [previewCard, setPreviewCard] = useState<boolean>(false)
+
+  const [hasImageChanged, setHasImageChanged] = useState({
+    banner: false,
+    logo: false,
+  })
 
   const [tags, setTags] = useState<string[]>([])
 
@@ -64,7 +71,6 @@ export function EditGroup({ group }: EditGroupProps) {
       })
   }
 
-  // The useEffect that handles the initial setup
   useEffect(() => {
     if (group.groupDetails.bannerCID) fetchImage(group.groupDetails.bannerCID, 'banner')
     if (group.groupDetails.logoCID) fetchImage(group.groupDetails.logoCID, 'logo')
@@ -74,15 +80,11 @@ export function EditGroup({ group }: EditGroupProps) {
   }, [])
 
   const handleSetImage = ({ file, imageType }: HandleSetImage) => {
-    let newImage = ''
     if (file && isImageFile(file)) {
-      newImage = URL.createObjectURL(file)
+      setHasImageChanged(prev => ({ ...prev, [imageType]: true }))
     }
     const setImage = imageType === 'logo' ? setLogoFile : setBannerFile
     setImage(file)
-
-    const setUrl = imageType === 'logo' ? setLogoUrl : setBannerUrl
-    setUrl(newImage)
   }
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,8 +92,7 @@ export function EditGroup({ group }: EditGroupProps) {
   }
 
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-
-      setGroupDescriptionState(e.target.value)
+    setGroupDescriptionState(e.target.value)
   }
 
   const hidePreview = () => {
@@ -111,40 +112,56 @@ export function EditGroup({ group }: EditGroupProps) {
         '/circuits/VerifyOwner__prod.wasm',
         '/circuits/VerifyOwner__prod.0.zkey'
       )
+      let images = {
+        bannerFile: hasImageChanged.banner ? bannerFile : null,
+        logoFile: hasImageChanged.logo ? logoFile : null,
+      }
 
-      const { bannerCID, logoCID } = await uploadImages({ bannerFile, logoFile })
+      const { bannerCID, logoCID } = await uploadImages(images)
 
       const mergedGroupDetails = {
         ...group.groupDetails,
+        groupName,
         // add only if the value is not empty
         ...(groupDescriptionState && { description: groupDescriptionState }),
         bannerCID: bannerCID ? getBytes32FromIpfsHash(bannerCID) : constants.HashZero,
         logoCID: logoCID ? getBytes32FromIpfsHash(logoCID) : constants.HashZero,
-        tags: tags.map(tag => getBytes32FromString(tag)),
+        tags: tags.map(tag => {
+          console.log('tag', tag, getBytes32FromString(tag))
+          return getBytes32FromString(tag)
+        }),
       }
+      console.log('mergedGroupDetails', mergedGroupDetails)
 
       // Call the setGroupDescription function
-      setGroupDetails(group.groupId as string, a, b, c, mergedGroupDetails)
+      setGroupDetails(group.groupId as string, a, b, c, mergedGroupDetails, isAdmin || isModerator)
         .then(async response => {
           await handleUpdateStateAfterEdit()
           toast.success('Group details updated')
           setIsSubmitting(false)
-
+          setPreviewCard(false)
           router.push(`/communities/${group.groupId}`)
         })
         .catch(error => {
           console.log(error) // log the error or handle it as you need
+
+          toast.error(`Something went wrong ${error.message}`)
+          setIsSubmitting(false)
+          setPreviewCard(false)
         })
     } catch (error) {
       // todo: handle better
       toast.error(error.message)
       setIsSubmitting(false)
+      setPreviewCard(false)
     } finally {
+      setIsSubmitting(false)
+      setPreviewCard(false)
     }
-  }, [bannerFile, logoFile, group.id, forumContract, groupDescriptionState, groupName])
+  }, [bannerFile, logoFile, group.id, forumContract, tags, groupDescriptionState, groupName])
 
   return (
-    <div className={clsx('max-w-screen-2xl  relative z-50  grid w-full grid-cols-1 gap-4 sm:p-8 md:p-24')}>
+    <div className={clsx('relative  z-50 grid  w-full max-w-screen-2xl grid-cols-1 gap-4 sm:p-8 md:p-24')}>
       <div className="-z-[1] flex flex-col space-y-4 sm:col-span-full md:col-span-6 lg:col-span-6">
         <div className="flex flex-row items-center justify-between py-4">
           <h1 className="text-2xl font-semibold text-gray-700 dark:text-gray-300">{t('editCommunity')}</h1>
@@ -156,7 +173,7 @@ export function EditGroup({ group }: EditGroupProps) {
         <div className="flex flex-col space-y-4">
           <label className="text-lg text-gray-700 dark:text-gray-300">{t('placeholder.communityName')}</label>
           <input
-            className="focus:border-blue-500 rounded border px-3 py-2 text-gray-700 transition-colors focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:focus:border-blue-400"
+            className="rounded border px-3 py-2 text-gray-700 transition-colors focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:focus:border-blue-400"
             placeholder={'An awesome community name'}
             type="text"
             value={groupName}
@@ -166,13 +183,13 @@ export function EditGroup({ group }: EditGroupProps) {
 
         <div className="flex flex-col space-y-4">
           <label className="text-lg text-gray-700 dark:text-gray-300">{t('placeholder.communityTags')}</label>
-            <TagInput onChange={(t) => setTags(t)} selected={tags}/>
+          <TagInput onChange={t => setTags(t)} selected={tags} />
         </div>
 
         <div className="flex flex-col space-y-4">
           <label className="text-lg text-gray-700 dark:text-gray-300">{t('placeholder.communityDescription')}</label>
           <textarea
-            className="focus:border-blue-500 h-20 rounded border px-3 py-2 text-gray-700 transition-colors focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:focus:border-blue-400"
+            className="h-20 rounded border px-3 py-2 text-gray-700 transition-colors focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:focus:border-blue-400"
             placeholder={t('placeholder.communityDescriptionContent') || ''}
             value={groupDescriptionState}
             onChange={handleDescriptionChange}
@@ -181,14 +198,14 @@ export function EditGroup({ group }: EditGroupProps) {
 
         <div className="flex gap-4 ">
           <PictureUpload
-            uploadedImageUrl={bannerUrl}
+              uploadedImageUrl={bannerFile ? URL.createObjectURL(bannerFile) : null}
             displayName={t('banner')}
             name={'banner'}
             setImageFileState={handleSetImage}
           />
 
           <PictureUpload
-            uploadedImageUrl={logoUrl}
+              uploadedImageUrl={logoFile ? URL.createObjectURL(logoFile) : null}
             displayName={t('logo')}
             name={'logo'}
             setImageFileState={handleSetImage}
@@ -208,7 +225,7 @@ export function EditGroup({ group }: EditGroupProps) {
           <PrimaryButton
             className={clsx(
               buttonVariants.primarySolid,
-              ' border transition-colors hover:bg-blue-600 dark:bg-blue-700 dark:text-gray-300 dark:hover:bg-blue-800'
+              ' border bg-primary text-primary-foreground transition-colors hover:bg-blue-600 dark:hover:bg-blue-800'
             )}
             onClick={togglePreview}
           >
@@ -216,22 +233,28 @@ export function EditGroup({ group }: EditGroupProps) {
           </PrimaryButton>
         </div>
       </div>
-      {previewCard && <div className="fixed inset-0 bg-gray-900/80 transition-colors" />}
 
       {previewCard && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className=" z-50 flex h-40 w-40 bg-gray-400">
-            <PrimaryButton className={clsx('bg-red-400')} onClick={hidePreview} isLoading={isSubmitting}>
-              Cancel
-            </PrimaryButton>
-            <PrimaryButton
-              // disabled={isSubmitDisabled}
-              onClick={submitAllGroupDetails}
-              isLoading={isSubmitting}
-            >
-              {t('button.confirm-edit')}
-            </PrimaryButton>
-          </div>
+        <div className="fixed inset-0 z-10 flex items-center justify-center">
+          <div className="absolute inset-0 bg-gray-900/80 transition-colors"></div>
+          <Card className="relative z-20 mx-auto max-w-lg rounded-lg bg-card p-4 shadow-lg">
+            <CardContent className="flex flex-col items-center space-y-4">
+              <h2 className="text-xl font-semibold text-card-foreground">Confirm Your Changes</h2>
+              <p>Are you sure you want to apply these changes?</p>
+              <div className="flex w-full justify-around pt-4">
+                <PrimaryButton className="bg-red-400 hover:bg-red-500" onClick={hidePreview} isLoading={isSubmitting}>
+                  Cancel
+                </PrimaryButton>
+                <PrimaryButton
+                  // disabled={isSubmitDisabled}
+                  onClick={submitAllGroupDetails}
+                  isLoading={isSubmitting}
+                >
+                  {t('button.confirm-edit')}
+                </PrimaryButton>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
     </div>

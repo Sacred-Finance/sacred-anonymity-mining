@@ -2,7 +2,7 @@ import React from 'react'
 import { Logo } from './Logo'
 import { NavBarButton } from '../components/buttons/NavBarButton'
 import { ThemeToggleButton } from './Theme'
-import { ArrowsPointingInIcon, ArrowsPointingOutIcon, QuestionMarkCircleIcon } from '@heroicons/react/20/solid'
+import { ArrowsPointingInIcon, ArrowsPointingOutIcon, QuestionMarkCircleIcon, UserCircleIcon } from '@heroicons/react/20/solid'
 import ConnectWallet from './Connect/ConnectWallet'
 import clsx from 'clsx'
 
@@ -46,6 +46,14 @@ const Header = () => {
           className="text-gray-600 dark:text-gray-300"
         >
           <QuestionMarkCircleIcon className="h-8 w-8" />
+        </NavBarButton>
+        <NavBarButton
+          href="/account"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-gray-600 dark:text-gray-300"
+        >
+          <UserCircleIcon className="h-8 w-8" />
         </NavBarButton>
         <ThemeToggleButton />
       </div>
