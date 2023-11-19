@@ -249,7 +249,7 @@ export function useUserIfJoined(communityId: string | number): User | boolean {
         setUserJoined(u)
         state.communitiesJoined[Number(communityId)] = u
       } else {
-        state.communitiesJoined[communityId] = false
+        state.communitiesJoined[Number(communityId)] = false
         setUserJoined(false)
       }
     } else {
@@ -303,7 +303,7 @@ export function useCommunitiesJoinedByUser() {
       const communitiesJoined: Group[] = []
       await Promise.all(state?.communities.map(community => {
         if (isUndefined(state.communitiesJoined[Number(community.id)])) {
-          const generatedIdentity = new Identity(`${userAddress}_${Number(community.id)}_anon`)
+          const generatedIdentity = new Identity(`${userAddress}`)
           return hasUserJoined(Number(community.id), generatedIdentity.commitment.toString()).then(userJoined => {
             if (userJoined) {
               communitiesJoined.push(community)
