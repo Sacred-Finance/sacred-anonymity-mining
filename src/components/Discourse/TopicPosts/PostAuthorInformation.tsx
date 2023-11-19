@@ -1,7 +1,7 @@
 import { Avatar } from '@components/Discourse/TopicPosts/Avatar'
 import _ from 'lodash'
 import React from 'react'
-import {formatDistanceToNow} from "date-fns";
+import { formatDistanceToNow } from 'date-fns'
 
 export const PostAuthorInformation = ({ post }) => (
   <div className=" flex items-center space-x-4">

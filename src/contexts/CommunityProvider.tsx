@@ -2,12 +2,12 @@ import React, { createContext, ReactNode, useContext, useReducer, useMemo, useEf
 import { User } from '@/lib/model'
 import { ethers } from 'ethers'
 import { Identity } from '@semaphore-protocol/identity'
-import _, { isBoolean } from 'lodash'
+import _, { isBoolean, isUndefined } from 'lodash'
 import { useAccount } from 'wagmi'
 import { useIdentity } from '@/hooks/useIdentity'
 import { Group, Item } from '@/types/contract/ForumInterface'
 import { Topic } from '@components/Discourse/types'
-import { hasUserJoined } from '@/lib/utils'
+import { createNote, hasUserJoined } from '@/lib/utils'
 
 export type CommunityId = string | number | ethers.BigNumber
 type CommunityContextType = {
@@ -35,9 +35,10 @@ type State = {
   users: User[]
   usersGrouped: { [key: string]: User[] }
   activeCommunity: ActiveCommunity | ActiveDiscourseCommunity
-  activePost: ActivePost,
-  isAdmin: boolean,
-  isModerator: boolean,
+  activePost: ActivePost
+  isAdmin: boolean
+  isModerator: boolean
+  communitiesJoined: { [key: string]: User | boolean }
 }
 
 type Action =
@@ -50,7 +51,7 @@ type Action =
   // a new type for active community, and will store community details, post list, and comments for each post
   | { type: 'SET_ACTIVE_COMMUNITY'; payload: ActiveCommunity | ActiveDiscourseCommunity }
   | { type: 'SET_ACTIVE_POST'; payload: ActivePost }
-  | { type: 'SET_USER_ACCESS'; payload: { isAdmin?: boolean, isModerator?: boolean } }
+  | { type: 'SET_USER_ACCESS'; payload: { isAdmin?: boolean; isModerator?: boolean } }
 
 const initialState: State = {
   communities: [],
@@ -67,6 +68,7 @@ const initialState: State = {
   },
   isAdmin: false,
   isModerator: false,
+  communitiesJoined: {}
 }
 
 function reducer(state: State, action: Action): State {
@@ -129,6 +131,7 @@ function reducer(state: State, action: Action): State {
         users: [action.payload, ...state.users],
         usersGrouped: newUsersGrouped,
         communities: newCommunities,
+        communitiesJoined: { ...state.communitiesJoined, [groupId]: true }
       }
     case 'REMOVE_USER':
       const userId = getGroupIdOrUserId(action.payload)
@@ -153,17 +156,18 @@ function reducer(state: State, action: Action): State {
         users: state.users.filter(u => u.identityCommitment !== action.payload.identityCommitment),
         usersGrouped: updatedUsersGrouped,
         communities: updatedCommunities,
+        communitiesJoined: { ...state.communitiesJoined, [userId]: false }
       }
 
-      case 'SET_USER_ACCESS': {
-        const isAdmin = isBoolean(action.payload.isAdmin) ? action.payload.isAdmin : state.isAdmin;
-        const isModerator = isBoolean(action.payload.isModerator) ? action.payload.isModerator : state.isModerator;
-        return {
-          ...state,
-          isAdmin,
-          isModerator
-        }
+    case 'SET_USER_ACCESS': {
+      const isAdmin = isBoolean(action.payload.isAdmin) ? action.payload.isAdmin : state.isAdmin
+      const isModerator = isBoolean(action.payload.isModerator) ? action.payload.isModerator : state.isModerator
+      return {
+        ...state,
+        isAdmin,
+        isModerator,
       }
+    }
     default:
       return state
   }
@@ -220,40 +224,103 @@ export function useActiveUser({ groupId }): User | undefined {
   )
 }
 
-export function useUserIfJoined(communityId: string | number): User | false {
+export function useUserIfJoined(communityId: string | number): User | boolean {
+  communityId = Number(communityId)
   const { state } = useCommunityContext()
   const { address: userAddress } = useAccount()
-  const [userJoined, setUserJoined] = React.useState<User | false>(null)
+  const [userJoined, setUserJoined] = React.useState<User | boolean>(null)
 
   useEffect(() => {
     checkIfUserHasJoined()
   }, [userAddress, state.usersGrouped[communityId]?.length])
 
   const checkIfUserHasJoined = async () => {
-    if (userAddress) {
+    if (!userAddress) return false
+    if (isUndefined(state.communitiesJoined[communityId])) {
       const generatedIdentity = new Identity(`${userAddress}`)
       const userJoined = await hasUserJoined(Number(communityId), generatedIdentity.getCommitment().toString())
       if (userJoined) {
-        setUserJoined({
+        const u = {
           name: 'anon',
           identityCommitment: generatedIdentity.getCommitment().toString(),
           groupId: +communityId,
-          id: null,
-        })
+          id: '',
+        }
+        setUserJoined(u)
+        state.communitiesJoined[Number(communityId)] = u
       } else {
+        state.communitiesJoined[communityId] = false
         setUserJoined(false)
       }
+    } else {
+      setUserJoined(state.communitiesJoined[communityId])
+    }
+  }
+  return userJoined
+}
+
+// For account page
+export function useCommunitiesCreatedByUser() {
+  const { state } = useCommunityContext()
+  const { address: userAddress } = useAccount()
+  const [communitiesCreated, setCommunitiesCreated] = React.useState<Group[]>([])
+
+  useEffect(() => {
+    filterCommunitiesCreatedByUser()
+  }, [userAddress, state.communities?.length])
+
+  const filterCommunitiesCreatedByUser = async () => {
+    if (userAddress && state.communities?.length) {
+      const communitiesCreated: Group[] = []
+      for (let i = 0; i < state.communities.length; i++) {
+        const generatedIdentity = new Identity(`${userAddress}`)
+        const generatedNote = (await createNote(generatedIdentity)).toString()
+        if (state.communities[i].note === generatedNote) {
+          communitiesCreated.push(state.communities[i])
+        }
+      }
+      setCommunitiesCreated(communitiesCreated)
+    } else {
+      setCommunitiesCreated([])
     }
   }
 
-  // return useMemo(() => {
-  if (!userAddress) return false
-  // if (!state.usersGrouped) throw new Error('hasUserJoined - usersGrouped is undefined')
-  // if (!state.usersGrouped[communityId]) {
-  //   return false
-  // }
+  return { communitiesCreated }
+}
 
-  return userJoined
+// For account page
+export function useCommunitiesJoinedByUser() {
+  const { state } = useCommunityContext()
+  const { address: userAddress } = useAccount()
+  const [communitiesJoined, setCommunitiesJoined] = React.useState<Group[]>([])
+
+  useEffect(() => {
+    filterCommunitiesJoinedByUser()
+  }, [userAddress, state.communities?.length, state.usersGrouped])
+
+  const filterCommunitiesJoinedByUser = async () => {
+    if (userAddress && state.communities?.length) {
+      const communitiesJoined: Group[] = []
+      await Promise.all(state?.communities.map(community => {
+        if (isUndefined(state.communitiesJoined[Number(community.id)])) {
+          const generatedIdentity = new Identity(`${userAddress}_${Number(community.id)}_anon`)
+          return hasUserJoined(Number(community.id), generatedIdentity.commitment.toString()).then(userJoined => {
+            if (userJoined) {
+              communitiesJoined.push(community)
+              state.communitiesJoined[Number(community.id)] = true
+            }
+          })
+        } else if (state.communitiesJoined[Number(community.id)]) {
+          return Promise.resolve(communitiesJoined.push(community))
+        }
+      }))
+      setCommunitiesJoined(communitiesJoined)
+    } else {
+      setCommunitiesJoined([])
+    }
+  }
+
+  return { communitiesJoined }
 }
 
 export const addAvatarToUser = (user: User) => {
