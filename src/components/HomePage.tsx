@@ -163,9 +163,9 @@ function HomePage({ isLoading = false, isAdmin = false, discourseCommunities }: 
           <Separator className="my-4" />
           <div className="relative">
             <ScrollArea className={'h-full'}>
-              <div className="grid-cols-auto flex grow flex-col items-stretch justify-center gap-6 rounded-lg p-0 md:grid md:items-start md:p-8 lg:grid-cols-2 xl:grid-cols-3">
+              <div className="grid-cols-auto flex grow flex-col  gap-6 rounded-lg p-0 md:grid  md:py-8 lg:grid-cols-2 xl:grid-cols-3">
                 {(filteredCommunities.length ? filteredCommunities : communities).map(community => (
-                  <CommunityCard community={community} isAdmin={isAdmin || false} />
+                  <CommunityCard key={`$community_${community.id}`} community={community} isAdmin={isAdmin || false} />
                 ))}
               </div>
               <ScrollBar orientation="vertical" />

@@ -121,6 +121,15 @@ function generateBreadcrumbItems(community, post, location): BreadCrumbItem[] {
         isCurrentPage: true,
       },
     ]
+  } else if (location.pathname.includes('account')) {
+    items = [
+      { label: 'Home', href: '/', isCurrentPage: false },
+      {
+        label: 'Account',
+        href: `/account`,
+        isCurrentPage: true,
+      },
+    ]
   } else if (location.pathname.includes('create-group')) {
     items = [
       { label: 'Home', href: '/', isCurrentPage: false },

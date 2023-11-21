@@ -335,21 +335,20 @@ export async function augmentGroupData(rawGroupData: RawGroupData, forPaths = fa
 }
 
 function serializeRawItemData(rawItemData: RawItemData): Item {
-  console.log('rawItemData', rawItemData)
   return {
-    kind: rawItemData.kind.toString(),
-    id: rawItemData.id.toString(),
-    parentId: rawItemData.parentId.toString(),
-    groupId: rawItemData.groupId.toString(),
-    createdAtBlock: rawItemData.createdAtBlock.toNumber(),
-    childIds: rawItemData.childIds.map(id => id.toString()),
-    upvote: rawItemData.upvote.toNumber(),
-    downvote: rawItemData.downvote.toNumber(),
-    note: rawItemData.note.toString(),
-    ownerEpoch: rawItemData.ownerEpoch.toString(),
-    ownerEpochKey: rawItemData.ownerEpochKey.toString(),
-    contentCID: getIpfsHashFromBytes32(rawItemData.contentCID.toString()),
-    removed: rawItemData.removed,
+    kind: rawItemData?.kind?.toString(),
+    id: rawItemData?.id?.toString(),
+    parentId: rawItemData?.parentId.toString(),
+    groupId: rawItemData?.groupId.toString(),
+    createdAtBlock: rawItemData?.createdAtBlock?.toNumber(),
+    childIds: rawItemData?.childIds?.map(id => id.toString()),
+    upvote: rawItemData?.upvote?.toNumber(),
+    downvote: rawItemData?.downvote?.toNumber(),
+    note: rawItemData?.note.toString(),
+    ownerEpoch: rawItemData?.ownerEpoch?.toString(),
+    ownerEpochKey: rawItemData?.ownerEpochKey?.toString(),
+    contentCID: getIpfsHashFromBytes32(rawItemData.contentCID?.toString()),
+    removed: rawItemData?.removed,
   }
 }
 
