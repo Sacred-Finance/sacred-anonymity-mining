@@ -7,21 +7,21 @@ import useSWR from 'swr'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
 
-function Home({ communitiesData, users, discourseCommunities }) {
+function Home({ discourseCommunities }) {
   const router = useRouter()
-  const pageRef = React.useRef(null);
-  const { state: {isAdmin, isModerator} } = useCommunityContext();
+  const pageRef = React.useRef(null)
+  const {
+    state: { isAdmin, isModerator },
+  } = useCommunityContext()
   useCheckIfUserIsAdminOrModerator(true)
 
   useEffect(() => {
     if (pageRef.current) {
       pageRef.current.scrollIntoView({ behavior: 'smooth' })
-      console.log('scrolling to top')
     }
   }, [router.pathname])
 
-  const { data, error, isLoading } = useSWR('/api/data')
-  console.log(data)
+  const { data, error, isLoading, isValidating } = useSWR('/api/data')
   const { dispatch } = useCommunityContext()
 
   useEffect(() => {
@@ -40,8 +40,13 @@ function Home({ communitiesData, users, discourseCommunities }) {
   if (error) {
     return <div>Error: {error.message}</div>
   }
-  // if (!communitiesData) return <LoadingComponent/>
-  return <HomePage isLoading={isLoading} isAdmin={isAdmin || isModerator || false} discourseCommunities={discourseCommunities} />
+  return (
+    <HomePage
+      isLoading={isLoading || isValidating}
+      isAdmin={isAdmin || isModerator || false}
+      discourseCommunities={discourseCommunities}
+    />
+  )
 }
 
 export const getServerSideProps = async () => {

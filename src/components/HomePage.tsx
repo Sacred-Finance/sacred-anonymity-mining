@@ -21,7 +21,7 @@ interface HomeProps {
   discourseCommunities: DiscourseCommunity[]
 }
 
-function NoCommunities(props: {isLoading: boolean, searchTerm: string }) {
+function NoCommunities(props: { isLoading: boolean; searchTerm: string }) {
   const router = useRouter()
   if (props.isLoading) {
     return (
@@ -126,7 +126,8 @@ function HomePage({ isLoading = false, isAdmin = false, discourseCommunities }: 
     return debounce(handleSearchChange, communities.length ? 400 : 0)
   }, [communities])
 
-  if (isLoading || !communities.length) {
+  // todo: find a standard for page loading.
+  if (!communities.length) {
     return <NoCommunities isLoading={isLoading} searchTerm={searchTerm} />
   }
   return (
