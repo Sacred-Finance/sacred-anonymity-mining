@@ -3152,6 +3152,11 @@ ajv@^6.10.0, ajv@^6.12.4:
     json-schema-traverse "^0.4.1"
     uri-js "^4.2.2"
 
+animal-avatar-generator@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/animal-avatar-generator/-/animal-avatar-generator-1.2.0.tgz#298677c81d6e164cae949aabba03e2ff76d82481"
+  integrity sha512-C9fExOFmO5jz2KcaDLSn8IhyRayy63M7E/hf3pTIe2GvbVWFqTIZFMSTH41VGRJD+zNWQLmQwcDaA42slEz3lA==
+
 anondb@^0.0.16:
   version "0.0.16"
   resolved "https://registry.yarnpkg.com/anondb/-/anondb-0.0.16.tgz#057bcc5d58676f3cc0983f99656f03641df3367b"
