@@ -876,6 +876,7 @@ export const providerUrlMap = {
 
 export const jsonRPCProvider = getRpcProvider(Number(process.env.NEXT_PUBLIC_CHAIN_ID))
 export const jsonRPCProviderUrl = getRpcProviderUrl(Number(process.env.NEXT_PUBLIC_CHAIN_ID))
+export const providerChainId = Number(process.env.NEXT_PUBLIC_CHAIN_ID)
 
 const abiInterface = new ethers.utils.Interface(ForumABI.abi).functions
 

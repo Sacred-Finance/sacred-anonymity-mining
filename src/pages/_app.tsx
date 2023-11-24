@@ -6,7 +6,7 @@ import { useEffect, useRef } from 'react'
 import HeadGlobal from '@/components/HeadGlobal'
 import '../../i18n'
 import { alchemyProvider } from 'wagmi/providers/alchemy'
-
+import { providerChainId } from '../constant/const'
 import { connectorsForWallets, darkTheme, RainbowKitProvider, Theme } from '@rainbow-me/rainbowkit'
 import { braveWallet, coinbaseWallet, injectedWallet, metaMaskWallet } from '@rainbow-me/rainbowkit/wallets'
 import { goerli, localhost, mainnet, optimismGoerli, arbitrumGoerli, polygonMumbai, sepolia } from 'wagmi/chains'
@@ -131,8 +131,8 @@ const connectors = connectorsForWallets([
 
 const client = createClient({
   autoConnect: true,
-  provider: provider({ chainId: Number(process.env.NEXT_PUBLIC_CHAIN_ID) }),
-  webSocketProvider: webSocketProvider({ chainId: Number(process.env.NEXT_PUBLIC_CHAIN_ID) }),
+  provider: provider({ chainId: providerChainId }),
+  webSocketProvider: webSocketProvider({ chainId: providerChainId }),
   connectors: connectors,
   logger: {
     warn: message => console.warn('Wagmi warning', message),
@@ -163,7 +163,7 @@ export function Web3Wrapper({ children }) {
           learnMoreUrl: app.url,
         }}
         chains={chains}
-        initialChain={Number(process.env.NEXT_PUBLIC_CHAIN_ID)} // Optional, initialChain={1}, initialChain={chain.mainnet}, initialChain={gnosisChain}
+        initialChain={providerChainId} // Optional, initialChain={1}, initialChain={chain.mainnet}, initialChain={gnosisChain}
         showRecentTransactions={false}
         theme={myTheme}
         id={'rainbowkit'}
