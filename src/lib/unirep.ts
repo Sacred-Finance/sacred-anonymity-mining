@@ -1,8 +1,8 @@
 import { MemoryConnector } from 'anondb/web'
 import { constructSchema } from 'anondb/types'
-import { attesterAddress, unirepAddress } from '../constant/const'
+import { attesterAddress, unirepAddress, jsonRPCProviderUrl } from '../constant/const'
 import { Contract, Wallet, ethers } from 'ethers'
-import { polygonMumbai } from 'wagmi/chains'
+import { polygonMumbai, optimismGoerli, arbitrumGoerli } from 'wagmi/chains'
 import { userUnirepSignUp } from './api'
 import { UserState, schema } from '@unirep/core'
 import { Identity } from '@semaphore-protocol/identity'
@@ -52,12 +52,12 @@ export class UnirepUser {
    * @param identity User's identity.
    */
   constructor(public identity: Identity) {
-    if (!process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL || !process.env.NEXT_PUBLIC_ETHEREUM_PRIVATE_KEY) {
+    if (!jsonRPCProviderUrl || !process.env.NEXT_PUBLIC_ETHEREUM_PRIVATE_KEY) {
       throw new Error('Environment variables are not set.')
     }
 
     this.provider = new ethers.providers.JsonRpcProvider(
-      { url: process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL },
+      { url: jsonRPCProviderUrl },
       polygonMumbai.id
     )
     this.signer = new Wallet(process.env.NEXT_PUBLIC_ETHEREUM_PRIVATE_KEY, this.provider)

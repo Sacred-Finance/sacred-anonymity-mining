@@ -6,7 +6,7 @@ import { Chain } from 'wagmi'
 import ToolTip from '@components/HOC/ToolTip'
 import { PrimaryButton } from '@components/buttons'
 import { useTranslation } from 'next-i18next'
-import { polygonMumbai } from 'wagmi/chains'
+import { polygonMumbai, optimismGoerli, arbitrumGoerli } from 'wagmi/chains'
 import { PictureUpload } from '@components/PictureUpload'
 import clsx from 'clsx'
 import { buttonVariants } from '@styles/classes'
@@ -77,7 +77,7 @@ function CreateGroupFormUI({ onCreate }) {
     setUrl(file ? URL.createObjectURL(file) : '')
   }
 
-  const [selectedChain, setSelectedChain] = useState<Chain>(supportedChains[polygonMumbai.id])
+  const [selectedChain, setSelectedChain] = useState<Chain>(supportedChains[Number(process.env.NEXT_PUBLIC_CHAIN_ID)])
 
   const onTokenSelect = (index, tokenAddress, symbol, decimals) => {
     formik.setFieldValue(`tokenRequirements.${index}.tokenAddress`, tokenAddress)
@@ -106,7 +106,7 @@ function CreateGroupFormUI({ onCreate }) {
       requirements: reqMandatory ? tokenRequirements : [],
       bannerFile: bannerFile,
       logoFile: logoFile,
-      chainId: reqMandatory ? selectedChain.id : polygonMumbai.id,
+      chainId: reqMandatory ? selectedChain.id : Number(process.env.NEXT_PUBLIC_CHAIN_ID),
       tags: tags,
       description: groupDescription,
       note: BigInt(0).toString(),

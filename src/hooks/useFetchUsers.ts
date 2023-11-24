@@ -1,6 +1,5 @@
 import { ForumContractAddress, semaphoreContract } from '../constant/const'
 import ForumABI from '../constant/abi/Forum.json'
-import { polygonMumbai } from 'wagmi/chains'
 import { useCommunityContext } from '../contexts/CommunityProvider'
 import { useContract, useProvider } from 'wagmi'
 import { User } from '../lib/model'
@@ -11,7 +10,7 @@ export const useFetchUsers = (groupId, loadOnInit = true,) => {
   const { dispatch } = useCommunityContext()
 
 
-  const provider = useProvider({ chainId: polygonMumbai.id })
+  const provider = useProvider({ chainId: Number(process.env.NEXT_PUBLIC_CHAIN_ID) })
 
   const forumContract = useContract({
     address: ForumContractAddress,

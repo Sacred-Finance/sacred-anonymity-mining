@@ -6,7 +6,7 @@ import { toast } from "react-toastify"
 import { useAccount } from "wagmi"
 import { polygonMumbai } from "wagmi/chains"
 
-export const useFetchBalance = (tokenAddress: string = mumbaiTestnetMaticContractAddress, chainId: number = polygonMumbai.id) => {
+export const useFetchBalance = (tokenAddress: string = mumbaiTestnetMaticContractAddress, chainId: number = Number(process.env.NEXT_PUBLIC_CHAIN_ID)) => {
   const { address } = useAccount();
   const contract = new Contract (tokenAddress, erc20dummyABI, getRpcProvider(chainId))
 
