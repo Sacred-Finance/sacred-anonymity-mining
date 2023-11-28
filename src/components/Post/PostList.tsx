@@ -9,6 +9,7 @@ import { BookOpenIcon } from '@heroicons/react/20/solid'
 import { Card, CardContent, CardFooter, CardHeader } from '@/shad/ui/card'
 import { Badge } from '@/shad/ui/badge'
 import { ScrollArea, ScrollBar } from '@/shad/ui/scroll-area'
+import AnimalAvatar from '../AnimalAvatar'
 
 export const PostList = ({ posts }: { posts: Item[] }) => {
   if (!posts) return null
@@ -29,6 +30,8 @@ export const PostList = ({ posts }: { posts: Item[] }) => {
         </CardContent>
 
         <CardFooter className={'justify-self-end items-end'}>
+          {<AnimalAvatar seed={`${p.note}_${Number(p.groupId)}`} options={{size: 30}} /> }
+
           <Badge className="flex gap-4">
             {p.childIds.length} <BookOpenIcon className="h-full w-4" />
           </Badge>

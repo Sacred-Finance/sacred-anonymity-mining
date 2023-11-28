@@ -51,6 +51,7 @@ enum ActionType {
   SET_ACTIVE_COMMUNITY = 'SET_ACTIVE_COMMUNITY',
   SET_ACTIVE_POST = 'SET_ACTIVE_POST',
   SET_USER_ACCESS = 'SET_USER_ACCESS',
+  UPDATE_COMMUNITIES_JOINED = 'UPDATE_COMMUNITIES_JOINED',
 }
 
 type Action =
@@ -64,6 +65,7 @@ type Action =
   | { type: ActionType.SET_ACTIVE_COMMUNITY; payload: ActiveCommunity | ActiveDiscourseCommunity }
   | { type: ActionType.SET_ACTIVE_POST; payload: ActivePost }
   | { type: ActionType.SET_USER_ACCESS; payload: { isAdmin?: boolean; isModerator?: boolean } }
+  | { type: ActionType.UPDATE_COMMUNITIES_JOINED; payload: { communityId: number, hasJoined:User | boolean } }
 
 const initialState: State = {
   communities: [],
@@ -180,6 +182,15 @@ function reducer(state: State, action: Action): State {
         isModerator,
       }
     }
+
+    case 'UPDATE_COMMUNITIES_JOINED':
+      return {
+        ...state,
+        communitiesJoined: {
+          ...state.communitiesJoined,
+          [action.payload.communityId]: action.payload.hasJoined,
+        },
+      }
     default:
       return state
   }
@@ -238,7 +249,7 @@ export function useActiveUser({ groupId }): User | undefined {
 
 export function useUserIfJoined(communityId: string | number): User | boolean {
   communityId = Number(communityId)
-  const { state } = useCommunityContext()
+  const { state, dispatch } = useCommunityContext()
   const { address: userAddress } = useAccount()
   const [userJoined, setUserJoined] = React.useState<User | boolean>(null)
 
@@ -259,9 +270,9 @@ export function useUserIfJoined(communityId: string | number): User | boolean {
           id: '',
         }
         setUserJoined(u)
-        state.communitiesJoined[Number(communityId)] = u
+        dispatch({ type: ActionType.UPDATE_COMMUNITIES_JOINED, payload: {communityId: Number(communityId), hasJoined: u} })
       } else {
-        state.communitiesJoined[communityId] = false
+        dispatch({ type: ActionType.UPDATE_COMMUNITIES_JOINED, payload: {communityId: Number(communityId), hasJoined: false} })
         setUserJoined(false)
       }
     } else {
@@ -302,7 +313,7 @@ export function useCommunitiesCreatedByUser() {
 
 // For account page
 export function useCommunitiesJoinedByUser() {
-  const { state } = useCommunityContext()
+  const { state, dispatch } = useCommunityContext()
   const { address: userAddress } = useAccount()
   const [communitiesJoined, setCommunitiesJoined] = React.useState<Group[]>([])
 
@@ -319,7 +330,7 @@ export function useCommunitiesJoinedByUser() {
           return hasUserJoined(Number(community.id), generatedIdentity.commitment.toString()).then(userJoined => {
             if (userJoined) {
               communitiesJoined.push(community)
-              state.communitiesJoined[Number(community.id)] = true
+              dispatch({ type: ActionType.UPDATE_COMMUNITIES_JOINED, payload: {communityId: Number(community.id), hasJoined: true} })
             }
           })
         } else if (state.communitiesJoined[Number(community.id)]) {

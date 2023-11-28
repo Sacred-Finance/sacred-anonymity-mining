@@ -7,8 +7,16 @@ import { connectorsForWallets } from '@rainbow-me/rainbowkit'
 import { alchemyProvider } from 'wagmi/providers/alchemy'
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc'
 import { publicProvider } from 'wagmi/providers/public'
+import { ParticleNetwork } from '@particle-network/auth'
+import { particleWallet } from '@particle-network/rainbowkit-ext'
 
 export const stallTimeout = 10_0000
+
+new ParticleNetwork({
+  appId: process.env.NEXT_PUBLIC_PARTICLE_APP_ID || '',
+  clientKey: process.env.NEXT_PUBLIC_PARTICLE_CLIENT_KEY || '',
+  projectId: process.env.NEXT_PUBLIC_PARTICLE_PROJECT_ID || '',
+})
 
 export const { chains, provider, webSocketProvider } = configureChains(
   [polygonMumbai],
@@ -57,10 +65,13 @@ export const { chains, provider, webSocketProvider } = configureChains(
 
   { stallTimeout: stallTimeout, pollingInterval: stallTimeout }
 )
-
 const otherWallets = [
   braveWallet({ chains }),
   // ledgerWallet({ chains }),
+  particleWallet({ chains, authType: 'google' }),
+  particleWallet({ chains, authType: 'facebook' }),
+  particleWallet({ chains, authType: 'apple' }),
+  particleWallet({ chains }),
   coinbaseWallet({ chains, appName: app.name }),
   // rainbowWallet({ chains }),
   //   walletConnectWallet({ chains }),

@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router'
 import { useCommunityContext, useUserIfJoined } from '@/contexts/CommunityProvider'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useAccount } from 'wagmi'
 import { Identity } from '@semaphore-protocol/identity'
 import { createNote } from '@/lib/utils'
@@ -20,6 +20,7 @@ import { getGroupWithPostAndCommentData } from '@/lib/fetcher'
 import { Avatar } from '@components/Avatar'
 import EditorJsRenderer from '@components/editor-js/EditorJSRenderer'
 import { Address } from '@/types/common'
+import AnimalAvatar from '../AnimalAvatar'
 
 const Editor = dynamic(() => import('../editor-js/Editor'), {
   ssr: false,
@@ -160,7 +161,8 @@ export const PostItem = ({ post, group }: { post: Item; group: Group }) => {
 
         {isTypeOfPoll && <PollUI group={group} post={post} />}
 
-        <div className="sticky bottom-0 flex items-center justify-between gap-4">
+        <div className="sticky bottom-0 flex items-center justify-end gap-4">
+          {(parentId && Number(parentId) == 0) && <AnimalAvatar seed={`${post.note}_${Number(groupId)}`} options={{ size: 40 }} /> }
           <ContentActions
             item={post}
             contentId={post.id}

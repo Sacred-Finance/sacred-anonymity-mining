@@ -4,6 +4,7 @@ import { toBufferBE, toBufferLE } from 'bigint-buffer'
 import { buildBabyjub, buildPedersenHash } from 'circomlibjs'
 import { Identity } from '@semaphore-protocol/identity'
 import { forumContract, semaphoreContract } from '@/constant/const'
+import { AvatarOptions } from 'animal-avatar-generator'
 
 const { groth16 } = require('snarkjs')
 
@@ -279,4 +280,9 @@ export const hasUserJoined = async (group, identityCommitment) => {
 
 export const fetchUsersFromSemaphoreContract = async groupId => {
   return semaphoreContract?.getGroupMembers(groupId?.toString())
+}
+
+export const generateAvatar = async (seed: string, options: AvatarOptions) => {
+  const avatar = (await import('animal-avatar-generator')).default;
+  return avatar(seed, { size: 200, ...options })
 }
