@@ -2,9 +2,10 @@ import React from 'react'
 import { Logo } from './Logo'
 import { NavBarButton } from '../components/buttons/NavBarButton'
 import { ThemeToggleButton } from './Theme'
-import { ArrowsPointingInIcon, ArrowsPointingOutIcon, QuestionMarkCircleIcon, UserCircleIcon } from '@heroicons/react/20/solid'
+import { ArrowsPointingInIcon, ArrowsPointingOutIcon, UserCircleIcon } from '@heroicons/react/20/solid'
 import ConnectWallet from './Connect/ConnectWallet'
 import clsx from 'clsx'
+import { FaDiscord } from 'react-icons/fa'
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = React.useState(false)
@@ -15,11 +16,11 @@ const Header = () => {
       className={clsx(
         'flex  p-4 text-gray-800 dark:bg-gray-900 dark:text-white',
         menuOpen
-          ? 'fixed inset-0 z-50 flex flex-col items-center justify-evenly bg-gray-900/50 p-12 '
+          ? 'items-between fixed inset-0 z-[41] flex flex-col justify-start gap-4 bg-gray-900 '
           : 'relative items-center justify-between'
       )}
     >
-      <div className="flex items-center justify-between space-x-4">
+      <div className={clsx('flex w-full md:w-fit', menuOpen ? 'items-start justify-between' : 'items-center justify-between pt-1')}>
         <NavBarButton href="/" className="">
           <div className="md:hidden">
             <Logo width={200} />
@@ -29,7 +30,7 @@ const Header = () => {
           </div>
         </NavBarButton>
 
-        <div className="flex items-center space-x-4 sm:flex md:hidden">
+        <div className="flex items-center space-x-4 self-end sm:flex md:hidden ">
           {!menuOpen ? (
             <ArrowsPointingOutIcon className="h-8 w-8" onClick={() => setMenuOpen(!menuOpen)} />
           ) : (
@@ -37,21 +38,29 @@ const Header = () => {
           )}
         </div>
       </div>
-      <div className={clsx('flex items-center gap-2', menuOpen ? 'flex gap-4' : 'hidden md:flex')}>
-        <ConnectWallet />
+
+      <div
+        className={clsx(
+          'flex items-center gap-12',
+          menuOpen ? 'flex justify-center gap-4 flex-wrap ' : 'hidden md:flex'
+        )}
+      >
+        <div className={'w-50 flex h-10 flex-shrink-0 grow '}>
+          <ConnectWallet />
+        </div>
         <NavBarButton
-          href="https://www.thatsacred.place/help"
+          href="https://discord.com/channels/816041991502430218/829728678190907412"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-gray-600 dark:text-gray-300"
+          className="text-gray-600 hover:!text-purple-500  dark:text-gray-300"
         >
-          <QuestionMarkCircleIcon className="h-8 w-8" />
+          <FaDiscord className="h-8 w-8" />
         </NavBarButton>
         <NavBarButton
           href="/account"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-gray-600 dark:text-gray-300"
+          className="text-gray-600 hover:!text-purple-500 dark:text-gray-300"
         >
           <UserCircleIcon className="h-8 w-8" />
         </NavBarButton>

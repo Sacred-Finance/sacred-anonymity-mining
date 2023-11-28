@@ -15,7 +15,7 @@ export const ThemeToggleButton = ({ noTabIndex = false }) => {
 
   return (
     <button
-      className={clsx('group relative  !text-purple-500', primaryButtonStyle)}
+      className={clsx('group relative  !text-purple-500')}
       tabIndex={noTabIndex ? -1 : 0}
       onClick={e => {
         e.preventDefault()
@@ -23,9 +23,9 @@ export const ThemeToggleButton = ({ noTabIndex = false }) => {
       }}
     >
       {resolvedTheme === 'light' ? (
-        <MoonIcon className="inline-block h-8 group-hover:text-yellow-500" />
+        <MoonIcon className="inline-block h-8 w-8  group-hover:text-yellow-500" />
       ) : (
-        <SunIcon className="inline-block h-6 w-6 group-hover:text-red-400" />
+        <SunIcon className="h-8 w-8 group-hover:text-red-400" />
       )}
     </button>
   )
