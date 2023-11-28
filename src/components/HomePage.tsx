@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { debounce } from 'lodash'
 import { CommunityCard } from '../components/CommunityCard/CommunityCard'
 import { useCommunityContext } from '../contexts/CommunityProvider'
-import { MagnifyingGlassIcon, TrashIcon } from '@heroicons/react/20/solid'
 import { motion } from 'framer-motion'
 import { Group } from '@/types/contract/ForumInterface'
 import { DiscourseCommunity } from '@/lib/model'
@@ -15,6 +14,7 @@ import { IoAddCircle } from 'react-icons/io5'
 import { Separator } from '@/shad/ui/separator'
 import { ScrollArea, ScrollBar } from '@/shad/ui/scroll-area'
 import LoadingComponent from '@components/LoadingComponent'
+import { SearchBar } from '@components/SearchBar'
 
 interface HomeProps {
   isAdmin: boolean
@@ -118,7 +118,6 @@ function HomePage({ isLoading = false, isAdmin = false, discourseCommunities }: 
   const debouncedResults = useMemo(() => {
     return debounce(handleSearchChange, communities.length ? 400 : 0)
   }, [communities])
-
   if (isLoading || !communities.length) {
     return <NoCommunities isLoading={isLoading} searchTerm={searchTerm} />
   }
@@ -133,7 +132,7 @@ function HomePage({ isLoading = false, isAdmin = false, discourseCommunities }: 
             <TabsTrigger value="discourse">Discourse</TabsTrigger>
           </TabsList>
           <div className="ml-auto mr-4 flex w-full max-w-xl items-center">
-            <SearchBar debouncedResults={debouncedResults} />
+            <SearchBar debouncedResults={debouncedResults} searchTerm={searchTerm} />
           </div>
           <div className="ml-auto mr-4">
             <Button
@@ -184,35 +183,6 @@ function HomePage({ isLoading = false, isAdmin = false, discourseCommunities }: 
           </motion.div>
         </TabsContent>
       </Tabs>
-    </>
-  )
-}
-
-export const SearchBar = ({ debouncedResults }) => {
-  return (
-    <>
-      <div className="form-input flex h-10 w-full items-center  rounded hover:shadow-md  dark:bg-gray-900 dark:text-white">
-        <div className={'flex justify-center p-3'}>
-          <MagnifyingGlassIcon className="h-4 w-6 text-black dark:text-inherit" />
-        </div>
-        <input
-          id="search"
-          name="search"
-          className="col-span-6 flex h-full w-full rounded border-0  bg-transparent text-black outline-0 focus:select-none focus:outline-none focus:ring-0 dark:text-inherit"
-          onChange={debouncedResults}
-          type="text"
-          placeholder="Explore"
-        />
-        <button
-          className={'flex justify-center p-3 text-black hover:opacity-75 dark:text-inherit'}
-          onClick={() => {
-            document.getElementById('search').value = ''
-            debouncedResults({ target: { value: '' } })
-          }}
-        >
-          <TrashIcon className=" h-6 w-6" />
-        </button>
-      </div>
     </>
   )
 }
