@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Post, Topic } from '@components/Discourse/types'
-import '../topic-post.scss'
 import { useAnimation } from 'framer-motion'
 import { RecursivePostRenderer } from '@components/Discourse/TopicPosts/RecursivePostRenderer'
 import { nestPosts } from '@components/Discourse/TopicPosts/helper'
