@@ -5,6 +5,7 @@ import { Group, Item } from '@/types/contract/ForumInterface'
 import { PostItem } from '@components/Post/PostItem'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { VoteForItemUI } from './PostPage'
+import AnimalAvatar from '../AnimalAvatar'
 
 export interface TempComment {
   id: string
@@ -49,6 +50,8 @@ export const PostComment = ({ comment }: { comment: Item }) => {
             visibility: commentIsConfirmed(comment.id) ? 'visible' : 'hidden',
           }}
         >
+          {<AnimalAvatar seed={`${comment.note}_${Number(comment.groupId)}`} options={{size: 30}} /> }
+
           <VoteForItemUI postId={comment.parentId} post={comment} group={community} />
 
           <p className="inline-block text-sm">
