@@ -1,27 +1,9 @@
-import Image from 'next/image'
-
-import { motion } from 'framer-motion'
-
-const AnimatedImage = motion(Image)
+import LottieControl from '@components/LottieLoader'
 
 const LoadingComponent = () => {
   return (
-    <div className={'h-screen w-full'}>
-      <h1>
-        <span className={'text-6xl'}>Loading</span>
-      </h1>
-      <AnimatedImage
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        src={'/logo.svg'}
-        className={'animate-pulse '}
-        width={200}
-        height={200}
-        alt={'logo'}
-        unoptimized
-        fetchPriority={'high'}
-      />
+    <div className={'fixed inset-0 z-[5000] flex h-screen w-full items-center justify-center bg-black/50'}>
+      <LottieControl />
     </div>
   )
 }
