@@ -5,8 +5,9 @@ import { ForumContractAddress } from '@/constant/const'
 import ForumABI from '@/constant/abi/Forum.json'
 import { useFetchCommunitiesByIds } from '@/hooks/useFetchCommunities'
 import React, { useCallback, useEffect, useState } from 'react'
-import { polygonMumbai } from 'wagmi/chains'
+import { optimismGoerli, arbitrumGoerli, polygonMumbai } from 'wagmi/chains'
 import { constants, ethers } from 'ethers'
+import { providerChainId } from '../constant/const'
 import { Identity } from '@semaphore-protocol/identity'
 import { createInputNote, generateGroth16Proof, getBytes32FromIpfsHash, getBytes32FromString } from '@/lib/utils'
 import { uploadImages } from '@/utils/communityUtils'
@@ -47,7 +48,7 @@ export function EditGroup({ group }: EditGroupProps) {
   const [tags, setTags] = useState<string[]>([])
 
   // Define the provider and contract within a useEffect to avoid unnecessary re-renders
-  const provider = useProvider({ chainId: polygonMumbai.id })
+  const provider = useProvider({ chainId: providerChainId })
   const forumContract = useContract({
     address: ForumContractAddress,
     abi: ForumABI.abi,

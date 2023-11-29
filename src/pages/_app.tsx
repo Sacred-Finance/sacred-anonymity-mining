@@ -6,10 +6,10 @@ import { useEffect, useRef } from 'react'
 import HeadGlobal from '@/components/HeadGlobal'
 import '../../i18n'
 import { alchemyProvider } from 'wagmi/providers/alchemy'
-
+import { providerChainId } from '../constant/const'
 import { connectorsForWallets, darkTheme, RainbowKitProvider, Theme } from '@rainbow-me/rainbowkit'
 import { braveWallet, coinbaseWallet, injectedWallet, metaMaskWallet } from '@rainbow-me/rainbowkit/wallets'
-import { goerli, localhost, mainnet, polygonMumbai, sepolia } from 'wagmi/chains'
+import { goerli, localhost, mainnet, optimismGoerli, arbitrumGoerli, polygonMumbai, sepolia } from 'wagmi/chains'
 import { configureChains, createClient, WagmiConfig } from 'wagmi'
 import { publicProvider } from 'wagmi/providers/public'
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc'
@@ -86,7 +86,18 @@ const { chains, provider, webSocketProvider } = configureChains(
             http: process.env.NEXT_PUBLIC_SEPOLIA_URL ?? '',
             webSocket: process.env.NEXT_PUBLIC_LOCALHOST_URL ?? '',
           }
+        } else if (chain.id === optimismGoerli.id) {
+          return {
+            http: process.env.NEXT_PUBLIC_OPTIMISM_GOERLI_URL ?? '',
+            webSocket: process.env.NEXT_PUBLIC_LOCALHOST_URL ?? '',
+          }
+        } else if (chain.id === arbitrumGoerli.id) {
+          return {
+            http: process.env.NEXT_PUBLIC_ARBITRUM_GOERLI_URL ?? '',
+            webSocket: process.env.NEXT_PUBLIC_LOCALHOST_URL ?? '',
+          }
         }
+
         console.error(`No RPC URL for chain ${chain.name}`)
         return null
       },
@@ -120,8 +131,8 @@ const connectors = connectorsForWallets([
 
 const client = createClient({
   autoConnect: true,
-  provider: provider({ chainId: polygonMumbai.id }),
-  webSocketProvider: webSocketProvider({ chainId: polygonMumbai.id }),
+  provider: provider({ chainId: providerChainId }),
+  webSocketProvider: webSocketProvider({ chainId: providerChainId }),
   connectors: connectors,
   logger: {
     warn: message => console.warn('Wagmi warning', message),
@@ -152,7 +163,7 @@ export function Web3Wrapper({ children }) {
           learnMoreUrl: app.url,
         }}
         chains={chains}
-        initialChain={polygonMumbai.id} // Optional, initialChain={1}, initialChain={chain.mainnet}, initialChain={gnosisChain}
+        initialChain={providerChainId} // Optional, initialChain={1}, initialChain={chain.mainnet}, initialChain={gnosisChain}
         showRecentTransactions={false}
         theme={myTheme}
         id={'rainbowkit'}

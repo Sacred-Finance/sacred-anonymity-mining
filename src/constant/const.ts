@@ -1,5 +1,5 @@
 import { Contract, ethers } from 'ethers'
-import { arbitrum, arbitrumGoerli, avalanche, avalancheFuji, Chain, goerli, mainnet, polygonMumbai, sepolia } from 'wagmi/chains'
+import { arbitrum, arbitrumGoerli, avalanche, avalancheFuji, Chain, goerli, mainnet, polygonMumbai, sepolia, optimismGoerli } from 'wagmi/chains'
 import ForumABI from '../constant/abi/Forum.json'
 import { Forum } from '@/types/contract/Forum'
 import { SemaphoreEthers } from '@semaphore-protocol/data'
@@ -774,6 +774,7 @@ export const erc20dummyABI = [
 export const supportedChains: { [key: string]: Chain } = {
   [polygonMumbai.id]: polygonMumbai,
   [goerli.id]: goerli,
+  [optimismGoerli.id]: optimismGoerli,
   [sepolia.id]: sepolia,
   [mainnet.id]: mainnet,
   [avalanche.id]: avalanche,
@@ -785,6 +786,7 @@ export const supportedChains: { [key: string]: Chain } = {
 export const chainLogos: { [key: string]: string } = {
   [polygonMumbai.id]: '/poly.png',
   [goerli.id]: '/goerli.png',
+  [optimismGoerli.id]: '/goerli.png',
   [sepolia.id]: '/eth.png',
   [avalancheFuji.id]: '/avax.png',
   [mainnet.id]: '/eth.png',
@@ -799,10 +801,17 @@ export const supportedChainsArray = Object.keys(supportedChains).map(k => suppor
 
 export const getRpcProvider = (chainId: number) => providerMap[chainId]
 
-export const jsonRPCProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL, {
+export const getRpcProviderUrl = (chainId: number) => providerUrlMap[chainId]
+
+export const jsonRPCProviderMumbai = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL, {
   name: polygonMumbai.name,
   chainId: polygonMumbai.id,
 })
+
+export const jsonRPCProviderOptimismGoerli = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_OPTIMISM_GOERLI_URL, {
+  name: optimismGoerli.name,
+  chainId: optimismGoerli.id,
+} as any)
 
 export const jsonRPCProviderGoerli = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_GOERLI_URL, {
   name: goerli.name,
@@ -841,16 +850,33 @@ export const jsonRPCProviderArbitrumGoerli = new ethers.providers.JsonRpcProvide
 })
 
 export const providerMap = {
-  [polygonMumbai.id]: jsonRPCProvider,
+  [polygonMumbai.id]: jsonRPCProviderMumbai,
   [avalancheFuji.id]: jsonRPCProviderAvalancheFuji,
   [sepolia.id]: jsonRPCProviderSepolia,
   [goerli.id]: jsonRPCProviderGoerli,
+  [optimismGoerli.id]: jsonRPCProviderOptimismGoerli,
   [mainnet.id]: jsonRPCProviderMainnet,
   [avalanche.id]: jsonRPCProviderAvalancheMainnet,
   [arbitrum.id]: jsonRPCProviderArbitrumMainnet,
   [arbitrumGoerli.id]: jsonRPCProviderArbitrumGoerli
 }
+
+export const providerUrlMap = {
+  [polygonMumbai.id]: process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL,
+  [avalancheFuji.id]: process.env.NEXT_PUBLIC_AVALANCHE_FUJI_URL,
+  [sepolia.id]: process.env.NEXT_PUBLIC_SEPOLIA_URL,
+  [goerli.id]: process.env.NEXT_PUBLIC_GOERLI_URL,
+  [optimismGoerli.id]: process.env.NEXT_PUBLIC_OPTIMISM_GOERLI_URL,
+  [mainnet.id]: process.env.NEXT_PUBLIC_MAINNET_URL,
+  [avalanche.id]: process.env.NEXT_PUBLIC_AVALANCHE_MAINNET_URL,
+  [arbitrum.id]: process.env.NEXT_PUBLIC_ARBITRUM_MAINNET_URL,
+  [arbitrumGoerli.id]: process.env.NEXT_PUBLIC_ARBITRUM_GOERLI_URL
+}
 /** */
+
+export const jsonRPCProvider = getRpcProvider(Number(process.env.NEXT_PUBLIC_CHAIN_ID))
+export const jsonRPCProviderUrl = getRpcProviderUrl(Number(process.env.NEXT_PUBLIC_CHAIN_ID))
+export const providerChainId = Number(process.env.NEXT_PUBLIC_CHAIN_ID)
 
 const abiInterface = new ethers.utils.Interface(ForumABI.abi).functions
 
@@ -858,7 +884,7 @@ const abiInterface = new ethers.utils.Interface(ForumABI.abi).functions
 
 export const forumContract = new Contract(ForumContractAddress, ForumABI.abi, jsonRPCProvider) as Forum
 
-export const semaphoreContract = new SemaphoreEthers(process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL, {
+export const semaphoreContract = new SemaphoreEthers(jsonRPCProviderUrl, {
   address: SemaphoreContractAddress,
 })
 /** */
