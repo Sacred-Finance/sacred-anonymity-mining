@@ -42,7 +42,7 @@ export const PostComment = ({ comment }: { comment: Item }) => {
   const community = state.activeCommunity.community as Group
   return (
     <>
-      {comment && <PostItem post={comment} group={community} />}
+      {comment && <PostItem post={comment} group={community} showAvatar={false} />}
       <div className="pt-3 text-gray-600 dark:text-gray-400">
         <div
           className="flex gap-4 items-center"
