@@ -23,6 +23,18 @@ import { randomSeed } from '@orbisclub/orbis-sdk/utils/index.js'
 import { getDefaultWallets } from '@rainbow-me/rainbowkit'
 import { ethers } from 'ethers'
 
+async function stringToSeed(input) {
+  const encoder = new TextEncoder()
+  const data = encoder.encode(input)
+  const hash = await crypto.subtle.digest('SHA-256', data)
+  const uint8Array = new Uint8Array(hash)
+  return uint8Array.slice(0, 32)
+}
+async function connectUser(orbis, address) {
+  const seed = await stringToSeed(address)
+  const { did } = await orbis.connectWithSeed(seed)
+  return did
+}
 function App({ Component, pageProps }: AppProps) {
   return (
     <ThemeProvider attribute={'class'} defaultTheme={'dark'} storageKey={'theme-color'}>
