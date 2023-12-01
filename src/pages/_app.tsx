@@ -56,6 +56,20 @@ async function getProfile(orbis, did) {
   console.log('MY PROFILE', { data })
 }
 function App({ Component, pageProps }: AppProps) {
+  const { address } = useAccount()
+  const connected = !!address
+  if (connected) {
+    const orbis = new Orbis() // Instantiate
+    const userId = address //TODO: a more secure way to get a deterministic 'user_id' from the user
+    connectUser(orbis, userId).then(did => {
+      // Connect by providing a deterministing string belonging to this user (right now it's address. Not secure?)
+      updateProfile(orbis).then(() => {
+        //can update the profile with standard and custom data
+        getProfile(orbis, did) //can fetch the profile
+      })
+    })
+  }
+
   return (
     <ThemeProvider attribute={'class'} defaultTheme={'dark'} storageKey={'theme-color'}>
       <Web3Wrapper>
