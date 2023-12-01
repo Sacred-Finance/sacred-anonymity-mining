@@ -51,6 +51,10 @@ async function connectUser(orbis, address) {
   const { did } = await orbis.connectWithSeed(seed)
   return did
 }
+async function getProfile(orbis, did) {
+  const { data, error } = await orbis.getProfile(did)
+  console.log('MY PROFILE', { data })
+}
 function App({ Component, pageProps }: AppProps) {
   return (
     <ThemeProvider attribute={'class'} defaultTheme={'dark'} storageKey={'theme-color'}>
