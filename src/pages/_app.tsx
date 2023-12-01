@@ -30,6 +30,22 @@ async function stringToSeed(input) {
   const uint8Array = new Uint8Array(hash)
   return uint8Array.slice(0, 32)
 }
+
+async function updateProfile(orbis) {
+  const options = {}
+  const res = await orbis.updateProfile({
+    pfp: 'http://localhost:3000/_next/static/media/sacred-logos-wordmark-light.c4692ced.svg',
+    cover: 'http://localhost:3000/_next/static/media/sacred-logos-wordmark-light.c4692ced.svg',
+    username: 'righteous-eagle',
+    description: 'I love crypto man',
+    data: {
+      'whats-the-time': new Date().toLocaleString(),
+      'profile-1': 'this my first profile',
+      'profile-2': 'this my first profile',
+    },
+  })
+  console.log({ res })
+}
 async function connectUser(orbis, address) {
   const seed = await stringToSeed(address)
   const { did } = await orbis.connectWithSeed(seed)
