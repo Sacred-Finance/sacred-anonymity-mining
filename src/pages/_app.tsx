@@ -7,8 +7,8 @@ import HeadGlobal from '@/components/HeadGlobal'
 import '../../i18n'
 
 import { darkTheme, RainbowKitProvider, Theme } from '@rainbow-me/rainbowkit'
-import {  polygonMumbai } from 'wagmi/chains'
-import {  WagmiConfig } from 'wagmi'
+import { polygonMumbai } from 'wagmi/chains'
+import { useAccount, WagmiConfig } from 'wagmi'
 import { CommunityProvider } from '../contexts/CommunityProvider'
 import { startIPFS } from '../lib/utils'
 import { ToastContainer } from 'react-toastify'
@@ -18,6 +18,10 @@ import StandardLayout from '@components/HOC/StandardLayout'
 import { merge } from 'lodash'
 import { SWRProvider } from '@/contexts/SWRProvider'
 import { chains, client } from '../../wagmi-config'
+import { Orbis } from '@orbisclub/orbis-sdk'
+import { randomSeed } from '@orbisclub/orbis-sdk/utils/index.js'
+import { getDefaultWallets } from '@rainbow-me/rainbowkit'
+import { ethers } from 'ethers'
 
 function App({ Component, pageProps }: AppProps) {
   return (
