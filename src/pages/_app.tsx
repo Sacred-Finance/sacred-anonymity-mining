@@ -5,7 +5,6 @@ import { app } from '@/appConfig'
 import { useEffect, useRef } from 'react'
 import HeadGlobal from '@/components/HeadGlobal'
 import '../../i18n'
-import { alchemyProvider } from 'wagmi/providers/alchemy'
 
 import { darkTheme, RainbowKitProvider, Theme } from '@rainbow-me/rainbowkit'
 import {  polygonMumbai } from 'wagmi/chains'
