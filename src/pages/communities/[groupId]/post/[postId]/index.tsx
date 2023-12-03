@@ -9,6 +9,8 @@ import { useRouter } from 'next/router'
 import LoadingComponent from '@components/LoadingComponent'
 import { CommentClass } from '@/lib/comment'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
+import Head from 'next/head'
+import { app } from '@/appConfig'
 
 function PostIndex() {
   const { dispatch } = useCommunityContext()
@@ -45,15 +47,25 @@ function PostIndex() {
   const postInstance = new Post(post.id, group.groupId)
   const commentInstance = new CommentClass(group.groupId, post.id, null)
   group.id = ethers.BigNumber.from(group.id)
+  const logoCID = group?.groupDetails?.logoCID
 
   return (
-    <PostPage
-      postInstance={postInstance}
-      post={post}
-      community={group}
-      comments={comments}
-      commentInstance={commentInstance}
-    />
+    <div>
+      <Head>
+        <title>{group.name}</title>
+        <meta property="og:title" content={post.title} />
+        <meta property="og:url" content={location.href} />
+        <meta property="og:description" content={post.title} />
+        <meta property="og:image" content={logoCID ? `https://ipfs.io/ipfs/${logoCID}` : `${app.image}`} />
+      </Head>
+      <PostPage
+        postInstance={postInstance}
+        post={post}
+        community={group}
+        comments={comments}
+        commentInstance={commentInstance}
+      />
+    </div>
   )
 }
 

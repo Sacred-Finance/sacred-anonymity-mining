@@ -6,6 +6,8 @@ import React, { useEffect } from 'react'
 import useSWR from 'swr'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
+import Head from 'next/head'
+import { app } from '@/appConfig'
 
 function Home({ discourseCommunities }) {
   const router = useRouter()
@@ -41,11 +43,18 @@ function Home({ discourseCommunities }) {
     return <div>Error: {error.message}</div>
   }
   return (
-    <HomePage
-      isLoading={isLoading || isValidating}
-      isAdmin={isAdmin || isModerator || false}
-      discourseCommunities={discourseCommunities}
-    />
+    <div>
+      <Head>
+        <title>Sacred Logos</title>
+        <meta property="og:title" content="Sacred Logos" key="title" />
+        <meta property="og:url" content={location.href} />
+      </Head>
+      <HomePage
+        isLoading={isLoading || isValidating}
+        isAdmin={isAdmin || isModerator || false}
+        discourseCommunities={discourseCommunities}
+      />
+    </div>
   )
 }
 
