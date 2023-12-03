@@ -26,7 +26,13 @@ const Editor = dynamic(() => import('../editor-js/Editor'), {
   ssr: false,
 })
 
-export const PostItem = ({ post, group }: { post: Item; group: Group }) => {
+interface PostItemProps {
+  post: Item
+  group: Group
+  showAvatar?: boolean
+}
+
+export const PostItem = ({ post, group, showAvatar = true }: PostItemProps) => {
   const { groupId, parentId, id, kind } = post
 
   const postId = parentId && +parentId > 0 ? parentId : id
@@ -161,8 +167,8 @@ export const PostItem = ({ post, group }: { post: Item; group: Group }) => {
 
         {isTypeOfPoll && <PollUI group={group} post={post} />}
 
-        <div className="sticky bottom-0 flex items-center justify-end gap-4">
-          {(parentId && Number(parentId) == 0) && <AnimalAvatar seed={`${post.note}_${Number(groupId)}`} options={{ size: 40 }} /> }
+        <div className="sticky bottom-0 flex items-center justify-between gap-4">
+          {(parentId && Number(parentId) == 0) && showAvatar && <AnimalAvatar seed={`${post.note}_${Number(groupId)}`} options={{ size: 40 }} /> }
           <ContentActions
             item={post}
             contentId={post.id}
