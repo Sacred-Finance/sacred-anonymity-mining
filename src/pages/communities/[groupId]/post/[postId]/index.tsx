@@ -48,15 +48,15 @@ function PostIndex() {
   const commentInstance = new CommentClass(group.groupId, post.id, null)
   group.id = ethers.BigNumber.from(group.id)
   const logoCID = group?.groupDetails?.logoCID
-
+  const ogImage = logoCID ? `https://ipfs.io/ipfs/${logoCID}` : app.image
   return (
     <div>
-      <Head>
+      <Head key={ogImage}>
         <title>{group.name}</title>
         <meta property="og:title" content={post.title} />
         <meta property="og:url" content={location.href} />
         <meta property="og:description" content={post.title} />
-        <meta property="og:image" content={logoCID ? `https://ipfs.io/ipfs/${logoCID}` : app.image} />
+        <meta property="og:image" content={ogImage} />
       </Head>
       <PostPage
         postInstance={postInstance}

@@ -15,7 +15,6 @@ function Group() {
   const { groupId } = router.query
   const { data, error, isValidating } = useSWR(getGroupWithPostData(groupId), fetcher)
   const { dispatch } = useCommunityContext()
-  const [ogImage, setOgImage] = useState(app.image)
   useCheckIfUserIsAdminOrModerator(true)
 
   const { group, posts, users } = data || {}
@@ -33,19 +32,18 @@ function Group() {
         type: ActionType.SET_USERS,
         payload: users,
       })
-      if (group?.groupDetails?.logoCID) {
-        setOgImage(`https://ipfs.io/ipfs/${group?.groupDetails?.logoCID}`)
-      }
     }
   }, [group, posts, users, isValidating])
   if (error) return <div>Error: {error.message}</div>
   if (!data) return <LoadingPage />
 
   group.id = ethers.BigNumber.from(group.id)
+  const logoCID = group?.groupDetails?.logoCID
 
+  const ogImage = logoCID ? `https://ipfs.io/ipfs/${logoCID}` : app.image
   return (
     <div>
-      <Head>
+      <Head key={ogImage}>
         <title>{group.name}</title>
         <meta property="og:title" content={group.name} />
         <meta property="og:url" content={location.origin} />
