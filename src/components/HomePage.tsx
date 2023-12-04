@@ -14,6 +14,7 @@ import { Button } from '@/shad/ui/button'
 import { IoAddCircle } from 'react-icons/io5'
 import { Separator } from '@/shad/ui/separator'
 import { ScrollArea, ScrollBar } from '@/shad/ui/scroll-area'
+import LoadingComponent from '@components/LoadingComponent'
 
 interface HomeProps {
   isAdmin: boolean
@@ -26,15 +27,7 @@ function NoCommunities(props: { isLoading: boolean; searchTerm: string }) {
   if (props.isLoading) {
     return (
       <>
-        <motion.h2
-          layout
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="h-screen animate-pulse text-3xl font-semibold  dark:text-gray-200"
-        >
-          Loading
-        </motion.h2>
+        <LoadingComponent />
       </>
     )
   }
