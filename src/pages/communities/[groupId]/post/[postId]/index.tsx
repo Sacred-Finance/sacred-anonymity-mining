@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { Post } from '@/lib/post'
-import { useCommunityContext } from '@/contexts/CommunityProvider'
+import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
 import { PostPage } from '@components/Post/PostPage'
 import { ethers } from 'ethers'
 import useSWR from 'swr'
@@ -9,8 +9,6 @@ import { useRouter } from 'next/router'
 import LoadingComponent from '@components/LoadingComponent'
 import { CommentClass } from '@/lib/comment'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
-import Head from 'next/head'
-import { app } from '@/appConfig'
 
 function PostIndex() {
   const { dispatch } = useCommunityContext()
@@ -24,14 +22,14 @@ function PostIndex() {
     const { group, post, comments } = data || {}
     if (!group || !post || !comments) return
     dispatch({
-      type: 'SET_ACTIVE_COMMUNITY',
+      type: ActionType.SET_ACTIVE_COMMUNITY,
       payload: {
         community: group,
         postList: [post],
       },
     })
     dispatch({
-      type: 'SET_ACTIVE_POST',
+      type: ActionType.SET_ACTIVE_POST,
       payload: {
         community: group,
         post: post,
@@ -47,17 +45,8 @@ function PostIndex() {
   const postInstance = new Post(post.id, group.groupId)
   const commentInstance = new CommentClass(group.groupId, post.id, null)
   group.id = ethers.BigNumber.from(group.id)
-  const logoCID = group?.groupDetails?.logoCID
-  const ogImage = logoCID ? `https://ipfs.io/ipfs/${logoCID}` : app.image
   return (
     <div>
-      <Head key={ogImage}>
-        <title>{group.name}</title>
-        <meta property="og:title" content={post.title} />
-        <meta property="og:url" content={location.href} />
-        <meta property="og:description" content={post.title} />
-        <meta property="og:image" content={ogImage} />
-      </Head>
       <PostPage
         postInstance={postInstance}
         post={post}

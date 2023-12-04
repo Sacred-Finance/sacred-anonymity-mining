@@ -4,10 +4,9 @@ import axios from 'axios'
 import { useRouter } from 'next/router'
 import React, { useEffect } from 'react'
 import useSWR from 'swr'
-import { useCommunityContext } from '@/contexts/CommunityProvider'
+import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
 import Head from 'next/head'
-import { app } from '@/appConfig'
 
 function Home({ discourseCommunities }) {
   const router = useRouter()
@@ -32,9 +31,13 @@ function Home({ discourseCommunities }) {
 
     if (!communitiesData || !users) return
     // convert id back to bignumber
-    dispatch({ type: 'SET_COMMUNITIES', payload: communitiesData.map(c => ({ ...c, id: BigNumber.from(c.id) })) })
     dispatch({
-      type: 'SET_USERS',
+      type: ActionType.SET_COMMUNITIES,
+      payload: communitiesData.map(c => ({ ...c, id: BigNumber.from(c.id) })),
+    })
+
+    dispatch({
+      type: ActionType.SET_USERS,
       payload: users,
     })
   }, [data])
