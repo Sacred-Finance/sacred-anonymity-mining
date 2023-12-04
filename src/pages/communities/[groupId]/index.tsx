@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import LoadingPage from '@components/LoadingComponent'
 import { CommunityPage } from '@components/CommunityPage'
-import { useCommunityContext } from '@/contexts/CommunityProvider'
+import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
 import { ethers } from 'ethers'
 import useSWR from 'swr'
 import { useRouter } from 'next/router'
@@ -12,34 +12,34 @@ import { app } from '@/appConfig'
 
 function Group() {
   const router = useRouter()
-  const { groupId, postId } = router.query
+  const { groupId } = router.query
   const { data, error, isValidating } = useSWR(getGroupWithPostData(groupId), fetcher)
   const { dispatch } = useCommunityContext()
-  const [ogImage, setOgImage] = React.useState(`${app.image}`)
+  const [ogImage, setOgImage] = useState(app.image)
   useCheckIfUserIsAdminOrModerator(true)
+
+  const { group, posts, users } = data || {}
 
   useEffect(() => {
     if (data && !isValidating && !error && !data?.error) {
       dispatch({
-        type: 'SET_ACTIVE_COMMUNITY',
+        type: ActionType.SET_ACTIVE_COMMUNITY,
         payload: {
-          community: data.group,
-          posts: data.posts,
+          community: group,
+          posts,
         },
       })
       dispatch({
-        type: 'SET_USERS',
-        payload: data?.users,
+        type: ActionType.SET_USERS,
+        payload: users,
       })
-      if (data?.group?.groupDetails?.logoCID) {
-        setOgImage(`https://ipfs.io/ipfs/${data?.group?.groupDetails?.logoCID}`)
+      if (group?.groupDetails?.logoCID) {
+        setOgImage(`https://ipfs.io/ipfs/${group?.groupDetails?.logoCID}`)
       }
     }
-  }, [data?.group, data?.posts, data?.users, isValidating])
+  }, [group, posts, users, isValidating])
   if (error) return <div>Error: {error.message}</div>
   if (!data) return <LoadingPage />
-
-  const { group, posts } = data
 
   group.id = ethers.BigNumber.from(group.id)
 

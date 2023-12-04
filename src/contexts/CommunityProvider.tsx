@@ -41,7 +41,7 @@ type State = {
   communitiesJoined: { [key: string]: User | boolean }
 }
 
-enum ActionType {
+export enum ActionType {
   ADD_COMMUNITY = 'ADD_COMMUNITY',
   REMOVE_COMMUNITY = 'REMOVE_COMMUNITY',
   ADD_USER = 'ADD_USER',
