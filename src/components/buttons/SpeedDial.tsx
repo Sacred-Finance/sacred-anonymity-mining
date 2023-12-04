@@ -19,7 +19,7 @@ export interface SpeedDialProps {
 
 const MotionButton = motion(Button)
 
-export const SpeedDial: React.FC<SpeedDialProps> = ({ actions, onHover, onOpen }) => {
+export const SpeedDial: React.FC<SpeedDialProps> = ({ actions, onOpen }) => {
   const [isOpen, setIsOpen] = useState(false)
 
   actions = actions.filter(Boolean) as ActionItem[]

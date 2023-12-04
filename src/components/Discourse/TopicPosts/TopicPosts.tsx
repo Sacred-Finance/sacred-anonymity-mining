@@ -36,8 +36,6 @@ const TopicPosts = ({ topic, mutate, readonly }: { topic: Topic; mutate: (newPos
         <RecursivePostRenderer
           key={post.id}
           post={post}
-          postRefs={postRefs}
-          setPostsInView={setPostsInView}
           controls={controls}
           setTargetPostNumber={setTargetPostNumber}
           addReplyToPosts={mutate}

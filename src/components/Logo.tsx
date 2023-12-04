@@ -29,7 +29,3 @@ export const Logo = ({
     />
   )
 }
-
-export const MobileLogo = (props: any) => {
-  return <Image unoptimized src={mobileLogo} className={'w-8'} alt={logo} {...props} />
-}

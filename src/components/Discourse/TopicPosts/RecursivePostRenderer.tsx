@@ -10,10 +10,7 @@ interface RecursivePostRendererProps {
   post: Post & {
     replies?: Post[]
   }
-  postRefs: {
-    [key: number]: React.RefObject<HTMLDivElement>
-  }
-  setPostsInView: (posts: any[]) => void
+
   controls: any // Assuming 'controls' type based on your snippet. Adjust if necessary.
   setTargetPostNumber: React.Dispatch<React.SetStateAction<number | null>>
   addReplyToPosts: (newPost: Post) => void
@@ -23,8 +20,6 @@ interface RecursivePostRendererProps {
 
 export const RecursivePostRenderer: React.FC<RecursivePostRendererProps> = ({
   post,
-  postRefs,
-  setPostsInView,
   controls,
   setTargetPostNumber,
   addReplyToPosts,
@@ -37,10 +32,7 @@ export const RecursivePostRenderer: React.FC<RecursivePostRendererProps> = ({
       <RenderPost
         key={post.id}
         post={post}
-        postRefs={postRefs}
-        setPostsInView={setPostsInView}
         controls={controls}
-        setTargetPostNumber={setTargetPostNumber}
         addReplyToPosts={addReplyToPosts}
         depth={depth}
         readonly={readonly}
@@ -51,8 +43,6 @@ export const RecursivePostRenderer: React.FC<RecursivePostRendererProps> = ({
           <RecursivePostRenderer
             key={reply.id}
             post={reply}
-            postRefs={postRefs}
-            setPostsInView={setPostsInView}
             controls={controls}
             setTargetPostNumber={setTargetPostNumber}
             addReplyToPosts={addReplyToPosts}
