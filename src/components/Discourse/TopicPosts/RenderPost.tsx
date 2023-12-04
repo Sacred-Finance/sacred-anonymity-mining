@@ -7,34 +7,19 @@ import { PostFooter } from '@components/Discourse/TopicPosts/PostFooter'
 import { formatDistanceToNow } from 'date-fns'
 import _ from 'lodash'
 import { PostAuthorInformation } from '@components/Discourse/TopicPosts/PostAuthorInformation'
-import clsx from "clsx";
+import clsx from 'clsx'
 
-export const RenderPost = ({ post, postRefs, setPostsInView, controls, setTargetPostNumber, addReplyToPosts, depth, readonly=false }) => {
-  const postRef = postRefs.current[post.post_number] || (postRefs.current[post.post_number] = useRef<HTMLDivElement>())
-
-  const handleViewportEnter = () => {
-    setPostsInView(prev => [...prev, post.post_number])
-  }
-
-  const handleViewportLeave = () => {
-    setPostsInView(prev => prev.filter(num => num !== post.post_number))
-  }
-
+export const RenderPost = ({ post, controls, addReplyToPosts, depth, readonly = false }) => {
   return (
     <motion.div
       id={`post-${post.post_number}`}
-      ref={postRef}
       animate={controls}
       initial={{ backgroundColor: '' }}
-      onViewportEnter={handleViewportEnter}
-      onViewportLeave={handleViewportLeave}
       viewport={{ amount: 0.5 }}
-      className={
-      clsx(
-          depth === 0 ? 'ml-0' : 'ml-8',
-          "flex flex-col gap-8 rounded-lg border border-gray-300 bg-white p-6 shadow-md transition-colors duration-300 hover:bg-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:hover:bg-gray-900/80"
-        )
-      }
+      className={clsx(
+        depth === 0 ? 'ml-0' : 'ml-8',
+        'flex flex-col gap-8 rounded-lg border border-gray-300 bg-white p-6 shadow-md transition-colors duration-300 hover:bg-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:hover:bg-gray-900/80'
+      )}
     >
       <div
         className={'flex w-full items-center justify-start gap-4 border-b-2 border-gray-300 pb-2 dark:border-gray-600'}
