@@ -33,7 +33,7 @@ export default function HeadGlobal() {
       <meta property="og:description" content={app.description} />
       <meta property="og:site_name" content={app.name} />
       <meta property="og:url" content={app.url} />
-      <meta property="og:image" content={app.image} />
+      {/*<meta property="og:image" content={`${app.image}`} />*/}
 
       <meta name="description" content={app.description} />
       <meta name="keywords" content={app.keywords} />
