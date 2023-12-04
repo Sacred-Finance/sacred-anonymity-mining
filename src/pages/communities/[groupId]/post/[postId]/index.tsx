@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { Post } from '@/lib/post'
-import { useCommunityContext } from '@/contexts/CommunityProvider'
+import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
 import { PostPage } from '@components/Post/PostPage'
 import { ethers } from 'ethers'
 import useSWR from 'swr'
@@ -15,21 +15,21 @@ function PostIndex() {
   const router = useRouter()
   const { groupId, postId } = router.query
 
-  const { data, error, isLoading } = useSWR(getGroupWithPostAndCommentData(groupId, postId), fetcher);
+  const { data, error, isLoading } = useSWR(getGroupWithPostAndCommentData(groupId, postId), fetcher)
   useCheckIfUserIsAdminOrModerator(true)
 
   useEffect(() => {
     const { group, post, comments } = data || {}
     if (!group || !post || !comments) return
     dispatch({
-      type: 'SET_ACTIVE_COMMUNITY',
+      type: ActionType.SET_ACTIVE_COMMUNITY,
       payload: {
         community: group,
         postList: [post],
       },
     })
     dispatch({
-      type: 'SET_ACTIVE_POST',
+      type: ActionType.SET_ACTIVE_POST,
       payload: {
         community: group,
         post: post,
@@ -45,16 +45,17 @@ function PostIndex() {
   const postInstance = new Post(post.id, group.groupId)
   const commentInstance = new CommentClass(group.groupId, post.id, null)
   group.id = ethers.BigNumber.from(group.id)
-
   return (
-    <PostPage
-      postInstance={postInstance}
-      post={post}
-      community={group}
-      comments={comments}
-      commentInstance={commentInstance}
-    />
+    <div>
+      <PostPage
+        postInstance={postInstance}
+        post={post}
+        community={group}
+        comments={comments}
+        commentInstance={commentInstance}
+      />
+    </div>
   )
 }
 
-export default (PostIndex)
+export default PostIndex

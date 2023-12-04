@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import LoadingPage from '@components/LoadingComponent'
 import { CommunityPage } from '@components/CommunityPage'
-import { useCommunityContext } from '@/contexts/CommunityProvider'
+import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
 import { ethers } from 'ethers'
 import useSWR from 'swr'
 import { useRouter } from 'next/router'
@@ -10,34 +10,38 @@ import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminO
 
 function Group() {
   const router = useRouter()
-  const { groupId, postId } = router.query
+  const { groupId } = router.query
   const { data, error, isValidating } = useSWR(getGroupWithPostData(groupId), fetcher)
   const { dispatch } = useCommunityContext()
   useCheckIfUserIsAdminOrModerator(true)
 
+  const { group, posts, users } = data || {}
+
   useEffect(() => {
     if (data && !isValidating && !error && !data?.error) {
       dispatch({
-        type: 'SET_ACTIVE_COMMUNITY',
+        type: ActionType.SET_ACTIVE_COMMUNITY,
         payload: {
-          community: data.group,
-          posts: data.posts,
+          community: group,
+          posts,
         },
       })
       dispatch({
-        type: 'SET_USERS',
-        payload: data?.users,
+        type: ActionType.SET_USERS,
+        payload: users,
       })
     }
-  }, [data?.group, data?.posts, data?.users, isValidating])
+  }, [group, posts, users, isValidating])
   if (error) return <div>Error: {error.message}</div>
   if (!data) return <LoadingPage />
 
-  const { group, posts } = data
-
   group.id = ethers.BigNumber.from(group.id)
 
-  return <CommunityPage community={group} posts={posts} />
+  return (
+    <div>
+      <CommunityPage community={group} posts={posts} />
+    </div>
+  )
 }
 
 export default Group
