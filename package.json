@@ -74,6 +74,7 @@
     "@tailwindcss/typography": "^0.5.8",
     "@types/lodash": "^4.14.195",
     "@types/pluralize": "^0.0.31",
+    "@types/react-lottie": "^1.2.10",
     "@unirep/circuits": "^2.0.0-beta-3",
     "@unirep/contracts": "^2.0.0-beta-3",
     "@unirep/core": "^2.0.0-beta-3",

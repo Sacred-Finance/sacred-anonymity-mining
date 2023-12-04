@@ -7,14 +7,13 @@ export default function Footer(): JSX.Element {
   if (!ready) return <> </>
 
   return (
-    <footer className="bg-gray-800 dark:bg-gray-900">
+    <footer className="bg-gray-800 dark:bg-gray-900 justify-self-end">
       <div className="container mx-auto px-6 py-8 lg:px-16">
         <div className="md:flex md:justify-between">
           <div className="mb-6 flex items-center md:mb-0">
             <Logo width={400} invertTheme={true} className="h- mr-3" />
           </div>
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
-            {/* Follow Us Section */}
             <div>
               <h2 className="mb-6 text-xl font-semibold text-white">{t('footer.followUs')}</h2>
               <ul className="font-medium text-gray-500 dark:text-gray-400">
