@@ -25,16 +25,13 @@ export const PostList = ({ posts }: { posts: Item[] }) => {
           <PostTitle post={p} title={p.title} onPostPage={false} id={''} />
         </CardHeader>
 
-        <CardContent className={' overflow-hidden'}>
+        <CardContent className={'overflow-hidden'}>
           <EditorJsRenderer data={p.description} className={'line-clamp-4'} />
         </CardContent>
 
-        <CardFooter className={'justify-self-end items-end'}>
-          {<AnimalAvatar seed={`${p.note}_${Number(p.groupId)}`} options={{size: 30}} /> }
-
-          <Badge className="flex gap-4">
-            {p.childIds.length} <BookOpenIcon className="h-full w-4" />
-          </Badge>
+        <CardFooter className={'flex items-center justify-self-end bg-card-foreground/5 py-4 text-xs'}>
+          {<AnimalAvatar seed={`${p.note}_${Number(p.groupId)}`} options={{ size: 30 }} />}
+          {p.childIds.length} Posts
         </CardFooter>
       </Card>
     )

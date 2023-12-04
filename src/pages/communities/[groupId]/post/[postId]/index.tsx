@@ -46,7 +46,6 @@ function PostIndex() {
   const commentInstance = new CommentClass(group.groupId, post.id, null)
   group.id = ethers.BigNumber.from(group.id)
   return (
-    <div>
       <PostPage
         postInstance={postInstance}
         post={post}
@@ -54,7 +53,6 @@ function PostIndex() {
         comments={comments}
         commentInstance={commentInstance}
       />
-    </div>
   )
 }
 

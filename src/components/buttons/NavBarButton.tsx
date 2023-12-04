@@ -15,7 +15,7 @@ export function NavBarButton({
 } & React.AnchorHTMLAttributes<HTMLAnchorElement> &
   Partial<typeof Link>): JSX.Element {
   return (
-    <Link href={href} className={primaryButtonStyle} {...rest}>
+    <Link href={href} className={'flex items-center justify-center flex-col hover:text-primary'} {...rest}>
       {children}
     </Link>
   )
