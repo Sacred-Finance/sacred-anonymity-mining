@@ -1,9 +1,31 @@
+'use client'
+
 import Head from 'next/head'
 import { app } from '@/appConfig'
 import { useTheme } from 'next-themes'
+import { useCommunityContext } from '@/contexts/CommunityProvider'
+import React from 'react'
+import { useRouter } from 'next/router'
 
 export default function HeadGlobal() {
   const { resolvedTheme } = useTheme()
+
+  const { state } = useCommunityContext()
+  const router = useRouter()
+
+  const { groupId, postId, topicId } = router.query
+  const inCommunity = groupId || postId || topicId
+
+  const { activeCommunity } = state
+
+  // todo - we do not have access to discourse from here. we need to change the state to include the discourse communities before we can use this
+  const logoCID = activeCommunity?.community?.groupDetails?.logoCID
+  const image = inCommunity ? (logoCID && `https://ipfs.io/ipfs/${logoCID}`) || app.image : app.image
+  const title = inCommunity ? activeCommunity?.community?.name || app.title : app.title
+  const description = inCommunity
+    ? activeCommunity?.community?.groupDetails?.description || app.description
+    : app.description
+
   return (
     <Head>
       <meta charSet="utf-8" />
@@ -26,18 +48,17 @@ export default function HeadGlobal() {
 
       <link rel="icon" href={app.favicon} />
 
-       <link rel="manifest" href="/manifest.json" />
+      <link rel="manifest" href="/manifest.json" />
 
       <meta property="og:type" content="website" />
-      <meta property="og:title" content={app.title} />
-      <meta property="og:description" content={app.description} />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
       <meta property="og:site_name" content={app.name} />
       <meta property="og:url" content={app.url} />
-      <meta property="og:image" content={app.image} />
-
-      <meta name="description" content={app.description} />
+      <meta property="og:image" content={image} />
+      <meta name="description" content={description} />
       <meta name="keywords" content={app.keywords} />
-      <title>{app.title}</title>
+      <title>{title}</title>
     </Head>
   )
 }

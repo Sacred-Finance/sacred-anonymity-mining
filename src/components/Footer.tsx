@@ -28,11 +28,7 @@ export default function Footer(): JSX.Element {
                     {t('footer.twitter')}
                   </a>
                 </li>
-                <li className="mb-4">
-                  <a href="https://t.me/SacredLogosOfficial" className="hover:text-purple-500">
-                    {t('footer.telegram')}
-                  </a>
-                </li>
+
                 <li>
                   <a href="https://sacredlogos.medium.com/" className="hover:text-purple-500">
                     {t('footer.medium')}
