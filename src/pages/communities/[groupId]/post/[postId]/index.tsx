@@ -17,7 +17,7 @@ function PostIndex() {
   const router = useRouter()
   const { groupId, postId } = router.query
 
-  const { data, error, isLoading } = useSWR(getGroupWithPostAndCommentData(groupId, postId), fetcher);
+  const { data, error, isLoading } = useSWR(getGroupWithPostAndCommentData(groupId, postId), fetcher)
   useCheckIfUserIsAdminOrModerator(true)
 
   useEffect(() => {
@@ -56,7 +56,7 @@ function PostIndex() {
         <meta property="og:title" content={post.title} />
         <meta property="og:url" content={location.href} />
         <meta property="og:description" content={post.title} />
-        <meta property="og:image" content={logoCID ? `https://ipfs.io/ipfs/${logoCID}` : `${app.image}`} />
+        <meta property="og:image" content={logoCID ? `https://ipfs.io/ipfs/${logoCID}` : app.image} />
       </Head>
       <PostPage
         postInstance={postInstance}
@@ -69,4 +69,4 @@ function PostIndex() {
   )
 }
 
-export default (PostIndex)
+export default PostIndex
