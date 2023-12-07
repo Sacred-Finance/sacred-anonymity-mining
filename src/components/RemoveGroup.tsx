@@ -18,7 +18,9 @@ const RemoveGroup: React.FC<RemoveGroupProps> = ({ groupId, hidden }) => {
   const { writeAsync } = useRemoveGroup(groupId)
 
   const { address } = useAccount()
-  const { state: { isAdmin, isModerator } } = useCommunityContext()
+  const {
+    state: { isAdmin, isModerator },
+  } = useCommunityContext()
   const [isLoading, setIsLoading] = React.useState(false)
 
   const onClick = () => {

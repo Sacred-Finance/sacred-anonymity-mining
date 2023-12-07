@@ -77,9 +77,9 @@ export enum PollType {
 }
 
 export type DiscourseCommunity = {
-  apiKey?: string,
-  username?: string,
-  endpoint?: string,
-  id?: number,
+  apiKey?: string
+  username?: string
+  endpoint?: string
+  id?: number
   readonly?: boolean
 }

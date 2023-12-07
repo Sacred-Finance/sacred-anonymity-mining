@@ -5,7 +5,6 @@ import { useEffect, useRef } from 'react'
 import { Event } from '@ethersproject/contracts'
 import { Group } from '@/types/contract/ForumInterface'
 
-
 type GroupId = number // Define GroupId type or replace it with your actual type
 export const useFetchCommunitiesByIds = (groupIds: GroupId[], loadOnInit = true) => {
   const { dispatch, state } = useCommunityContext()

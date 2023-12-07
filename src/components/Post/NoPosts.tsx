@@ -8,9 +8,7 @@ export const NoPosts = ({ onClick, children }: { onClick?: () => void; children?
   const { t } = useTranslation()
 
   return (
-    <div
-      onClick={onClick}
-    >
+    <div onClick={onClick}>
       {t('noPostsFound')}
       {children}
     </div>
@@ -24,7 +22,7 @@ export const NoComments = ({ onClick, children }: { onClick?: () => void; childr
     <div
       onClick={onClick}
       className={
-        'font-bold absolute inset-0 flex h-96 select-none flex-col items-center justify-center rounded border p-2 text-center text-xl '
+        'absolute inset-0 flex h-96 select-none flex-col items-center justify-center rounded border p-2 text-center text-xl font-bold '
       }
     >
       {t('noCommentsFound')}

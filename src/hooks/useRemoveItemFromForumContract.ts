@@ -10,7 +10,7 @@ import { CommentClass } from '@/lib/comment'
 import { useTranslation } from 'react-i18next'
 import { ContentType, PostContent, User } from '@/lib/model'
 import { getGroupWithPostAndCommentData } from '@/lib/fetcher'
-import {Address} from "@/types/common";
+import { Address } from '@/types/common'
 
 export const useRemoveItemFromForumContract = (groupId, postId, isAdminOrModerator, setIsLoading) => {
   const { address } = useAccount()
@@ -32,20 +32,22 @@ export const useRemoveItemFromForumContract = (groupId, postId, isAdminOrModerat
   }
 
   const deleteItem = async (itemId, itemType: number) => {
-    if (Number(itemType) != ContentType.POST && itemType != ContentType.POLL && itemType != ContentType.COMMENT){
-        return toast.error(t('toast.error.invalidItemType'), { type: 'error', toastId: 'min' })
+    if (Number(itemType) != ContentType.POST && itemType != ContentType.POLL && itemType != ContentType.COMMENT) {
+      return toast.error(t('toast.error.invalidItemType'), { type: 'error', toastId: 'min' })
     }
 
     if (!validateRequirements()) return
 
     if (isAdminOrModerator) {
-      return writeAsync ? writeAsync({
-        recklesslySetUnpreparedArgs: [+itemId],
-      }).then(async value => {
-        return await value.wait().then(async () => {
-          await mutate(getGroupWithPostAndCommentData(groupId, postId))
-        })
-      }) : null
+      return writeAsync
+        ? writeAsync({
+            recklesslySetUnpreparedArgs: [+itemId],
+          }).then(async value => {
+            return await value.wait().then(async () => {
+              await mutate(getGroupWithPostAndCommentData(groupId, postId))
+            })
+          })
+        : null
     } else {
       return itemType == ContentType.POST ?? itemType == ContentType.POLL
         ? postInstance?.delete(address, itemId, users, member as User, groupId, setIsLoading)

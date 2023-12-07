@@ -198,14 +198,14 @@ export function EditGroup({ group }: EditGroupProps) {
 
         <div className="flex gap-4 ">
           <PictureUpload
-              uploadedImageUrl={bannerFile ? URL.createObjectURL(bannerFile) : null}
+            uploadedImageUrl={bannerFile ? URL.createObjectURL(bannerFile) : null}
             displayName={t('banner')}
             name={'banner'}
             setImageFileState={handleSetImage}
           />
 
           <PictureUpload
-              uploadedImageUrl={logoFile ? URL.createObjectURL(logoFile) : null}
+            uploadedImageUrl={logoFile ? URL.createObjectURL(logoFile) : null}
             displayName={t('logo')}
             name={'logo'}
             setImageFileState={handleSetImage}

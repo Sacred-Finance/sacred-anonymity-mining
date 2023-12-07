@@ -46,12 +46,12 @@ const Access: React.FC = () => {
         await data.wait()
         fetchAdmins()
         fetchIsAdmin()
-        toast.success(`${variables?.args[0]} has been removed successfully`, {autoClose: 5000})
+        toast.success(`${variables?.args[0]} has been removed successfully`, { autoClose: 5000 })
       } catch (error) {}
     },
     onError: (error, variables) => {
-      toast.error(error.message, {autoClose: 5000})
-    }
+      toast.error(error.message, { autoClose: 5000 })
+    },
   })
 
   /** remove moderator */
@@ -67,12 +67,12 @@ const Access: React.FC = () => {
       try {
         await data.wait()
         fetchModerators()
-        toast.success(`${variables?.args[0]} has been removed successfully`, {autoClose: 5000})
+        toast.success(`${variables?.args[0]} has been removed successfully`, { autoClose: 5000 })
       } catch (error) {}
     },
     onError: (error, variables) => {
-      toast.error(error.message, {autoClose: 5000})
-    }
+      toast.error(error.message, { autoClose: 5000 })
+    },
   })
 
   /** add admin */
@@ -90,12 +90,12 @@ const Access: React.FC = () => {
         console.log('variables', variables)
         await data.wait()
         fetchAdmins()
-        toast.success(`${variables?.args[0]} has been added successfully`, {autoClose: 5000})
+        toast.success(`${variables?.args[0]} has been added successfully`, { autoClose: 5000 })
       } catch (error) {}
     },
     onError: (error, variables) => {
-      toast.error(error.message, {autoClose: 5000})
-    }
+      toast.error(error.message, { autoClose: 5000 })
+    },
   })
 
   /** add moderator */
@@ -111,12 +111,12 @@ const Access: React.FC = () => {
       try {
         await data.wait()
         fetchModerators()
-        toast.success(`${variables?.args[0]} has been added successfully`, {autoClose: 5000})
+        toast.success(`${variables?.args[0]} has been added successfully`, { autoClose: 5000 })
       } catch (error) {}
     },
     onError: (error, variables) => {
-      toast.error(error.message, {autoClose: 5000})
-    }
+      toast.error(error.message, { autoClose: 5000 })
+    },
   })
 
   const onAddAdmin = value => {
@@ -167,19 +167,23 @@ const Access: React.FC = () => {
             onChange={e => setValue(e.target.value)}
             value={value}
             required
-            autoComplete='off'
+            autoComplete="off"
           />
           <PrimaryButton
             type="button"
-            className="absolute bottom-2.5 right-2.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-primary dark:hover:bg-primary-700 dark:focus:ring-primary-800 top-[7px]"
-            onClick={() => onSubmit(value)} disabled={!Boolean(value) || Boolean(patternError)}
+            className="hover:bg-primary-800 dark:hover:bg-primary-700 dark:focus:ring-primary-800 absolute bottom-2.5 right-2.5 top-[7px] rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-primary"
+            onClick={() => onSubmit(value)}
+            disabled={!Boolean(value) || Boolean(patternError)}
             isLoading={isAddingAdmin || isAddingMod}
           >
             Add
           </PrimaryButton>
         </div>
-        {<div className={clsx([patternError ? 'visible text-red-800' : 'invisible', 'mt-0'])}>{t('formErrors.enterValidAddress')}</div>}
-
+        {
+          <div className={clsx([patternError ? 'visible text-red-800' : 'invisible', 'mt-0'])}>
+            {t('formErrors.enterValidAddress')}
+          </div>
+        }
       </>
     )
   }
@@ -187,7 +191,7 @@ const Access: React.FC = () => {
   const TableWrapper = ({ items, canRemove, caption, onRemove }) => {
     return (
       <>
-        <Table className='min-h-[20vh]'>
+        <Table className="min-h-[20vh]">
           <TableCaption>{caption}</TableCaption>
           <TableHeader>
             <TableRow>
@@ -216,12 +220,10 @@ const Access: React.FC = () => {
     )
   }
 
-  if ((!isAdmin && !isModerator) && (isFetching || isLoading)) return <LoadingComponent />
+  if (!isAdmin && !isModerator && (isFetching || isLoading)) return <LoadingComponent />
 
   if (!isAdmin && !isModerator) {
-    return (
-      <div>Not allowed to access </div>
-    )
+    return <div>Not allowed to access </div>
   }
   return (
     <div className="">

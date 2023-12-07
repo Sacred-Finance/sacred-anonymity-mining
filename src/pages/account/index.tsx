@@ -1,7 +1,11 @@
 import { CommunityCard } from '@/components/CommunityCard/CommunityCard'
 import { PostItem } from '@/components/Post/PostItem'
 import { PostList } from '@/components/Post/PostList'
-import { useCommunitiesCreatedByUser, useCommunitiesJoinedByUser, useCommunityContext } from '@/contexts/CommunityProvider'
+import {
+  useCommunitiesCreatedByUser,
+  useCommunitiesJoinedByUser,
+  useCommunityContext,
+} from '@/contexts/CommunityProvider'
 import { useFetchItemsCreatedByUser } from '@/hooks/useFetchItemsCreatedByUser'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shad/ui/tabs'
 import { BigNumber } from 'ethers'
@@ -68,7 +72,10 @@ const Account = () => {
       </TabsContent>
       <TabsContent value="comments" className="border-none p-0 outline-none">
         {comments?.map(comment => (
-          <div key={comment.id} className="mb-3 flex flex-col rounded-xl border p-3 dark:border-gray-700 dark:bg-gray-900">
+          <div
+            key={comment.id}
+            className="mb-3 flex flex-col rounded-xl border p-3 dark:border-gray-700 dark:bg-gray-900"
+          >
             <PostItem group={{ id: comment?.groupId }} post={comment} />
           </div>
         ))}

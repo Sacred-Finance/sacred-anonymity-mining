@@ -1,5 +1,5 @@
 import { OutputData } from '@editorjs/editorjs'
-import React, {memo} from 'react'
+import React, { memo } from 'react'
 import clsx from 'clsx'
 
 const editorJsHtml = require('editorjs-html')

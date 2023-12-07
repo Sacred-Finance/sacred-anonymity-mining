@@ -19,11 +19,11 @@ const SelectToken = ({ chainId, selectedToken, onTokenSelect }: SelectTokenProps
   const ref = React.useRef<HTMLDivElement>(null)
   useOutsideClickHandler(ref.current, () => setOptionsVisible(false))
   return (
-    <div ref={ref} className='w-full'>
+    <div ref={ref} className="w-full">
       <button
         id="dropdownSearchButton"
         onClick={() => setOptionsVisible(!optionsVisible)}
-        className="inline-flex items-center w-full rounded-lg border px-4 py-2 text-center text-md font-medium focus:outline-none border-gray-400 dark:border-gray-600 dark:bg-gray-700"
+        className="text-md inline-flex w-full items-center rounded-lg border border-gray-400 px-4 py-2 text-center font-medium focus:outline-none dark:border-gray-600 dark:bg-gray-700"
         type="button"
       >
         <span className="flex items-center gap-2 dark:text-white">
@@ -45,7 +45,10 @@ const SelectToken = ({ chainId, selectedToken, onTokenSelect }: SelectTokenProps
       </button>
 
       {optionsVisible && (
-        <div id="dropdownSearch" className="absolute z-10 mt-2 w-[400px] border border-gray-300 rounded-lg bg-white shadow dark:bg-gray-700">
+        <div
+          id="dropdownSearch"
+          className="absolute z-10 mt-2 w-[400px] rounded-lg border border-gray-300 bg-white shadow dark:bg-gray-700"
+        >
           <div className="p-3">
             <label htmlFor="input-group-search" className="sr-only">
               Search
@@ -57,7 +60,7 @@ const SelectToken = ({ chainId, selectedToken, onTokenSelect }: SelectTokenProps
               <input
                 type="text"
                 id="input-group-search"
-                className="focus:border-blue-500 dark:border-gray-500 dark:focus:border-blue-500 block w-full rounded-lg border border-gray-300 bg-gray-50 p-2 pl-10 text-sm text-gray-900 focus:ring-blue-500 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 dark:focus:ring-blue-500"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-500 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                 placeholder="Search name or paste address"
                 onChange={e => onSearch(e.target.value)}
               />

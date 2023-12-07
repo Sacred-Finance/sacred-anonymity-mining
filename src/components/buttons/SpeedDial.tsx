@@ -82,7 +82,7 @@ const ActionButton = ({ action }) => {
 
 const ActionButtons = ({ actions }) => (
   <div className="space-y-2">
-    {actions.map((action,key) => (
+    {actions.map((action, key) => (
       <ActionButton key={key} action={action} />
     ))}
   </div>

@@ -6,7 +6,7 @@ import { Group } from '@semaphore-protocol/group'
 import { Identity } from '@semaphore-protocol/identity'
 import { useAccount } from 'wagmi'
 
-const username = 'anon';
+const username = 'anon'
 
 export const useLeaveCommunity = ({ id }) => {
   const activeUser = useActiveUser({ groupId: id })
@@ -17,10 +17,10 @@ export const useLeaveCommunity = ({ id }) => {
     console.log('Leaving group...')
 
     const userIdentity = new Identity(`${address}_${id}_anon`)
-    let group = new Group(id);
-    const users = await fetchUsersFromSemaphoreContract(id);
+    let group = new Group(id)
+    const users = await fetchUsersFromSemaphoreContract(id)
     users.forEach(u => group.addMember(BigInt(u)))
-    const index = group.indexOf(BigInt(userIdentity.commitment));
+    const index = group.indexOf(BigInt(userIdentity.commitment))
     // group.removeMember(index);
 
     const { siblings, pathIndices, root } = group.generateMerkleProof(index)
@@ -38,7 +38,15 @@ export const useLeaveCommunity = ({ id }) => {
       '/circuits/VerifyOwner__prod.0.zkey'
     )
 
-    return await leaveGroup(id, userIdentity.commitment.toString(), a, b, c, siblings.map(s => s.toString()), pathIndices).then(() => {
+    return await leaveGroup(
+      id,
+      userIdentity.commitment.toString(),
+      a,
+      b,
+      c,
+      siblings.map(s => s.toString()),
+      pathIndices
+    ).then(() => {
       console.log('Left group')
       dispatch({
         type: 'REMOVE_USER',

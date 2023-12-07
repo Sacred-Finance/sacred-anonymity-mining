@@ -47,7 +47,7 @@ export function useContentManagement(config: ContentManagementConfig): ContentMa
       setIsContentEditable,
       isContentEditing,
       setIsContentEditing,
-      clearContent
+      clearContent,
     }
   } else {
     return {
@@ -59,7 +59,7 @@ export function useContentManagement(config: ContentManagementConfig): ContentMa
       setIsContentEditable,
       isContentEditing,
       setIsContentEditing,
-      clearContent
+      clearContent,
     }
   }
 }

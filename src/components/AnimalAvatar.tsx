@@ -7,7 +7,7 @@ interface AnimalAvatarProps {
   options?: AvatarOptions
 }
 
-const AnimalAvatar = ({seed, options = {}}: AnimalAvatarProps) => {
+const AnimalAvatar = ({ seed, options = {} }: AnimalAvatarProps) => {
   const [avatar, setAvatar] = useState<string>('')
 
   useEffect(() => {
@@ -22,9 +22,7 @@ const AnimalAvatar = ({seed, options = {}}: AnimalAvatarProps) => {
       setAvatar('https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png')
     }
   }
-  return (
-    <img className="mr-auto" src={avatar} alt={'avatar'} />
-  )
+  return <img className="mr-auto" src={avatar} alt={'avatar'} />
 }
 
 export default AnimalAvatar

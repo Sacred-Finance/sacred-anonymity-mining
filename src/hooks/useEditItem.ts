@@ -106,7 +106,7 @@ export const useEditItem = ({
         throw error
       }
     } else {
-      return (itemType == 0 || itemType == 2)
+      return itemType == 0 || itemType == 2
         ? postInstance?.edit(content, address, itemId, member as User, groupId, setIsLoading)
         : commentInstance?.edit(content, address, itemId, member as User, groupId, setIsLoading)
     }

@@ -1,16 +1,16 @@
 import fetch from 'node-fetch'
 
 export default async function fetcher<T>(url: string): Promise<T> {
-  const res = await fetch(url);
+  const res = await fetch(url)
 
   if (!res.ok) {
-    const error = new Error('An error occurred while fetching the data');
-    (error as any).info = await res.json();
-    (error as any).status = res.status;
-    throw error;
+    const error = new Error('An error occurred while fetching the data')
+    ;(error as any).info = await res.json()
+    ;(error as any).status = res.status
+    throw error
   }
 
-  return res.json() as Promise<T>;
+  return res.json() as Promise<T>
 }
 
 export function getGroupWithPostData(groupId: string | string[] | undefined) {
@@ -29,16 +29,13 @@ export function getGroupWithPostAndCommentData(
 
 export function getDiscourseData(groupId: number | string | string[] | undefined, post_ids?: number[] | null) {
   if (!isNaN(Number(groupId))) {
-    let url = `/api/discourse/${groupId}`;
+    let url = `/api/discourse/${groupId}`
     if (post_ids && post_ids.length > 0) {
       // Format the post_ids as query parameters
-      const postIdsQuery = post_ids.map((id) => `post_ids[]=${id}`).join('&');
-      url += `?${postIdsQuery}`;
+      const postIdsQuery = post_ids.map(id => `post_ids[]=${id}`).join('&')
+      url += `?${postIdsQuery}`
     }
-    return url;
+    return url
   }
-  return null;
+  return null
 }
-
-
-

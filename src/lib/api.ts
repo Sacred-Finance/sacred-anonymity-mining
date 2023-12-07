@@ -137,14 +137,7 @@ export async function userUnirepSignUp(publicSignals: BigNumberish[], proof: Big
   })
 }
 
-export async function setGroupDetails(
-  groupId: string,
-  a: any,
-  b: any,
-  c: any,
-  details: any,
-  isAdmin: boolean = false
-) {
+export async function setGroupDetails(groupId: string, a: any, b: any, c: any, details: any, isAdmin: boolean = false) {
   return axios.post(`${RELAYER_URL}/set-group-details`, {
     groupId,
     a,

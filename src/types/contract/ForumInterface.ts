@@ -1,6 +1,6 @@
 import { BigNumber, ethers } from 'ethers'
-import {OutputData} from "@editorjs/editorjs";
-import {OutputBlockData} from "@editorjs/editorjs/types/data-formats/output-data";
+import { OutputData } from '@editorjs/editorjs'
+import { OutputBlockData } from '@editorjs/editorjs/types/data-formats/output-data'
 
 export interface Admins {
   _admins: string[]
@@ -204,7 +204,7 @@ export interface Requirement {
 
 export interface RawRequirement {
   tokenAddress: string
-  minAmount: ethers.BigNumber,
+  minAmount: ethers.BigNumber
   // maxAmount: ethers.BigNumber
 }
 

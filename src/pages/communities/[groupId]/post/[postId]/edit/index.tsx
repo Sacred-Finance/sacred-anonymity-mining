@@ -22,4 +22,4 @@ function CreateGroupForm() {
   return <EditGroup group={community} />
 }
 
-export default (CreateGroupForm)
+export default CreateGroupForm

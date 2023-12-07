@@ -116,7 +116,7 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
               {/*content*/}
               <div className="relative flex w-full flex-col rounded border-0 bg-white shadow-lg outline-none focus:outline-none dark:bg-gray-800">
                 {/*header*/}
-                <div className="flex items-start justify-between rounded-t border-b border-solid border-slate-200 dark:border-gray-600 p-5">
+                <div className="flex items-start justify-between rounded-t border-b border-solid border-slate-200 p-5 dark:border-gray-600">
                   <h3 className="text-3xl font-semibold">Create Poll</h3>
                   <Button
                     className="float-right  border-0 bg-transparent p-1 text-3xl font-semibold leading-none text-black opacity-5 outline-none focus:outline-none"
@@ -278,7 +278,7 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
                 </div>
 
                 {/*footer*/}
-                <div className="flex items-center justify-end rounded-b border-t border-solid border-slate-200 dark:border-gray-600 p-6">
+                <div className="flex items-center justify-end rounded-b border-t border-solid border-slate-200 p-6 dark:border-gray-600">
                   <button
                     className="background-transparent   px-6 py-2 text-sm font-bold uppercase text-red-500 outline-none transition-all duration-150 ease-linear focus:outline-none"
                     type="button"

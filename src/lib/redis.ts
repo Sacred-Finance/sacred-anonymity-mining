@@ -64,7 +64,6 @@ export const setCache = async (key: string, value: any, path = '$') => {
     })
 }
 
-
 export const removeFromCache = async (key: string, path = '$') => {
   console.log('removeFromCache', key)
 
@@ -74,24 +73,23 @@ export const removeFromCache = async (key: string, path = '$') => {
   }
 
   redisClient.json
-      .del(key, path)
-      .then(
-          success => {
-            if (success === 1) {
-              console.log('removal successful', key)
-            } else {
-              console.warn('No matching key was found for removal', key)
-            }
-          },
-          fail => {
-            console.error({ fail, key })
-          }
-      )
-      .catch(error => {
-        console.error('redisClient error ', error)
-      })
+    .del(key, path)
+    .then(
+      success => {
+        if (success === 1) {
+          console.log('removal successful', key)
+        } else {
+          console.warn('No matching key was found for removal', key)
+        }
+      },
+      fail => {
+        console.error({ fail, key })
+      }
+    )
+    .catch(error => {
+      console.error('redisClient error ', error)
+    })
 }
-
 
 export const setCacheAtSpecificPath = async (key: string, value: any, path = '$') => {
   if (!redisClient) {
@@ -261,7 +259,7 @@ export const removeAt = async (key, path) => {
   try {
     await redisClient.json.del(key, path)
   } catch (error) {
-    console.log('removeAt',key, error)
+    console.log('removeAt', key, error)
   }
 }
 

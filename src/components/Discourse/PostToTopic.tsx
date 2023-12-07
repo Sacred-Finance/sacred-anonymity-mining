@@ -70,38 +70,38 @@ const PostToTopic = ({
 
   return (
     <>
-        <NewPostForm
-          isReadOnly={readonly}
-          classes={{
-            rootOpen: 'fixed z-50 inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center',
-            formBody: 'w-full h-full flex flex-col gap-4',
-            editor: 'border rounded py-1 px-2 bg-white dark:bg-gray-800',
-            submitButton: 'bg-green-500 text-white border-none rounded hover:bg-green-600',
-            formContainerOpen:
-              'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded shadow-lg w-full max-w-3xl',
-            openFormButtonOpen: 'bg-primary-500 text-white opacity-0 hover:bg-primary-600',
-          }}
-          editorId={`${topic?.id}_post`}
-          description={description}
-          setDescription={setDescription}
-          handleSubmit={onSubmit}
-          resetForm={() => {
-            // @ts-ignore
-            setDescription(null)
-          }}
-          title={false}
-          isEditable={true}
-          itemType={'post'}
-          actionType={'new'}
-          submitButtonText={t('button.post') as string}
-          openFormButtonText={t('button.newPost') as string}
-          tokenBalanceReveal={{
-            selectedValue: selectedToReveal,
-            onSelected(value) {
-              setSelectedToReveal(value)
-            },
-          }}
-        />
+      <NewPostForm
+        isReadOnly={readonly}
+        classes={{
+          rootOpen: 'fixed z-50 inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center',
+          formBody: 'w-full h-full flex flex-col gap-4',
+          editor: 'border rounded py-1 px-2 bg-white dark:bg-gray-800',
+          submitButton: 'bg-green-500 text-white border-none rounded hover:bg-green-600',
+          formContainerOpen:
+            'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded shadow-lg w-full max-w-3xl',
+          openFormButtonOpen: 'bg-primary-500 text-white opacity-0 hover:bg-primary-600',
+        }}
+        editorId={`${topic?.id}_post`}
+        description={description}
+        setDescription={setDescription}
+        handleSubmit={onSubmit}
+        resetForm={() => {
+          // @ts-ignore
+          setDescription(null)
+        }}
+        title={false}
+        isEditable={true}
+        itemType={'post'}
+        actionType={'new'}
+        submitButtonText={t('button.post') as string}
+        openFormButtonText={t('button.newPost') as string}
+        tokenBalanceReveal={{
+          selectedValue: selectedToReveal,
+          onSelected(value) {
+            setSelectedToReveal(value)
+          },
+        }}
+      />
     </>
   )
 }

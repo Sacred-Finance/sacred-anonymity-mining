@@ -39,11 +39,12 @@ export const PostItem = ({ post, group, showAvatar = true }: PostItemProps) => {
 
   const user = useUserIfJoined(post.groupId)
   const address = useAccount().address
-  const { state: { isAdmin, isModerator } } = useCommunityContext()
+  const {
+    state: { isAdmin, isModerator },
+  } = useCommunityContext()
   const [isLoading, setIsLoading] = useState(false)
 
   const { t } = useTranslation()
-
 
   const isAdminOrModerator = isAdmin || isModerator
 
@@ -168,7 +169,9 @@ export const PostItem = ({ post, group, showAvatar = true }: PostItemProps) => {
         {isTypeOfPoll && <PollUI group={group} post={post} />}
 
         <div className="sticky bottom-0 flex items-center justify-between gap-4">
-          {(parentId && Number(parentId) == 0) && showAvatar && <AnimalAvatar seed={`${post.note}_${Number(groupId)}`} options={{ size: 40 }} /> }
+          {parentId && Number(parentId) == 0 && showAvatar && (
+            <AnimalAvatar seed={`${post.note}_${Number(groupId)}`} options={{ size: 40 }} />
+          )}
           <ContentActions
             item={post}
             contentId={post.id}
@@ -237,5 +240,5 @@ const checkIfPostIsEditable = async ({
   const generatedNote = await createNote(userPosting)
   const generatedNoteAsBigNumber = BigNumber.from(generatedNote).toString()
   const noteBigNumber = BigNumber.from(post.note).toString()
-  return (generatedNoteAsBigNumber === noteBigNumber) || canDelete
+  return generatedNoteAsBigNumber === noteBigNumber || canDelete
 }

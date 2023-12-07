@@ -282,8 +282,6 @@ function CreateGroupFormUI({ onCreate }) {
                             />
                           </div>
 
-                          
-
                           <button
                             type="button"
                             onClick={() => {
@@ -313,11 +311,7 @@ function CreateGroupFormUI({ onCreate }) {
             >
               Close
             </Link>
-            <PrimaryButton
-              disabled={isSubmitDisabled || isSubmitting}
-              onClick={submit}
-              isLoading={isSubmitting}
-            >
+            <PrimaryButton disabled={isSubmitDisabled || isSubmitting} onClick={submit} isLoading={isSubmitting}>
               {t('button.create')}
             </PrimaryButton>
           </div>

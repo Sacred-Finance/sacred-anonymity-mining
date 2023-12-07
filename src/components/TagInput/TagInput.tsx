@@ -48,7 +48,7 @@ const TagInput = ({ onChange, selected }: TagInputProps) => {
                 {selected?.map((tag, index) => (
                   <div
                     key={`${tag}_${index}`}
-                    className="border-slate-500 m-1 flex items-center justify-center rounded-full border bg-slate-300 px-2 py-1 font-medium text-black"
+                    className="m-1 flex items-center justify-center rounded-full border border-slate-500 bg-slate-300 px-2 py-1 font-medium text-black"
                   >
                     <div className="max-w-full flex-initial text-xs font-normal leading-none">{tag}</div>
                     <div className="flex flex-auto flex-row-reverse">
@@ -64,7 +64,7 @@ const TagInput = ({ onChange, selected }: TagInputProps) => {
                   placeholder="Search Tags"
                   onChange={filterTags}
                   onFocus={() => setOptionsVisible(true)}
-                  className="h-full w-full appearance-none rounded-[10px] border-solid border-slate-300 bg-transparent p-1 px-2 text-gray-800 outline-none focus:border-primary-500 dark:text-gray-200"
+                  className="focus:border-primary-500 h-full w-full appearance-none rounded-[10px] border-solid border-slate-300 bg-transparent p-1 px-2 text-gray-800 outline-none dark:text-gray-200"
                 />
               </div>
             </div>

@@ -4,7 +4,6 @@ import fetcher, { getDiscourseData } from '@/lib/fetcher'
 import { useRouter } from 'next/router'
 
 export const useFetchPosts = posts => {
-
   const topic_id: number = posts?.[0]?.topic_id
 
   const post_ids: number[] = posts.map(post => post.id)

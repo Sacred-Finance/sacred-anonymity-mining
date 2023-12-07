@@ -9,16 +9,14 @@ export const useFetchRepliesForPosts = (posts: Post[]) => {
   const [postsWithReplies, setPostsWithReplies] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const router = useRouter();
-  const { groupId } = router.query;
+  const router = useRouter()
+  const { groupId } = router.query
 
   useEffect(() => {
     const fetchReplies = async () => {
       if (!posts) return
       try {
-        const postsWithReplyCount = posts.filter(
-          post => !post.hidden && !post.deleted_at && post.reply_count > 0
-        )
+        const postsWithReplyCount = posts.filter(post => !post.hidden && !post.deleted_at && post.reply_count > 0)
         const fetchRepliesPromises = postsWithReplyCount.map(post =>
           fetch(`/api/discourse/${groupId}/${post.id}/replies`).then(res => res.json())
         )

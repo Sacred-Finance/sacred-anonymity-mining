@@ -1,7 +1,7 @@
 import React from 'react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shad/ui/tooltip'
 import { Button, ButtonProps } from '@/shad/ui/button'
-import {PrimaryButton} from "@components/buttons";
+import { PrimaryButton } from '@components/buttons'
 
 export default function ToolTip({
   tooltip,

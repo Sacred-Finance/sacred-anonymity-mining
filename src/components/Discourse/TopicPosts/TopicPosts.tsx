@@ -4,7 +4,15 @@ import { useAnimation } from 'framer-motion'
 import { RecursivePostRenderer } from '@components/Discourse/TopicPosts/RecursivePostRenderer'
 import { nestPosts } from '@components/Discourse/TopicPosts/helper'
 
-const TopicPosts = ({ topic, mutate, readonly }: { topic: Topic; mutate: (newPost: Post) => void, readonly: boolean }) => {
+const TopicPosts = ({
+  topic,
+  mutate,
+  readonly,
+}: {
+  topic: Topic
+  mutate: (newPost: Post) => void
+  readonly: boolean
+}) => {
   const postRefs = useRef<{ [key: number]: React.RefObject<HTMLDivElement> }>({})
   const [targetPostNumber, setTargetPostNumber] = useState<number | null>(null)
   const [postsInView, setPostsInView] = useState([])

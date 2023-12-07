@@ -283,6 +283,6 @@ export const fetchUsersFromSemaphoreContract = async groupId => {
 }
 
 export const generateAvatar = async (seed: string, options: AvatarOptions) => {
-  const avatar = (await import('animal-avatar-generator')).default;
+  const avatar = (await import('animal-avatar-generator')).default
   return avatar(seed, { size: 200, ...options })
 }

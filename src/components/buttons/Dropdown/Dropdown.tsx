@@ -16,9 +16,16 @@ const Dropdown = ({ disabled = false, options, selected, onSelect }: DropdownPro
         disabled={disabled}
         className="flex w-full items-center justify-between rounded-md border border-gray-300 bg-white px-2 py-1 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
       >
-        <div className="flex gap-2 items-center">
+        <div className="flex items-center gap-2">
           {selected?.image && (
-            <Image src={selected.image} alt={'ChainLogo'} width={'20'} height={'20'} style={{height: 20, width: 20}} className="rounded" />
+            <Image
+              src={selected.image}
+              alt={'ChainLogo'}
+              width={'20'}
+              height={'20'}
+              style={{ height: 20, width: 20 }}
+              className="rounded"
+            />
           )}{' '}
           {selected.key}
         </div>
@@ -36,7 +43,7 @@ const Dropdown = ({ disabled = false, options, selected, onSelect }: DropdownPro
               className="w-full px-3 py-2 text-left  hover:bg-gray-200 focus:outline-none dark:hover:bg-gray-500"
               onClick={() => onSelect(k.value)}
             >
-              <div className="flex gap-2 items-center">
+              <div className="flex items-center gap-2">
                 {k?.image && <Image src={k.image} alt={'ChainLogo'} width={25} height={25} className="rounded" />}{' '}
                 {k.key}
               </div>

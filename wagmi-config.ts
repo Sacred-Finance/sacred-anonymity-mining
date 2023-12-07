@@ -1,7 +1,18 @@
 // Web3 Configs
 import { configureChains, createClient } from 'wagmi'
-import { goerli, localhost, mainnet, polygonMumbai, sepolia } from 'wagmi/chains'
-import { braveWallet, coinbaseWallet, injectedWallet, metaMaskWallet } from '@rainbow-me/rainbowkit/wallets'
+import {
+  goerli,
+  localhost,
+  mainnet,
+  polygonMumbai,
+  sepolia,
+} from 'wagmi/chains'
+import {
+  braveWallet,
+  coinbaseWallet,
+  injectedWallet,
+  metaMaskWallet,
+} from '@rainbow-me/rainbowkit/wallets'
 import { app } from '@/appConfig'
 import { connectorsForWallets } from '@rainbow-me/rainbowkit'
 import { alchemyProvider } from 'wagmi/providers/alchemy'
@@ -79,7 +90,17 @@ const otherWallets = [
 const connectors = connectorsForWallets([
   {
     groupName: 'Recommended',
-    wallets: [injectedWallet({ chains, shimDisconnect: true }), metaMaskWallet({ chains, shimDisconnect: true })],
+    wallets: [
+      injectedWallet({ chains, shimDisconnect: true }),
+      metaMaskWallet({
+        chains,
+        shimDisconnect: true,
+        walletConnectOptions: {
+          showQrModal: true,
+        },
+        projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_ID,
+      }),
+    ],
   },
   {
     groupName: 'Other Wallets',

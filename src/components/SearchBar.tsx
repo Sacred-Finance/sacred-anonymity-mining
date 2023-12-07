@@ -27,8 +27,7 @@ export const SearchBar = ({ searchTerm, debouncedResults }) => {
               transition={transition}
               disabled={!searchTerm}
               onClick={() => {
-                  if (inputRef.current)
-                inputRef.current.value = ''
+                if (inputRef.current) inputRef.current.value = ''
                 debouncedResults({ target: { value: '' } })
               }}
             >

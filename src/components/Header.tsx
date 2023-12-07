@@ -2,9 +2,13 @@ import React from 'react'
 import { Logo } from './Logo'
 import { NavBarButton } from '../components/buttons/NavBarButton'
 import { ThemeToggleButton } from './Theme'
-import { ArrowsPointingInIcon, ArrowsPointingOutIcon, UserCircleIcon } from '@heroicons/react/20/solid'
+import {
+  ArrowsPointingInIcon,
+  ArrowsPointingOutIcon,
+  UserCircleIcon,
+} from '@heroicons/react/20/solid'
 import ConnectWallet from './Connect/ConnectWallet'
-import clsx from 'clsx'
+import { clsx } from 'clsx'
 import { FaDiscord } from 'react-icons/fa'
 
 const Header = () => {
@@ -20,7 +24,14 @@ const Header = () => {
           : 'relative items-center justify-between'
       )}
     >
-      <div className={clsx('flex w-full md:w-fit', menuOpen ? 'items-start justify-between' : 'items-center justify-between pt-1')}>
+      <div
+        className={clsx(
+          'flex w-full md:w-fit',
+          menuOpen
+            ? 'items-start justify-between'
+            : 'items-center justify-between pt-1'
+        )}
+      >
         <NavBarButton href="/" className="">
           <div className="md:hidden">
             <Logo width={200} />
@@ -32,9 +43,15 @@ const Header = () => {
 
         <div className="flex items-center space-x-4 self-end sm:flex md:hidden ">
           {!menuOpen ? (
-            <ArrowsPointingOutIcon className="h-8 w-8" onClick={() => setMenuOpen(!menuOpen)} />
+            <ArrowsPointingOutIcon
+              className="h-8 w-8"
+              onClick={() => setMenuOpen(!menuOpen)}
+            />
           ) : (
-            <ArrowsPointingInIcon className="h-8 w-8" onClick={() => setMenuOpen(!menuOpen)} />
+            <ArrowsPointingInIcon
+              className="h-8 w-8"
+              onClick={() => setMenuOpen(!menuOpen)}
+            />
           )}
         </div>
       </div>
@@ -42,7 +59,7 @@ const Header = () => {
       <div
         className={clsx(
           'flex items-center gap-12',
-          menuOpen ? 'flex justify-center gap-4 flex-wrap ' : 'hidden md:flex'
+          menuOpen ? 'flex flex-wrap justify-center gap-4 ' : 'hidden md:flex'
         )}
       >
         <div className={'w-50 flex h-10 flex-shrink-0 grow '}>

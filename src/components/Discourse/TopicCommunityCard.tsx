@@ -23,32 +23,32 @@ const TopicCommunityCard: React.FC<{ topic: Topic; variant?: 'banner' | 'default
 
   return (
     <Link
-    key={topic.id}
-    href={`/discourse/${groupId}/${topic.id}`}
-    className={clsx(
-      'relative block w-full max-w-lg flex-shrink-0 flex-grow transform rounded shadow transition-transform dark:shadow-white',
-      variant === 'banner'
-        ? 'pointer-events-auto '
-        : 'hover-peer:-z-[1] peer overflow-hidden border border-gray-900 bg-white transition-all duration-300 ease-in-out hover:z-[150] dark:bg-gray-900 sm:w-full md:w-auto'
-    )}
-  >
-    <div className="relative flex h-full flex-col space-y-4 rounded bg-white transition-colors dark:bg-gray-900">
-      <div className="flex h-36 w-full items-center justify-center rounded-t bg-gray-800 p-4 text-xl font-semibold text-white dark:text-gray-300">
-        {topic?.fancy_title}
-      </div>
-      <div className="space-y-2 p-4">
-        <div className="flex justify-between">
-          <span className="text-gray-700 dark:text-gray-300">Posts: {topic.posts_count}</span>
-          <span className="text-gray-700 dark:text-gray-300">Likes: {topic.like_count}</span>
-          <span className="text-gray-700 dark:text-gray-300">Views: {topic.views}</span>
+      key={topic.id}
+      href={`/discourse/${groupId}/${topic.id}`}
+      className={clsx(
+        'relative block w-full max-w-lg flex-shrink-0 flex-grow transform rounded shadow transition-transform dark:shadow-white',
+        variant === 'banner'
+          ? 'pointer-events-auto '
+          : 'hover-peer:-z-[1] peer overflow-hidden border border-gray-900 bg-white transition-all duration-300 ease-in-out hover:z-[150] dark:bg-gray-900 sm:w-full md:w-auto'
+      )}
+    >
+      <div className="relative flex h-full flex-col space-y-4 rounded bg-white transition-colors dark:bg-gray-900">
+        <div className="flex h-36 w-full items-center justify-center rounded-t bg-gray-800 p-4 text-xl font-semibold text-white dark:text-gray-300">
+          {topic?.fancy_title}
         </div>
-        <ul className="text-xs text-gray-500 dark:text-gray-400">
-          <TimeSinceTopicCreated topic={topic} />
-          <TimeSinceLastPost topic={topic} />
-        </ul>
+        <div className="space-y-2 p-4">
+          <div className="flex justify-between">
+            <span className="text-gray-700 dark:text-gray-300">Posts: {topic.posts_count}</span>
+            <span className="text-gray-700 dark:text-gray-300">Likes: {topic.like_count}</span>
+            <span className="text-gray-700 dark:text-gray-300">Views: {topic.views}</span>
+          </div>
+          <ul className="text-xs text-gray-500 dark:text-gray-400">
+            <TimeSinceTopicCreated topic={topic} />
+            <TimeSinceLastPost topic={topic} />
+          </ul>
+        </div>
       </div>
-    </div>
-  </Link>
+    </Link>
   )
 }
 

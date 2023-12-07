@@ -7,7 +7,7 @@ import { cacheGroupData, uploadImages } from '../utils/communityUtils'
 import { useAccount } from 'wagmi'
 import { useCommunityContext } from '../contexts/CommunityProvider'
 import { constants, ethers } from 'ethers'
-import {createNote, getBytes32FromIpfsHash, getBytes32FromString} from '@/lib/utils'
+import { createNote, getBytes32FromIpfsHash, getBytes32FromString } from '@/lib/utils'
 import { CommunityDetails, Requirement } from '@/lib/model'
 import { Group } from '@/types/contract/ForumInterface'
 interface ICreateCommunityArgs extends Group {

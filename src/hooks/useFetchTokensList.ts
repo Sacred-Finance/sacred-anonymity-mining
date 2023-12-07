@@ -1,16 +1,16 @@
-import { useEffect, useState } from "react"
-import axios from "axios";
-import { isAddress } from "ethers/lib/utils.js";
-import { groupBy } from "lodash";
+import { useEffect, useState } from 'react'
+import axios from 'axios'
+import { isAddress } from 'ethers/lib/utils.js'
+import { groupBy } from 'lodash'
 
 export const useFetchTokensList = (chainId: number) => {
-  const [mappedTokensList, setMappedTokensList] = useState({});
-  const [filteredTokensList, setFilteredTokensList] = useState<any>([]);
+  const [mappedTokensList, setMappedTokensList] = useState({})
+  const [filteredTokensList, setFilteredTokensList] = useState<any>([])
 
   useEffect(() => {
-    fetchTokensList().then((data) => {
+    fetchTokensList().then(data => {
       const groupedData = groupBy(data?.tokens, 'chainId')
-      setMappedTokensList(groupedData);
+      setMappedTokensList(groupedData)
       setFilteredTokensList(groupedData[chainId])
     })
   }, [])
@@ -29,11 +29,11 @@ export const useFetchTokensList = (chainId: number) => {
     setFilteredTokensList(filteredTokens)
   }
 
-  const onSearch = (searchTerm) => {
+  const onSearch = searchTerm => {
     console.log(searchTerm)
     if (isAddress(searchTerm)) {
       filterByKey('address', searchTerm)
-    } else if(searchTerm) {
+    } else if (searchTerm) {
       filterByKey('name', searchTerm)
     } else {
       setFilteredTokensList(mappedTokensList[chainId])
@@ -44,8 +44,5 @@ export const useFetchTokensList = (chainId: number) => {
     return (await axios.get('https://gateway.ipfs.io/ipns/tokens.uniswap.org')).data
   }
 
-  
-
   return { filteredTokensList, onSearch }
-
 }

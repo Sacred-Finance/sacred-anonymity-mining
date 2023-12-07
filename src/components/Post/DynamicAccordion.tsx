@@ -25,7 +25,7 @@ function AiAccordionItem({ config, responses }: { config: AiAccordionConfig; res
 export function DynamicAccordion() {
   const { responses, setResponses, setEnabled, enabled } = useAIDigest()
 
-    console.log('responses', responses)
+  console.log('responses', responses)
 
   return (
     <Accordion

@@ -45,12 +45,12 @@ export const PostComment = ({ comment }: { comment: Item }) => {
       {comment && <PostItem post={comment} group={community} showAvatar={false} />}
       <div className="pt-3 text-gray-600 dark:text-gray-400">
         <div
-          className="flex gap-4 items-center"
+          className="flex items-center gap-4"
           style={{
             visibility: commentIsConfirmed(comment.id) ? 'visible' : 'hidden',
           }}
         >
-          {<AnimalAvatar seed={`${comment.note}_${Number(comment.groupId)}`} options={{size: 30}} /> }
+          {<AnimalAvatar seed={`${comment.note}_${Number(comment.groupId)}`} options={{ size: 30 }} />}
 
           <VoteForItemUI postId={comment.parentId} post={comment} group={community} />
 

@@ -63,7 +63,7 @@ export const CommunityCard = ({
         onMouseLeave={() => setShowBackground(false)}
         onClick={() => setShowBackground(false)}
         className={
-          'group relative flex flex-col justify-between overflow-hidden rounded-lg bg-gray-300/20 dark:bg-gray-800/50  divide-y divide-gray-300/20 dark:divide-gray-800/50'
+          'group relative flex flex-col justify-between divide-y divide-gray-300/20 overflow-hidden rounded-lg  bg-gray-300/20 dark:divide-gray-800/50 dark:bg-gray-800/50'
         }
       >
         <CardHeader className={'relative z-10  flex w-full flex-col   py-2  '}>
@@ -107,7 +107,7 @@ export const CommunityCard = ({
             </div>
           </CardTitle>
         </CardHeader>
-        <CardContent className={'pt-2 pb-0 min-h-[120px]'}>
+        <CardContent className={'min-h-[120px] pb-0 pt-2'}>
           {bannerSrc && (
             <Image
               className=" -z-1 pointer-events-none h-full w-full rounded-lg object-cover opacity-40 transition-opacity duration-300 ease-in-out group-hover:opacity-80"

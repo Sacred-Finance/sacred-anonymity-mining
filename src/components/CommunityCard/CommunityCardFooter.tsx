@@ -21,8 +21,8 @@ export const CommunityCardFooter = () => {
   if (!community) return null
 
   return (
-    <CardFooter className={'flex justify-between gap-2 py-4 pt-6   z-40 relative bg-opacity-10'}>
-      <div className="flex  shrink basis-[66%] lg:basis-[75%]   flex-wrap  gap-2 rounded">
+    <CardFooter className={'relative z-40 flex justify-between gap-2   bg-opacity-10 py-4 pt-6'}>
+      <div className="flex  shrink basis-[66%] flex-wrap   gap-2  rounded lg:basis-[75%]">
         <ToolTip tooltip={'# Users'} buttonProps={{ variant: 'outline', className: ' grow max-w-[75px] min-w-[45px]' }}>
           {userCount ?? 0} <UserIcon className="h-full w-4" />
         </ToolTip>

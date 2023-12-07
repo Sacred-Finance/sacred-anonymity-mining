@@ -29,7 +29,12 @@ export const useJoinCommunity = () => {
         const note = await createNote(freshUser)
         try {
           // Attempt to join the community
-          const joinResponse = await joinGroup(groupId.toString(), freshUser.getCommitment().toString(), username, note.toString())
+          const joinResponse = await joinGroup(
+            groupId.toString(),
+            freshUser.getCommitment().toString(),
+            username,
+            note.toString()
+          )
           // Call the prependUser function from the context provider instead of dispatching the action
 
           dispatch({

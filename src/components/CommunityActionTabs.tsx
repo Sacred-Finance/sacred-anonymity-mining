@@ -1,5 +1,5 @@
 import React from 'react'
-import clsx from "clsx";
+import clsx from 'clsx'
 
 const BaseSVG = ({ children, ...props }) => {
   return (
@@ -45,7 +45,7 @@ export const ChatIcon = ({ ...props }) => {
       strokeWidth={1.5}
       stroke="currentColor"
       {...props}
-      className={clsx('w-6 h-6', props.className)}
+      className={clsx('h-6 w-6', props.className)}
     >
       <path
         strokeLinecap="round"
@@ -65,7 +65,7 @@ export const PollIcon = ({ ...props }) => {
       strokeWidth={1.5}
       stroke="currentColor"
       {...props}
-      className={clsx('w-6 h-6', props.className)}
+      className={clsx('h-6 w-6', props.className)}
     >
       <path
         strokeLinecap="round"
@@ -85,7 +85,7 @@ export const InfoIcon = ({ ...props }) => {
       strokeWidth={1.5}
       stroke="currentColor"
       {...props}
-      className={clsx('w-6 h-6', props.className)}
+      className={clsx('h-6 w-6', props.className)}
     >
       <path
         strokeLinecap="round"

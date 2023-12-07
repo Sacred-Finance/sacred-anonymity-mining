@@ -1,7 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getHandler } from '@pages/api/discourse/helper'
 
-
 export default async function (req: NextApiRequest, res: NextApiResponse) {
   const { topicId } = req.query
   const { endpoint } = req.headers

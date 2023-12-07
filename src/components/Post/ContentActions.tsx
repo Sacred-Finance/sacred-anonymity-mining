@@ -67,7 +67,7 @@ export const ContentActions = ({
               isLoading={isLoading}
               disabled={!item || (!item.description?.blocks?.length && !item.blocks?.length)}
               onClick={() => save()}
-              startIcon={<PaperAirplaneIcon className="h-4 w-4 mr-1" />}
+              startIcon={<PaperAirplaneIcon className="mr-1 h-4 w-4" />}
               loadingPosition={'start'}
             >
               {t('button.save')}
@@ -78,7 +78,7 @@ export const ContentActions = ({
                 'border text-sm transition-colors duration-150 hover:bg-gray-500 hover:text-white',
                 'text-slate-200'
               )}
-              startIcon={<XCircleIcon className="h-4 w-4 mr-1" />}
+              startIcon={<XCircleIcon className="mr-1 h-4 w-4" />}
               loadingPosition={'start'}
               onClick={() => onClickCancel()}
             >

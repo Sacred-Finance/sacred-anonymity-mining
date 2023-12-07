@@ -7,9 +7,8 @@ import { User } from '../lib/model'
 import { useEffect, useRef } from 'react'
 import { parseBytes32String } from 'ethers/lib/utils'
 
-export const useFetchUsers = (groupId, loadOnInit = true,) => {
+export const useFetchUsers = (groupId, loadOnInit = true) => {
   const { dispatch } = useCommunityContext()
-
 
   const provider = useProvider({ chainId: polygonMumbai.id })
 
@@ -35,8 +34,7 @@ export const useFetchUsers = (groupId, loadOnInit = true,) => {
     }
 
     try {
-
-      const users = await fetchUsersFromContract();
+      const users = await fetchUsersFromContract()
 
       dispatch({
         type: 'SET_USERS',

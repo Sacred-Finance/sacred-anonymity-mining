@@ -13,9 +13,9 @@ const FilterButtons = ({ filters, onFilter, activeFilter, displayIcon = true, di
               onClick={() => onFilter(filter.name)}
               className={`${index !== 0 ? 'border-l border-gray-300' : ''} ${
                 isActive
-                  ? 'bg-purple-500 text-white hover:bg-primary-600'
+                  ? 'hover:bg-primary-600 bg-purple-500 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              } flex items-center px-4 py-2 focus:border-primary-400 focus:outline-none focus:ring`}
+              } focus:border-primary-400 flex items-center px-4 py-2 focus:outline-none focus:ring`}
             >
               {displayIcon && <span className="">{filter.icon}</span>}
               {displayName && <span>{filter.name}</span>}

@@ -14,7 +14,7 @@ interface RecursivePostRendererProps {
   controls: any // Assuming 'controls' type based on your snippet. Adjust if necessary.
   setTargetPostNumber: React.Dispatch<React.SetStateAction<number | null>>
   addReplyToPosts: (newPost: Post) => void
-  depth?: number,
+  depth?: number
   readonly?: boolean
 }
 
@@ -24,7 +24,7 @@ export const RecursivePostRenderer: React.FC<RecursivePostRendererProps> = ({
   setTargetPostNumber,
   addReplyToPosts,
   depth = 0,
-  readonly = false
+  readonly = false,
 }) => {
   return (
     <>

@@ -38,11 +38,8 @@ The `TopicPosts` component is responsible for displaying a list of posts within 
 ## Usage
 
 ```jsx
-import TopicPosts from 'path-to-component/TopicPosts';
-import { Topic } from '@components/Discourse/types';
+import TopicPosts from 'path-to-component/TopicPosts'
+import { Topic } from '@components/Discourse/types'
 
-const MyComponent = ({ topic }) => (
-  <TopicPosts topic={topic} />
-);
+const MyComponent = ({ topic }) => <TopicPosts topic={topic} />
 ```
-

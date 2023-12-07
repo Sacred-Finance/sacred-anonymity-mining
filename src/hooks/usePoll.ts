@@ -3,7 +3,14 @@ import { createComment, createPost, votePoll } from '@/lib/api'
 import { getGroupWithPostAndCommentData, getGroupWithPostData } from '@/lib/fetcher'
 import { ItemCreationRequest, PollRequestStruct, PostContent, ReputationProofStruct } from '@/lib/model'
 import { UnirepUser } from '@/lib/unirep'
-import { createNote, fetchUsersFromSemaphoreContract, getBytes32FromIpfsHash, hashBytes, hashBytes2, uploadIPFS } from '@/lib/utils'
+import {
+  createNote,
+  fetchUsersFromSemaphoreContract,
+  getBytes32FromIpfsHash,
+  hashBytes,
+  hashBytes2,
+  uploadIPFS,
+} from '@/lib/utils'
 import { Group, Item } from '@/types/contract/ForumInterface'
 import { Group as SemaphoreGroup } from '@semaphore-protocol/group'
 import { Identity } from '@semaphore-protocol/identity'
@@ -25,13 +32,13 @@ interface Poll {
 }
 
 interface SubmitPollParams {
-  id: any;
-  pollData: number[];
-  onSuccessCallback: any;
-  onErrorCallback: any;
+  id: any
+  pollData: number[]
+  onSuccessCallback: any
+  onErrorCallback: any
 }
 
-export const usePoll = ({  group }: { group: Group }) => {
+export const usePoll = ({ group }: { group: Group }) => {
   const { address } = useAccount()
   const activeUser = useActiveUser({ groupId: group.id })
 
@@ -145,7 +152,7 @@ export const usePoll = ({  group }: { group: Group }) => {
     }
   }
 
-  const submitPoll = async ({id, pollData, onSuccessCallback, onErrorCallback}: SubmitPollParams) => {
+  const submitPoll = async ({ id, pollData, onSuccessCallback, onErrorCallback }: SubmitPollParams) => {
     try {
       const signal = hashBytes2(id, 'votePoll')
       const extraNullifier = signal.toString()

@@ -2,7 +2,7 @@ import { ethers } from 'ethers'
 import { erc20dummyABI, forumContract, providerMap } from '@/constant/const'
 import { setCache } from '@/lib/redis'
 import { getContent, getIpfsHashFromBytes32, parseComment, parsePost, uploadImageToIPFS } from '@/lib/utils'
-import {CommunityDetails, ContentType, ReputationProofStruct, Requirement} from '@/lib/model'
+import { CommunityDetails, ContentType, ReputationProofStruct, Requirement } from '@/lib/model'
 
 import pica from 'pica'
 import { useCallback } from 'react'
@@ -377,4 +377,3 @@ export async function augmentItemData(rawItemData: RawItemData): Promise<Item> {
     console.error('augmentItemData', e)
   }
 }
-

@@ -1,7 +1,14 @@
 import { ItemCreationRequest, ReputationProofStruct, User } from '@/lib/model'
 import { BigNumber, ethers } from 'ethers'
 import { Identity } from '@semaphore-protocol/identity'
-import { createNote, fetchUsersFromSemaphoreContract, generateGroth16Proof, getBytes32FromIpfsHash, hashBytes, uploadIPFS } from '@/lib/utils'
+import {
+  createNote,
+  fetchUsersFromSemaphoreContract,
+  generateGroth16Proof,
+  getBytes32FromIpfsHash,
+  hashBytes,
+  uploadIPFS,
+} from '@/lib/utils'
 import { forumContract } from '@/constant/const'
 import { createComment, createPost, edit } from '@/lib/api'
 import { UnirepUser } from '@/lib/unirep'

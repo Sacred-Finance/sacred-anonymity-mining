@@ -55,7 +55,7 @@ export const postHandler = (req: NextApiRequest, res: NextApiResponse) => async 
 
 export const gptPostHandler = async (url: string, body: any) => {
   try {
-   return  fetch(url, {
+    return fetch(url, {
       method: 'POST',
       headers: {
         'Accept-Encoding': 'gzip, deflate, br',

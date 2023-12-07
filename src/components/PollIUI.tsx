@@ -201,7 +201,7 @@ export const PollUI = ({ group, post }: { group: Group; post: Item }) => {
             ))}
           <PrimaryButton
             className={clsx(
-              'w-fit my-2',
+              'my-2 w-fit',
               'border border-gray-500 text-sm text-slate-200 transition-colors duration-150 hover:bg-gray-500 hover:text-white dark:text-slate-200'
             )}
             type="button"

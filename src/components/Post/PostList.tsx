@@ -29,8 +29,8 @@ export const PostList = ({ posts }: { posts: Item[] }) => {
           <EditorJsRenderer data={p.description} className={'line-clamp-4'} />
         </CardContent>
 
-        <CardFooter className={'justify-self-end items-end'}>
-          {<AnimalAvatar seed={`${p.note}_${Number(p.groupId)}`} options={{size: 30}} /> }
+        <CardFooter className={'items-end justify-self-end'}>
+          {<AnimalAvatar seed={`${p.note}_${Number(p.groupId)}`} options={{ size: 30 }} />}
 
           <Badge className="flex gap-4">
             {p.childIds.length} <BookOpenIcon className="h-full w-4" />
