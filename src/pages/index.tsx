@@ -7,6 +7,7 @@ import useSWR from 'swr'
 import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
 import Head from 'next/head'
+import { Syncing } from '@/components/Syncing'
 
 function Home({ discourseCommunities }) {
   const router = useRouter()
@@ -52,8 +53,9 @@ function Home({ discourseCommunities }) {
         <meta property="og:title" content="Sacred Logos" key="title" />
         <meta property="og:url" content={location.href} />
       </Head>
+      {isValidating && <Syncing />}
       <HomePage
-        isLoading={isLoading || isValidating}
+        isLoading={isLoading}
         isAdmin={isAdmin || isModerator || false}
         discourseCommunities={discourseCommunities}
       />

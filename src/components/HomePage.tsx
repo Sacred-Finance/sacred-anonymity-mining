@@ -5,7 +5,6 @@ import { useCommunityContext } from '../contexts/CommunityProvider'
 import { motion } from 'framer-motion'
 import { Group } from '@/types/contract/ForumInterface'
 import { DiscourseCommunity } from '@/lib/model'
-import { useLocalStorage } from '@/hooks/useLocalStorage'
 import Communities from './Discourse/Communities'
 import { useRouter } from 'next/router'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shad/ui/tabs'
@@ -22,16 +21,8 @@ interface HomeProps {
   discourseCommunities: DiscourseCommunity[]
 }
 
-function NoCommunities(props: { isLoading: boolean; searchTerm: string }) {
+function NoCommunities({ searchTerm }: { searchTerm: string }) {
   const router = useRouter()
-  if (props.isLoading) {
-    return (
-      <>
-        <LoadingComponent />
-      </>
-    )
-  }
-
   return (
     <>
       <div className="col-span-full flex w-full flex-col items-center justify-center space-y-4">
@@ -53,7 +44,7 @@ function NoCommunities(props: { isLoading: boolean; searchTerm: string }) {
         >
           <>
             {' '}
-            {props.searchTerm
+            {searchTerm
               ? 'We could not find any communities that match your search. Try adjusting your filters or search again with a different term'
               : 'We could not find any communities at this time. Please try again later'}
             .
@@ -77,12 +68,11 @@ function NoCommunities(props: { isLoading: boolean; searchTerm: string }) {
 
 function HomePage({ isLoading = false, isAdmin = false, discourseCommunities }: HomeProps) {
   const { state } = useCommunityContext()
-  const { communities, users } = state
+  const { communities } = state
 
   // state
   const [filteredCommunities, setFilteredCommunities] = useState<Group[]>(communities)
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedIndex, setSelectedIndex] = useLocalStorage('communityTab', 0)
   const router = useRouter()
 
   useEffect(() => {
@@ -90,14 +80,6 @@ function HomePage({ isLoading = false, isAdmin = false, discourseCommunities }: 
       debouncedResults.cancel()
     }
   })
-
-  useEffect(() => {
-    if (router.query?.tab) {
-      if (typeof router.query.tab === 'string') {
-        setSelectedIndex(parseInt(router.query.tab))
-      }
-    }
-  }, [])
 
   const handleSearchChange = e => {
     const val = e.target.value
@@ -120,8 +102,13 @@ function HomePage({ isLoading = false, isAdmin = false, discourseCommunities }: 
   }, [communities])
 
   // todo: find a standard for page loading.
+
+  if (isLoading) {
+    return <LoadingComponent />
+  }
+
   if (!communities.length) {
-    return <NoCommunities isLoading={isLoading} searchTerm={searchTerm} />
+    return <NoCommunities searchTerm={searchTerm} />
   }
   return (
     <>
