@@ -18,6 +18,10 @@ import Dropdown from '@/components/buttons/Dropdown/Dropdown'
 import TagInput from '@/components/TagInput/TagInput'
 import SelectToken from '@/components/SelectToken/SelectToken'
 import Head from 'next/head'
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/shad/ui/hover-card'
+import { Button } from '@/shad/ui/button'
+import { FaCircleInfo } from 'react-icons/fa6'
+import { CommunityCardBody } from '@components/CommunityCard/CommunityCardBody'
 
 export interface HandleSetImage {
   file: File | null
@@ -186,16 +190,22 @@ function CreateGroupFormUI({ onCreate }) {
 
           <div className="flex items-center justify-between space-x-4">
             <div className="flex items-center space-x-4">
-              <ToolTip
-                tooltip={t('toolTip.tokenGating.message') || ''}
-                buttonProps={{ variant: 'secondary', className: 'flex gap-4' }}
-              >
-                <QuestionMarkCircleIcon className="h-6 w-6" />
-              </ToolTip>
-
-              <label htmlFor={'isChecked'} className="text-lg font-semibold">
-                {t('toolTip.tokenGating.title')}
-              </label>
+              <HoverCard openDelay={500} closeDelay={250}>
+                <HoverCardTrigger asChild>
+                  <Button variant="outline" className={' flex items-center justify-center rounded p-3 text-xs'}>
+                    <FaCircleInfo className={'h-4 w-4 flex-shrink-0'} />
+                  </Button>
+                </HoverCardTrigger>
+                <HoverCardContent className="pointer-events-auto max-h-96 w-96 overflow-y-auto ">
+                  <div className="space-y-1">
+                    <span className="text-md max-h-72 text-muted-foreground">
+                      {t('toolTip.tokenGating.title')}
+                      <hr className={'mb-2 mt-1'} />
+                      {t('toolTip.tokenGating.message') || ''}
+                    </span>
+                  </div>
+                </HoverCardContent>
+              </HoverCard>
 
               <input
                 type="checkbox"
@@ -240,7 +250,7 @@ function CreateGroupFormUI({ onCreate }) {
             <AnimatePresence>
               <motion.form onSubmit={submit}>
                 {formik.values.tokenRequirements.length === 0 && (
-                  <div className="flex flex-col items-center justify-center space-y-4 rounded border border-gray-200 bg-gray-100 p-4">
+                  <div className="flex flex-col items-center justify-center space-y-4 rounded border border-gray-200 bg-gray-100 p-4 dark:bg-gray-900">
                     <p className="text-sm font-semibold ">{t('placeholder.noTokenRequirements')}</p>
                   </div>
                 )}
@@ -282,8 +292,6 @@ function CreateGroupFormUI({ onCreate }) {
                             />
                           </div>
 
-                          
-
                           <button
                             type="button"
                             onClick={() => {
@@ -313,11 +321,7 @@ function CreateGroupFormUI({ onCreate }) {
             >
               Close
             </Link>
-            <PrimaryButton
-              disabled={isSubmitDisabled || isSubmitting}
-              onClick={submit}
-              isLoading={isSubmitting}
-            >
+            <PrimaryButton disabled={isSubmitDisabled || isSubmitting} onClick={submit} isLoading={isSubmitting}>
               {t('button.create')}
             </PrimaryButton>
           </div>

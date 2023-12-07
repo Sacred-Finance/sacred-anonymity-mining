@@ -20,7 +20,12 @@ const Header = () => {
           : 'relative items-center justify-between'
       )}
     >
-      <div className={clsx('flex w-full md:w-fit', menuOpen ? 'items-start justify-between' : 'items-center justify-between pt-1')}>
+      <div
+        className={clsx(
+          'flex w-full md:w-fit',
+          menuOpen ? 'items-start justify-between' : 'items-center justify-between pt-1'
+        )}
+      >
         <NavBarButton href="/" className="">
           <div className="md:hidden">
             <Logo width={200} />
@@ -41,8 +46,8 @@ const Header = () => {
 
       <div
         className={clsx(
-          'flex items-center gap-12',
-          menuOpen ? 'flex justify-center gap-4 flex-wrap ' : 'hidden md:flex'
+          'flex items-center gap-4',
+          menuOpen ? 'flex flex-wrap justify-center gap-4 ' : 'hidden md:flex'
         )}
       >
         <div className={'w-50 flex h-10 flex-shrink-0 grow '}>
@@ -52,17 +57,17 @@ const Header = () => {
           href="https://discord.com/channels/816041991502430218/829728678190907412"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-gray-600 hover:!text-purple-500  dark:text-gray-300"
         >
           <FaDiscord className="h-8 w-8" />
+          <span className={'text-sm'}>Discord</span>
         </NavBarButton>
         <NavBarButton
           href="/account"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-gray-600 hover:!text-purple-500 dark:text-gray-300"
         >
           <UserCircleIcon className="h-8 w-8" />
+          <span className={'text-sm'}>Account</span>
         </NavBarButton>
         <ThemeToggleButton />
       </div>

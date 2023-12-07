@@ -11,7 +11,7 @@ import { OutputDataToHTML } from '@components/Discourse/OutputDataToMarkDown'
 import { PostItem } from '@components/Post/PostItem'
 import { NewPostModal, PostComment, TempComment } from '@components/Post/PostComments'
 import { Tab } from '@headlessui/react'
-import { ExclamationCircleIcon } from '@heroicons/react/20/solid'
+import { SparklesIcon } from '@heroicons/react/20/solid'
 import { ChatIcon, InfoIcon, PollIcon } from '@components/CommunityActionTabs'
 import { NewPostForm, NewPostFormProps } from '@components/NewPostForm'
 import { useItemsSortedByVote } from '@/hooks/useItemsSortedByVote'
@@ -42,13 +42,11 @@ import { emptyPollRequest } from '@/lib/item'
 import { ScrollArea } from '@/shad/ui/scroll-area'
 import ReputationCard from '../ReputationCard'
 import AIDigestButton from '@components/buttons/AIPostDigestButton'
-import { WandIcon } from 'lucide-react'
 import { Card } from '@/shad/ui/card'
 import { DynamicAccordion } from '@components/Post/DynamicAccordion'
-import { Checkbox } from '@/shad/ui/checkbox'
-import clsx from 'clsx'
 import { analysisLabelsAndTypes } from '@components/Post/AiAccordionConfig'
 import { AnalysisCheckboxComponent } from '@components/Post/AiAnalysisCheckboxComponent'
+import { Button } from '@/shad/ui/button'
 
 export const AIDigestContext = React.createContext<{
   enabled: { [key: string]: boolean }
@@ -132,7 +130,7 @@ export function PostPage({
             </div>
             <div className=" flex h-full grow flex-col gap-4 overflow-y-auto p-3 md:w-1/2">
               <Tab.Group onChange={handleTabChange} defaultIndex={selectedTab} selectedIndex={selectedTab}>
-                <Tab.List className="sticky top-0 z-10 flex gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
+                <Tab.List className="sticky top-0 z-10 flex flex-wrap gap-4 rounded-xl border  bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
                   {Object.entries(tabData).map(([name, Icon], index) => (
                     <TooltipTab key={index} name={name} Icon={Icon} />
                   ))}
@@ -204,21 +202,22 @@ export function PostPage({
   )
 }
 const tabData = {
-  'All Replies': ChatIcon,
-  'Polls': PollIcon,
-  'AI': WandIcon,
-  'Community Info': InfoIcon,
+  Replies: ChatIcon,
+  Polls: PollIcon,
+  AI: SparklesIcon,
+  Info: InfoIcon,
 }
 
 const TooltipTab = ({ name, Icon }) => (
   <Tab
     className={({ selected }) =>
-      `rounded bg-secondary text-secondary-foreground dark:bg-gray-950/50 ${selected ? 'ring-[1px] ring-primary' : ''}`
+      ` bg-secondary text-secondary-foreground dark:bg-gray-950/50 ${selected ? 'ring-[1px] ring-primary bg-black/10' : ''}`
     }
   >
-    <ToolTip tooltip={name} buttonProps={{ variant: 'link' }}>
-      <Icon className={'h-7 w-7'} />
-    </ToolTip>
+    <Button variant="outline">
+      <Icon className={'h-5 w-5'} />
+      {name}
+    </Button>
   </Tab>
 )
 interface HandleVoteParams {
