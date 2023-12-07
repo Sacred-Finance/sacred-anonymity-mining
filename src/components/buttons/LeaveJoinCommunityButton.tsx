@@ -12,24 +12,28 @@ export function LeaveJoinCommunityButton(props: {
     showBackground: boolean
     bannerSrc: string | undefined
   }
-  hasUserJoined: User | boolean
+  hasUserJoined: User | boolean | null
 }) {
+  const { address } = useAccount()
+
+  if (!address) return <ConnectButton label={'Connect'} />
+
   return (
     <>
       {props.community ? (
-        <React.Fragment>
-          {props.hasUserJoined ? (
+        <>
+          {!!props.hasUserJoined ? (
             <LeaveCommunityButton community={props.community} />
           ) : (
-            <React.Fragment>
-              {props.hasUserJoined == null ? (
+            <>
+              {!props.hasUserJoined ? (
                 <CircularLoader />
               ) : (
                 <JoinCommunityButton community={props.community} hideIfJoined={props.community.variant === 'banner'} />
               )}
-            </React.Fragment>
+            </>
           )}
-        </React.Fragment>
+        </>
       ) : (
         <svg className="h-5 w-5 animate-spin text-blue-600 dark:text-blue-400" viewBox="0 0 24 24">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
