@@ -5,11 +5,9 @@ import { app } from '@/appConfig'
 import { useEffect, useRef } from 'react'
 import HeadGlobal from '@/components/HeadGlobal'
 import '../../i18n'
-import { alchemyProvider } from 'wagmi/providers/alchemy'
-
 import { darkTheme, RainbowKitProvider, Theme } from '@rainbow-me/rainbowkit'
-import {  polygonMumbai } from 'wagmi/chains'
-import {  WagmiConfig } from 'wagmi'
+import { polygonMumbai } from 'wagmi/chains'
+import { WagmiConfig } from 'wagmi'
 import { CommunityProvider } from '../contexts/CommunityProvider'
 import { startIPFS } from '../lib/utils'
 import { ToastContainer } from 'react-toastify'
@@ -39,8 +37,12 @@ function App({ Component, pageProps }: AppProps) {
 export default App
 
 const myTheme = merge(darkTheme(), {
+  radii: {
+    connectButton: '0.25rem',
+  },
   colors: {
-    accentColor: '#07296d',
+    accentColor: '#7b3fe4',
+    accentColorForeground: 'white',
   },
 } as Theme)
 
