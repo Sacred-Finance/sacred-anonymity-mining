@@ -2,10 +2,11 @@ import { useContractWrite } from 'wagmi'
 import { ForumContractAddress } from '../constant/const'
 import ForumABI from '../constant/abi/Forum.json'
 import { setCacheAtSpecificPath } from '../lib/redis'
-import { CommunityId, useCommunityContext } from '../contexts/CommunityProvider'
+import type { CommunityId } from '../contexts/CommunityProvider'
+import { useCommunityContext } from '../contexts/CommunityProvider'
 import { toast } from 'react-toastify'
 import { useRouter } from 'next/router'
-import { Address } from '@/types/common'
+import type { Address } from '@/types/common'
 import { useState } from 'react'
 
 export const useRemoveGroup = (groupId: CommunityId) => {

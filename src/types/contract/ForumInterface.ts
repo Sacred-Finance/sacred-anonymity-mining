@@ -1,6 +1,5 @@
-import { BigNumber, ethers } from 'ethers'
-import { OutputData } from '@editorjs/editorjs'
-import { OutputBlockData } from '@editorjs/editorjs/types/data-formats/output-data'
+import type { BigNumber, ethers } from 'ethers'
+import type { OutputData } from '@editorjs/editorjs'
 
 export interface Admins {
   _admins: string[]
@@ -292,23 +291,53 @@ export interface PostsInGroup {
 }
 
 export interface SetGroupBannerByOwner {
-  (a: number[], b: number[][], c: number[], groupId: number, bannerCID: string): Promise<void> // The function that doesn't return a value, hence Promise<void>
+  (
+    a: number[],
+    b: number[][],
+    c: number[],
+    groupId: number,
+    bannerCID: string
+  ): Promise<void> // The function that doesn't return a value, hence Promise<void>
 }
 
 export interface SetGroupDescriptionByOwner {
-  (a: number[], b: number[][], c: number[], groupId: number, description: string): Promise<void> // The function that doesn't return a value, hence Promise<void>
+  (
+    a: number[],
+    b: number[][],
+    c: number[],
+    groupId: number,
+    description: string
+  ): Promise<void> // The function that doesn't return a value, hence Promise<void>
 }
 
 export interface SetGroupDetailsByOwner {
-  (a: number[], b: number[][], c: number[], groupId: number, details: GroupDetails): Promise<void> // The function that doesn't return a value, hence Promise<void>
+  (
+    a: number[],
+    b: number[][],
+    c: number[],
+    groupId: number,
+    details: GroupDetails
+  ): Promise<void> // The function that doesn't return a value, hence Promise<void>
 }
 
 export interface SetGroupLogoByOwner {
-  (a: number[], b: number[][], c: number[], groupId: number, logoCID: string): Promise<void> // The function that doesn't return a value, hence Promise<void>
+  (
+    a: number[],
+    b: number[][],
+    c: number[],
+    groupId: number,
+    logoCID: string
+  ): Promise<void> // The function that doesn't return a value, hence Promise<void>
 }
 
 export interface SetGroupTagsByOwner {
-  (a: number[], b: number[][], c: number[], groupId: number, tags: string[]): Promise<void> // The function that doesn't return a value, hence Promise<void>
+  (
+    a: number[],
+    b: number[][],
+    c: number[],
+    groupId: number,
+    tags: string[]
+  ): Promise<void> // The function that doesn't return a value, hence Promise<void>
 }
 
 export interface UserUnirepSignUp {

@@ -1,7 +1,7 @@
-import { OutputData } from '@editorjs/editorjs'
-import { BigNumberish } from 'ethers'
-import { Requirement as ContractRequirement } from '@/types/contract/ForumInterface'
-import { Identity } from '@semaphore-protocol/identity'
+import type { OutputData } from '@editorjs/editorjs'
+import type { BigNumberish } from 'ethers'
+import type { Requirement as ContractRequirement } from '@/types/contract/ForumInterface'
+import type { Identity } from '@semaphore-protocol/identity'
 
 export interface Requirement extends ContractRequirement {
   name?: string

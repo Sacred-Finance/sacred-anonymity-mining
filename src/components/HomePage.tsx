@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { debounce } from 'lodash'
-import { CommunityCard } from '../components/CommunityCard/CommunityCard'
-import { useCommunityContext } from '../contexts/CommunityProvider'
+import { CommunityCard } from '@components/CommunityCard/CommunityCard'
+import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { motion } from 'framer-motion'
-import { Group } from '@/types/contract/ForumInterface'
-import { DiscourseCommunity } from '@/lib/model'
+import type { Group } from '@/types/contract/ForumInterface'
+import type { DiscourseCommunity } from '@/lib/model'
 import Communities from './Discourse/Communities'
 import { useRouter } from 'next/router'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shad/ui/tabs'
@@ -66,12 +66,17 @@ function NoCommunities({ searchTerm }: { searchTerm: string }) {
   )
 }
 
-function HomePage({ isLoading = false, isAdmin = false, discourseCommunities }: HomeProps) {
+function HomePage({
+  isLoading = false,
+  isAdmin = false,
+  discourseCommunities,
+}: HomeProps) {
   const { state } = useCommunityContext()
   const { communities } = state
 
   // state
-  const [filteredCommunities, setFilteredCommunities] = useState<Group[]>(communities)
+  const [filteredCommunities, setFilteredCommunities] =
+    useState<Group[]>(communities)
   const [searchTerm, setSearchTerm] = useState('')
   const router = useRouter()
 
@@ -121,7 +126,10 @@ function HomePage({ isLoading = false, isAdmin = false, discourseCommunities }: 
             <TabsTrigger value="discourse">Discourse</TabsTrigger>
           </TabsList>
           <div className="ml-auto mr-4 flex w-full max-w-xl items-center">
-            <SearchBar debouncedResults={debouncedResults} searchTerm={searchTerm} />
+            <SearchBar
+              debouncedResults={debouncedResults}
+              searchTerm={searchTerm}
+            />
           </div>
           <div className="ml-auto mr-4">
             <Button
@@ -138,26 +146,42 @@ function HomePage({ isLoading = false, isAdmin = false, discourseCommunities }: 
         <TabsContent value="logos" className="border-none p-0 outline-none">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <h2 className="text-2xl font-semibold tracking-tight">Communities</h2>
+              <h2 className="text-2xl font-semibold tracking-tight">
+                Communities
+              </h2>
             </div>
           </div>
           <Separator className="my-4" />
           <div className="relative">
             <ScrollArea className={'h-full'}>
               <div className="grid-cols-auto flex grow flex-col  gap-6 rounded-lg p-0 md:grid  md:py-8 lg:grid-cols-2 xl:grid-cols-3">
-                {(filteredCommunities.length ? filteredCommunities : communities).map(community => (
-                  <CommunityCard key={`$community_${community.id}`} community={community} isAdmin={isAdmin || false} />
+                {(filteredCommunities.length
+                  ? filteredCommunities
+                  : communities
+                ).map(community => (
+                  <CommunityCard
+                    key={`$community_${community.id}`}
+                    community={community}
+                    isAdmin={isAdmin || false}
+                  />
                 ))}
               </div>
               <ScrollBar orientation="vertical" />
             </ScrollArea>
           </div>
         </TabsContent>
-        <TabsContent value="discourse" className="h-full flex-col border-none p-0 data-[state=active]:flex">
+        <TabsContent
+          value="discourse"
+          className="h-full flex-col border-none p-0 data-[state=active]:flex"
+        >
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <h2 className="text-2xl font-semibold tracking-tight">Discourse</h2>
-              <p className="text-sm text-muted-foreground">Your favorite communities. From Discourse.</p>
+              <h2 className="text-2xl font-semibold tracking-tight">
+                Discourse
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Your favorite communities. From Discourse.
+              </p>
             </div>
           </div>
           <Separator className="my-4" />

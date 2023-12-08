@@ -27,7 +27,17 @@ export const DemoContextProvider = ({ children }) => {
   }
 
   return (
-    <DemoContext.Provider value={{ account, setAccount, isLoading, setIsLoading, texts, addText, removeText }}>
+    <DemoContext.Provider
+      value={{
+        account,
+        setAccount,
+        isLoading,
+        setIsLoading,
+        texts,
+        addText,
+        removeText,
+      }}
+    >
       {children}
     </DemoContext.Provider>
   )

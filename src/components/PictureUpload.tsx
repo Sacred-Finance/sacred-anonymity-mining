@@ -1,7 +1,8 @@
-import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'next-i18next'
 import { useHandleFileImageUpload } from '../utils/communityUtils'
-import { HandleSetImage } from '@pages/communities/[groupId]/edit'
+import type { HandleSetImage } from '@pages/communities/[groupId]/edit'
 
 export const PictureUpload = (props: {
   uploadedImageUrl: string | null
@@ -9,19 +10,25 @@ export const PictureUpload = (props: {
   name: 'banner' | 'logo'
   setImageFileState: Dispatch<SetStateAction<HandleSetImage>>
 }) => {
-  const handleFileImageUpload = useHandleFileImageUpload(props.setImageFileState)
+  const handleFileImageUpload = useHandleFileImageUpload(
+    props.setImageFileState
+  )
 
   const { t } = useTranslation()
   const inputRef = useRef<HTMLInputElement | null>(null)
   const imageRef = useRef<HTMLImageElement | null>(null)
   const [isDeleteIconVisible, setIsDeleteIconVisible] = useState(false)
   const openFileUpload = () => {
-    if (props.uploadedImageUrl) return
+    if (props.uploadedImageUrl) {
+      return
+    }
     inputRef.current?.click()
   }
 
   useEffect(() => {
-    if (!imageRef.current) return
+    if (!imageRef.current) {
+      return
+    }
 
     // on hover show edit button
     const showDeleteIcon = () => {
@@ -54,7 +61,9 @@ export const PictureUpload = (props: {
               style={{ opacity: isDeleteIconVisible ? 0.5 : 1 }}
               onClick={() => {
                 props.setImageFileState({ imageType: props.name, file: null })
-                if (!inputRef.current) return
+                if (!inputRef.current) {
+                  return
+                }
                 inputRef.current.value = ''
               }}
               src={props.uploadedImageUrl}
@@ -65,7 +74,9 @@ export const PictureUpload = (props: {
                 className="absolute inset-0 flex h-full w-full items-center justify-center"
                 onClick={() => {
                   props.setImageFileState({ imageType: props.name, file: null })
-                  if (!inputRef.current) return
+                  if (!inputRef.current) {
+                    return
+                  }
                   inputRef.current.value = ''
                 }}
               >
@@ -75,7 +86,12 @@ export const PictureUpload = (props: {
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M6 18L18 6M6 6l12 12" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             )}

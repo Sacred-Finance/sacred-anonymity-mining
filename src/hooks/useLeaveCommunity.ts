@@ -1,7 +1,14 @@
-import { useActiveUser, useCommunityContext, useUsers } from '@/contexts/CommunityProvider'
+import {
+  useActiveUser,
+  useCommunityContext,
+} from '@/contexts/CommunityProvider'
 import { leaveGroup } from '@/lib/api'
-import { User } from '@/lib/model'
-import { createNote, fetchUsersFromSemaphoreContract, generateGroth16Proof } from '@/lib/utils'
+import type { User } from '@/lib/model'
+import {
+  createNote,
+  fetchUsersFromSemaphoreContract,
+  generateGroth16Proof,
+} from '@/lib/utils'
 import { Group } from '@semaphore-protocol/group'
 import { Identity } from '@semaphore-protocol/identity'
 import { useAccount } from 'wagmi'
@@ -17,7 +24,7 @@ export const useLeaveCommunity = ({ id }) => {
     console.log('Leaving group...')
 
     const userIdentity = new Identity(`${address}_${id}_anon`)
-    let group = new Group(id)
+    const group = new Group(id)
     const users = await fetchUsersFromSemaphoreContract(id)
     users.forEach(u => group.addMember(BigInt(u)))
     const index = group.indexOf(BigInt(userIdentity.commitment))
@@ -26,7 +33,7 @@ export const useLeaveCommunity = ({ id }) => {
     const { siblings, pathIndices, root } = group.generateMerkleProof(index)
 
     const note = await createNote(userIdentity)
-    let input = {
+    const input = {
       note: note,
       trapdoor: userIdentity.getTrapdoor(),
       nullifier: userIdentity.getNullifier(),

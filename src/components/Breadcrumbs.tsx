@@ -1,4 +1,5 @@
-import React, { ReactNode, useEffect, useState } from 'react'
+import type { ReactNode } from 'react'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { CircularLoader } from '@components/buttons/JoinCommunityButton'
@@ -25,17 +26,26 @@ function useBreadcrumbs(): BreadCrumbItem[] {
       setBreadcrumbItems([])
       return
     }
-    setBreadcrumbItems(generateBreadcrumbItems(activeCommunity.community, activePost.post, router.pathname))
+    setBreadcrumbItems(
+      generateBreadcrumbItems(
+        activeCommunity.community,
+        activePost.post,
+        router.pathname
+      )
+    )
   }, [state, router.pathname])
 
   return breadcrumbItems
 }
 
-export const Breadcrumbs = ({ backdrop = false }): JSX.Element => {
+export const Breadcrumbs = (): JSX.Element => {
   const breadcrumbItems = useBreadcrumbs()
 
   return (
-    <nav className="flex justify-between gap-4 rounded-t px-5 py-3 text-gray-700" aria-label="Breadcrumb">
+    <nav
+      className="flex justify-between gap-4 rounded-t px-5 py-3 text-gray-700"
+      aria-label="Breadcrumb"
+    >
       <ol className="flex items-center gap-4 dark:text-white">
         {breadcrumbItems.map((item, index) => (
           <li key={index} className="inline-flex items-center gap-4">
@@ -49,7 +59,9 @@ export const Breadcrumbs = ({ backdrop = false }): JSX.Element => {
 }
 
 const BreadcrumbLink = ({ item }: { item: BreadCrumbItem }) => {
-  if (!item) return null
+  if (!item) {
+    return null
+  }
 
   return (
     <Link
@@ -59,7 +71,9 @@ const BreadcrumbLink = ({ item }: { item: BreadCrumbItem }) => {
           e.preventDefault()
         }
       }}
-      className={clsx(item.isCurrentPage ? 'text-primary' : 'hover:text-primary/90')}
+      className={clsx(
+        item.isCurrentPage ? 'text-primary' : 'hover:text-primary/90'
+      )}
     >
       {item.label}
     </Link>
@@ -75,7 +89,11 @@ const BreadcrumbArrow = () => (
     stroke="currentColor"
     className="h-4 w-4"
   >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M8.25 4.5l7.5 7.5-7.5 7.5"
+    />
   </svg>
 )
 
@@ -84,28 +102,52 @@ const elipsis = (text, length) => {
 }
 
 function generateBreadcrumbItems(community, post, pathname): BreadCrumbItem[] {
-  const communityLabel = elipsis(community?.name, 50) ?? <CircularLoader className={'text-white'} />
-  const postLabel = elipsis(post.title, 20) ?? <CircularLoader className={'text-white'} />
+  const communityLabel = elipsis(community?.name, 50) ?? (
+    <CircularLoader className={'text-white'} />
+  )
+  const postLabel = elipsis(post.title, 20) ?? (
+    <CircularLoader className={'text-white'} />
+  )
 
-  let items = [HOME_BREADCRUMB] // Default breadcrumb item
+  const items = [HOME_BREADCRUMB] // Default breadcrumb item
 
   if (pathname === '/') {
     return [{ ...HOME_BREADCRUMB, isCurrentPage: true }]
   } else if (pathname.includes('/post/')) {
     items.push(
-      { label: communityLabel, href: `/communities/${community?.id}`, isCurrentPage: false },
-      { label: postLabel, href: `/communities/${community?.id}/post/${post.id}`, isCurrentPage: true }
+      {
+        label: communityLabel,
+        href: `/communities/${community?.id}`,
+        isCurrentPage: false,
+      },
+      {
+        label: postLabel,
+        href: `/communities/${community?.id}/post/${post.id}`,
+        isCurrentPage: true,
+      }
     )
   } else if (pathname.includes('/communities/')) {
-    items.push({ label: communityLabel, href: `/communities/${community?.id}`, isCurrentPage: true })
+    items.push({
+      label: communityLabel,
+      href: `/communities/${community?.id}`,
+      isCurrentPage: true,
+    })
   } else if (pathname.includes('/access')) {
     items.push({ label: 'Access', href: '/access', isCurrentPage: true })
   } else if (pathname.includes('/account')) {
     items.push({ label: 'Account', href: '/account', isCurrentPage: true })
   } else if (pathname.includes('/create-group')) {
-    items.push({ label: 'Create Group', href: '/create-group', isCurrentPage: true })
+    items.push({
+      label: 'Create Group',
+      href: '/create-group',
+      isCurrentPage: true,
+    })
   } else if (pathname.includes('/discourse')) {
-    items.push({ label: 'Discourse', href: `/discourse/${community?.fancy_title}`, isCurrentPage: true })
+    items.push({
+      label: 'Discourse',
+      href: `/discourse/${community?.fancy_title}`,
+      isCurrentPage: true,
+    })
   }
 
   return items

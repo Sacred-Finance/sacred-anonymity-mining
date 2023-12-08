@@ -2,6 +2,7 @@ import React from 'react'
 import { useCommunityById } from '@/contexts/CommunityProvider'
 import { useRouter } from 'next/router'
 import { EditGroup } from '@components/EditGroup'
+
 // todo: figure out when/if it's beneficial to make calls to individual contract updates vs editing the entire group at once
 
 export interface HandleSetImage {
@@ -13,7 +14,7 @@ export const isImageFile = (file: File) => {
   return file && file.type.startsWith('image/')
 }
 
-function CreateGroupForm() {
+function EditGroupForm() {
   const router = useRouter()
   const { groupId } = router.query
   const [isMounted, setIsMounted] = React.useState(false)
@@ -33,4 +34,4 @@ function CreateGroupForm() {
   return <EditGroup group={community} />
 }
 
-export default CreateGroupForm
+export default EditGroupForm

@@ -1,27 +1,27 @@
-import { Address, useContractReads } from 'wagmi'
+import type { Address } from 'wagmi'
+import { useContractReads } from 'wagmi'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'react-toastify'
 import { erc20dummyABI } from '../constant/const'
-import { Group } from '@/types/contract/ForumInterface'
-
-interface RequirementCheck {
-  symbol: string | undefined
-  minAmount: number
-  balance: number
-  decimals: number | undefined
-}
+import type { Group } from '@/types/contract/ForumInterface'
 
 interface ValidationResult {
   hasSufficientBalance: boolean
   toastMessage: string
 }
 
-export const useValidateUserBalance = (community: Group | undefined, address: Address | undefined) => {
-  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
+export const useValidateUserBalance = (
+  community: Group | undefined,
+  address: Address | undefined
+) => {
+  const [validationResult, setValidationResult] =
+    useState<ValidationResult | null>(null)
   const [fetchEnabled, setFetchEnabled] = useState(false)
 
   const requirements = useMemo(() => {
-    if (!community?.requirements?.length || !address || !community?.chainId) return []
+    if (!community?.requirements?.length || !address || !community?.chainId) {
+      return []
+    }
     return community.requirements.map(r => ({
       address: r.tokenAddress,
       abi: erc20dummyABI,
@@ -31,7 +31,10 @@ export const useValidateUserBalance = (community: Group | undefined, address: Ad
     }))
   }, [community, address])
 
-  const isEnabled = useMemo(() => fetchEnabled && requirements.length > 0, [fetchEnabled, requirements])
+  const isEnabled = useMemo(
+    () => fetchEnabled && requirements.length > 0,
+    [fetchEnabled, requirements]
+  )
 
   const { data, isError, isLoading } = useContractReads({
     contracts: requirements.filter(Boolean),
@@ -51,7 +54,9 @@ export const useValidateUserBalance = (community: Group | undefined, address: Ad
   }, [data, isError, isLoading])
 
   const checkUserBalance = useCallback(() => {
-    if (!community?.requirements?.length) return true
+    if (!community?.requirements?.length) {
+      return true
+    }
 
     if (!data || isError || isLoading) {
       setFetchEnabled(true)
@@ -63,11 +68,20 @@ export const useValidateUserBalance = (community: Group | undefined, address: Ad
       const requirement = community.requirements[i]
       const balance = Number(bal)
       const minAmount = Number(requirement.minAmount)
-      if (balance < minAmount) toastMessage += `Insufficient ${requirement?.symbol} \n`
-      return { balance, symbol: requirement.symbol, minAmount, decimals: requirement.decimals }
+      if (balance < minAmount) {
+        toastMessage += `Insufficient ${requirement?.symbol} \n`
+      }
+      return {
+        balance,
+        symbol: requirement.symbol,
+        minAmount,
+        decimals: requirement.decimals,
+      }
     })
 
-    const hasSufficientBalance = requirementsMet.every(e => e.balance >= e.minAmount / 10 ** e.decimals)
+    const hasSufficientBalance = requirementsMet.every(
+      e => e.balance >= e.minAmount / 10 ** e.decimals
+    )
 
     if (!hasSufficientBalance) {
       toast.warning(`Insufficient Balance`)

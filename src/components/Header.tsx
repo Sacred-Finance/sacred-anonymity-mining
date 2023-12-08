@@ -18,9 +18,9 @@ const Header = () => {
     <nav
       id={'header'}
       className={clsx(
-        'flex  p-4 text-gray-800 dark:bg-gray-900 dark:text-white',
+        'flex  bg-white p-4 text-gray-800 dark:bg-gray-900 dark:text-white',
         menuOpen
-          ? 'items-between fixed inset-0 z-[41] flex flex-col justify-start gap-4 bg-gray-900 '
+          ? 'items-between fixed inset-0 z-[41] flex flex-col justify-start gap-4'
           : 'relative items-center justify-between'
       )}
     >
@@ -58,28 +58,28 @@ const Header = () => {
 
       <div
         className={clsx(
-          'flex items-center gap-12',
+          'flex items-center gap-4',
           menuOpen ? 'flex flex-wrap justify-center gap-4 ' : 'hidden md:flex'
         )}
       >
-        <div className={'w-50 flex h-10 flex-shrink-0 grow '}>
+        <div className={'flex h-10 shrink-0 grow '}>
           <ConnectWallet />
         </div>
         <NavBarButton
           href="https://discord.com/channels/816041991502430218/829728678190907412"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-gray-600 hover:!text-purple-500  dark:text-gray-300"
+          className="flex flex-col items-center text-gray-600  hover:!text-purple-500 dark:text-gray-300"
         >
           <FaDiscord className="h-8 w-8" />
+          <span className={'text-sm'}>Discord</span>
         </NavBarButton>
         <NavBarButton
           href="/account"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-gray-600 hover:!text-purple-500 dark:text-gray-300"
+          className="flex flex-col items-center text-gray-600 hover:!text-purple-500 dark:text-gray-300"
         >
           <UserCircleIcon className="h-8 w-8" />
+          <span className={'text-sm'}>Account</span>
         </NavBarButton>
         <ThemeToggleButton />
       </div>

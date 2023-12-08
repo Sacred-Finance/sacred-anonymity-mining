@@ -19,10 +19,12 @@ const input =
 const sidebar = 'dark:bg-background-900 text-white dark:text-white border-r-2'
 
 // Cards
-const card = 'dark:bg-background-900 text-white dark:text-white border-2 rounded'
+const card =
+  'dark:bg-background-900 text-white dark:text-white border-2 rounded'
 
 // Modal/Dialog
-const modal = 'dark:bg-background-900 text-white dark:text-white border-2 rounded shadow-lg'
+const modal =
+  'dark:bg-background-900 text-white dark:text-white border-2 rounded shadow-lg'
 
 // Carousel/Slider
 const carousel = 'dark:bg-background-900 text-white dark:text-white'
@@ -31,10 +33,12 @@ const carousel = 'dark:bg-background-900 text-white dark:text-white'
 const accordion = 'dark:bg-background-900 text-white dark:text-white border-t-2'
 
 // Dropdowns
-const dropdown = 'dark:bg-background-900 text-white dark:text-white border-2 rounded'
+const dropdown =
+  'dark:bg-background-900 text-white dark:text-white border-2 rounded'
 
 // Tooltips
-const tooltip = 'dark:bg-background-900 text-white dark:text-white border-2 rounded'
+const tooltip =
+  'dark:bg-background-900 text-white dark:text-white border-2 rounded'
 
 // Alerts/Notifications
 const alert = 'dark:bg-error-500 text-white border-2 rounded px-4 py-2'
@@ -46,22 +50,25 @@ const breadcrumb = 'dark:bg-background-900  '
 const tab = 'dark:bg-background-900 text-white dark:text-white border-b-2'
 
 // Badges/Labels
-const badge = 'dark:bg-primary-500 text-white rounded-full px-2 py-1'
+const badge = 'dark:bg-primary text-white rounded-full px-2 py-1'
 
 // Progress Bars
-const progressBar = 'bg-primary-500 dark:bg-purple-200 rounded-full'
+const progressBar = 'bg-primary dark:bg-purple-200 rounded-full'
 
 // Loaders/Spinners
-const loader = 'dark:text-primary-500'
+const loader = 'dark:text-primary'
 
 // Pagination
-const pagination = 'dark:bg-background-900 text-white dark:text-white border-r-2'
+const pagination =
+  'dark:bg-background-900 text-white dark:text-white border-r-2'
 
 // Popovers
-const popover = 'dark:bg-background-900 text-white dark:text-white border-2 rounded'
+const popover =
+  'dark:bg-background-900 text-white dark:text-white border-2 rounded'
 
 // Datepicker
-const datepicker = 'dark:bg-background-900 text-white dark:text-white border-2 rounded'
+const datepicker =
+  'dark:bg-background-900 text-white dark:text-white border-2 rounded'
 
 // Tables/Data Grid
 const table = 'dark:bg-background-900 text-white dark:text-white border-2'
@@ -70,7 +77,8 @@ const table = 'dark:bg-background-900 text-white dark:text-white border-2'
 const listView = 'dark:bg-background-900 text-white dark:text-white border-b-2'
 
 // Forms
-const form = 'dark:bg-background-900 text-white dark:text-white border-2 rounded'
+const form =
+  'dark:bg-background-900 text-white dark:text-white border-2 rounded'
 
 // Validation Messages
 const validationMessage = 'text-error-500 dark:text-error-500'
@@ -109,19 +117,19 @@ export const classes = {
 // exclusively color related classes, for use in conjunction with other classes, hover, focus, active, selected, border etc. includes dark mode variants
 export const buttonVariants = {
   primary:
-    'text-primary-500 dark:text-primary-500 hover:text-primary-600 dark:hover:text-primary-600 focus:text-primary-600 dark:focus:text-primary-600 active:text-primary-600 dark:active:text-primary-600 selected:text-primary-600 dark:selected:text-primary-600 ' +
-    'border-primary-500 dark:border-primary-500 hover:border-primary-600 dark:hover:border-primary-600 ',
+    'text-primary dark:text-primary hover:text-primary-600 dark:hover:text-primary-600 focus:text-primary-600 dark:focus:text-primary-600 active:text-primary-600 dark:active:text-primary-600 selected:text-primary-600 dark:selected:text-primary-600 ' +
+    'border-primary dark:border-primary hover:border-primary-600 dark:hover:border-primary-600 ',
   primaryOutline:
-    'text-primary-500 dark:text-primary-500 hover:text-primary-600 dark:hover:text-primary-600 focus:text-primary-600 dark:focus:text-primary-600 active:text-primary-600 dark:active:text-primary-600 selected:text-primary-600 dark:selected:text-primary-600 ' +
-    'border-primary-500 dark:border-primary-500 hover:border-primary-600 dark:hover:border-primary-600 ',
+    'text-primary dark:text-primary hover:text-primary-600 dark:hover:text-primary-600 focus:text-primary-600 dark:focus:text-primary-600 active:text-primary-600 dark:active:text-primary-600 selected:text-primary-600 dark:selected:text-primary-600 ' +
+    'border-primary dark:border-primary hover:border-primary-600 dark:hover:border-primary-600 ',
   primarySolid:
-    'text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-700 active:bg-primary-700',
+    'text-white bg-primary hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-700 active:bg-primary-700',
   solid:
-    'text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-700 active:bg-primary-700',
+    'text-white bg-primary hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-700 active:bg-primary-700',
 
   primarySolidOutline:
-    'text-primary-500 dark:text-primary-500 hover:text-primary-600 dark:hover:text-primary-600 focus:text-primary-600 dark:focus:text-primary-600 active:text-primary-600 dark:active:text-primary-600 selected:text-primary-600 dark:selected:text-primary-600 ' +
-    'border-primary-500 dark:border-primary-500 hover:border-primary-600 dark:hover:border-primary-600 ',
+    'text-primary dark:text-primary hover:text-primary-600 dark:hover:text-primary-600 focus:text-primary-600 dark:focus:text-primary-600 active:text-primary-600 dark:active:text-primary-600 selected:text-primary-600 dark:selected:text-primary-600 ' +
+    'border-primary dark:border-primary hover:border-primary-600 dark:hover:border-primary-600 ',
 
   secondary:
     'text-secondary-500 dark:text-secondary-500 hover:text-secondary-600 dark:hover:text-secondary-600 focus:text-secondary-600 dark:focus:text-secondary-600 active:text-secondary-600 dark:active:text-secondary-600 selected:text-secondary-600 dark:selected:text-secondary-600 ' +
@@ -135,7 +143,7 @@ export const buttonVariants = {
 }
 
 export const primaryButtonStyle = clsx(
-  ' !focus-none disabled:active:!scale-100 disabled:hover:pointer-none !select-none p-2 text-center content-center align-middle  shadow-none  rounded  focus:outline-none focus:text-bold active:scale-95 transition-transform duration-100 ease-in-out'
+  ' !focus-none disabled:hover:pointer-none focus:text-bold !select-none content-center rounded p-2 text-center  align-middle  shadow-none  transition-transform duration-100 ease-in-out focus:outline-none active:scale-95 disabled:active:!scale-100'
 )
 
 // The following Tailwind theme aspires to be a reproduction of the

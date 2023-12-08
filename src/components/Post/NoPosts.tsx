@@ -1,10 +1,14 @@
 import { useTranslation } from 'next-i18next'
 
 import React from 'react'
-import Image from 'next/image'
-import { PrimaryButton } from '@components/buttons'
 
-export const NoPosts = ({ onClick, children }: { onClick?: () => void; children?: React.ReactNode }) => {
+export const NoPosts = ({
+  onClick,
+  children,
+}: {
+  onClick?: () => void
+  children?: React.ReactNode
+}) => {
   const { t } = useTranslation()
 
   return (
@@ -15,7 +19,13 @@ export const NoPosts = ({ onClick, children }: { onClick?: () => void; children?
   )
 }
 
-export const NoComments = ({ onClick, children }: { onClick?: () => void; children?: React.ReactNode }) => {
+export const NoComments = ({
+  onClick,
+  children,
+}: {
+  onClick?: () => void
+  children?: React.ReactNode
+}) => {
   const { t } = useTranslation()
 
   return (

@@ -1,11 +1,11 @@
 import { MemoryConnector } from 'anondb/web'
 import { constructSchema } from 'anondb/types'
 import { attesterAddress, unirepAddress } from '../constant/const'
-import { Contract, Wallet, ethers } from 'ethers'
+import { Contract, ethers, Wallet } from 'ethers'
 import { polygonMumbai } from 'wagmi/chains'
 import { userUnirepSignUp } from './api'
-import { UserState, schema } from '@unirep/core'
-import { Identity } from '@semaphore-protocol/identity'
+import { schema, UserState } from '@unirep/core'
+import type { Identity } from '@semaphore-protocol/identity'
 import unirepAbi from '@unirep/contracts/abi/Unirep.json'
 import prover from './prover'
 
@@ -52,7 +52,10 @@ export class UnirepUser {
    * @param identity User's identity.
    */
   constructor(public identity: Identity) {
-    if (!process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL || !process.env.NEXT_PUBLIC_ETHEREUM_PRIVATE_KEY) {
+    if (
+      !process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL ||
+      !process.env.NEXT_PUBLIC_ETHEREUM_PRIVATE_KEY
+    ) {
       throw new Error('Environment variables are not set.')
     }
 
@@ -60,7 +63,10 @@ export class UnirepUser {
       { url: process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL },
       polygonMumbai.id
     )
-    this.signer = new Wallet(process.env.NEXT_PUBLIC_ETHEREUM_PRIVATE_KEY, this.provider)
+    this.signer = new Wallet(
+      process.env.NEXT_PUBLIC_ETHEREUM_PRIVATE_KEY,
+      this.provider
+    )
     this.unirep = new Contract(unirepAddress, unirepAbi, this.signer)
 
     if (!UnirepUser.hasSignedUp) {
@@ -88,10 +94,13 @@ export class UnirepUser {
     await userState.sync.start()
     UnirepUser.user.userState = userState
     await userState.waitForSync()
-    this.latestTransitionedEpoch = await UnirepUser.user.userState.latestTransitionedEpoch()
+    this.latestTransitionedEpoch =
+      await UnirepUser.user.userState.latestTransitionedEpoch()
 
     UnirepUser.user.identity = this.identity
-    UnirepUser.hasSignedUp = await userState.hasSignedUp(BigInt(attesterAddress))
+    UnirepUser.hasSignedUp = await userState.hasSignedUp(
+      BigInt(attesterAddress)
+    )
 
     if (!UnirepUser.hasSignedUp) {
       await this.signup()
@@ -128,13 +137,20 @@ export class UnirepUser {
   async updateUserEpochKey(): Promise<void> {
     const userState = this.getUserState()
 
-    if (!userState) return console.error('User state not found')
+    if (!userState) {
+      return console.error('User state not found')
+    }
     await userState.waitForSync()
     const currentEpoch = await this.unirep.attesterCurrentEpoch(attesterAddress)
 
-    if (!this.getEpochData() || !this.getEpochData()?.epochKey || this.getEpochData().epoch < currentEpoch) {
+    if (
+      !this.getEpochData() ||
+      !this.getEpochData()?.epochKey ||
+      this.getEpochData().epoch < currentEpoch
+    ) {
       console.log('Updating Epoch Key:', attesterAddress)
-      const { publicSignals, proof, epochKey, epoch } = await userState.genEpochKeyProof({ nonce: 0 })
+      const { publicSignals, proof, epochKey, epoch } =
+        await userState.genEpochKeyProof({ nonce: 0 })
       UnirepUser.user.epochData = {
         epoch,
         epochKey,
@@ -182,7 +198,8 @@ export class UnirepUser {
     const targetEpoch = await this.unirep.attesterCurrentEpoch(attesterAddress)
 
     try {
-      const { publicSignals, proof } = await userState.genUserStateTransitionProof({ toEpoch: targetEpoch })
+      const { publicSignals, proof } =
+        await userState.genUserStateTransitionProof({ toEpoch: targetEpoch })
       await (await this.unirep.userStateTransition(publicSignals, proof)).wait()
       await userState.waitForSync()
       await this.updateUserEpochKey()
@@ -199,7 +216,7 @@ export class UnirepUser {
    */
   async signup(): Promise<void> {
     console.time('signup')
-    let userState = UnirepUser.user.userState || (await this.genUserState())
+    const userState = UnirepUser.user.userState || (await this.genUserState())
     await this.updateUserState()
     const { publicSignals, proof } = await userState.genUserSignUpProof()
     const { status } = await userUnirepSignUp(publicSignals, proof)
@@ -220,7 +237,7 @@ export class UnirepUser {
    * Update the user state.
    */
   async updateUserState(): Promise<void> {
-    let userState = this.getUserState()
+    const userState = this.getUserState()
     const currentEpoch = await this.unirep.attesterCurrentEpoch(attesterAddress)
     this.latestTransitionedEpoch = await userState.latestTransitionedEpoch()
     if (this.latestTransitionedEpoch < currentEpoch) {
@@ -252,7 +269,9 @@ export class UnirepUser {
     UnirepUser.reputation = response
     this.reputationLoaded = true
 
-    if (!repuation) return console.error('User state not found')
+    if (!repuation) {
+      return console.error('User state not found')
+    }
     return response
   }
 }

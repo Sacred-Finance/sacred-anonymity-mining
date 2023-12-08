@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { MoonIcon, SunIcon } from '@heroicons/react/24/solid'
 import { useTheme } from 'next-themes'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -22,7 +22,9 @@ export const ThemeToggleButton = ({ noTabIndex = false }) => {
     setMounted(true)
   }, [])
 
-  if (!mounted) return null
+  if (!mounted) {
+    return null
+  }
 
   const handleClick = e => {
     e.preventDefault()
@@ -31,9 +33,9 @@ export const ThemeToggleButton = ({ noTabIndex = false }) => {
 
   const oppositeThemeIcon =
     resolvedTheme === 'light' ? (
-      <MoonIcon className="inline-block h-8 w-8 flex-shrink-0 text-blue-500" />
+      <MoonIcon className="inline-block h-8 w-8 shrink-0 text-blue-500" />
     ) : (
-      <SunIcon className="h-8 w-8 flex-shrink-0 text-orange-600" />
+      <SunIcon className="h-8 w-8 shrink-0 text-orange-600" />
     )
 
   return (
@@ -50,14 +52,16 @@ export const ThemeToggleButton = ({ noTabIndex = false }) => {
       <MotionButton
         layoutId={'active'}
         whileHover={{ opacity: 0 }}
-        className={clsx('z-[1] flex bg-transparent hover:bg-transparent items-center justify-center gap-1 text-xs p-0')}
+        className={clsx(
+          'z-[1] flex items-center justify-center gap-1 bg-transparent p-0 text-xs hover:bg-transparent'
+        )}
         tabIndex={noTabIndex ? -1 : 0}
         onClick={handleClick}
       >
         {resolvedTheme === 'light' ? (
-          <SunIcon className="h-8 w-8 flex-shrink-0 text-orange-600" />
+          <SunIcon className="h-8 w-8 shrink-0 text-orange-600" />
         ) : (
-          <MoonIcon className="inline-block h-8 w-8 flex-shrink-0 text-blue-500" />
+          <MoonIcon className="inline-block h-8 w-8 shrink-0 text-blue-500" />
         )}
       </MotionButton>
       <AnimatePresence>

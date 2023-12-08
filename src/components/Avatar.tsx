@@ -1,9 +1,8 @@
 // Avatar.tsx
 
-import { User } from '@/lib/model'
+import type { User } from '@/lib/model'
 import { getAvatarUrl } from '@/contexts/CommunityProvider'
 import clsx from 'clsx'
-import { motion } from 'framer-motion'
 
 export const Avatar = ({
   user,
@@ -29,12 +28,17 @@ export const Avatar = ({
   isCommunityAdmin?: boolean
 }) => {
   let avatar = { name: '', url: '' }
-  if (!user) return null
+  if (!user) {
+    return null
+  }
   if (typeof user === 'string') {
     avatar = { name: user, url: getAvatarUrl(user) }
   }
   if (typeof user === 'object') {
-    avatar = { ...user, url: getAvatarUrl(user?.identityCommitment?.toString()) }
+    avatar = {
+      ...user,
+      url: getAvatarUrl(user?.identityCommitment?.toString()),
+    }
   }
 
   return (
@@ -43,7 +47,11 @@ export const Avatar = ({
       onClick={onClick}
       title={title}
     >
-      <div className={'absolute  bottom-0  right-0 col-span-2 flex h-full flex-col justify-between py-1'}>
+      <div
+        className={
+          'absolute  bottom-0  right-0 col-span-2 flex h-full flex-col justify-between py-1'
+        }
+      >
         {isOnline && (
           <div
             className={` h-2 w-2 rounded-full border-2 border-white bg-green-500 hover:scale-110`}
@@ -73,7 +81,9 @@ export const Avatar = ({
         )}
 
         {isCommunityAdmin && (
-          <div className={` h-2 w-2 rounded-full border-2 border-white bg-red-500 hover:scale-110`} />
+          <div
+            className={` h-2 w-2 rounded-full border-2 border-white bg-red-500 hover:scale-110`}
+          />
         )}
       </div>
       <img

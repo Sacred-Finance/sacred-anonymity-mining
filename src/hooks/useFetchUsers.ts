@@ -1,11 +1,10 @@
-import { ForumContractAddress, semaphoreContract } from '../constant/const'
+import { ForumContractAddress } from '../constant/const'
 import ForumABI from '../constant/abi/Forum.json'
 import { polygonMumbai } from 'wagmi/chains'
 import { useCommunityContext } from '../contexts/CommunityProvider'
 import { useContract, useProvider } from 'wagmi'
-import { User } from '../lib/model'
+import type { User } from '../lib/model'
 import { useEffect, useRef } from 'react'
-import { parseBytes32String } from 'ethers/lib/utils'
 
 export const useFetchUsers = (groupId, loadOnInit = true) => {
   const { dispatch } = useCommunityContext()
@@ -44,7 +43,7 @@ export const useFetchUsers = (groupId, loadOnInit = true) => {
               name: 'anon',
               groupId: +groupId,
               identityCommitment: u.toString(),
-            } as User)
+            }) as User
         ),
       })
     } catch (e) {
@@ -54,9 +53,13 @@ export const useFetchUsers = (groupId, loadOnInit = true) => {
 
   const didLoadRef = useRef(false)
   useEffect(() => {
-    if (didLoadRef.current) return
+    if (didLoadRef.current) {
+      return
+    }
     didLoadRef.current = true
-    if (loadOnInit) fetchUsers()
+    if (loadOnInit) {
+      fetchUsers()
+    }
   }, [groupId])
 
   return { fetchUsers, fetchUsersFromContract }

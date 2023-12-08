@@ -1,6 +1,5 @@
 import React, { useCallback } from 'react'
 import clsx from 'clsx'
-import { classes } from '@/styles/classes'
 import { PlusIcon, TrashIcon } from '@heroicons/react/20/solid'
 import { PollType } from '@/lib/model'
 import { usePoll } from '@/hooks/usePoll'
@@ -8,8 +7,8 @@ import { toast } from 'react-toastify'
 import { PrimaryButton } from './buttons'
 import dynamic from 'next/dynamic'
 import { debounce } from 'lodash'
-import { OutputData } from '@editorjs/editorjs'
-import { Group, Item } from '@/types/contract/ForumInterface'
+import type { OutputData } from '@editorjs/editorjs'
+import type { Group, Item } from '@/types/contract/ForumInterface'
 import { useAccount } from 'wagmi'
 import { ScrollArea } from '@/shad/ui/scroll-area'
 import { Button } from '@/shad/ui/button'
@@ -142,7 +141,10 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
                           id={`${i.value}`}
                           value={i.value}
                         />
-                        <label htmlFor={`${i.value}`} className="inline-block pl-[0.15rem] hover:cursor-pointer">
+                        <label
+                          htmlFor={`${i.value}`}
+                          className="inline-block pl-[0.15rem] hover:cursor-pointer"
+                        >
                           {i.label}
                         </label>
                       </div>
@@ -156,7 +158,7 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
                     </label>
                     <input
                       //highlight on click
-                      className=" focus:border-primary-500  w-full rounded border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+                      className=" focus:border-primary  w-full rounded border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
                       onClick={e => e.currentTarget.select()}
                       maxLength={60}
                       placeholder={'Poll Title'}
@@ -173,7 +175,7 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
                     <Editor
                       divProps={{
                         className: clsx(
-                          'mt-2 z-50 bg-white text-black w-full h-full rounded-md shadow-md overflow-y-visible form-textarea dark:border-gray-600 dark:bg-gray-700'
+                          'form-textarea z-50 mt-2 h-full w-full overflow-y-visible rounded-md bg-white text-black shadow-md dark:border-gray-600 dark:bg-gray-700'
                         ),
                       }}
                       id={'content'}
@@ -191,7 +193,7 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
                       <div className="flex w-full flex-col gap-4">
                         <div className="text-md">Rate Scale From</div>
                         <input
-                          className=" focus:border-primary-500  w-full rounded border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+                          className=" focus:border-primary  w-full rounded border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
                           placeholder={'Rate Scale From'}
                           type="number"
                           value={rateScaleFrom}
@@ -201,7 +203,7 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
                       <div className="flex w-full flex-col gap-4">
                         <div className="text-md">Rate Scale To</div>
                         <input
-                          className=" focus:border-primary-500  w-full rounded border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+                          className=" focus:border-primary  w-full rounded border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
                           placeholder={'Rate Scale To'}
                           type="number"
                           value={rateScaleTo}
@@ -213,13 +215,15 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
 
                   {/* Options */}
                   <div className="flex w-full flex-col gap-4">
-                    <div className="text-md">Options (Minimum 2, Maximum 10)</div>
+                    <div className="text-md">
+                      Options (Minimum 2, Maximum 10)
+                    </div>
                     <div className="flex flex-col gap-4">
                       {options.map((option, index) => (
                         <div className="flex items-center gap-2" key={index}>
                           <input
                             tabIndex={index}
-                            className=" focus:border-primary-500  w-full rounded border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+                            className=" focus:border-primary  w-full rounded border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
                             placeholder={'Option'}
                             type="text"
                             value={option}
@@ -237,7 +241,7 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
                               setOptions(newOptions)
                             }}
                             disabled={options.length <= 2}
-                            className="rounded border border-pink-500  px-2 py-2 text-xs font-bold uppercase text-red-500 outline-none transition-all duration-150 ease-linear hover:bg-red-500 hover:text-white focus:outline-none active:bg-red-600 disabled:cursor-not-allowed disabled:opacity-25"
+                            className="rounded border border-pink-500  p-2 text-xs font-bold uppercase text-red-500 outline-none transition-all duration-150 ease-linear hover:bg-red-500 hover:text-white focus:outline-none active:bg-red-600 disabled:cursor-not-allowed disabled:opacity-25"
                             type="button"
                           >
                             <TrashIcon width={20} />
@@ -249,10 +253,14 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
                               newOptions.push('')
                               setOptions(newOptions)
                             }}
-                            disabled={options.length >= 10 || index !== options.length - 1}
+                            disabled={
+                              options.length >= 10 ||
+                              index !== options.length - 1
+                            }
                             className={clsx(
-                              'mr-1 rounded border border-pink-500 px-2 py-2 text-xs font-bold uppercase text-gray-500 outline-none transition-all duration-150 ease-linear last:mr-0 hover:bg-gray-500 hover:text-white focus:outline-none active:bg-gray-600',
-                              options.length >= 10 || index !== options.length - 1
+                              'mr-1 rounded border border-pink-500 p-2 text-xs font-bold uppercase text-gray-500 outline-none transition-all duration-150 ease-linear last:mr-0 hover:bg-gray-500 hover:text-white focus:outline-none active:bg-gray-600',
+                              options.length >= 10 ||
+                                index !== options.length - 1
                                 ? 'invisible'
                                 : 'bg-green-500/90 text-white'
                             )}
@@ -268,7 +276,7 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
                   <div className="flex w-full flex-col gap-4">
                     <div className="text-md">Duration (In Hours)</div>
                     <input
-                      className=" focus:border-primary-500  w-full rounded border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+                      className=" focus:border-primary  w-full rounded border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
                       placeholder={'In Hours, 1 Week = 168 Hours'}
                       type="number"
                       value={duration}

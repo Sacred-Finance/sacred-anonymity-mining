@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import TopicCommunityCard from '@/components/Discourse/TopicCommunityCard'
-import { TopicList } from '@/components/Discourse/types'
+import type { TopicList } from '@/components/Discourse/types'
 import axios from 'axios'
 import { useRouter } from 'next/router'
 import { useFetchMetadata } from '@/hooks/discourse/useFetchMetadata'
@@ -19,10 +19,18 @@ export const DiscourseCommunityBanner = (loading, community) => (
             </span>
           </div>
         )}
-        <img className="m-auto h-[10%] w-[10%] rounded-t-lg pt-2" src={community?.image} alt="" />
+        <img
+          className="m-auto h-[10%] w-[10%] rounded-t-lg pt-2"
+          src={community?.image}
+          alt=""
+        />
         <div className="p-3 text-center">
-          <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{community?.name}</h5>
-          <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">{community?.description}</p>
+          <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+            {community?.name}
+          </h5>
+          <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">
+            {community?.description}
+          </p>
         </div>
       </div>
     )}
@@ -52,7 +60,11 @@ const Index = () => {
       {DiscourseCommunityBanner(loading, community)}
       <div className="xs:justify-center flex flex-wrap gap-4 md:justify-start">
         {topicList?.topics?.map(topic => (
-          <TopicCommunityCard key={topic.id} topic={topic} variant={'default'} />
+          <TopicCommunityCard
+            key={topic.id}
+            topic={topic}
+            variant={'default'}
+          />
         ))}
       </div>
     </>

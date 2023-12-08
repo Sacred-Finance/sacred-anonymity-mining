@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { useTranslation } from 'next-i18next'
 
 import { TrashIcon } from '@heroicons/react/20/solid'
@@ -30,9 +30,13 @@ const RemoveGroup: React.FC<RemoveGroupProps> = ({ groupId, hidden }) => {
     })
   }
 
-  if (hidden) return null
+  if (hidden) {
+    return null
+  }
 
-  if (isLoading) return <CircularLoader />
+  if (isLoading) {
+    return <CircularLoader />
+  }
 
   return (
     <>

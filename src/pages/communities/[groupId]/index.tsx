@@ -11,7 +11,10 @@ import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminO
 function Group() {
   const router = useRouter()
   const { groupId } = router.query
-  const { data, error, isValidating } = useSWR(getGroupWithPostData(groupId), fetcher)
+  const { data, error, isValidating } = useSWR(
+    getGroupWithPostData(groupId),
+    fetcher
+  )
   const { dispatch } = useCommunityContext()
   useCheckIfUserIsAdminOrModerator(true)
 
@@ -32,8 +35,12 @@ function Group() {
       })
     }
   }, [group, posts, users, isValidating])
-  if (error) return <div>Error: {error.message}</div>
-  if (!data) return <LoadingPage />
+  if (error) {
+    return <div>Error: {error.message}</div>
+  }
+  if (!data) {
+    return <LoadingPage />
+  }
 
   group.id = ethers.BigNumber.from(group.id)
 

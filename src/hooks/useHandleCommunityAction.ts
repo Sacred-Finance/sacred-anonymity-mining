@@ -1,4 +1,4 @@
-import { useCallback, useContext } from 'react'
+import { useCallback } from 'react'
 import { toast } from 'react-toastify'
 
 export const useHandleCommunityAction = () => {
@@ -13,9 +13,12 @@ export const useHandleCommunityAction = () => {
         const response = await actionFn(...actionParams)
 
         if (!response) {
-          toast.warning('no response from Relayer - this may not be a problem', {
-            autoClose: 7000,
-          })
+          toast.warning(
+            'no response from Relayer - this may not be a problem',
+            {
+              autoClose: 7000,
+            }
+          )
         }
 
         const { status, data } = response
@@ -29,7 +32,9 @@ export const useHandleCommunityAction = () => {
             progress: undefined,
             toastId: 'handleCommunity',
           })
-          if (successCallback) successCallback()
+          if (successCallback) {
+            successCallback()
+          }
         } else {
           console.error('Error in action')
         }

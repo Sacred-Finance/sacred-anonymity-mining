@@ -2,7 +2,7 @@ import { useAccount, useContractRead } from 'wagmi'
 import { ForumContractAddress } from '../constant/const'
 import ForumABI from '../constant/abi/Forum.json'
 import { useEffect, useState } from 'react'
-import { Address } from '@/types/common'
+import type { Address } from '@/types/common'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
 
 export const useCheckIfUserIsAdminOrModerator = (checkOnInit = false) => {
@@ -62,7 +62,10 @@ export const useCheckIfUserIsAdminOrModerator = (checkOnInit = false) => {
 
   useEffect(() => {
     if (!address) {
-      dispatch({ type: 'SET_USER_ACCESS', payload: { isModerator: false, isAdmin: false } })
+      dispatch({
+        type: 'SET_USER_ACCESS',
+        payload: { isModerator: false, isAdmin: false },
+      })
     } else {
       fetchIsAdmin()
       fetchIsModerator()

@@ -1,6 +1,5 @@
 import { useMemo } from 'react'
-import { Items } from 'receptacle'
-import { Item } from '@/types/contract/ForumInterface'
+import type { Item } from '@/types/contract/ForumInterface'
 
 export const useItemsSortedByVote = (
   tempData: Item[],
@@ -12,9 +11,13 @@ export const useItemsSortedByVote = (
 
     switch (sortBy) {
       case 'highest':
-        return sorted.sort((a, b) => b.upvote - b.downvote - (a.upvote - a.downvote))
+        return sorted.sort(
+          (a, b) => b.upvote - b.downvote - (a.upvote - a.downvote)
+        )
       case 'lowest':
-        return sorted.sort((a, b) => a.upvote - a.downvote - (b.upvote - b.downvote))
+        return sorted.sort(
+          (a, b) => a.upvote - a.downvote - (b.upvote - b.downvote)
+        )
       case 'controversial':
         return sorted.sort((a, b) => {
           const aVotes = a.upvote + a.downvote
@@ -30,9 +33,15 @@ export const useItemsSortedByVote = (
           }
         })
       case 'newest':
-        return sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        return sorted.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        )
       case 'oldest':
-        return sorted.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+        return sorted.sort(
+          (a, b) =>
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        )
       default:
         return sorted
     }

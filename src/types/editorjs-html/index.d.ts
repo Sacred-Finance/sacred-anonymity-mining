@@ -1,5 +1,5 @@
 declare module 'editorjs-html' {
-  import { OutputData } from '@editorjs/editorjs'
+  import type { OutputData } from '@editorjs/editorjs'
 
   export interface EditorJsHtmlOptions {
     [blockType: string]: (block: any) => string | JSX.Element

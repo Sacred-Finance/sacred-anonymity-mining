@@ -1,5 +1,5 @@
 import React from 'react'
-import { Data } from '@components/Discourse/types'
+import type { Data } from '@components/Discourse/types'
 import UserComponent from '@components/Discourse/UserComponent'
 import TopicListComponent from '@components/Discourse/TopicListComponent'
 

@@ -11,7 +11,9 @@ export const AnalysisCheckboxComponent = () => {
 
   const handleCheckboxChange = key => {
     // disabled if analysis has data
-    if (responses[key]) return
+    if (responses[key]) {
+      return
+    }
     setEnabled({ ...enabled, [key]: !enabled[key] })
   }
 
@@ -30,11 +32,18 @@ export const AnalysisCheckboxComponent = () => {
           >
             <label
               htmlFor={analysis.key}
-              className={clsx('relative flex cursor-pointer flex-col gap-1', isComplete ? 'opacity-50' : '')}
+              className={clsx(
+                'relative flex cursor-pointer flex-col gap-1',
+                isComplete ? 'opacity-50' : ''
+              )}
               onClick={() => handleCheckboxChange(analysis.key)}
             >
-              <span className="text-gray-700 dark:text-gray-300">{analysis.label}</span>
-              <span className="text-xs text-gray-500 dark:text-gray-300">{analysis.description}</span>
+              <span className="text-gray-700 dark:text-gray-300">
+                {analysis.label}
+              </span>
+              <span className="text-xs text-gray-500 dark:text-gray-300">
+                {analysis.description}
+              </span>
               <Checkbox
                 disabled={isComplete}
                 className="absolute right-0 top-0 rounded-full"

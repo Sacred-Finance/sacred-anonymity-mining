@@ -1,7 +1,5 @@
-import React, { AnchorHTMLAttributes, ButtonHTMLAttributes } from 'react'
-import Link, { LinkProps } from 'next/link'
-
-import { primaryButtonStyle } from '../../styles/classes'
+import React from 'react'
+import Link from 'next/link'
 
 export function NavBarButton({
   href,
@@ -15,7 +13,11 @@ export function NavBarButton({
 } & React.AnchorHTMLAttributes<HTMLAnchorElement> &
   Partial<typeof Link>): JSX.Element {
   return (
-    <Link href={href} className={'flex items-center justify-center flex-col hover:text-primary'} {...rest}>
+    <Link
+      href={href}
+      className={'flex flex-col items-center justify-center hover:text-primary'}
+      {...rest}
+    >
       {children}
     </Link>
   )

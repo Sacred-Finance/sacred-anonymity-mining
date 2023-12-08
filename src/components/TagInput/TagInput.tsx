@@ -1,6 +1,11 @@
-import React, { SyntheticEvent, useState } from 'react'
+import type { SyntheticEvent } from 'react'
+import React, { useState } from 'react'
 import clsx from 'clsx'
-import { ChevronDownIcon, ChevronUpIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  XMarkIcon,
+} from '@heroicons/react/24/outline'
 import { difference } from 'lodash'
 import { TAGS } from '@/constant/tags'
 import { useOutsideClickHandler } from '@/hooks/useOutsideClickHandler'
@@ -50,10 +55,15 @@ const TagInput = ({ onChange, selected }: TagInputProps) => {
                     key={`${tag}_${index}`}
                     className="m-1 flex items-center justify-center rounded-full border border-slate-500 bg-slate-300 px-2 py-1 font-medium text-black"
                   >
-                    <div className="max-w-full flex-initial text-xs font-normal leading-none">{tag}</div>
+                    <div className="max-w-full flex-initial text-xs font-normal leading-none">
+                      {tag}
+                    </div>
                     <div className="flex flex-auto flex-row-reverse">
                       <div className="cursor-pointer">
-                        <XMarkIcon className="ml-1 h-4 w-4" onClick={() => removeTag(tag, index)} />
+                        <XMarkIcon
+                          className="ml-1 h-4 w-4"
+                          onClick={() => removeTag(tag, index)}
+                        />
                       </div>
                     </div>
                   </div>
@@ -64,7 +74,7 @@ const TagInput = ({ onChange, selected }: TagInputProps) => {
                   placeholder="Search Tags"
                   onChange={filterTags}
                   onFocus={() => setOptionsVisible(true)}
-                  className="focus:border-primary-500 h-full w-full appearance-none rounded-[10px] border-solid border-slate-300 bg-transparent p-1 px-2 text-gray-800 outline-none dark:text-gray-200"
+                  className="focus:border-primary h-full w-full appearance-none rounded-[10px] border-solid border-slate-300 bg-transparent p-1 px-2 text-gray-800 outline-none dark:text-gray-200"
                 />
               </div>
             </div>
@@ -90,7 +100,7 @@ const TagInput = ({ onChange, selected }: TagInputProps) => {
                     <div
                       className={clsx(
                         true && 'border-primary-600',
-                        'relative flex w-full items-center border-l-2 border-transparent p-2 pl-2'
+                        'relative flex w-full items-center border-l-2 border-transparent p-2'
                       )}
                     >
                       <div className="flex w-full items-center">

@@ -41,7 +41,9 @@ export const CommunityCardBody: React.FC = () => {
                 .toString()}
               -
               {ethers.constants.AddressZero !== r?.tokenAddress &&
-                ` ${r?.tokenAddress.slice(0, 6)}...${r?.tokenAddress.slice(-4)}`}
+                ` ${r?.tokenAddress.slice(0, 6)}...${r?.tokenAddress.slice(
+                  -4
+                )}`}
             </Badge>
           </li>
         ))}

@@ -1,6 +1,10 @@
 // react hook to fetch balanc of erc token
 
-import { erc20dummyABI, getRpcProvider, mumbaiTestnetMaticContractAddress } from '@/constant/const'
+import {
+  erc20dummyABI,
+  getRpcProvider,
+  mumbaiTestnetMaticContractAddress,
+} from '@/constant/const'
 import { Contract } from 'ethers'
 import { toast } from 'react-toastify'
 import { useAccount } from 'wagmi'
@@ -11,7 +15,11 @@ export const useFetchBalance = (
   chainId: number = polygonMumbai.id
 ) => {
   const { address } = useAccount()
-  const contract = new Contract(tokenAddress, erc20dummyABI, getRpcProvider(chainId))
+  const contract = new Contract(
+    tokenAddress,
+    erc20dummyABI,
+    getRpcProvider(chainId)
+  )
 
   const fetchBalance = async () => {
     if (!address) {

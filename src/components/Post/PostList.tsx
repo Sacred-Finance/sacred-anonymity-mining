@@ -1,6 +1,6 @@
 import React from 'react'
 import { ContentType } from '@/lib/model'
-import { Item } from '@/types/contract/ForumInterface'
+import type { Item } from '@/types/contract/ForumInterface'
 import { NoPosts } from '@components/Post/NoPosts'
 import { CircularLoader } from '@components/buttons/JoinCommunityButton'
 import EditorJsRenderer from '@components/editor-js/EditorJSRenderer'
@@ -12,7 +12,9 @@ import { ScrollArea, ScrollBar } from '@/shad/ui/scroll-area'
 import AnimalAvatar from '../AnimalAvatar'
 
 export const PostList = ({ posts }: { posts: Item[] }) => {
-  if (!posts) return null
+  if (!posts) {
+    return null
+  }
 
   const renderedPosts = posts.map(p => {
     if (ContentType[p?.kind] === undefined) {
@@ -30,7 +32,12 @@ export const PostList = ({ posts }: { posts: Item[] }) => {
         </CardContent>
 
         <CardFooter className={'items-end justify-self-end'}>
-          {<AnimalAvatar seed={`${p.note}_${Number(p.groupId)}`} options={{ size: 30 }} />}
+          {
+            <AnimalAvatar
+              seed={`${p.note}_${Number(p.groupId)}`}
+              options={{ size: 30 }}
+            />
+          }
 
           <Badge className="flex gap-4">
             {p.childIds.length} <BookOpenIcon className="h-full w-4" />
@@ -46,7 +53,11 @@ export const PostList = ({ posts }: { posts: Item[] }) => {
 
       <ScrollArea className={'h-full'}>
         <div className="hidden items-stretch justify-center gap-6 rounded-lg  md:grid lg:grid-cols-2 xl:grid-cols-3">
-          {renderedPosts === undefined ? <CircularLoader /> : <>{renderedPosts}</>}
+          {renderedPosts === undefined ? (
+            <CircularLoader />
+          ) : (
+            <>{renderedPosts}</>
+          )}
         </div>
         <ScrollBar orientation="vertical" />
       </ScrollArea>

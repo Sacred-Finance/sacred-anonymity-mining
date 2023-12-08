@@ -4,7 +4,12 @@ import { FaMagnifyingGlass } from 'react-icons/fa6'
 import React from 'react'
 
 const animationVariants = {
-  initial: { opacity: 0, scale: 0.8, y: '-100%', transition: { duration: 0.2 } },
+  initial: {
+    opacity: 0,
+    scale: 0.8,
+    y: '-100%',
+    transition: { duration: 0.2 },
+  },
   animate: { opacity: 1, scale: 1, y: '0%', transition: { duration: 0.2 } },
   exit: { opacity: 0, scale: 0.8, y: '100%', transition: { duration: 0.2 } },
 }
@@ -27,7 +32,9 @@ export const SearchBar = ({ searchTerm, debouncedResults }) => {
               transition={transition}
               disabled={!searchTerm}
               onClick={() => {
-                if (inputRef.current) inputRef.current.value = ''
+                if (inputRef.current) {
+                  inputRef.current.value = ''
+                }
                 debouncedResults({ target: { value: '' } })
               }}
             >

@@ -15,12 +15,17 @@ function PostIndex() {
   const router = useRouter()
   const { groupId, postId } = router.query
 
-  const { data, error, isLoading } = useSWR(getGroupWithPostAndCommentData(groupId, postId), fetcher)
+  const { data, error, isLoading } = useSWR(
+    getGroupWithPostAndCommentData(groupId, postId),
+    fetcher
+  )
   useCheckIfUserIsAdminOrModerator(true)
 
   useEffect(() => {
     const { group, post, comments } = data || {}
-    if (!group || !post || !comments) return
+    if (!group || !post || !comments) {
+      return
+    }
     dispatch({
       type: ActionType.SET_ACTIVE_COMMUNITY,
       payload: {
@@ -38,21 +43,25 @@ function PostIndex() {
     })
   }, [data])
 
-  if (error) return <div>Error: {error.message}</div>
-  if (!data || isLoading) return <LoadingComponent />
+  if (error) {
+    return <div>Error: {error.message}</div>
+  }
+  if (!data || isLoading) {
+    return <LoadingComponent />
+  }
 
   const { group, post, comments } = data
   const postInstance = new Post(post.id, group.groupId)
   const commentInstance = new CommentClass(group.groupId, post.id, null)
   group.id = ethers.BigNumber.from(group.id)
   return (
-      <PostPage
-        postInstance={postInstance}
-        post={post}
-        community={group}
-        comments={comments}
-        commentInstance={commentInstance}
-      />
+    <PostPage
+      postInstance={postInstance}
+      post={post}
+      community={group}
+      comments={comments}
+      commentInstance={commentInstance}
+    />
   )
 }
 

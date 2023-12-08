@@ -27,10 +27,14 @@ function Home({ discourseCommunities }) {
   const { dispatch } = useCommunityContext()
 
   useEffect(() => {
-    if (!data) return
+    if (!data) {
+      return
+    }
     const { communitiesData, users } = data
 
-    if (!communitiesData || !users) return
+    if (!communitiesData || !users) {
+      return
+    }
     // convert id back to bignumber
     dispatch({
       type: ActionType.SET_COMMUNITIES,
@@ -64,7 +68,9 @@ function Home({ discourseCommunities }) {
 }
 
 export const getServerSideProps = async () => {
-  const data = await axios.get(process.env.NEXT_PUBLIC_DISCOURSE_GOOGLE_SHEET_API_URL as string)
+  const data = await axios.get(
+    process.env.NEXT_PUBLIC_DISCOURSE_GOOGLE_SHEET_API_URL as string
+  )
   return {
     props: {
       discourseCommunities: data.data?.communities,

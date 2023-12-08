@@ -14,7 +14,9 @@ export const useValidatedImage = (cid: string) => {
     }
 
     // If CID is not in cache and not provided, return
-    if (!cid) return
+    if (!cid) {
+      return
+    }
 
     const image = new Image()
     image.src = `https://ipfs.io/ipfs/${cid}`

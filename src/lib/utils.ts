@@ -1,17 +1,19 @@
 import { ethers, utils } from 'ethers'
-import { create, IPFSHTTPClient } from 'ipfs-http-client'
+import type { IPFSHTTPClient } from 'ipfs-http-client'
+import { create } from 'ipfs-http-client'
 import { toBufferBE, toBufferLE } from 'bigint-buffer'
 import { buildBabyjub, buildPedersenHash } from 'circomlibjs'
-import { Identity } from '@semaphore-protocol/identity'
+import type { Identity } from '@semaphore-protocol/identity'
 import { forumContract, semaphoreContract } from '@/constant/const'
-import { AvatarOptions } from 'animal-avatar-generator'
+import type { AvatarOptions } from 'animal-avatar-generator'
 
 const { groth16 } = require('snarkjs')
 
 let ipfs: IPFSHTTPClient
 let babyJub, pedersen
 
-const pedersenHash = data => BigInt(babyJub.F.toString(babyJub.unpackPoint(pedersen.hash(data))[0]))
+const pedersenHash = data =>
+  BigInt(babyJub.F.toString(babyJub.unpackPoint(pedersen.hash(data))[0]))
 
 function unstringifyBigInts(o) {
   if (typeof o == 'string' && /^[0-9]+$/.test(o)) {
@@ -21,7 +23,9 @@ function unstringifyBigInts(o) {
   } else if (Array.isArray(o)) {
     return o.map(unstringifyBigInts)
   } else if (typeof o == 'object') {
-    if (o === null) return null
+    if (o === null) {
+      return null
+    }
     const res = {}
     const keys = Object.keys(o)
     keys.forEach(k => {
@@ -36,7 +40,10 @@ function unstringifyBigInts(o) {
 async function convertProofToSolidityInput(proof, publicSignals) {
   const editedPublicSignals = unstringifyBigInts(publicSignals)
   const editedProof = unstringifyBigInts(proof)
-  const calldata = await groth16.exportSolidityCallData(editedProof, editedPublicSignals)
+  const calldata = await groth16.exportSolidityCallData(
+    editedProof,
+    editedPublicSignals
+  )
   const argv = calldata
     .replace(/["[\]\s]/g, '')
     .split(',')
@@ -51,7 +58,8 @@ async function convertProofToSolidityInput(proof, publicSignals) {
 }
 
 export const generateGroth16Proof = async (input, wasmFile, zkeyFileName) => {
-  const { proof: _proof, publicSignals: _publicSignals } = await groth16.fullProve(input, wasmFile, zkeyFileName)
+  const { proof: _proof, publicSignals: _publicSignals } =
+    await groth16.fullProve(input, wasmFile, zkeyFileName)
   return await convertProofToSolidityInput(_proof, _publicSignals)
 }
 
@@ -60,7 +68,9 @@ export const getContent = async (CID: string) => {
     console.log('ipfs not started')
     await startIPFS()
   }
-  if (!CID) return ''
+  if (!CID) {
+    return ''
+  }
   const decoder = new TextDecoder()
   let content = ''
   console.log(CID + ' loading')
@@ -98,7 +108,10 @@ export const getIpfsHashFromBytes32 = (bytes32Hex: string): string => {
 }
 
 export const getBytes32FromIpfsHash = (ipfsListing: string): string => {
-  return '0x' + Buffer.from(utils.base58.decode(ipfsListing).slice(2)).toString('hex')
+  return (
+    '0x' +
+    Buffer.from(utils.base58.decode(ipfsListing).slice(2)).toString('hex')
+  )
 }
 
 export const uploadIPFS = async (message: string) => {
@@ -122,7 +135,9 @@ export const getStringFromBytes32 = (bytes32Hex: string): string => {
   return ethers.utils.parseBytes32String(bytes32Hex)
 }
 
-export const uploadImageToIPFS = async (message: File): Promise<string | null> => {
+export const uploadImageToIPFS = async (
+  message: File
+): Promise<string | null> => {
   if (!ipfs || !message) {
     return null
   }
@@ -136,8 +151,12 @@ export const uploadImageToIPFS = async (message: File): Promise<string | null> =
   }
 }
 
-export const hashBytes2 = (itemId: number, type: string): BigInt => {
-  return BigInt(utils.keccak256(utils.solidityPack(['uint256', 'string'], [itemId, type]))) >> BigInt(8)
+export const hashBytes2 = (itemId: number, type: string): bigint => {
+  return (
+    BigInt(
+      utils.keccak256(utils.solidityPack(['uint256', 'string'], [itemId, type]))
+    ) >> BigInt(8)
+  )
 }
 
 export const hashBytes = (signal: string): bigint => {
@@ -160,18 +179,32 @@ export const createNote = async (identity: Identity) => {
   const trapdoor = identity.getTrapdoor() //getTrapDoor is not a function, error on posting a comment
   const nullifier = identity.getNullifier()
   const trapdoorBuffer = numToBuffer(trapdoor, 32, 'le')
-  const image = Buffer.concat([trapdoorBuffer, numToBuffer(nullifier, 32, 'le')])
-  if (!babyJub) babyJub = await buildBabyjub()
-  if (!pedersen) pedersen = await buildPedersenHash()
+  const image = Buffer.concat([
+    trapdoorBuffer,
+    numToBuffer(nullifier, 32, 'le'),
+  ])
+  if (!babyJub) {
+    babyJub = await buildBabyjub()
+  }
+  if (!pedersen) {
+    pedersen = await buildPedersenHash()
+  }
   return pedersenHash(image)
 }
 export const createInputNote = async (identity: Identity) => {
   const trapdoor = identity.getTrapdoor() //getTrapDoor is not a function, error on posting a comment
   const nullifier = identity.getNullifier()
   const trapdoorBuffer = numToBuffer(trapdoor, 32, 'le')
-  const image = Buffer.concat([trapdoorBuffer, numToBuffer(nullifier, 32, 'le')])
-  if (!babyJub) babyJub = await buildBabyjub()
-  if (!pedersen) pedersen = await buildPedersenHash()
+  const image = Buffer.concat([
+    trapdoorBuffer,
+    numToBuffer(nullifier, 32, 'le'),
+  ])
+  if (!babyJub) {
+    babyJub = await buildBabyjub()
+  }
+  if (!pedersen) {
+    pedersen = await buildPedersenHash()
+  }
   return { note: pedersenHash(image), trapdoor: trapdoor, nullifier: nullifier }
 }
 
@@ -184,7 +217,9 @@ export const startIPFS = async () => {
     const auth =
       'Basic ' +
       Buffer.from(
-        process.env.NEXT_PUBLIC_INFURA_IPFS_PROJECT_ID + ':' + process.env.NEXT_PUBLIC_INFURA_IPFS_PROJECT_SECRET
+        process.env.NEXT_PUBLIC_INFURA_IPFS_PROJECT_ID +
+          ':' +
+          process.env.NEXT_PUBLIC_INFURA_IPFS_PROJECT_SECRET
       ).toString('base64')
 
     ipfs = await create({
@@ -260,10 +295,10 @@ export const sortArray = (array: [], prop: string, asc: boolean) => {
 }
 
 export const removeDuplicates = (array, prop: string) => {
-  let set = new Set()
+  const set = new Set()
   return array.filter(obj => {
-    let key = obj[prop]
-    let isNew = !set.has(key)
+    const key = obj[prop]
+    const isNew = !set.has(key)
     set.add(key)
     return isNew
   })

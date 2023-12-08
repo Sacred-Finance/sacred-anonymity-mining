@@ -2,7 +2,7 @@ import { useContractRead } from 'wagmi'
 import ForumABI from '../constant/abi/Forum.json'
 import { ForumContractAddress } from '../constant/const'
 import { useState } from 'react'
-import { Address } from '@/types/common'
+import type { Address } from '@/types/common'
 
 export const useCheckIfItemIsRemoved = itemId => {
   const [isPostRemoved, setIsPostRemoved] = useState(false)

@@ -1,5 +1,9 @@
 import React, { useState } from 'react'
-import { ChevronDownIcon, ChevronUpIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  MagnifyingGlassIcon,
+} from '@heroicons/react/24/outline'
 import { useFetchTokensList } from '@/hooks/useFetchTokensList'
 import uriToHttp from '@/utils/uriToHttp'
 import Image from 'next/image'
@@ -11,7 +15,11 @@ interface SelectTokenProps {
   selectedToken?: string
 }
 
-const SelectToken = ({ chainId, selectedToken, onTokenSelect }: SelectTokenProps) => {
+const SelectToken = ({
+  chainId,
+  selectedToken,
+  onTokenSelect,
+}: SelectTokenProps) => {
   const [optionsVisible, setOptionsVisible] = useState(false)
   const { filteredTokensList, onSearch } = useFetchTokensList(chainId)
   const [selectedTokenIndex, setSelectedTokenIndex] = useState(-1)
@@ -35,12 +43,20 @@ const SelectToken = ({ chainId, selectedToken, onTokenSelect }: SelectTokenProps
               width={25}
             />
           )}
-          {selectedToken && selectedTokenIndex > -1 ? filteredTokensList[selectedTokenIndex]?.name : 'Select Token'}
+          {selectedToken && selectedTokenIndex > -1
+            ? filteredTokensList[selectedTokenIndex]?.name
+            : 'Select Token'}
         </span>
         {optionsVisible ? (
-          <ChevronUpIcon className="-mr-1 ml-auto h-5 w-5 dark:text-white" aria-hidden="true" />
+          <ChevronUpIcon
+            className="-mr-1 ml-auto h-5 w-5 dark:text-white"
+            aria-hidden="true"
+          />
         ) : (
-          <ChevronDownIcon className="-mr-1 ml-auto h-5 w-5 dark:text-white" aria-hidden="true" />
+          <ChevronDownIcon
+            className="-mr-1 ml-auto h-5 w-5 dark:text-white"
+            aria-hidden="true"
+          />
         )}
       </button>
 
@@ -55,12 +71,15 @@ const SelectToken = ({ chainId, selectedToken, onTokenSelect }: SelectTokenProps
             </label>
             <div className="relative">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                <MagnifyingGlassIcon
+                  className="h-5 w-5 text-gray-400"
+                  aria-hidden="true"
+                />
               </div>
               <input
                 type="text"
                 id="input-group-search"
-                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-500 dark:bg-gray-600 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-500 dark:bg-gray-600 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                 placeholder="Search name or paste address"
                 onChange={e => onSearch(e.target.value)}
               />
@@ -81,7 +100,11 @@ const SelectToken = ({ chainId, selectedToken, onTokenSelect }: SelectTokenProps
                 }}
               >
                 <a className="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                  <img className="mr-2 h-6 w-6 rounded-full" src={uriToHttp(t?.logoURI)} alt={t?.name} />
+                  <img
+                    className="mr-2 h-6 w-6 rounded-full"
+                    src={uriToHttp(t?.logoURI)}
+                    alt={t?.name}
+                  />
                   {t?.name}
                 </a>
               </li>

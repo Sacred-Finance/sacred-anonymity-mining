@@ -1,11 +1,12 @@
 import { useTranslation } from 'react-i18next'
-import React, { Dispatch, SetStateAction, useCallback, useRef, useState } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import { PrimaryButton } from './buttons'
 import dynamic from 'next/dynamic'
 import clsx from 'clsx'
 import Dropdown from './buttons/Dropdown/Dropdown'
 import { Tab } from '@headlessui/react'
-import { OutputData } from '@editorjs/editorjs'
+import type { OutputData } from '@editorjs/editorjs'
 import { Input } from '@/shad/ui/input'
 import { Label } from '@/shad/ui/label'
 import AnonymizeButton from '@components/buttons/AIAnonymiseButton'
@@ -69,7 +70,10 @@ export interface NewPostFormProps {
 }
 
 const getClassNames = (base, customClassNames, condition) => {
-  return clsx(base, condition ? customClassNames?.true : customClassNames?.false)
+  return clsx(
+    base,
+    condition ? customClassNames?.true : customClassNames?.false
+  )
 }
 
 function ContentSection({
@@ -92,7 +96,9 @@ function ContentSection({
     <ScrollArea className="h-[500px] w-full rounded-xl border bg-gray-950/10   p-4 ">
       <Editor
         divProps={{
-          className: cn('z-50 w-full form-input h-full rounded-md bg-gradient-to-r  min-h-[15vh]'),
+          className: cn(
+            'z-50 w-full form-input h-full rounded-md bg-gradient-to-r  min-h-[15vh]'
+          ),
         }}
         data={data}
         onChange={onChange}
@@ -214,7 +220,11 @@ export const NewPostForm = ({
                 className=" w-full rounded-xl border bg-gray-950/10   p-4 "
                 ref={inputRef}
                 placeholder={
-                  t(itemType !== 'post' ? 'placeholder.enterComment' : 'placeholder.enterPostTitle') as string
+                  t(
+                    itemType !== 'post'
+                      ? 'placeholder.enterComment'
+                      : 'placeholder.enterPostTitle'
+                  ) as string
                 }
                 value={title}
                 onChange={e => setTitle(e.target.value)}
@@ -296,15 +306,25 @@ const FormButtons = ({
     <div className="flex flex-row items-center gap-2">
       {tokenBalanceReveal && (
         <Dropdown
-          options={percentageToReveal.map(percentage => ({ key: `${percentage}%`, value: percentage }))}
-          selected={{ key: `${tokenBalanceReveal.selectedValue}% Reveal`, value: tokenBalanceReveal?.selectedValue }}
+          options={percentageToReveal.map(percentage => ({
+            key: `${percentage}%`,
+            value: percentage,
+          }))}
+          selected={{
+            key: `${tokenBalanceReveal.selectedValue}% Reveal`,
+            value: tokenBalanceReveal?.selectedValue,
+          }}
           onSelect={value => tokenBalanceReveal?.onSelected(value)}
           disabled={false}
         />
       )}
       {children}
 
-      <PrimaryButton onClick={handleSubmitAction} isLoading={isSubmitting} disabled={isSubmitting || disableSubmit}>
+      <PrimaryButton
+        onClick={handleSubmitAction}
+        isLoading={isSubmitting}
+        disabled={isSubmitting || disableSubmit}
+      >
         {submitButtonText}
       </PrimaryButton>
     </div>

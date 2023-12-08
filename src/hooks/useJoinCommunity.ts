@@ -5,9 +5,8 @@ import { joinGroup } from '../lib/api'
 import { useHandleCommunityAction } from './useHandleCommunityAction'
 import { useCommunityContext } from '../contexts/CommunityProvider'
 import { useAccount } from 'wagmi'
-import { ethers } from 'ethers'
-import _ from 'lodash'
-import { User } from '../lib/model' // Import the CommunityProvider context hook
+import type { ethers } from 'ethers'
+import type { User } from '../lib/model' // Import the CommunityProvider context hook
 import { createNote } from '@/lib/utils'
 
 export const useJoinCommunity = () => {
@@ -17,9 +16,25 @@ export const useJoinCommunity = () => {
   const handleCommunityAction = useHandleCommunityAction()
 
   return useCallback(
-    async (groupName: string, groupId: string | number | ethers.BigNumber, successCallback?: () => void) => {
-      if (!isConnected || !address || typeof groupId === 'undefined' || isNaN(<number>groupId) || !groupName) {
-        console.error('Missing required parameters', isConnected, address, groupId, groupName)
+    async (
+      groupName: string,
+      groupId: string | number | ethers.BigNumber,
+      successCallback?: () => void
+    ) => {
+      if (
+        !isConnected ||
+        !address ||
+        typeof groupId === 'undefined' ||
+        isNaN(<number>groupId) ||
+        !groupName
+      ) {
+        console.error(
+          'Missing required parameters',
+          isConnected,
+          address,
+          groupId,
+          groupName
+        )
         return
       }
 
@@ -66,7 +81,12 @@ export const useJoinCommunity = () => {
         }
       }
 
-      return await handleCommunityAction(actionFn, [], `Successfully joined ${groupName}`, successCallback)
+      return await handleCommunityAction(
+        actionFn,
+        [],
+        `Successfully joined ${groupName}`,
+        successCallback
+      )
     },
     [isConnected, address, handleCommunityAction, dispatch] // Update the dependencies array
   )

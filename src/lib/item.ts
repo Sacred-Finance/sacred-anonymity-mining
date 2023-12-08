@@ -1,4 +1,8 @@
-import { ItemCreationRequest, ReputationProofStruct, User } from '@/lib/model'
+import type {
+  ItemCreationRequest,
+  ReputationProofStruct,
+  User,
+} from '@/lib/model'
 import { BigNumber, ethers } from 'ethers'
 import { Identity } from '@semaphore-protocol/identity'
 import {
@@ -12,12 +16,13 @@ import {
 import { forumContract } from '@/constant/const'
 import { createComment, createPost, edit } from '@/lib/api'
 import { UnirepUser } from '@/lib/unirep'
-import { MIN_REP_POST } from '@/lib/post'
-import { MIN_REP_COMMENT } from '@/lib/comment'
 import { generateProof } from '@semaphore-protocol/proof'
-import { Group as SemaphoreGroup, Group } from '@semaphore-protocol/group'
+import { Group as SemaphoreGroup } from '@semaphore-protocol/group'
 import { mutate } from 'swr'
-import { getGroupWithPostAndCommentData, getGroupWithPostData } from '@/lib/fetcher'
+import {
+  getGroupWithPostAndCommentData,
+  getGroupWithPostData,
+} from '@/lib/fetcher'
 
 export const emptyPollRequest = {
   pollType: 0,
@@ -28,14 +33,20 @@ export const emptyPollRequest = {
   answerCIDs: [],
 }
 
-export async function handleDeleteItem(address: string, postedByUser: User, itemId) {
+export async function handleDeleteItem(
+  address: string,
+  postedByUser: User,
+  itemId
+) {
   try {
-    let signal = ethers.constants.HashZero
-    const userPosting = new Identity(`${address}_${this.groupId}_${postedByUser?.name}`)
+    const signal = ethers.constants.HashZero
+    const userPosting = new Identity(
+      `${address}_${this.groupId}_${postedByUser?.name}`
+    )
     const note = await createNote(userPosting)
 
     const item = await forumContract.itemAt(itemId)
-    let input = {
+    const input = {
       note: BigInt(item.note.toHexString()),
       trapdoor: userPosting.getTrapdoor(),
       nullifier: userPosting.getNullifier(),
@@ -60,9 +71,19 @@ export async function handleDeleteItem(address: string, postedByUser: User, item
 }
 
 // todo: create works, but it fails in either the caching, or updating the UI after its made - fix currently is refreshing the page.
-export async function create(content, type, address, users, postedByUser, groupId, setWaiting, onIPFSUploadSuccess) {
-  let currentDate = new Date()
-  const message = currentDate.getTime().toString() + '#' + JSON.stringify(content)
+export async function create(
+  content,
+  type,
+  address,
+  users,
+  postedByUser,
+  groupId,
+  setWaiting,
+  onIPFSUploadSuccess
+) {
+  const currentDate = new Date()
+  const message =
+    currentDate.getTime().toString() + '#' + JSON.stringify(content)
 
   try {
     const cid = await uploadIPFS(message)
@@ -72,12 +93,14 @@ export async function create(content, type, address, users, postedByUser, groupI
     onIPFSUploadSuccess(content, cid)
 
     const signal = getBytes32FromIpfsHash(cid)
-    const userPosting = new Identity(`${address}_${this.groupId}_${postedByUser?.name || 'anon'}`)
+    const userPosting = new Identity(
+      `${address}_${this.groupId}_${postedByUser?.name || 'anon'}`
+    )
     const unirepUser = new UnirepUser(userPosting)
     await unirepUser.updateUserState()
     const userState = await unirepUser.getUserState()
 
-    let reputationProof = await userState.genProveReputationProof({
+    const reputationProof = await userState.genProveReputationProof({
       epkNonce: 0,
       minRep: 0,
       graffitiPreImage: 0,
@@ -85,7 +108,7 @@ export async function create(content, type, address, users, postedByUser, groupI
 
     const extraNullifier = hashBytes(signal).toString()
     const note = await createNote(userPosting)
-    let semaphoreGroup = new SemaphoreGroup(groupId)
+    const semaphoreGroup = new SemaphoreGroup(groupId)
     const u = await fetchUsersFromSemaphoreContract(groupId)
     u.forEach(u => semaphoreGroup.addMember(BigInt(u)))
 
@@ -147,9 +170,16 @@ export async function create(content, type, address, users, postedByUser, groupI
   }
 }
 
-export async function editContent(type, content, address: string, itemId, postedByUser: User) {
-  let currentDate = new Date()
-  const message = currentDate.getTime().toString() + '#' + JSON.stringify(content)
+export async function editContent(
+  type,
+  content,
+  address: string,
+  itemId,
+  postedByUser: User
+) {
+  const currentDate = new Date()
+  const message =
+    currentDate.getTime().toString() + '#' + JSON.stringify(content)
   console.log(`Editing your anonymous ${type}...`)
   let cid
   try {
@@ -159,12 +189,14 @@ export async function editContent(type, content, address: string, itemId, posted
     }
     const signal = getBytes32FromIpfsHash(cid)
 
-    const userPosting = new Identity(`${address}_${this.groupId}_${postedByUser?.name}`)
+    const userPosting = new Identity(
+      `${address}_${this.groupId}_${postedByUser?.name}`
+    )
     const note = await createNote(userPosting)
 
     const item = await forumContract.itemAt(itemId)
 
-    let input = {
+    const input = {
       trapdoor: userPosting.getTrapdoor(),
       note: BigInt(item.note.toHexString()),
       nullifier: userPosting.getNullifier(),
@@ -179,7 +211,9 @@ export async function editContent(type, content, address: string, itemId, posted
     return await edit(itemId, signal, note, a, b, c)
       .then(async data => {
         console.log('edited item!', data, this.groupId, itemId)
-        await mutate(getGroupWithPostAndCommentData(this.groupId, this.postId ?? itemId))
+        await mutate(
+          getGroupWithPostAndCommentData(this.groupId, this.postId ?? itemId)
+        )
         return data
       })
       .catch(err => {
@@ -190,7 +224,13 @@ export async function editContent(type, content, address: string, itemId, posted
   }
 }
 
-export async function updateContentVote(itemId, voteType, confirmed: boolean, type, revert = false) {
+export async function updateContentVote(
+  itemId,
+  voteType,
+  confirmed: boolean,
+  type,
+  revert = false
+) {
   if (type === 'post') {
     await mutate(getGroupWithPostData(this.groupId))
   } else if (type === 'comment') {

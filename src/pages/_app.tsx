@@ -5,7 +5,8 @@ import { app } from '@/appConfig'
 import { useEffect, useRef } from 'react'
 import HeadGlobal from '@/components/HeadGlobal'
 import '../../i18n'
-import { darkTheme, RainbowKitProvider, Theme } from '@rainbow-me/rainbowkit'
+import type { Theme } from '@rainbow-me/rainbowkit'
+import { darkTheme, RainbowKitProvider } from '@rainbow-me/rainbowkit'
 import { polygonMumbai } from 'wagmi/chains'
 import { WagmiConfig } from 'wagmi'
 import { CommunityProvider } from '../contexts/CommunityProvider'
@@ -16,11 +17,15 @@ import ErrorBoundary from '../components/ErrorBoundary'
 import StandardLayout from '@components/HOC/StandardLayout'
 import { merge } from 'lodash'
 import { SWRProvider } from '@/contexts/SWRProvider'
-import { chains, client } from '../../wagmi-config'
+import { chains, config } from '../../wagmi-config'
 
 function App({ Component, pageProps }: AppProps) {
   return (
-    <ThemeProvider attribute={'class'} defaultTheme={'dark'} storageKey={'theme-color'}>
+    <ThemeProvider
+      attribute={'class'}
+      defaultTheme={'dark'}
+      storageKey={'theme-color'}
+    >
       <Web3Wrapper>
         <HeadGlobal />
         <SWRProvider>
@@ -55,7 +60,7 @@ export function Web3Wrapper({ children }) {
   }, [])
 
   return (
-    <WagmiConfig client={client}>
+    <WagmiConfig config={config}>
       <RainbowKitProvider
         appInfo={{
           appName: app.name,

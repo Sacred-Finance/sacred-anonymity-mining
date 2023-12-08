@@ -6,7 +6,9 @@ interface Created {
   postId?: string | undefined
 }
 
-export const useIdentity = ({ groupId, postId }: Created = { groupId: undefined, postId: undefined }) => {
+export const useIdentity = (
+  { groupId, postId }: Created = { groupId: undefined, postId: undefined }
+) => {
   const { address, isConnected } = useAccount()
 
   try {

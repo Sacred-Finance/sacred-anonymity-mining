@@ -1,14 +1,25 @@
 import { ethers } from 'ethers'
 import { erc20dummyABI, forumContract, providerMap } from '@/constant/const'
 import { setCache } from '@/lib/redis'
-import { getContent, getIpfsHashFromBytes32, parseComment, parsePost, uploadImageToIPFS } from '@/lib/utils'
-import { CommunityDetails, ContentType, ReputationProofStruct, Requirement } from '@/lib/model'
+import {
+  getContent,
+  getIpfsHashFromBytes32,
+  parseComment,
+  parsePost,
+  uploadImageToIPFS,
+} from '@/lib/utils'
+import type { CommunityDetails, Requirement } from '@/lib/model'
+import { ContentType } from '@/lib/model'
 
 import pica from 'pica'
 import { useCallback } from 'react'
-import { Group, Item, RawGroupData, RawItemData } from '@/types/contract/ForumInterface'
-import { Event } from '@ethersproject/contracts'
-import { UnirepUser } from '@/lib/unirep'
+import type {
+  Group,
+  Item,
+  RawGroupData,
+  RawItemData,
+} from '@/types/contract/ForumInterface'
+import type { Event } from '@ethersproject/contracts'
 
 type GroupId = number
 
@@ -16,14 +27,23 @@ interface FetchCommunitiesDataParams {
   groups: Array<Event | GroupId>
 }
 
-export const fetchCommunitiesData = async ({ groups }: FetchCommunitiesDataParams): Promise<Awaited<Group>[]> => {
+export const fetchCommunitiesData = async ({
+  groups,
+}: FetchCommunitiesDataParams): Promise<Awaited<Group>[]> => {
   // ensure the event has the right name
   try {
-    const groupIds = groups.map(group => (typeof group === 'number' ? group : group?.args?.['groupId']?.toNumber()))
+    const groupIds = groups.map(group =>
+      typeof group === 'number' ? group : group?.args?.['groupId']?.toNumber()
+    )
 
-    const checkEvent = groups.filter(group => typeof group !== 'number' && group.event === 'NewGroupCreated')
+    const checkEvent = groups.filter(
+      group => typeof group !== 'number' && group.event === 'NewGroupCreated'
+    )
 
-    if (checkEvent.length !== groups.filter(group => typeof group !== 'number').length) {
+    if (
+      checkEvent.length !==
+      groups.filter(group => typeof group !== 'number').length
+    ) {
       console.error('Event name is not NewGroupCreated')
       throw new Error('Event name is not NewGroupCreated')
     }
@@ -53,7 +73,9 @@ export const fetchCommunitiesData = async ({ groups }: FetchCommunitiesDataParam
         banner: groupData?.groupDetails.bannerCID
           ? getIpfsHashFromBytes32(groupData.groupDetails.bannerCID)
           : undefined,
-        logo: groupData?.groupDetails.logoCID ? getIpfsHashFromBytes32(groupData.groupDetails.logoCID) : undefined,
+        logo: groupData?.groupDetails.logoCID
+          ? getIpfsHashFromBytes32(groupData.groupDetails.logoCID)
+          : undefined,
         groupDetails: groupData.groupDetails,
       } as Group
     })
@@ -85,7 +107,10 @@ type UploadImagesParams = {
 export const uploadImages = async ({
   bannerFile,
   logoFile,
-}: UploadImagesParams): Promise<{ bannerCID: string | null; logoCID: string | null }> => {
+}: UploadImagesParams): Promise<{
+  bannerCID: string | null
+  logoCID: string | null
+}> => {
   const [bannerResult, logoResult] = await Promise.allSettled([
     bannerFile ? uploadImageToIPFS(bannerFile) : Promise.resolve(null),
     logoFile ? uploadImageToIPFS(logoFile) : Promise.resolve(null),
@@ -122,7 +147,14 @@ export const cacheGroupData = async ({
   requirements: Requirement[]
   details: CommunityDetails
 }): Promise<any> => {
-  const { blockHash, args, event, transactionIndex, blockNumber, ...otherData } = groupData
+  const {
+    blockHash,
+    args,
+    event,
+    transactionIndex,
+    blockNumber,
+    ...otherData
+  } = groupData
   const [groupIdArg, nameArg, note] = args
   const groupIdInt = parseInt(groupIdArg.hex, 16)
 
@@ -188,7 +220,8 @@ export const handleFileImageUpload = (e, setImageFileState) => {
       banner: 16 / 9,
       logo: 1, // assuming you want a square logo
     }
-    const requiredDimensionsText = '1920x1080px for banners and 512x512px for logos.'
+    const requiredDimensionsText =
+      '1920x1080px for banners and 512x512px for logos.'
 
     const requiredDimensions = {
       banner: { width: 1920, height: 640 },
@@ -231,12 +264,18 @@ export const handleFileImageUpload = (e, setImageFileState) => {
   }
 }
 
-export const addRequirementDetails = async (community: Group): Promise<Awaited<Requirement[]>> => {
+export const addRequirementDetails = async (
+  community: Group
+): Promise<Awaited<Requirement[]>> => {
   return (await Promise.all(
     community.requirements.map(async requirement => {
       let token
       try {
-        token = new ethers.Contract(requirement.tokenAddress, erc20dummyABI, providerMap[community.chainId])
+        token = new ethers.Contract(
+          requirement.tokenAddress,
+          erc20dummyABI,
+          providerMap[community.chainId]
+        )
       } catch (e) {
         console.error('Error creating token contract:', e)
         return {
@@ -249,7 +288,10 @@ export const addRequirementDetails = async (community: Group): Promise<Awaited<R
       }
 
       if (!token) {
-        console.warn('Token contract not initialized:', requirement.tokenAddress)
+        console.warn(
+          'Token contract not initialized:',
+          requirement.tokenAddress
+        )
         return {
           tokenAddress: requirement.tokenAddress,
           symbol: '',
@@ -303,8 +345,12 @@ function serializeGroupData(rawGroupData: RawGroupData): Group {
     name: rawGroupData.name,
     groupId: rawGroupData.id.toString(),
     groupDetails: {
-      bannerCID: getIpfsHashFromBytes32(rawGroupData.groupDetails.bannerCID.toString()),
-      logoCID: getIpfsHashFromBytes32(rawGroupData.groupDetails.logoCID.toString()),
+      bannerCID: getIpfsHashFromBytes32(
+        rawGroupData.groupDetails.bannerCID.toString()
+      ),
+      logoCID: getIpfsHashFromBytes32(
+        rawGroupData.groupDetails.logoCID.toString()
+      ),
       description: rawGroupData.groupDetails.description.toString(),
       tags: rawGroupData.groupDetails.tags.map(t => t.toString()),
     },
@@ -322,14 +368,18 @@ function serializeGroupData(rawGroupData: RawGroupData): Group {
 }
 
 // Asynchronous function to normalize and augment data
-export async function augmentGroupData(rawGroupData: RawGroupData, forPaths = false): Promise<Group> {
+export async function augmentGroupData(
+  rawGroupData: RawGroupData,
+  forPaths = false
+): Promise<Group> {
   const normalizedGroupData = serializeGroupData(rawGroupData)
 
   if (forPaths) {
     return normalizedGroupData
   }
 
-  normalizedGroupData.requirements = await addRequirementDetails(normalizedGroupData)
+  normalizedGroupData.requirements =
+    await addRequirementDetails(normalizedGroupData)
 
   return normalizedGroupData
 }

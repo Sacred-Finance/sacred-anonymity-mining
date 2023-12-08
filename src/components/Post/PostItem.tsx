@@ -1,5 +1,7 @@
-import { useRouter } from 'next/router'
-import { useCommunityContext, useUserIfJoined } from '@/contexts/CommunityProvider'
+import {
+  useCommunityContext,
+  useUserIfJoined,
+} from '@/contexts/CommunityProvider'
 import React, { useEffect, useState } from 'react'
 import { useAccount } from 'wagmi'
 import { Identity } from '@semaphore-protocol/identity'
@@ -8,18 +10,18 @@ import { BigNumber } from 'ethers'
 import { PollUI } from '@components/PollIUI'
 import { ContentActions } from '@components/Post/ContentActions'
 import { PostTitle } from '@components/Post/PostTitle'
-import { ContentType, User } from '@/lib/model'
+import type { User } from '@/lib/model'
+import { ContentType } from '@/lib/model'
 import { useContentManagement } from '@/hooks/useContentManagement'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'react-toastify'
 import { useEditItem } from '@/hooks/useEditItem'
 import dynamic from 'next/dynamic'
-import { Group, Item } from '@/types/contract/ForumInterface'
+import type { Group, Item } from '@/types/contract/ForumInterface'
 import { mutate } from 'swr'
 import { getGroupWithPostAndCommentData } from '@/lib/fetcher'
-import { Avatar } from '@components/Avatar'
 import EditorJsRenderer from '@components/editor-js/EditorJSRenderer'
-import { Address } from '@/types/common'
+import type { Address } from '@/types/common'
 import AnimalAvatar from '../AnimalAvatar'
 
 const Editor = dynamic(() => import('../editor-js/Editor'), {
@@ -59,7 +61,9 @@ export const PostItem = ({ post, group, showAvatar = true }: PostItemProps) => {
   })
 
   const saveEditedPost = async () => {
-    if (!address || !user) return
+    if (!address || !user) {
+      return
+    }
 
     try {
       if (isTypeOfPost || isTypeOfPoll) {
@@ -69,8 +73,13 @@ export const PostItem = ({ post, group, showAvatar = true }: PostItemProps) => {
         if (!contentDescription || !contentDescription.blocks?.length) {
           toast.error(t('alert.emptyContent'))
         }
-        if (!contentTitle || !contentDescription || !contentDescription.blocks?.length)
+        if (
+          !contentTitle ||
+          !contentDescription ||
+          !contentDescription.blocks?.length
+        ) {
           return toast.error(t('alert.emptyContent'))
+        }
       }
 
       setIsLoading(true)
@@ -130,7 +139,7 @@ export const PostItem = ({ post, group, showAvatar = true }: PostItemProps) => {
             {isContentEditing && (
               <input
                 name="title"
-                className="focus:ring-primary-dark rounded bg-gray-100 p-4 text-black placeholder-gray-500 focus:outline-none focus:ring-2 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400"
+                className="focus:ring-primary-dark rounded bg-gray-100 p-4 text-black placeholder:text-gray-500 focus:outline-none focus:ring-2 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-400"
                 placeholder={t('placeholder.enterPostTitle') as string}
                 type="text"
                 value={contentTitle}
@@ -139,7 +148,12 @@ export const PostItem = ({ post, group, showAvatar = true }: PostItemProps) => {
             )}
 
             {!isContentEditing && post.title && (
-              <PostTitle title={post.title} id={post.id} onPostPage={isPostPage} post={post} />
+              <PostTitle
+                title={post.title}
+                id={post.id}
+                onPostPage={isPostPage}
+                post={post}
+              />
             )}
           </div>
         )}
@@ -148,7 +162,9 @@ export const PostItem = ({ post, group, showAvatar = true }: PostItemProps) => {
           {!isContentEditing ? (
             <EditorJsRenderer
               data={
-                isTypeOfPost || isTypeOfPoll ? post.description : { blocks: post.blocks || post?.description?.blocks }
+                isTypeOfPost || isTypeOfPoll
+                  ? post.description
+                  : { blocks: post.blocks || post?.description?.blocks }
               }
             />
           ) : (
@@ -170,7 +186,10 @@ export const PostItem = ({ post, group, showAvatar = true }: PostItemProps) => {
 
         <div className="sticky bottom-0 flex items-center justify-between gap-4">
           {parentId && Number(parentId) == 0 && showAvatar && (
-            <AnimalAvatar seed={`${post.note}_${Number(groupId)}`} options={{ size: 40 }} />
+            <AnimalAvatar
+              seed={`${post.note}_${Number(groupId)}`}
+              options={{ size: 40 }}
+            />
           )}
           <ContentActions
             item={post}

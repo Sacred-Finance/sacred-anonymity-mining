@@ -1,4 +1,5 @@
-import React, { ReactNode, useState } from 'react'
+import type { ReactNode } from 'react'
+import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Bars3Icon } from '@heroicons/react/20/solid'
 import { Button } from '@/shad/ui/button'
@@ -24,7 +25,9 @@ export const SpeedDial: React.FC<SpeedDialProps> = ({ actions, onOpen }) => {
 
   actions = actions.filter(Boolean) as ActionItem[]
 
-  if (!actions.length) return null
+  if (!actions.length) {
+    return null
+  }
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -38,9 +41,17 @@ export const SpeedDial: React.FC<SpeedDialProps> = ({ actions, onOpen }) => {
           }}
         >
           {isOpen ? (
-            <XIcon className={'h-6 w-6 text-gray-700 dark:text-gray-300 dark:group-hover:text-white'} />
+            <XIcon
+              className={
+                'h-6 w-6 text-gray-700 dark:text-gray-300 dark:group-hover:text-white'
+              }
+            />
           ) : (
-            <Bars3Icon className={'h-6 w-6 text-gray-700 dark:text-gray-300 dark:group-hover:text-white'} />
+            <Bars3Icon
+              className={
+                'h-6 w-6 text-gray-700 dark:text-gray-300 dark:group-hover:text-white'
+              }
+            />
           )}
           <span className="sr-only">Open actions menu</span>
         </MotionButton>
@@ -57,9 +68,16 @@ export const SpeedDial: React.FC<SpeedDialProps> = ({ actions, onOpen }) => {
   )
 }
 const ActionButton = ({ action }) => {
-  if (!action) return null
+  if (!action) {
+    return null
+  }
 
-  if (typeof action === 'object' && action.icon && action.label && action.onClick) {
+  if (
+    typeof action === 'object' &&
+    action.icon &&
+    action.label &&
+    action.onClick
+  ) {
     return (
       <Button
         key={action.label}

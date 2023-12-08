@@ -1,7 +1,7 @@
 import { forumContract } from '@/constant/const'
 import { ContentType } from '@/lib/model'
 import { createNote } from '@/lib/utils'
-import { Item } from '@/types/contract/ForumInterface'
+import type { Item } from '@/types/contract/ForumInterface'
 import { augmentItemData } from '@/utils/communityUtils'
 import { Identity } from '@semaphore-protocol/identity'
 import { ethers } from 'ethers'
@@ -12,7 +12,9 @@ import { useAccount } from 'wagmi'
 
 export const useFetchItemsCreatedByUser = () => {
   const { address } = useAccount()
-  const [itemsGrouped, setItemsGrouped] = useState<{ [contentType: string]: any[] }>({
+  const [itemsGrouped, setItemsGrouped] = useState<{
+    [contentType: string]: any[]
+  }>({
     [ContentType.POST]: [],
     [ContentType.COMMENT]: [],
     [ContentType.POLL]: [],
@@ -31,7 +33,9 @@ export const useFetchItemsCreatedByUser = () => {
          */
         for (const item of res) {
           const decodedItem = item.decode?.(item.data, item.topics)
-          const identity = new Identity(`${address}_${Number(decodedItem.groupId)}_anon`)
+          const identity = new Identity(
+            `${address}_${Number(decodedItem.groupId)}_anon`
+          )
           const note = await createNote(identity)
           if (
             decodedItem.contentCID &&

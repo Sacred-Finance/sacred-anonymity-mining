@@ -1,8 +1,8 @@
-import { useContractRead, useContractWrite } from 'wagmi'
+import { useContractRead } from 'wagmi'
 import { ForumContractAddress } from '../constant/const'
 import ForumABI from '../constant/abi/Forum.json'
 import { useState } from 'react'
-import { Address } from '@/types/common'
+import type { Address } from '@/types/common'
 
 export const useFetchAdminsAndModerators = () => {
   const {

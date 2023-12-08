@@ -37,7 +37,9 @@ export const SWRProvider = ({ children }) => {
   useEffect(() => {
     setIsMounted(true)
   }, [])
-  if (!isMounted) return null
+  if (!isMounted) {
+    return null
+  }
   return (
     <SWRConfig
       value={{

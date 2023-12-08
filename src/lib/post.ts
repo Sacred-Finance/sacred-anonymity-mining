@@ -1,16 +1,21 @@
 import { Group } from '@semaphore-protocol/group'
 import { Identity } from '@semaphore-protocol/identity'
 import { generateProof } from '@semaphore-protocol/proof'
-import { BigNumber, utils } from 'ethers'
+import { utils } from 'ethers'
 import { vote } from './api'
-import { PostContent, ReputationProofStruct, User } from './model'
-import { getContent, getIpfsHashFromBytes32, hashBytes2 } from './utils'
-import { getCache, removeAt, setCache } from '../lib/redis'
+import type { PostContent, ReputationProofStruct, User } from './model'
+import { hashBytes2 } from './utils'
+import { removeAt } from '../lib/redis'
 import { mutate } from 'swr'
 import { UnirepUser } from './unirep'
-import { forumContract, jsonRPCProvider } from '@/constant/const'
-import { create, editContent, handleDeleteItem, updateContentVote } from '@/lib/item'
-import { Address } from '@/types/common'
+import { jsonRPCProvider } from '@/constant/const'
+import {
+  create,
+  editContent,
+  handleDeleteItem,
+  updateContentVote,
+} from '@/lib/item'
+import type { Address } from '@/types/common'
 
 export const MIN_REP_POST = 0
 
@@ -56,7 +61,15 @@ export class Post {
     return `${this.groupId}_post_${this.id ?? postId}`
   }
 
-  async create({ postContent, address, users, postedByUser, groupId, setWaiting, onIPFSUploadSuccess }: CreatePost) {
+  async create({
+    postContent,
+    address,
+    users,
+    postedByUser,
+    groupId,
+    setWaiting,
+    onIPFSUploadSuccess,
+  }: CreatePost) {
     return await create.call(
       this,
       postContent,
@@ -78,10 +91,26 @@ export class Post {
     groupId: string,
     setWaiting: Function
   ) {
-    return await editContent.call(this, 'post', postContent, address, itemId, postedByUser, groupId, setWaiting)
+    return await editContent.call(
+      this,
+      'post',
+      postContent,
+      address,
+      itemId,
+      postedByUser,
+      groupId,
+      setWaiting
+    )
   }
 
-  async delete(address: string, itemId, users: User[], postedByUser: User, groupId: string, setWaiting: Function) {
+  async delete(
+    address: string,
+    itemId,
+    users: User[],
+    postedByUser: User,
+    groupId: string,
+    setWaiting: Function
+  ) {
     console.log(`Removing your anonymous post...`)
     return await handleDeleteItem.call(this, address, postedByUser, itemId)
   }
@@ -94,19 +123,31 @@ export class Post {
   async vote(voteType, address, users, postedByUser, itemId, groupId) {
     try {
       // Validate parameters
-      if (!address) throw new Error('Invalid address')
-      if (!Array.isArray(users)) throw new Error('Invalid users array')
-      if (isNaN(itemId)) throw new Error('Invalid item ID')
-      if (isNaN(groupId)) throw new Error('Invalid group ID')
+      if (!address) {
+        throw new Error('Invalid address')
+      }
+      if (!Array.isArray(users)) {
+        throw new Error('Invalid users array')
+      }
+      if (isNaN(itemId)) {
+        throw new Error('Invalid item ID')
+      }
+      if (isNaN(groupId)) {
+        throw new Error('Invalid group ID')
+      }
 
       const voteCmdNum = hashBytes2(+itemId, 'vote')
       const signal = utils.hexZeroPad('0x' + voteCmdNum.toString(16), 32)
       const extraNullifier = voteCmdNum.toString()
       const g = new Group(groupId)
-      const userPosting = new Identity(`${address}_${this.groupId}_${postedByUser?.name}`)
+      const userPosting = new Identity(
+        `${address}_${this.groupId}_${postedByUser?.name}`
+      )
 
       const filteredUsers = users.filter(u => u?.groupId === +this.groupId)
-      if (filteredUsers.length === 0) throw new Error('No matching users found for the provided groupId')
+      if (filteredUsers.length === 0) {
+        throw new Error('No matching users found for the provided groupId')
+      }
 
       g.addMembers(filteredUsers.map(u => u?.identityCommitment))
 
@@ -115,16 +156,18 @@ export class Post {
       const userState = await unirepUser.getUserState()
       // if (!userState) throw new Error("Failed to get User State");
 
-      let reputationProof = await userState.genProveReputationProof({
+      const reputationProof = await userState.genProveReputationProof({
         epkNonce: 0,
         minRep: MIN_REP_VOTE,
         graffitiPreImage: '',
       })
 
       const epochData = unirepUser.getEpochData()
-      if (!epochData) throw new Error('Failed to get Epoch Data')
+      if (!epochData) {
+        throw new Error('Failed to get Epoch Data')
+      }
 
-      let voteProofData: ReputationProofStruct = {
+      const voteProofData: ReputationProofStruct = {
         publicSignals: epochData.publicSignals,
         proof: epochData.proof,
         publicSignalsQ: reputationProof.publicSignals,
@@ -134,7 +177,12 @@ export class Post {
       }
 
       // time this
-      const { proof, nullifierHash, merkleTreeRoot } = await generateProof(userPosting, g, extraNullifier, signal)
+      const { proof, nullifierHash, merkleTreeRoot } = await generateProof(
+        userPosting,
+        g,
+        extraNullifier,
+        signal
+      )
       return vote(
         itemId,
         this.groupId?.toString(),

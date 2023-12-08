@@ -2,7 +2,12 @@ import React, { useState } from 'react'
 import { useTranslation } from 'next-i18next'
 import { CogIcon } from '@heroicons/react/20/solid'
 
-export type SortByOption = 'highest' | 'lowest' | 'controversial' | 'newest' | 'oldest'
+export type SortByOption =
+  | 'highest'
+  | 'lowest'
+  | 'controversial'
+  | 'newest'
+  | 'oldest'
 
 interface SortByProps {
   onSortChange: (sortBy: SortByOption) => void

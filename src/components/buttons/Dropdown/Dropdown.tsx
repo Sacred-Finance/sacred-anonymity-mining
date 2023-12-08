@@ -9,7 +9,12 @@ interface DropdownProps {
   selected: { key: string; value: any; image?: string }
 }
 
-const Dropdown = ({ disabled = false, options, selected, onSelect }: DropdownProps) => {
+const Dropdown = ({
+  disabled = false,
+  options,
+  selected,
+  onSelect,
+}: DropdownProps) => {
   return (
     <div className="group text-gray-700 dark:text-gray-200">
       <button
@@ -30,13 +35,18 @@ const Dropdown = ({ disabled = false, options, selected, onSelect }: DropdownPro
           {selected.key}
         </div>
         <ChevronRightIcon
-          className="h-5 w-5 transform transition-transform duration-200 group-hover:rotate-90"
+          className="h-5 w-5 transition-transform duration-200 group-hover:rotate-90"
           aria-hidden="true"
         />
       </button>
 
       <div className="absolute left-auto z-50 hidden w-48 overflow-hidden rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 group-hover:block dark:bg-gray-700">
-        <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+        <div
+          className="py-1"
+          role="menu"
+          aria-orientation="vertical"
+          aria-labelledby="options-menu"
+        >
           {options?.map((k, i) => (
             <button
               key={k.key}
@@ -44,7 +54,15 @@ const Dropdown = ({ disabled = false, options, selected, onSelect }: DropdownPro
               onClick={() => onSelect(k.value)}
             >
               <div className="flex items-center gap-2">
-                {k?.image && <Image src={k.image} alt={'ChainLogo'} width={25} height={25} className="rounded" />}{' '}
+                {k?.image && (
+                  <Image
+                    src={k.image}
+                    alt={'ChainLogo'}
+                    width={25}
+                    height={25}
+                    className="rounded"
+                  />
+                )}{' '}
                 {k.key}
               </div>
             </button>

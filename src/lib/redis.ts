@@ -31,7 +31,9 @@ const refreshCache = (cachedDate: string) => {
     We need to ensure it is at least x minutes fresh
     This is standard practice for caching in high traffic systems
     */
-  if (!cachedDate) return true
+  if (!cachedDate) {
+    return true
+  }
 
   const currentDate = Number(dateStamp('x')[1])
   const timeDifference = (currentDate - Number(cachedDate)) / 60_000
@@ -91,7 +93,11 @@ export const removeFromCache = async (key: string, path = '$') => {
     })
 }
 
-export const setCacheAtSpecificPath = async (key: string, value: any, path = '$') => {
+export const setCacheAtSpecificPath = async (
+  key: string,
+  value: any,
+  path = '$'
+) => {
   if (!redisClient) {
     redisClient = await getRedisClient()
   }
@@ -112,7 +118,10 @@ export const setCacheAtSpecificPath = async (key: string, value: any, path = '$'
     })
 }
 
-export const getMCache2 = async (keys: string[], withCleanUp = false): Promise<{ cache; refresh: boolean }[]> => {
+export const getMCache2 = async (
+  keys: string[],
+  withCleanUp = false
+): Promise<{ cache; refresh: boolean }[]> => {
   if (!redisClient) {
     redisClient = await getRedisClient()
   }
@@ -143,9 +152,11 @@ export const getMCache2 = async (keys: string[], withCleanUp = false): Promise<{
     const refresh = false
 
     if (withCleanUp) {
-      const cleanupPromise = cacheCommunityCleanUp(cache, keys[index]).catch(error => {
-        console.error(keys[index], error, 'Error cleaning up cache')
-      })
+      const cleanupPromise = cacheCommunityCleanUp(cache, keys[index]).catch(
+        error => {
+          console.error(keys[index], error, 'Error cleaning up cache')
+        }
+      )
       cleanupPromises.push(cleanupPromise)
     }
     return { cache, refresh: cache?.['refresh'] ?? refresh }
@@ -157,7 +168,10 @@ export const getMCache2 = async (keys: string[], withCleanUp = false): Promise<{
   return results
 }
 
-export const getCache = async (key: string, withCleanUp = false): Promise<{ cache; refresh: boolean }> => {
+export const getCache = async (
+  key: string,
+  withCleanUp = false
+): Promise<{ cache; refresh: boolean }> => {
   if (!redisClient) {
     redisClient = await getRedisClient()
   }
@@ -197,7 +211,9 @@ export const getCache = async (key: string, withCleanUp = false): Promise<{ cach
 const cacheCommunityCleanUp = async (key, cache) => {
   if (
     key.startsWith('group_') &&
-    (!cache.hasOwnProperty('note') || !cache.hasOwnProperty('id') || !cache.hasOwnProperty('groupId'))
+    (!cache.hasOwnProperty('note') ||
+      !cache.hasOwnProperty('id') ||
+      !cache.hasOwnProperty('groupId'))
   ) {
     console.log('cache missing required properties - deleting', key, cache)
     // Remove the cache if it doesn't have the required properties
@@ -206,18 +222,23 @@ const cacheCommunityCleanUp = async (key, cache) => {
   }
 }
 
-export const getMCache = async (key: string[], flatten = false): Promise<{ cache; refresh: boolean }> => {
+export const getMCache = async (
+  key: string[],
+  flatten = false
+): Promise<{ cache; refresh: boolean }> => {
   if (!redisClient) {
     redisClient = await getRedisClient()
   }
 
-  let data = []
+  const data = []
   let cache
   let cachedDate: string | null = ''
   try {
     const cachedResult = await redisClient.json.mget(key, '$')
     cache = cachedResult
-    if (flatten) cache = _.flatten(cachedResult)
+    if (flatten) {
+      cache = _.flatten(cachedResult)
+    }
 
     cachedDate = null
     console.log(data, cachedDate, cache)

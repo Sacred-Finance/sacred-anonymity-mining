@@ -8,17 +8,15 @@ import Delimiter from '@editorjs/delimiter'
 import Embed from '@editorjs/embed'
 import Image from '@editorjs/image'
 import InlineCode from '@editorjs/inline-code'
-import Link from '@editorjs/link'
 import List from '@editorjs/list'
 import Marker from '@editorjs/marker'
 import Quote from '@editorjs/quote'
 import Raw from '@editorjs/raw'
-import SimpleImage from '@editorjs/simple-image'
 import Table from '@editorjs/table'
 import Warning from '@editorjs/warning'
 import Underline from '@editorjs/underline'
 import { uploadImageToIPFS } from '../../lib/utils'
-import { EditorConfig } from '@editorjs/editorjs'
+import type { EditorConfig } from '@editorjs/editorjs'
 
 // Link: reuires backend implementation
 // Image: requires backend or 3rd party integration

@@ -41,7 +41,8 @@ export const useFetchTokensList = (chainId: number) => {
   }
 
   const fetchTokensList = async () => {
-    return (await axios.get('https://gateway.ipfs.io/ipns/tokens.uniswap.org')).data
+    return (await axios.get('https://gateway.ipfs.io/ipns/tokens.uniswap.org'))
+      .data
   }
 
   return { filteredTokensList, onSearch }

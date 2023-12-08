@@ -7,7 +7,10 @@ type Data = {
   country: string
 }
 
-export default function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
+export default function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<Data>
+) {
   res.redirect(307, '/')
 
   res.status(200).json({ name: 'John Doe', age: 42, country: 'United States' })

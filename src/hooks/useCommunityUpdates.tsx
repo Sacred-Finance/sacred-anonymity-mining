@@ -1,9 +1,14 @@
-import { useEffect, useCallback, useRef } from 'react'
-import { getContent, getIpfsHashFromBytes32, parsePost, removeDuplicates, sortArray } from '../lib/utils'
+import { useCallback, useEffect, useRef } from 'react'
+import {
+  getContent,
+  getIpfsHashFromBytes32,
+  parsePost,
+  removeDuplicates,
+  sortArray,
+} from '../lib/utils'
 import { useSWRConfig } from 'swr'
-import { User } from '../lib/model'
 import { forumContract, jsonRPCProvider } from '../constant/const'
-import { Post } from '@/lib/post'
+import type { Post } from '@/lib/post'
 
 export const handleError = message => {
   throw new Error(message)
@@ -11,9 +16,15 @@ export const handleError = message => {
 
 const POST_ITEM_TYPE = 0
 const updatePosts = (groupCacheId, mutate) => async (p, parsedPost) => {
-  if (!groupCacheId) handleError('groupCacheId is not defined')
-  if (!parsedPost) handleError('parsedPost is not defined')
-  if (!p) handleError('p is not defined')
+  if (!groupCacheId) {
+    handleError('groupCacheId is not defined')
+  }
+  if (!parsedPost) {
+    handleError('parsedPost is not defined')
+  }
+  if (!p) {
+    handleError('p is not defined')
+  }
 
   return mutate(
     groupCacheId,
@@ -27,7 +38,11 @@ const updatePosts = (groupCacheId, mutate) => async (p, parsedPost) => {
         downvote: p.downvote?.toNumber(),
       })
 
-      return sortArray(removeDuplicates(confirmedPosts, 'id'), 'createdAt', true)
+      return sortArray(
+        removeDuplicates(confirmedPosts, 'id'),
+        'createdAt',
+        true
+      )
     },
     { revalidate: false }
   )
@@ -41,27 +56,45 @@ const gatherContent = updatePostsCallback => async (contentCID, postId) => {
   return await updatePostsCallback(p, parsedPost)
 }
 
-const handleNewItem = (gatherContentCallback, id) => async (itemType, groupId, postId, parentId, contentCID) => {
-  if (isNaN(id)) return
-
-  if (itemType === POST_ITEM_TYPE && groupId.toString() === id) {
-    await gatherContentCallback(contentCID, postId)
-  }
-}
-
-const handleVoteItem = postInstance => async (voteType, itemType, itemId, upvote, downvote) => {
-  if (!postInstance) handleError('postInstance is not defined')
-  if (isNaN(itemId)) return
-  try {
-    if (itemType === POST_ITEM_TYPE) {
-      postInstance.updatePostsVote({ itemId: postInstance, voteType: itemId, confirmed: voteType, revert: true })
+const handleNewItem =
+  (gatherContentCallback, id) =>
+  async (itemType, groupId, postId, parentId, contentCID) => {
+    if (isNaN(id)) {
+      return
     }
-  } catch (err) {
-    console.error('Error in VoteItem event handler:', err)
-  }
-}
 
-const fetchEvents = async (postInstance, handleNewItemCallback, handleVoteItemCallback) => {
+    if (itemType === POST_ITEM_TYPE && groupId.toString() === id) {
+      await gatherContentCallback(contentCID, postId)
+    }
+  }
+
+const handleVoteItem =
+  postInstance => async (voteType, itemType, itemId, upvote, downvote) => {
+    if (!postInstance) {
+      handleError('postInstance is not defined')
+    }
+    if (isNaN(itemId)) {
+      return
+    }
+    try {
+      if (itemType === POST_ITEM_TYPE) {
+        postInstance.updatePostsVote({
+          itemId: postInstance,
+          voteType: itemId,
+          confirmed: voteType,
+          revert: true,
+        })
+      }
+    } catch (err) {
+      console.error('Error in VoteItem event handler:', err)
+    }
+  }
+
+const fetchEvents = async (
+  postInstance,
+  handleNewItemCallback,
+  handleVoteItemCallback
+) => {
   if (!jsonRPCProvider || !forumContract) {
     handleError('jsonRPCProvider or forumContract is not defined')
   }
@@ -69,8 +102,12 @@ const fetchEvents = async (postInstance, handleNewItemCallback, handleVoteItemCa
   console.log('fetchEvents - postInstance', postInstance)
 
   try {
-    const newItemEvents = await forumContract.queryFilter(forumContract.filters.NewItem())
-    const voteItemEvents = await forumContract.queryFilter(forumContract.filters.VoteItem())
+    const newItemEvents = await forumContract.queryFilter(
+      forumContract.filters.NewItem()
+    )
+    const voteItemEvents = await forumContract.queryFilter(
+      forumContract.filters.VoteItem()
+    )
 
     const newItemPromises = newItemEvents.map(event => {
       if (event.args) {
@@ -90,7 +127,11 @@ const fetchEvents = async (postInstance, handleNewItemCallback, handleVoteItemCa
   }
 }
 
-export const useCommunityUpdates = ({ postInstance }: { postInstance: Post }) => {
+export const useCommunityUpdates = ({
+  postInstance,
+}: {
+  postInstance: Post
+}) => {
   const groupId = postInstance.groupId
   const groupCacheId = postInstance.groupCacheId()
   const { mutate } = useSWRConfig()
@@ -101,22 +142,36 @@ export const useCommunityUpdates = ({ postInstance }: { postInstance: Post }) =>
   const handleVoteItemCB = handleVoteItem(postInstance)
 
   const fetchEventsCallback = useCallback(() => {
-    if (!postInstance) handleError('postInstance is not defined')
-    if (!handleNewItemCB) handleError('handleNewItemCB is not defined')
-    if (!handleVoteItemCB) handleError('handleNewItemCB or handleVoteItemCB is not defined')
+    if (!postInstance) {
+      handleError('postInstance is not defined')
+    }
+    if (!handleNewItemCB) {
+      handleError('handleNewItemCB is not defined')
+    }
+    if (!handleVoteItemCB) {
+      handleError('handleNewItemCB or handleVoteItemCB is not defined')
+    }
     fetchEvents(postInstance, handleNewItemCB, handleVoteItemCB)
   }, [postInstance, handleNewItemCB, handleVoteItemCB])
 
   const didLoadRef = useRef(false)
   useEffect(() => {
-    if (didLoadRef.current) return
-    if (!jsonRPCProvider || !forumContract) handleError('jsonRPCProvider or forumContract is not defined')
+    if (didLoadRef.current) {
+      return
+    }
+    if (!jsonRPCProvider || !forumContract) {
+      handleError('jsonRPCProvider or forumContract is not defined')
+    }
     didLoadRef.current = true
     fetchEventsCallback()
 
     return () => {
-      if (forumContract) forumContract.removeAllListeners()
-      if (jsonRPCProvider) jsonRPCProvider.removeAllListeners()
+      if (forumContract) {
+        forumContract.removeAllListeners()
+      }
+      if (jsonRPCProvider) {
+        jsonRPCProvider.removeAllListeners()
+      }
     }
   }, [fetchEventsCallback])
 }

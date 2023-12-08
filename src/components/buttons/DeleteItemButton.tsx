@@ -8,11 +8,21 @@ import { ContentType } from '@/lib/model'
 import { CustomModal } from '@components/CustomModal'
 import { TrashIcon } from '@heroicons/react/20/solid'
 
-const DeleteItemButton = ({ itemId, itemType, groupId, isAdminOrModerator }) => {
+const DeleteItemButton = ({
+  itemId,
+  itemType,
+  groupId,
+  isAdminOrModerator,
+}) => {
   const { t } = useTranslation()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { deleteItem } = useRemoveItemFromForumContract(groupId, itemId, isAdminOrModerator, setIsSubmitting)
+  const { deleteItem } = useRemoveItemFromForumContract(
+    groupId,
+    itemId,
+    isAdminOrModerator,
+    setIsSubmitting
+  )
   const router = useRouter()
   const [deleteConfirmation, setDeleteConfirmation] = useState('')
 
@@ -63,7 +73,9 @@ const DeleteItemButton = ({ itemId, itemType, groupId, isAdminOrModerator }) => 
             <h3 className="mt-2 text-lg font-medium text-gray-900 dark:text-gray-100">
               Are you sure you want to delete this?
             </h3>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">This action cannot be undone.</p>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              This action cannot be undone.
+            </p>
 
             <input
               className="mt-4 w-full rounded border border-gray-300 px-3 py-2 text-center shadow-sm focus:border-red-300 focus:ring focus:ring-red-200 focus:ring-opacity-50"
