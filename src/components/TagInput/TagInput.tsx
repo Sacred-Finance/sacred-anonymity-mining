@@ -74,7 +74,7 @@ const TagInput = ({ onChange, selected }: TagInputProps) => {
                   placeholder="Search Tags"
                   onChange={filterTags}
                   onFocus={() => setOptionsVisible(true)}
-                  className="focus:border-primary h-full w-full appearance-none rounded-[10px] border-solid border-slate-300 bg-transparent p-1 px-2 text-gray-800 outline-none dark:text-gray-200"
+                  className="h-full w-full appearance-none rounded-[10px] border-solid border-slate-300 bg-transparent p-1 px-2 text-gray-800 outline-none focus:border-primary dark:text-gray-200"
                 />
               </div>
             </div>

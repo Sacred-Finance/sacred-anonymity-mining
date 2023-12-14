@@ -1,6 +1,6 @@
 import type { OutputData } from '@editorjs/editorjs'
 
-export function OutputDataToMarkDown(description: OutputData) {
+export function OutputDataToMarkDown(description: typeof OutputData) {
   return description?.blocks?.reduce((acc, block, idx) => {
     let content = ''
     if (idx !== 0) {
@@ -62,7 +62,9 @@ export function OutputDataToMarkDown(description: OutputData) {
   }, '')
 }
 
-export const OutputDataToHTML = (description: OutputData | undefined) => {
+export const OutputDataToHTML = (
+  description: typeof OutputData | undefined
+) => {
   let convertedHtml = ''
   description?.blocks?.map(block => {
     switch (block.type) {

@@ -1,7 +1,4 @@
-'use client'
-
 import { Redis } from '@upstash/redis'
-import _ from 'lodash'
 
 const TTLmaxAgeMinutes = 3 //TTL of the cache. How long to hold a cache before refreshing it without interruption to the user
 let redisClient: Redis
@@ -42,7 +39,7 @@ const refreshCache = (cachedDate: string) => {
 
 export const setCache = async (key: string, value: any, path = '$') => {
   console.log('setCache', key, value)
-  const datedValue = dateStamp(value)
+  dateStamp(value)
 
   if (!redisClient) {
     console.log('redisClient not found - initializing')
@@ -118,56 +115,6 @@ export const setCacheAtSpecificPath = async (
     })
 }
 
-export const getMCache2 = async (
-  keys: string[],
-  withCleanUp = false
-): Promise<{ cache; refresh: boolean }[]> => {
-  if (!redisClient) {
-    redisClient = await getRedisClient()
-  }
-  console.log('getMCache', keys)
-
-  let cachedResults
-  try {
-    cachedResults = await redisClient.json.mget(keys, '.') // get entire JSON object for each key
-  } catch (error) {
-    console.log(keys, error)
-    return []
-  }
-
-  const cleanupPromises = []
-
-  const results = cachedResults.map((cachedResult, index) => {
-    let cache
-    if (cachedResult && 'data' in cachedResult) {
-      const { data } = cachedResult
-      cache = data
-      if (cachedResult.hasOwnProperty('lastCachedAt')) {
-        const { lastCachedAt } = cachedResult
-        cache['refresh'] = refreshCache(lastCachedAt)
-      }
-    } else {
-      cache = cachedResult
-    }
-    const refresh = false
-
-    if (withCleanUp) {
-      const cleanupPromise = cacheCommunityCleanUp(cache, keys[index]).catch(
-        error => {
-          console.error(keys[index], error, 'Error cleaning up cache')
-        }
-      )
-      cleanupPromises.push(cleanupPromise)
-    }
-    return { cache, refresh: cache?.['refresh'] ?? refresh }
-  })
-
-  // Wait for all cleanup operations to complete
-  await Promise.all(cleanupPromises)
-
-  return results
-}
-
 export const getCache = async (
   key: string,
   withCleanUp = false
@@ -222,68 +169,8 @@ const cacheCommunityCleanUp = async (key, cache) => {
   }
 }
 
-export const getMCache = async (
-  key: string[],
-  flatten = false
-): Promise<{ cache; refresh: boolean }> => {
-  if (!redisClient) {
-    redisClient = await getRedisClient()
-  }
-
-  const data = []
-  let cache
-  let cachedDate: string | null = ''
-  try {
-    const cachedResult = await redisClient.json.mget(key, '$')
-    cache = cachedResult
-    if (flatten) {
-      cache = _.flatten(cachedResult)
-    }
-
-    cachedDate = null
-    console.log(data, cachedDate, cache)
-  } catch (error) {
-    console.error(key, error)
-    cache = []
-  }
-
-  const refresh = false
-
-  return { cache, refresh }
-}
-
 /** Utilities */
 
 const updateLastCachedAt = async key => {
   await redisClient.json.set(key, '$.lastCachedAt', Date.now().toString())
-}
-
-export const insertAtTop = async (key, value) => {
-  try {
-    await redisClient.json.arrinsert(key, '$.data', value)
-    await updateLastCachedAt(key)
-  } catch (error) {
-    console.log(key, error)
-  }
-}
-
-export const insertAtBottom = async (key, value) => {
-  try {
-    await redisClient.json.arrappend(key, '$.data', value)
-    await updateLastCachedAt(key)
-  } catch (error) {
-    console.log(key, error)
-  }
-}
-
-export const removeAt = async (key, path) => {
-  try {
-    await redisClient.json.del(key, path)
-  } catch (error) {
-    console.log('removeAt', key, error)
-  }
-}
-
-export const updateAt = async (key, value) => {
-  redisClient.json.arrindex(key, '$.data.*', JSON.stringify({ id: 0 }))
 }

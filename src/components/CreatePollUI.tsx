@@ -25,7 +25,9 @@ interface CreatePollUIProps {
 const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
   const [showModal, setShowModal] = React.useState(false)
   const [title, setTitle] = React.useState('Do you like this poll?')
-  const [description, setDescription] = React.useState<OutputData | null>(null)
+  const [description, setDescription] = React.useState<
+    typeof OutputData | null
+  >(null)
   const [pollType, setPollType] = React.useState(0)
   const [duration, setDuration] = React.useState(168)
   const [rateScaleFrom, setRateScaleFrom] = React.useState(0)
@@ -153,12 +155,12 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
 
                   {/* Title */}
                   <div className="flex w-full flex-col gap-2">
-                    <label htmlFor={'title'} className="text-md">
+                    <label htmlFor={'title'} className="text-base">
                       Title (Max 60)
                     </label>
                     <input
                       //highlight on click
-                      className=" focus:border-primary  w-full rounded border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+                      className=" w-full  rounded border border-gray-400 px-3 py-2 focus:border-primary focus:outline-none dark:border-gray-600 dark:bg-gray-700"
                       onClick={e => e.currentTarget.select()}
                       maxLength={60}
                       placeholder={'Poll Title'}
@@ -169,16 +171,15 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
                   </div>
 
                   <ScrollArea className="flex max-h-[calc(35vh)] w-full flex-col gap-2 ">
-                    <label htmlFor={'content'} className="text-md">
+                    <label htmlFor={'content'} className="text-base">
                       Content
                     </label>
                     <Editor
                       divProps={{
                         className: clsx(
-                          'form-textarea z-50 mt-2 h-full w-full overflow-y-visible rounded-md bg-white text-black shadow-md dark:border-gray-600 dark:bg-gray-700'
+                          'z-50 mt-2 h-full w-full overflow-y-visible rounded-md bg-white text-black shadow-md dark:border-gray-600 dark:bg-gray-700'
                         ),
                       }}
-                      id={'content'}
                       data={description}
                       onChange={debouncedSetDescription}
                       readOnly={false}
@@ -191,9 +192,9 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
                   {pollType == PollType.NUMERIC_RATING && (
                     <div className="flex flex-row gap-4">
                       <div className="flex w-full flex-col gap-4">
-                        <div className="text-md">Rate Scale From</div>
+                        <div className="text-base">Rate Scale From</div>
                         <input
-                          className=" focus:border-primary  w-full rounded border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+                          className=" w-full  rounded border border-gray-400 px-3 py-2 focus:border-primary focus:outline-none dark:border-gray-600 dark:bg-gray-700"
                           placeholder={'Rate Scale From'}
                           type="number"
                           value={rateScaleFrom}
@@ -201,9 +202,9 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
                         />
                       </div>
                       <div className="flex w-full flex-col gap-4">
-                        <div className="text-md">Rate Scale To</div>
+                        <div className="text-base">Rate Scale To</div>
                         <input
-                          className=" focus:border-primary  w-full rounded border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+                          className=" w-full  rounded border border-gray-400 px-3 py-2 focus:border-primary focus:outline-none dark:border-gray-600 dark:bg-gray-700"
                           placeholder={'Rate Scale To'}
                           type="number"
                           value={rateScaleTo}
@@ -215,7 +216,7 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
 
                   {/* Options */}
                   <div className="flex w-full flex-col gap-4">
-                    <div className="text-md">
+                    <div className="text-base">
                       Options (Minimum 2, Maximum 10)
                     </div>
                     <div className="flex flex-col gap-4">
@@ -223,7 +224,7 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
                         <div className="flex items-center gap-2" key={index}>
                           <input
                             tabIndex={index}
-                            className=" focus:border-primary  w-full rounded border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+                            className=" w-full  rounded border border-gray-400 px-3 py-2 focus:border-primary focus:outline-none dark:border-gray-600 dark:bg-gray-700"
                             placeholder={'Option'}
                             type="text"
                             value={option}
@@ -274,9 +275,9 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
                   </div>
 
                   <div className="flex w-full flex-col gap-4">
-                    <div className="text-md">Duration (In Hours)</div>
+                    <div className="text-base">Duration (In Hours)</div>
                     <input
-                      className=" focus:border-primary  w-full rounded border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+                      className=" w-full  rounded border border-gray-400 px-3 py-2 focus:border-primary focus:outline-none dark:border-gray-600 dark:bg-gray-700"
                       placeholder={'In Hours, 1 Week = 168 Hours'}
                       type="number"
                       value={duration}

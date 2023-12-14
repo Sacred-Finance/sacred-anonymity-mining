@@ -1,9 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from 'next/types'
-import { forumContract } from '@/constant/const'
+import { forumContract, ForumContractAddress } from '@/constant/const'
 import { augmentGroupData, augmentItemData } from '@/utils/communityUtils'
-import type { Group, Item } from '@/types/contract/ForumInterface'
-import { ethers } from 'ethers'
+import type {
+  Group,
+  RawItemData,
+  RawGroupData, Item,
+} from '@/types/contract/ForumInterface'
 import type { User } from '@/lib/model'
+import { multicall } from '@wagmi/core'
+import { abi } from '@/constant/abi'
+import { polygonMumbai } from 'wagmi/chains'
 
 // get group details
 export default async function handler(
@@ -14,26 +20,65 @@ export default async function handler(
 ) {
   try {
     const { groupId } = req.query
-    const rawGroupData = await forumContract.groupAt(groupId)
-    const group = await augmentGroupData(rawGroupData)
-    const rawPostData = await Promise.all(
-      group.posts.map(postId => forumContract.itemAt(postId))
-    )
-    const posts = await Promise.all(
-      rawPostData.map(rawPost => augmentItemData(rawPost))
-    )
-    const filteredPosts = posts.filter(
-      post =>
-        post.contentCID &&
-        post.contentCID !== ethers.constants.HashZero &&
-        !post.removed
-    )
+    const bigIntGroupId = BigInt(groupId as string)
+    const rawGroupData = (await forumContract.read.groupAt([
+      bigIntGroupId,
+    ])) as unknown as RawGroupData
 
-    const usersWithCommitment = await forumContract.groupUsers(groupId)
+    if (rawGroupData.removed) {
+      return res.status(404).json({ error: 'Group not found' })
+    }
+    const group = await augmentGroupData(rawGroupData)
+
+    const postIds = rawGroupData.posts.map(p => p)
+
+    const wagmigotchiContract = {
+      address: ForumContractAddress,
+      abi: abi,
+    } as const
+
+    const postData = postIds.map(id => ({
+      address: ForumContractAddress,
+      functionName: 'itemAt',
+      abi: wagmigotchiContract.abi,
+      args: [id],
+    }))
+
+    const rawPostResults = await multicall({
+      allowFailure: true,
+      chainId: polygonMumbai.id,
+      contracts: postData,
+    })
+
+    const rawPosts = rawPostResults.map(data => data.result) as RawItemData[]
+
+    const filteredRawPosts = rawPosts.filter(
+      post =>
+        // post.contentCID &&
+        // post.contentCID !== ethers.constants.HashZero &&
+        !post.removed
+    ) as RawItemData[]
+
+    const augmentedPosts = (await Promise.all(
+      filteredRawPosts.map(async post => {
+        try {
+          return await augmentItemData(post)
+        } catch (err) {
+          console.error('Error augmenting post:', err)
+          return res
+            .status(500)
+            .json({ error: 'An error occurred while augmenting post' })
+        }
+      })
+    ))
+
+    const usersWithCommitment = await forumContract.read.groupUsers([
+      bigIntGroupId,
+    ])
 
     res.status(200).json({
       group,
-      posts: filteredPosts,
+      posts: augmentedPosts,
       users: usersWithCommitment.map((c, i) => ({
         name: 'anon',
         groupId: groupId.toString(),
@@ -41,6 +86,10 @@ export default async function handler(
       })) as unknown as User[],
     })
   } catch (err) {
+    console.trace(err)
+    if (err.message.includes('no group at index')) {
+      return res.status(404).json({ error: err.message })
+    }
     res.status(500).json({ error: err.message })
   }
 }

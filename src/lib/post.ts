@@ -3,23 +3,11 @@ import { Identity } from '@semaphore-protocol/identity'
 import { generateProof } from '@semaphore-protocol/proof'
 import { utils } from 'ethers'
 import { vote } from './api'
-import type { PostContent, ReputationProofStruct, User } from './model'
+import type { PostContent, User } from './model'
 import { hashBytes2 } from './utils'
-import { removeAt } from '../lib/redis'
-import { mutate } from 'swr'
-import { UnirepUser } from './unirep'
 import { jsonRPCProvider } from '@/constant/const'
-import {
-  create,
-  editContent,
-  handleDeleteItem,
-  updateContentVote,
-} from '@/lib/item'
+import { create, editContent, handleDeleteItem } from '@/lib/item'
 import type { Address } from '@/types/common'
-
-export const MIN_REP_POST = 0
-
-export const MIN_REP_VOTE = 1
 
 interface CreatePost {
   postContent: Partial<PostContent>
@@ -39,22 +27,6 @@ export class Post {
   constructor(id: string | undefined, groupId) {
     this.id = id
     this.groupId = groupId
-  }
-
-  // why are we using _post and not _group
-  postCacheId() {
-    return this.id + '_post'
-  }
-  cacheId() {
-    return this.id + '_post'
-  }
-
-  groupCacheId() {
-    return this.groupId + '_group'
-  }
-
-  specificPostId(postId?) {
-    return `${this.groupId}_post_${this.id ?? postId}`
   }
 
   specificId(postId?) {
@@ -111,13 +83,7 @@ export class Post {
     groupId: string,
     setWaiting: Function
   ) {
-    console.log(`Removing your anonymous post...`)
     return await handleDeleteItem.call(this, address, postedByUser, itemId)
-  }
-
-  // these previously accepted an instance
-  async updatePostsVote(itemId, voteType, confirmed: boolean, revert = false) {
-    updateContentVote.call(this, itemId, voteType, confirmed, 'post', revert)
   }
 
   async vote(voteType, address, users, postedByUser, itemId, groupId) {
@@ -151,31 +117,6 @@ export class Post {
 
       g.addMembers(filteredUsers.map(u => u?.identityCommitment))
 
-      const unirepUser = new UnirepUser(userPosting)
-      await unirepUser.updateUserState()
-      const userState = await unirepUser.getUserState()
-      // if (!userState) throw new Error("Failed to get User State");
-
-      const reputationProof = await userState.genProveReputationProof({
-        epkNonce: 0,
-        minRep: MIN_REP_VOTE,
-        graffitiPreImage: '',
-      })
-
-      const epochData = unirepUser.getEpochData()
-      if (!epochData) {
-        throw new Error('Failed to get Epoch Data')
-      }
-
-      const voteProofData: ReputationProofStruct = {
-        publicSignals: epochData.publicSignals,
-        proof: epochData.proof,
-        publicSignalsQ: reputationProof.publicSignals,
-        proofQ: reputationProof.proof,
-        ownerEpoch: 0,
-        ownerEpochKey: 0,
-      }
-
       // time this
       const { proof, nullifierHash, merkleTreeRoot } = await generateProof(
         userPosting,
@@ -189,30 +130,11 @@ export class Post {
         voteType,
         merkleTreeRoot.toString(),
         nullifierHash.toString(),
-        proof,
-        voteProofData
+        proof
       )
     } catch (error) {
       console.error('An error occurred while voting:', error)
       return error
     }
-  }
-
-  removeFromCache = async postId => {
-    mutate(
-      this.groupCacheId(),
-      async posts => {
-        const postsCopy = [...posts]
-        if (postsCopy?.length) {
-          const i = posts.findIndex(p => +p.id == postId)
-          if (i > -1) {
-            postsCopy.splice(i, 1)
-          }
-          await removeAt(this.specificId(postId), '$')
-        }
-        return postsCopy
-      },
-      { revalidate: false }
-    )
   }
 }

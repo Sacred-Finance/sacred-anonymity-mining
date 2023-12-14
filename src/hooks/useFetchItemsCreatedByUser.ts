@@ -4,7 +4,6 @@ import { createNote } from '@/lib/utils'
 import type { Item } from '@/types/contract/ForumInterface'
 import { augmentItemData } from '@/utils/communityUtils'
 import { Identity } from '@semaphore-protocol/identity'
-import { ethers } from 'ethers'
 import { groupBy } from 'lodash'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
@@ -19,18 +18,14 @@ export const useFetchItemsCreatedByUser = () => {
     [ContentType.COMMENT]: [],
     [ContentType.POLL]: [],
   })
+
   useEffect(() => {
-    forumContract
-      .queryFilter(forumContract.filters.NewItem(), 0, 'latest')
+    forumContract.getEvents
+      .NewItem()
       .then(async res => {
         const items: Item[] = []
         const itemsCreatedByMe = []
 
-        /**
-         * This loop is implemented separately rather than iterating over res directly once
-         * because we need to wait for the note to be created before we can compare it to the note and if we do it in the same loop
-         * we will have to wait for the note to be created for all items before we can compare it to the note also it throws webassemby related error
-         */
         for (const item of res) {
           const decodedItem = item.decode?.(item.data, item.topics)
           const identity = new Identity(
@@ -39,14 +34,18 @@ export const useFetchItemsCreatedByUser = () => {
           const note = await createNote(identity)
           if (
             decodedItem.contentCID &&
-            decodedItem.contentCID !== ethers.constants.HashZero &&
+            decodedItem.contentCID !==
+              '0x0000000000000000000000000000000000000000000000000000000000000000' && // Update with Viem's equivalent of ethers.constants.HashZero
             note.toString() === decodedItem.note.toString()
           ) {
             itemsCreatedByMe.push(decodedItem)
           }
         }
+
         const data = itemsCreatedByMe.map(async (decodedItem: any) => {
-          const rawItemData = await forumContract.itemAt(Number(decodedItem.id))
+          const rawItemData = await forumContract.read.itemAt([
+            Number(decodedItem.id),
+          ])
           const item = await augmentItemData(rawItemData)
           return Promise.resolve(items.push(item))
         })

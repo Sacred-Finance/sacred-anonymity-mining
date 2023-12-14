@@ -20,9 +20,10 @@ const PostToTopic = ({
 }) => {
   console.log('topic', readonly)
   const { t } = useTranslation()
-  const [description, setDescription] = useState<OutputData | null>(null)
+  const [description, setDescription] = useState<typeof OutputData | null>(null)
   const [selectedToReveal, setSelectedToReveal] = useState(0)
-  const { fetchBalance } = useFetchBalance()
+  const fetchBalance = useFetchBalance({})
+  console.log(fetchBalance)
   const router = useRouter()
   const { groupId } = router.query
   const onSubmit = async () => {
@@ -33,7 +34,7 @@ const PostToTopic = ({
 
     if (selectedToReveal > 0) {
       try {
-        const balance = await fetchBalance()
+        const balance = (await fetchBalance)()
         if (balance) {
           const percentageToReveal = (balance * selectedToReveal) / 100
           const toAppend = `<br><br><br><i>Sacred Bot: User has chosen to reveal ${percentageToReveal} tokens. </i>`

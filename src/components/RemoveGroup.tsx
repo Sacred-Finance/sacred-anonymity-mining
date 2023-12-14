@@ -1,9 +1,7 @@
 import React from 'react'
-import { useTranslation } from 'next-i18next'
 
 import { TrashIcon } from '@heroicons/react/20/solid'
 import { useRemoveGroup } from '@/hooks/useRemoveGroup'
-import { useAccount } from 'wagmi'
 import { CircularLoader } from './buttons/JoinCommunityButton'
 import { Button } from '@/shad/ui/button'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
@@ -14,10 +12,8 @@ interface RemoveGroupProps {
 }
 
 const RemoveGroup: React.FC<RemoveGroupProps> = ({ groupId, hidden }) => {
-  const { t } = useTranslation()
   const { writeAsync } = useRemoveGroup(groupId)
 
-  const { address } = useAccount()
   const {
     state: { isAdmin, isModerator },
   } = useCommunityContext()

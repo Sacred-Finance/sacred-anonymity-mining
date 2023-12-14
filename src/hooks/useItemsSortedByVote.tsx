@@ -7,7 +7,10 @@ export const useItemsSortedByVote = (
   sortBy: 'highest' | 'lowest' | 'controversial' | 'newest' | 'oldest'
 ) => {
   return useMemo(() => {
-    const sorted = [...tempData, ...(data ?? [])]
+    const sorted = [
+      ...tempData.filter(data => data),
+      ...(data?.filter(data => data) ?? []),
+    ]
 
     switch (sortBy) {
       case 'highest':

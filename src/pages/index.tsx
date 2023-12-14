@@ -8,10 +8,16 @@ import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
 import Head from 'next/head'
 import { Syncing } from '@/components/Syncing'
+import type { DiscourseCommunity } from '@/lib/model'
+import type { Group } from '@/types/contract/ForumInterface'
 
-function Home({ discourseCommunities }) {
+function Home({
+  discourseCommunities,
+}: {
+  discourseCommunities: DiscourseCommunity[]
+}) {
   const router = useRouter()
-  const pageRef = React.useRef(null)
+  const pageRef = React.useRef<HTMLDivElement>(null)
   const {
     state: { isAdmin, isModerator },
   } = useCommunityContext()
@@ -25,20 +31,22 @@ function Home({ discourseCommunities }) {
 
   const { data, error, isLoading, isValidating } = useSWR('/api/data')
   const { dispatch } = useCommunityContext()
-
   useEffect(() => {
     if (!data) {
       return
     }
+    console.log('data', data)
     const { communitiesData, users } = data
 
     if (!communitiesData || !users) {
       return
     }
-    // convert id back to bignumber
     dispatch({
       type: ActionType.SET_COMMUNITIES,
-      payload: communitiesData.map(c => ({ ...c, id: BigNumber.from(c.id) })),
+      payload: communitiesData.map((c: Group) => ({
+        ...c,
+        id: BigNumber.from(c.id),
+      })),
     })
 
     dispatch({

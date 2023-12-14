@@ -8,6 +8,7 @@ import { toast } from 'react-toastify'
 import { CircularLoader } from './buttons/JoinCommunityButton'
 import clsx from 'clsx'
 import type { Group, Item } from '@/types/contract/ForumInterface'
+import { hexToNumber } from 'viem'
 
 export const PollUI = ({ group, post }: { group: Group; post: Item }) => {
   const [answers, setAnswers] = React.useState([])
@@ -32,11 +33,11 @@ export const PollUI = ({ group, post }: { group: Group; post: Item }) => {
 
   const fetchPollDetails = async () => {
     setIsFetching(true)
-    forumContract
-      .pollAt(id)
+    forumContract.read
+      .pollAt([BigInt(id)])
       .then(async res => {
         console.log(res)
-        const {
+        let {
           answerCIDs,
           pollType,
           duration,
@@ -46,6 +47,14 @@ export const PollUI = ({ group, post }: { group: Group; post: Item }) => {
           rateScaleTo,
           results,
         } = res
+        // viem to number
+        answerCount = hexToNumber(answerCount)
+        duration = hexToNumber(duration)
+        startTime = hexToNumber(startTime)
+        rateScaleFrom = hexToNumber(rateScaleFrom)
+        rateScaleTo = hexToNumber(rateScaleTo)
+        results = results.map(hexToNumber)
+
         const pollExpiration = (Number(startTime) + duration * 60 * 60) * 1000
         setDuration(duration)
         setPollExpiresAt(pollExpiration)

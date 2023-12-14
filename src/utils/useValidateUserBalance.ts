@@ -2,8 +2,8 @@ import type { Address } from 'wagmi'
 import { useContractReads } from 'wagmi'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'react-toastify'
-import { erc20dummyABI } from '../constant/const'
 import type { Group } from '@/types/contract/ForumInterface'
+import { erc20dummyABI } from '@/constant/erc20dummyABI'
 
 interface ValidationResult {
   hasSufficientBalance: boolean

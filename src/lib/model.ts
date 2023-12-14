@@ -42,7 +42,7 @@ export interface PostOrComment {
 
 export interface PostContent extends PostOrComment {
   title?: string
-  description: OutputData
+  description: typeof OutputData
 }
 
 export type ReputationProofStruct = {

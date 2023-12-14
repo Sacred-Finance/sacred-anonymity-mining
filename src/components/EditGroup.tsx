@@ -1,11 +1,8 @@
 import { useRouter } from 'next/router'
-import { useAccount, useContract, useProvider } from 'wagmi'
+import { useAccount } from 'wagmi'
 import { useTranslation } from 'next-i18next'
-import { ForumContractAddress } from '@/constant/const'
-import ForumABI from '@/constant/abi/Forum.json'
 import { useFetchCommunitiesByIds } from '@/hooks/useFetchCommunities'
 import React, { useCallback, useEffect, useState } from 'react'
-import { polygonMumbai } from 'wagmi/chains'
 import { constants, ethers } from 'ethers'
 import { Identity } from '@semaphore-protocol/identity'
 import {
@@ -60,14 +57,6 @@ export function EditGroup({ group }: EditGroupProps) {
 
   const [tags, setTags] = useState<string[]>([])
 
-  // Define the provider and contract within a useEffect to avoid unnecessary re-renders
-  const provider = useProvider({ chainId: polygonMumbai.id })
-  const forumContract = useContract({
-    address: ForumContractAddress,
-    abi: ForumABI.abi,
-    signerOrProvider: provider,
-  }) as ethers.Contract
-
   // Helper function to fetch and handle the image
   const fetchImage = (
     imagePath: string,
@@ -97,7 +86,7 @@ export function EditGroup({ group }: EditGroupProps) {
     setGroupDescriptionState(group?.groupDetails?.description)
   }, [])
 
-  const handleSetImage = ({ file, imageType }: HandleSetImage) => {
+  const handleSetImage = ({ file, imageType }: HandleSetImage): void => {
     if (file && isImageFile(file)) {
       setHasImageChanged(prev => ({ ...prev, [imageType]: true }))
     }
@@ -164,7 +153,7 @@ export function EditGroup({ group }: EditGroupProps) {
         mergedGroupDetails,
         isAdmin || isModerator
       )
-        .then(async response => {
+        .then(async () => {
           await handleUpdateStateAfterEdit()
           toast.success('Group details updated')
           setIsSubmitting(false)
@@ -172,15 +161,14 @@ export function EditGroup({ group }: EditGroupProps) {
           router.push(`/communities/${group.groupId}`)
         })
         .catch(error => {
-          console.log(error) // log the error or handle it as you need
-
           toast.error(`Something went wrong ${error.message}`)
           setIsSubmitting(false)
           setPreviewCard(false)
         })
-    } catch (error) {
-      // todo: handle better
-      toast.error(error.message)
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message)
+      }
       setIsSubmitting(false)
       setPreviewCard(false)
     } finally {
@@ -191,7 +179,7 @@ export function EditGroup({ group }: EditGroupProps) {
     bannerFile,
     logoFile,
     group.id,
-    forumContract,
+    // forumContract,
     tags,
     groupDescriptionState,
     groupName,
@@ -203,7 +191,7 @@ export function EditGroup({ group }: EditGroupProps) {
         'relative  z-50 grid  w-full max-w-screen-2xl grid-cols-1 gap-4 sm:p-8 md:p-24'
       )}
     >
-      <div className="-z-[1] flex flex-col space-y-4 sm:col-span-full md:col-span-6 lg:col-span-6">
+      <div className="z-[-1] flex flex-col space-y-4 sm:col-span-full md:col-span-6 lg:col-span-6">
         <div className="flex flex-row items-center justify-between py-4">
           <h1 className="text-2xl font-semibold text-gray-700 dark:text-gray-300">
             {t('editCommunity')}

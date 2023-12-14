@@ -19,7 +19,7 @@ import { useEditItem } from '@/hooks/useEditItem'
 import dynamic from 'next/dynamic'
 import type { Group, Item } from '@/types/contract/ForumInterface'
 import { mutate } from 'swr'
-import { getGroupWithPostAndCommentData } from '@/lib/fetcher'
+import { GroupPostCommentAPI } from '@/lib/fetcher'
 import EditorJsRenderer from '@components/editor-js/EditorJSRenderer'
 import type { Address } from '@/types/common'
 import AnimalAvatar from '../AnimalAvatar'
@@ -90,7 +90,7 @@ export const PostItem = ({ post, group, showAvatar = true }: PostItemProps) => {
         itemType: post.kind,
         note: post.note,
       }).then(async value => {
-        await mutate(getGroupWithPostAndCommentData(groupId, postId))
+        await mutate(GroupPostCommentAPI(groupId, postId))
         setIsContentEditing(false)
       })
 

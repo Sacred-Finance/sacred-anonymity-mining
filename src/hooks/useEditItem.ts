@@ -15,7 +15,7 @@ import type { PostContent, User } from '@/lib/model'
 import { ContentType } from '@/lib/model'
 import { Identity } from '@semaphore-protocol/identity'
 import { mutate } from 'swr'
-import { getGroupWithPostAndCommentData } from '@/lib/fetcher'
+import { GroupPostCommentAPI } from '@/lib/fetcher'
 import type { Address } from '@/types/common'
 import type { Item } from '@/types/contract/ForumInterface'
 
@@ -129,7 +129,7 @@ export const useEditItem = ({
               recklesslySetUnpreparedArgs: [a, b, c, itemId, signal],
             }).then(async value => {
               return await value.wait().then(async () => {
-                await mutate(getGroupWithPostAndCommentData(groupId, postId))
+                await mutate(GroupPostCommentAPI(groupId, postId))
               })
             })
           : null

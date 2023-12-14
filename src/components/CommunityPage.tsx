@@ -10,8 +10,6 @@ import {
 import { useAccount } from 'wagmi'
 import { useTranslation } from 'react-i18next'
 import type { SortByOption } from '@components/SortBy'
-import { useUnirepSignUp } from '@/hooks/useUnirepSignup'
-import type { User } from '@/lib/model'
 import { useValidateUserBalance } from '@/utils/useValidateUserBalance'
 import { toast } from 'react-toastify'
 import { useItemsSortedByVote } from '@/hooks/useItemsSortedByVote'
@@ -23,8 +21,8 @@ import CreatePollUI from './CreatePollUI'
 import { useContentManagement } from '@/hooks/useContentManagement'
 import { NewPostModal } from '@components/Post/PostComments'
 import LoadingComponent from '@components/LoadingComponent'
-import ReputationCard from './ReputationCard'
 import { CommunityCard } from './CommunityCard/CommunityCard'
+import { User } from '@/lib/model'
 
 export function CommunityPage({
   community,
@@ -33,26 +31,19 @@ export function CommunityPage({
   community: Group
   posts?: Item[]
 }) {
-  const groupId = community.id.toString()
-  const user = useUserIfJoined(groupId as string)
-  useUnirepSignUp({ groupId: groupId, name: (user as User)?.name })
-
   const [sortBy, setSortBy] = useState<SortByOption>('highest')
 
   const sortedData = useItemsSortedByVote([], posts, sortBy)
   const {
-    state: { isAdmin, isModerator },
+    state: { isAdmin },
   } = useCommunityContext()
 
-  if (!community || !community?.id) {
+  if (!community) {
     return <LoadingComponent />
   }
 
   return (
     <div>
-      {/*<div className="ml-6">*/}
-      {/*  <ReputationCard />*/}
-      {/*</div>*/}
       <div className="relative flex min-h-screen gap-6 rounded-lg  p-6 transition-colors ">
         <div className="sticky top-0 flex w-full flex-col gap-6">
           <CommunityCard
@@ -131,7 +122,10 @@ const CreatePostUI = ({ group }: { group: Group }) => {
     setIsLoading(true)
 
     try {
-      const { status } = await postInstance?.create({
+      if (postInstance === undefined) {
+        return
+      }
+      const response = await postInstance?.create({
         postContent: {
           title: contentTitle,
           description: contentDescription,
@@ -141,19 +135,35 @@ const CreatePostUI = ({ group }: { group: Group }) => {
         postedByUser: activeUser as User,
         groupId: groupId as string,
         setWaiting: setIsLoading,
-        onIPFSUploadSuccess: (post) => {
+        onIPFSUploadSuccess: post => {
           console.log('post', post)
           toast.success('content stored correctly')
         },
       })
-
-      if (status === 200) {
-        setIsLoading(false)
-        clearContent()
-      } else {
+      try {
+        const { status, data, request, statusText, headers, config } = response
+        console.log('status', {
+          status,
+          data,
+          request,
+          statusText,
+          headers,
+          config,
+        })
+        if (status === 200) {
+          setIsLoading(false)
+          clearContent()
+          console.log('post created successfully')
+        } else {
+          console.log('error', response)
+          setIsLoading(false)
+        }
+      } catch (error) {
+        console.log('error', error)
         setIsLoading(false)
       }
     } catch (error) {
+      console.log('error', error)
       setIsLoading(false)
     }
   }

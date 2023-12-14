@@ -112,19 +112,19 @@ This app is open-source and licensed under the MIT license. For more details, ch
 
 ## 4. Post Features
 
-- [ ] Creating Posts
-- [ ] Editing a Post
-- [ ] Deleting a Post
+- [x] Creating Posts
+- [x] Editing a Post
+- [x] Deleting a Post
 - [ ] Post Loading Animation
 - [ ] Preview Post Before Submission
 
 ## 5. Community Features
 
-- [ ] Creating a Community
-- [ ] Joining a Community
-- [ ] Leaving a Community - tbd
-- [ ] Editing a Community
-- [ ] Deleting a Community - tbd
+- [x] Creating a Community
+- [x] Joining a Community
+- [x] Leaving a Community
+- [x] Editing a Community
+- [] Deleting a Community
 
 ## 9. Miscellaneous
 

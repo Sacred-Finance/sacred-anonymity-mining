@@ -1,6 +1,6 @@
 import React from 'react'
 import Header from '@components/Header'
-import { Breadcrumbs } from '@components/Breadcrumbs'
+import { Breadcrumbs } from '@components/breadcrumb/Breadcrumbs'
 import Footer from '@components/Footer'
 
 // preload('/api/data', fetcher)

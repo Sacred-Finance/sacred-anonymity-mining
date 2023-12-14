@@ -10,7 +10,7 @@ import { CommentClass } from '@/lib/comment'
 import { useTranslation } from 'react-i18next'
 import type { PostContent, User } from '@/lib/model'
 import { ContentType } from '@/lib/model'
-import { getGroupWithPostAndCommentData } from '@/lib/fetcher'
+import { GroupPostCommentAPI } from '@/lib/fetcher'
 import type { Address } from '@/types/common'
 
 export const useRemoveItemFromForumContract = (
@@ -23,7 +23,7 @@ export const useRemoveItemFromForumContract = (
   const users = useUsers()
   const member = useUserIfJoined(groupId)
   const postInstance = new Post(postId, groupId)
-  const commentInstance = new CommentClass(groupId, postId, null)
+  const commentInstance = new CommentClass(groupId, postId)
   const { t } = useTranslation()
 
   const onSettled = (data, error) => {
@@ -69,14 +69,14 @@ export const useRemoveItemFromForumContract = (
             recklesslySetUnpreparedArgs: [+itemId],
           }).then(async value => {
             return await value.wait().then(async () => {
-              await mutate(getGroupWithPostAndCommentData(groupId, postId))
+              await mutate(GroupPostCommentAPI(groupId, postId))
             })
           })
         : null
     } else {
       return itemType == ContentType.POST ?? itemType == ContentType.POLL
         ? postInstance?.delete(
-            address,
+            address as string,
             itemId,
             users,
             member as User,
@@ -96,9 +96,9 @@ export const useRemoveItemFromForumContract = (
 
   const onSuccess = async (data, variables) => {
     try {
-      const tx = await data.wait()
+      await data.wait()
       const itemId = variables.args[0]
-      const item = (await forumContract.itemAt(itemId)) as PostContent
+      const item = (await forumContract.read.itemAt([itemId])) as PostContent
       if (item.kind == ContentType.POST || item.kind == ContentType.POLL) {
         await setCacheAtSpecificPath(
           postInstance?.specificId(itemId),

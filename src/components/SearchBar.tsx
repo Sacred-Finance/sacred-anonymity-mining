@@ -16,10 +16,16 @@ const animationVariants = {
 
 const transition = { duration: 0.2 }
 
-export const SearchBar = ({ searchTerm, debouncedResults }) => {
+export const SearchBar = ({
+  searchTerm,
+  debouncedResults,
+}: {
+  searchTerm: string
+  debouncedResults: (e: { target: { value: string } }) => void
+}) => {
   const inputRef = React.useRef<HTMLInputElement>(null)
   return (
-    <div className="form-input flex h-10 w-full items-center  rounded hover:shadow-md  dark:bg-gray-900 dark:text-white">
+    <div className=" flex h-10 w-full items-center  rounded hover:shadow-md  dark:bg-gray-900 dark:text-white">
       <div className={'flex justify-center p-3'}>
         <AnimatePresence mode={'popLayout'}>
           {searchTerm ? (

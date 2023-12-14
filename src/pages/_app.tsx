@@ -9,8 +9,8 @@ import type { Theme } from '@rainbow-me/rainbowkit'
 import { darkTheme, RainbowKitProvider } from '@rainbow-me/rainbowkit'
 import { polygonMumbai } from 'wagmi/chains'
 import { WagmiConfig } from 'wagmi'
-import { CommunityProvider } from '../contexts/CommunityProvider'
-import { startIPFS } from '../lib/utils'
+import { CommunityProvider } from '@/contexts/CommunityProvider'
+import { startIPFS } from '@/lib/utils'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import ErrorBoundary from '../components/ErrorBoundary'
@@ -51,7 +51,7 @@ const myTheme = merge(darkTheme(), {
   },
 } as Theme)
 
-export function Web3Wrapper({ children }) {
+export function Web3Wrapper({ children }: { children: React.ReactNode }) {
   const didLoadRef = useRef(false)
   useEffect(() => {
     if (!didLoadRef.current) {

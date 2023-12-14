@@ -6,8 +6,12 @@ import { Identity } from '@semaphore-protocol/identity'
 import { useAccount } from 'wagmi'
 import Link from 'next/link'
 import ToolTip from '@components/HOC/ToolTip'
+import type { Group } from '@/types/contract/ForumInterface'
 
-export const useCheckIsOwner = (community, address) => {
+export const useCheckIsOwner = (
+  community: Group & { variant?: 'banner' | 'default' | undefined },
+  address: unknown
+) => {
   const [isOwner, setIsOwner] = useState(false)
 
   useEffect(() => {
@@ -29,7 +33,7 @@ export const useCheckIsOwner = (community, address) => {
   return { isOwner }
 }
 
-function EditGroupNavigationButton({ community }) {
+function EditGroupNavigationButton({ community }: { community: Group }) {
   const { address } = useAccount()
   const { t } = useTranslation()
 

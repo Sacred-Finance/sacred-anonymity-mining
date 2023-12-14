@@ -48,7 +48,7 @@ export const TosConfirmationWrapper: React.FC<TosConfirmationWrapperProps> = ({
       <Transition appear show={isOpen} as={Fragment}>
         <Dialog
           as="div"
-          className="fixed inset-0 z-10 flex items-center justify-center overflow-y-auto"
+          className="fixed inset-0 z-[31] flex items-center justify-center overflow-y-auto"
           onClose={() => setIsOpen(false)}
         >
           <Dialog.Overlay className="fixed inset-0 bg-black opacity-30 dark:bg-white" />

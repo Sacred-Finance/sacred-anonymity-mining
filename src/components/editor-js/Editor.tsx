@@ -11,8 +11,8 @@ type DivProps = {
 }
 
 type Props = {
-  data?: OutputData
-  onChange(val: OutputData): void
+  data?: typeof OutputData
+  onChange(val: typeof OutputData): void
   holder: string
   placeholder?: string
   readOnly?: boolean

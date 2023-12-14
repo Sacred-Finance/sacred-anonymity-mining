@@ -2,9 +2,8 @@ import React, { useEffect } from 'react'
 import { Post } from '@/lib/post'
 import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
 import { PostPage } from '@components/Post/PostPage'
-import { ethers } from 'ethers'
 import useSWR from 'swr'
-import fetcher, { getGroupWithPostAndCommentData } from '@/lib/fetcher'
+import fetcher, { GroupPostCommentAPI } from '@/lib/fetcher'
 import { useRouter } from 'next/router'
 import LoadingComponent from '@components/LoadingComponent'
 import { CommentClass } from '@/lib/comment'
@@ -16,7 +15,7 @@ function PostIndex() {
   const { groupId, postId } = router.query
 
   const { data, error, isLoading } = useSWR(
-    getGroupWithPostAndCommentData(groupId, postId),
+    GroupPostCommentAPI(groupId, postId),
     fetcher
   )
   useCheckIfUserIsAdminOrModerator(true)
@@ -53,7 +52,6 @@ function PostIndex() {
   const { group, post, comments } = data
   const postInstance = new Post(post.id, group.groupId)
   const commentInstance = new CommentClass(group.groupId, post.id, null)
-  group.id = ethers.BigNumber.from(group.id)
   return (
     <PostPage
       postInstance={postInstance}

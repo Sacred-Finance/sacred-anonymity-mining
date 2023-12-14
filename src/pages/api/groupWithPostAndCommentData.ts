@@ -12,17 +12,23 @@ export default async function handler(
 ) {
   try {
     const { groupId, postId } = req.query
-    const rawGroupData = await forumContract.groupAt(groupId)
+    const bigIntGroupId = BigInt(groupId as string)
+    const bigIntPostId = BigInt(postId as string)
+
+    const rawGroupData = await forumContract.read.groupAt([bigIntGroupId])
     const group = await augmentGroupData(rawGroupData)
 
     // get post details
-    const rawPostData = await forumContract.itemAt(postId)
+    const rawPostData = await forumContract.read.itemAt([bigIntPostId])
     const post = await augmentItemData(rawPostData)
 
     // posts and comments are fetched in the same way. the only difference is that comments are queried from the id's held within posts childIds array
     const rawComments = await Promise.all(
-      post.childIds.map(commentId => forumContract.itemAt(commentId))
+      post.childIds.map(commentId =>
+        forumContract.read.itemAt([BigInt(commentId)])
+      )
     )
+    console.log('rawComments', rawComments)
 
     const comments = await Promise.all(
       rawComments.map(c => augmentItemData(c))

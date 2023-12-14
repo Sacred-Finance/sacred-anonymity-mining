@@ -31,7 +31,7 @@ export interface NewPostFormProps {
   editorId: string
   title: string | false
   setTitle: Dispatch<SetStateAction<string | null>>
-  description: OutputData | null
+  description: typeof OutputData | null
   setDescription: (value: EditorJsType) => void
   resetForm: (isEdited: boolean) => void
   isReadOnly: boolean
@@ -85,7 +85,7 @@ function ContentSection({
   holder,
 }: {
   preview: boolean
-  data: OutputData | null
+  data: typeof OutputData | null
   inputs: string | undefined
   onChange: (value: EditorJsType) => void
   readOnly: boolean
@@ -210,7 +210,7 @@ export const NewPostForm = ({
         >
           {itemType === 'post' && title !== false && (
             <CardContent className={'flex flex-col gap-2'}>
-              <Label htmlFor={'title'} className="text-md">
+              <Label htmlFor={'title'} className="text-base">
                 Title (Max 60)
               </Label>
 
@@ -234,7 +234,7 @@ export const NewPostForm = ({
           <Tab.Group>
             <Tab.Panels>
               <CardHeader className={'flex justify-between'}>
-                <Label className="text-md">Content</Label>
+                <Label className="text-base">Content</Label>
               </CardHeader>
               <CardContent>
                 <ContentSection

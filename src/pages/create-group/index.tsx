@@ -13,7 +13,10 @@ import { polygonMumbai } from 'wagmi/chains'
 import { PictureUpload } from '@components/PictureUpload'
 import clsx from 'clsx'
 import { AnimatePresence, motion } from 'framer-motion'
-import { useCreateCommunity } from '@/hooks/useCreateCommunity'
+import {
+  ICreateCommunityArgs,
+  useCreateCommunity,
+} from '@/hooks/useCreateCommunity'
 import Link from 'next/link'
 import Dropdown from '@/components/buttons/Dropdown/Dropdown'
 import TagInput from '@/components/TagInput/TagInput'
@@ -28,7 +31,7 @@ import { Button } from '@/shad/ui/button'
 import { FaCircleInfo } from 'react-icons/fa6'
 
 export interface HandleSetImage {
-  file: File | null
+  file: File | undefined
   imageType: 'logo' | 'banner'
 }
 function RemoveIcon() {
@@ -50,7 +53,18 @@ function RemoveIcon() {
   )
 }
 
-function CreateGroupFormUI({ onCreate }) {
+interface OnTokenSelectParams {
+  index: number
+  tokenAddress: string
+  symbol: string
+  decimals: number
+}
+
+function CreateGroupFormUI({
+  onCreate,
+}: {
+  onCreate: (params: ICreateCommunityArgs) => Promise<void>
+}) {
   const { t } = useTranslation()
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -58,7 +72,6 @@ function CreateGroupFormUI({ onCreate }) {
   const initialValues = {
     tokenAddress: '',
     minAmount: 0,
-    // maxAmount: 0,
     token: '',
     decimals: 0,
   }
@@ -73,20 +86,23 @@ function CreateGroupFormUI({ onCreate }) {
   const [groupName, setGroupName] = useState('')
   const [groupDescription, setGroupDescription] = useState('')
   const [reqMandatory, setReqMandatory] = useState(true)
-  const [er, setEr] = useState({})
 
-  const [bannerFile, setBannerFile] = useState<File | null>(null)
-  const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [bannerFile, setBannerFile] = useState<File | undefined>(undefined)
+  const [logoFile, setLogoFile] = useState<File | undefined>(undefined)
 
-  const [bannerUrl, setBannerUrl] = useState<string | null>(null)
-  const [logoUrl, setLogoUrl] = useState<string | null>(null)
+  const [bannerUrl, setBannerUrl] = useState<string | undefined>(undefined)
+  const [logoUrl, setLogoUrl] = useState<string | undefined>(undefined)
 
   const [tags, setTags] = useState<string[]>([])
 
-  const handleNameChange = e => {
+  const handleNameChange = (e: {
+    target: { value: React.SetStateAction<string> }
+  }) => {
     setGroupName(e.target.value)
   }
-  const handleDescriptionChange = e => {
+  const handleDescriptionChange = (e: {
+    target: { value: React.SetStateAction<string> }
+  }) => {
     setGroupDescription(e.target.value)
   }
 
@@ -101,7 +117,12 @@ function CreateGroupFormUI({ onCreate }) {
     supportedChains[polygonMumbai.id]
   )
 
-  const onTokenSelect = (index, tokenAddress, symbol, decimals) => {
+  const onTokenSelect = ({
+    index,
+    tokenAddress,
+    symbol,
+    decimals,
+  }: OnTokenSelectParams) => {
     formik.setFieldValue(
       `tokenRequirements.${index}.tokenAddress`,
       tokenAddress
@@ -145,7 +166,6 @@ function CreateGroupFormUI({ onCreate }) {
   const selectChain = async (c: Chain) => {
     setSelectedChain(c)
     await formik.setFieldValue('tokenRequirements', [], false)
-    setEr({})
   }
 
   const isSubmitDisabled =
@@ -184,7 +204,7 @@ function CreateGroupFormUI({ onCreate }) {
         <div className="flex flex-col space-y-4">
           <label className="text-lg ">{t('placeholder.communityName')}</label>
           <input
-            className="form-input focus:border-primary rounded border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+            className="form-input rounded border border-gray-400 px-3 py-2 focus:border-primary focus:outline-none dark:border-gray-600 dark:bg-gray-700"
             placeholder={'An awesome community name'}
             type="text"
             value={groupName}
@@ -199,14 +219,14 @@ function CreateGroupFormUI({ onCreate }) {
               {t('placeholder.communityDescription')}
             </label>
             <textarea
-              className="focus:border-primary h-20 rounded border border-gray-400 px-3 py-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+              className="h-20 rounded border border-gray-400 px-3 py-2 focus:border-primary focus:outline-none dark:border-gray-600 dark:bg-gray-700"
               placeholder={t('placeholder.communityDescriptionContent') || ''}
               value={groupDescription}
               onChange={handleDescriptionChange}
             />
           </div>
 
-          <div className={'dark:text-primary flex items-start gap-4 '}>
+          <div className="flex items-start gap-4 dark:text-primary ">
             <PictureUpload
               uploadedImageUrl={bannerUrl}
               displayName={t('banner')}
@@ -287,7 +307,7 @@ function CreateGroupFormUI({ onCreate }) {
 
               <button
                 className={clsx(
-                  'aspect-1 flex h-10 w-10 items-center justify-center border p-3 text-xl'
+                  'flex h-10 w-10 items-center justify-center border p-3 text-xl'
                 )}
                 onClick={addReq}
               >
@@ -327,7 +347,12 @@ function CreateGroupFormUI({ onCreate }) {
                               chainId={selectedChain.id}
                               selectedToken={r?.token}
                               onTokenSelect={(address, symbol, decimals) =>
-                                onTokenSelect(i, address, symbol, decimals)
+                                onTokenSelect({
+                                  index: i,
+                                  tokenAddress: address,
+                                  symbol: symbol,
+                                  decimals: decimals,
+                                })
                               }
                             />
                           </div>
@@ -335,7 +360,7 @@ function CreateGroupFormUI({ onCreate }) {
                           <div className="w-32">
                             <input
                               disabled={!reqMandatory}
-                              className="w-full rounded h-10 border border-gray-400 px-3 py-2 focus:border-primary focus:outline-none dark:border-gray-600 dark:bg-gray-700"
+                              className="h-10 w-full rounded border border-gray-400 px-3 py-2 focus:border-primary focus:outline-none dark:border-gray-600 dark:bg-gray-700"
                               type="number"
                               min={0}
                               defaultValue={r.minAmount}
@@ -368,11 +393,7 @@ function CreateGroupFormUI({ onCreate }) {
               </motion.form>
             </AnimatePresence>
           </FormikProvider>
-          <div
-            className={
-              'flex flex-col justify-between space-x-0 py-2 md:flex-row md:space-x-2 md:py-4'
-            }
-          >
+          <div className="flex flex-col justify-between space-x-0 py-2 md:flex-row md:space-x-2 md:py-4">
             <Link
               href="/"
               className="rounded border-2 border-red-400 p-2 text-red-500 hover:bg-red-500 hover:text-white md:px-4"

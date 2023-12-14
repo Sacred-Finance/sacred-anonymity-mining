@@ -1,5 +1,5 @@
-import logo from '../../public/sacred-logos-wordmark.svg'
-import logoLight from '../../public/sacred-logos-wordmark-light.svg'
+import logo from 'public/sacred-logos-wordmark.svg'
+import logoLight from 'public/sacred-logos-wordmark-light.svg'
 import React from 'react'
 import Image from 'next/image'
 import { useTheme } from 'next-themes'

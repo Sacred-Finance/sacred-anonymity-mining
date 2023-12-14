@@ -61,7 +61,7 @@ export const CommunityCard = ({
   const bannerSrc = useValidatedImage(community?.groupDetails?.bannerCID)
   const logoSrc = useValidatedImage(community?.groupDetails?.logoCID)
 
-  if (!community || !community?.id) {
+  if (!community) {
     return <></>
   }
 
@@ -136,7 +136,7 @@ export const CommunityCard = ({
         <CardContent className={'min-h-[120px] pb-0 pt-2'}>
           {bannerSrc && (
             <Image
-              className=" -z-1 pointer-events-none h-full w-full rounded-lg object-cover opacity-40 transition-opacity duration-300 ease-in-out group-hover:opacity-80"
+              className="pointer-events-none h-full w-full rounded-lg object-cover opacity-40 transition-opacity duration-300 ease-in-out group-hover:opacity-80"
               src={bannerSrc}
               alt={'community banner'}
               fill={true}

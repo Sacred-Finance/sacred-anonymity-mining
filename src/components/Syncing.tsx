@@ -3,7 +3,7 @@ import React from 'react'
 
 export const Syncing = () => {
   return (
-    <div className="text-md fixed bottom-0 right-0 p-2 text-gray-400">
+    <div className="fixed bottom-0 right-0 p-2 text-gray-400">
       <span>Syncing</span>
       <span className="animate-ping">.</span>
       <span className="animate-ping">.</span>

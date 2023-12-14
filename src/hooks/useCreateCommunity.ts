@@ -1,11 +1,11 @@
 import { useCallback } from 'react'
 import { Identity } from '@semaphore-protocol/identity'
 
-import { createGroup } from '../lib/api'
+import { createGroup } from '@/lib/api'
 import { useHandleCommunityAction } from './useHandleCommunityAction'
-import { cacheGroupData, uploadImages } from '../utils/communityUtils'
+import { cacheGroupData, uploadImages } from '@/utils/communityUtils'
 import { useAccount } from 'wagmi'
-import { useCommunityContext } from '../contexts/CommunityProvider'
+import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
 import { constants } from 'ethers'
 import {
   createNote,
@@ -15,12 +15,12 @@ import {
 import type { CommunityDetails, Requirement } from '@/lib/model'
 import type { Group } from '@/types/contract/ForumInterface'
 
-interface ICreateCommunityArgs extends Group {
+export interface ICreateCommunityArgs extends Partial<Group> {
   name: string
   description: string
   requirements: Requirement[]
-  bannerFile: File
-  logoFile: File
+  bannerFile?: File | undefined
+  logoFile?: File | undefined
   chainId: number
   tags: Group['groupDetails']['tags']
 }
@@ -72,7 +72,7 @@ export const useCreateCommunity = (onCreateGroupClose: () => void) => {
 
         if (status === 200) {
           if (data.event === 'NewGroupCreated' && data.args) {
-            const [groupIdArg, nameArg, note] = data.args
+            const [groupIdArg] = data.args
 
             const groupIdHex = groupIdArg.hex
             const groupIdInt = parseInt(groupIdHex, 16)
@@ -90,7 +90,7 @@ export const useCreateCommunity = (onCreateGroupClose: () => void) => {
                 requirements,
               })
               dispatch({
-                type: 'ADD_COMMUNITY',
+                type: ActionType.ADD_COMMUNITY,
                 payload: {
                   groupId: groupIdInt,
                   name: name,

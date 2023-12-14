@@ -1,9 +1,5 @@
-import type {
-  ItemCreationRequest,
-  ReputationProofStruct,
-  User,
-} from '@/lib/model'
-import { BigNumber, ethers } from 'ethers'
+import type { ItemCreationRequest, User } from '@/lib/model'
+import { ethers } from 'ethers'
 import { Identity } from '@semaphore-protocol/identity'
 import {
   createNote,
@@ -15,14 +11,10 @@ import {
 } from '@/lib/utils'
 import { forumContract } from '@/constant/const'
 import { createComment, createPost, edit } from '@/lib/api'
-import { UnirepUser } from '@/lib/unirep'
-import { generateProof } from '@semaphore-protocol/proof'
 import { Group as SemaphoreGroup } from '@semaphore-protocol/group'
 import { mutate } from 'swr'
-import {
-  getGroupWithPostAndCommentData,
-  getGroupWithPostData,
-} from '@/lib/fetcher'
+import { GroupPostCommentAPI, GroupPostAPI } from '@/lib/fetcher'
+import { generateProof } from '@semaphore-protocol/proof'
 
 export const emptyPollRequest = {
   pollType: 0,
@@ -34,44 +26,49 @@ export const emptyPollRequest = {
 }
 
 export async function handleDeleteItem(
+  this: {
+    groupId: string
+    postId: string
+  },
   address: string,
   postedByUser: User,
-  itemId
+  itemId: bigint
 ) {
-  try {
-    const signal = ethers.constants.HashZero
-    const userPosting = new Identity(
-      `${address}_${this.groupId}_${postedByUser?.name}`
-    )
-    const note = await createNote(userPosting)
+  const signal = ethers.constants.HashZero
+  const userPosting = new Identity(
+    `${address}_${this.groupId}_${postedByUser?.name}`
+  )
 
-    const item = await forumContract.itemAt(itemId)
-    const input = {
-      note: BigInt(item.note.toHexString()),
-      trapdoor: userPosting.getTrapdoor(),
-      nullifier: userPosting.getNullifier(),
-    }
+  const note = await createNote(userPosting)
 
-    const { a, b, c } = await generateGroth16Proof(
-      input,
-      '/circuits/VerifyOwner__prod.wasm',
-      '/circuits/VerifyOwner__prod.0.zkey'
-    )
-    return edit(itemId, signal, note, a, b, c).then(async data => {
-      if (this.postId) {
-        await mutate(getGroupWithPostAndCommentData(this.groupId, this.postId))
-      } else {
-        await mutate(getGroupWithPostData(this.groupId))
-      }
-      return data
-    })
-  } catch (error) {
-    throw error
+  const item = await forumContract.read.itemAt([itemId])
+  const input = {
+    note: item.note,
+    trapdoor: userPosting.getTrapdoor(),
+    nullifier: userPosting.getNullifier(),
   }
+
+  const { a, b, c } = await generateGroth16Proof(
+    input,
+    '/circuits/VerifyOwner__prod.wasm',
+    '/circuits/VerifyOwner__prod.0.zkey'
+  )
+  return edit(itemId.toString(), signal, note, a, b, c).then(async data => {
+    if (this.postId) {
+      await mutate(GroupPostCommentAPI(this.groupId, this.postId))
+    } else {
+      await mutate(GroupPostAPI(this.groupId))
+    }
+    return data
+  })
 }
 
 // todo: create works, but it fails in either the caching, or updating the UI after its made - fix currently is refreshing the page.
 export async function create(
+  this: {
+    groupId: string
+    postId: string
+  },
   content,
   type,
   address,
@@ -96,15 +93,6 @@ export async function create(
     const userPosting = new Identity(
       `${address}_${this.groupId}_${postedByUser?.name || 'anon'}`
     )
-    const unirepUser = new UnirepUser(userPosting)
-    await unirepUser.updateUserState()
-    const userState = await unirepUser.getUserState()
-
-    const reputationProof = await userState.genProveReputationProof({
-      epkNonce: 0,
-      minRep: 0,
-      graffitiPreImage: 0,
-    })
 
     const extraNullifier = hashBytes(signal).toString()
     const note = await createNote(userPosting)
@@ -119,17 +107,6 @@ export async function create(
       hashBytes(signal)
     )
 
-    const epochData = unirepUser.getEpochData()
-
-    const epoch: ReputationProofStruct = {
-      publicSignals: epochData.publicSignals,
-      proof: epochData.proof,
-      publicSignalsQ: reputationProof.publicSignals,
-      proofQ: reputationProof.proof,
-      ownerEpoch: BigNumber.from(epochData.epoch)?.toString(),
-      ownerEpochKey: epochData.epochKey,
-    }
-
     const request: ItemCreationRequest = {
       contentCID: signal,
       merkleTreeRoot: merkleTreeRoot.toString(),
@@ -142,25 +119,22 @@ export async function create(
         groupId: this.groupId,
         request: request,
         solidityProof: proof,
-        unirepProof: epoch,
         asPoll: false,
         pollRequest: emptyPollRequest,
       }).then(async res => {
-        await mutate(getGroupWithPostData(this.groupId))
+        await mutate(GroupPostAPI(this.groupId))
         return res
       })
     } else if (type === 'comment') {
-      console.log('creating comment')
       return await createComment({
         groupId: this.groupId,
         parentId: this.postId,
         request: request,
         solidityProof: proof,
-        unirepProof: epoch,
         asPoll: false,
         pollRequest: emptyPollRequest,
       }).then(async res => {
-        await mutate(getGroupWithPostAndCommentData(this.groupId, this.postId))
+        await mutate(GroupPostCommentAPI(this.groupId, this.postId))
         return res
       })
     }
@@ -194,11 +168,11 @@ export async function editContent(
     )
     const note = await createNote(userPosting)
 
-    const item = await forumContract.itemAt(itemId)
+    const item = await forumContract.read.itemAt([itemId])
 
     const input = {
       trapdoor: userPosting.getTrapdoor(),
-      note: BigInt(item.note.toHexString()),
+      note: item.note,
       nullifier: userPosting.getNullifier(),
     }
 
@@ -211,9 +185,7 @@ export async function editContent(
     return await edit(itemId, signal, note, a, b, c)
       .then(async data => {
         console.log('edited item!', data, this.groupId, itemId)
-        await mutate(
-          getGroupWithPostAndCommentData(this.groupId, this.postId ?? itemId)
-        )
+        await mutate(GroupPostCommentAPI(this.groupId, this.postId ?? itemId))
         return data
       })
       .catch(err => {
@@ -232,8 +204,8 @@ export async function updateContentVote(
   revert = false
 ) {
   if (type === 'post') {
-    await mutate(getGroupWithPostData(this.groupId))
+    await mutate(GroupPostAPI(this.groupId))
   } else if (type === 'comment') {
-    await mutate(getGroupWithPostAndCommentData(this.groupId, this.postId))
+    await mutate(GroupPostCommentAPI(this.groupId, this.postId))
   }
 }

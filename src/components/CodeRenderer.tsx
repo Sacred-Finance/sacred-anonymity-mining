@@ -24,6 +24,7 @@ const CodeRenderer = ({ code }: Props) => {
 
   return (
     <pre>
+      {/* eslint-disable-next-line tailwindcss/no-custom-classname */}
       <code className={`language-${language}`}>{other}</code>
     </pre>
   )

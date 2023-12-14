@@ -11,13 +11,13 @@ export function CustomModal({
 }: {
   isOpen: boolean
   children: React.ReactNode
-  setIsOpen: any
+  setIsOpen: (isOpen: boolean) => void
   className?: string
 }) {
   // on click outside of modal, close modal
   const ref = React.useRef<HTMLDivElement>(null)
   useEffect(() => {
-    function handleClickOutside(event: any) {
+    function handleClickOutside(event) {
       if (ref.current && !ref.current.contains(event.target)) {
         setIsOpen(false)
       }

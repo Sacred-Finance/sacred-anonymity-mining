@@ -1,5 +1,4 @@
-import { ethers } from 'ethers'
-import { erc20dummyABI, forumContract, providerMap } from '@/constant/const'
+import { forumContract, getRpcProvider } from '@/constant/const'
 import { setCache } from '@/lib/redis'
 import {
   getContent,
@@ -20,6 +19,9 @@ import type {
   RawItemData,
 } from '@/types/contract/ForumInterface'
 import type { Event } from '@ethersproject/contracts'
+import { erc20dummyABI } from '@/constant/erc20dummyABI'
+import { getContract } from 'viem'
+import { toNumber } from 'lodash'
 
 type GroupId = number
 
@@ -36,6 +38,8 @@ export const fetchCommunitiesData = async ({
       typeof group === 'number' ? group : group?.args?.['groupId']?.toNumber()
     )
 
+    console.log('fetchCommunitiesData', groupIds)
+
     const checkEvent = groups.filter(
       group => typeof group !== 'number' && group.event === 'NewGroupCreated'
     )
@@ -49,9 +53,9 @@ export const fetchCommunitiesData = async ({
     }
 
     const updatedDataPromises = groupIds.map(async (groupId, index) => {
-      let groupData
+      let groupData: Group
       try {
-        groupData = await forumContract.groupAt(groupId.toString())
+        groupData = (await forumContract.read.groupAt([groupId])) as Group
         if (groupData?.removed) {
           return undefined
         }
@@ -62,13 +66,13 @@ export const fetchCommunitiesData = async ({
       const requirementDetails = await addRequirementDetails(groupData)
 
       return {
-        groupId: groupId,
+        groupId,
         name: groupData?.name,
-        id: groupData?.id?.toNumber(),
-        userCount: groupData?.userCount?.toNumber() || 0,
+        id: groupData?.id,
+        userCount: groupData?.userCount || 0,
         note: groupData?.note?.toString(), // todo:review this
         requirements: requirementDetails,
-        chainId: groupData?.chainId?.toNumber(),
+        chainId: groupData?.chainId,
         removed: groupData?.removed,
         banner: groupData?.groupDetails.bannerCID
           ? getIpfsHashFromBytes32(groupData.groupDetails.bannerCID)
@@ -77,7 +81,7 @@ export const fetchCommunitiesData = async ({
           ? getIpfsHashFromBytes32(groupData.groupDetails.logoCID)
           : undefined,
         groupDetails: groupData.groupDetails,
-      } as Group
+      } as unknown as Group
     })
 
     const result = await Promise.all(updatedDataPromises)
@@ -86,17 +90,6 @@ export const fetchCommunitiesData = async ({
     console.trace('error', error)
     return []
   }
-}
-
-interface UploadAndCacheImagesParams {
-  groupId: number
-  bannerFile?: File | null
-  logoFile?: File | null
-}
-
-interface ImageCacheData {
-  banner?: string
-  logo?: string
 }
 
 type UploadImagesParams = {
@@ -141,12 +134,24 @@ export const cacheGroupData = async ({
   requirements,
   details,
 }: {
-  groupId: any
+  groupId: number
   groupData: any
   chainId: number
   requirements: Requirement[]
   details: CommunityDetails
-}): Promise<any> => {
+}): Promise<{
+  name?: string
+  groupId?: number
+  id?: any
+  note?: string
+  groupData: any
+  chainId: number
+  requirements: Requirement[]
+  removed: boolean
+  details: CommunityDetails
+  banner: string
+  logo: string
+}> => {
   const {
     blockHash,
     args,
@@ -220,8 +225,6 @@ export const handleFileImageUpload = (e, setImageFileState) => {
       banner: 16 / 9,
       logo: 1, // assuming you want a square logo
     }
-    const requiredDimensionsText =
-      '1920x1080px for banners and 512x512px for logos.'
 
     const requiredDimensions = {
       banner: { width: 1920, height: 640 },
@@ -263,85 +266,91 @@ export const handleFileImageUpload = (e, setImageFileState) => {
     }
   }
 }
-
 export const addRequirementDetails = async (
   community: Group
 ): Promise<Awaited<Requirement[]>> => {
-  return (await Promise.all(
-    community.requirements.map(async requirement => {
-      let token
-      try {
-        token = new ethers.Contract(
-          requirement.tokenAddress,
-          erc20dummyABI,
-          providerMap[community.chainId]
-        )
-      } catch (e) {
-        console.error('Error creating token contract:', e)
-        return {
-          tokenAddress: requirement.tokenAddress,
-          symbol: '',
-          name: '',
-          decimals: '',
-          minAmount: requirement.minAmount.toString(),
-        }
-      }
+  if (!community.requirements) {
+    return []
+  }
 
-      if (!token) {
-        console.warn(
-          'Token contract not initialized:',
-          requirement.tokenAddress
-        )
-        return {
-          tokenAddress: requirement.tokenAddress,
-          symbol: '',
-          name: '',
-          decimals: '',
-          minAmount: requirement.minAmount.toString(),
-        }
-      }
+  return Promise.all(
+    community.requirements.map(requirement =>
+      processRequirement(requirement, community.chainId)
+    )
+  )
+}
 
-      let symbol, name, decimals
-      try {
-        symbol = await token.symbol()
-      } catch (e) {
-        console.error('Error fetching token symbol:', e)
-        symbol = ''
-      }
+const processRequirement = async (
+  requirement: Requirement,
+  chainId: number
+) => {
+  const defaultResponse = {
+    tokenAddress: requirement.tokenAddress,
+    symbol: '',
+    name: '',
+    decimals: '',
+    minAmount: requirement.minAmount.toString(),
+  }
 
-      try {
-        name = await token.name()
-      } catch (e) {
-        console.error('Error fetching token name:', e)
-        name = ''
-      }
+  if (!requirement.tokenAddress) {
+    return defaultResponse
+  }
 
-      try {
-        decimals = await token.decimals()
-      } catch (e) {
-        console.error('Error fetching token decimals:', e)
-        decimals = ''
-      }
+  const token = await createTokenContract(requirement, chainId)
 
-      const minAmount = requirement.minAmount.toString()
-      // const maxAmount = requirement?.maxAmount?.toString()
+  if (!token) {
+    console.warn('Token contract not initialized:', requirement.tokenAddress)
+    return defaultResponse
+  }
 
-      return {
-        tokenAddress: requirement.tokenAddress,
-        symbol: symbol ? symbol.toString() : '',
-        name,
-        decimals,
-        minAmount,
-        // maxAmount
-      }
+  const tokenDetails = await fetchTokenDetails(token)
+  return { ...defaultResponse, ...tokenDetails }
+}
+
+const createTokenContract = async (
+  requirement: Requirement,
+  chainId: number
+) => {
+  try {
+    return getContract({
+      address: requirement.tokenAddress as `0x${string}`,
+      abi: erc20dummyABI,
+      publicClient: getRpcProvider(chainId),
     })
-  )) as unknown as Requirement[]
+  } catch (error) {
+    console.error('Error creating token contract:', error)
+    return null
+  }
+}
+
+const fetchTokenDetails = async token => {
+  const details = { symbol: '', name: '', decimals: '' }
+
+  try {
+    details.symbol = await token.read.symbol()
+  } catch (error) {
+    console.error('Error fetching token symbol:', error)
+  }
+
+  try {
+    details.name = await token.read.name()
+  } catch (error) {
+    console.error('Error fetching token name:', error)
+  }
+
+  try {
+    details.decimals = await token.read.decimals()
+  } catch (error) {
+    console.error('Error fetching token decimals:', error)
+  }
+
+  return details
 }
 
 // Normalization function
 function serializeGroupData(rawGroupData: RawGroupData): Group {
   return {
-    id: rawGroupData.id.toNumber(),
+    id: Number(rawGroupData.id.toString()),
     name: rawGroupData.name,
     groupId: rawGroupData.id.toString(),
     groupDetails: {
@@ -354,25 +363,24 @@ function serializeGroupData(rawGroupData: RawGroupData): Group {
       description: rawGroupData.groupDetails.description.toString(),
       tags: rawGroupData.groupDetails.tags.map(t => t.toString()),
     },
-    requirements: rawGroupData?.requirements.map(r => ({
+    requirements: rawGroupData?.requirements?.map(r => ({
       tokenAddress: r.tokenAddress,
       minAmount: r.minAmount.toString(),
-      // maxAmount: r?.maxAmount?.toString(),
     })),
     note: rawGroupData.note.toString(),
-    userCount: rawGroupData.userCount.toNumber(),
-    chainId: rawGroupData.chainId.toNumber(),
-    posts: rawGroupData.posts.map(p => p.toNumber()),
+    userCount: Number(rawGroupData.userCount.toString()),
+    chainId: Number(rawGroupData.chainId.toString()),
+    posts: rawGroupData.posts.map(p => p.toString()),
     removed: rawGroupData.removed,
   }
 }
 
-// Asynchronous function to normalize and augment data
 export async function augmentGroupData(
   rawGroupData: RawGroupData,
   forPaths = false
 ): Promise<Group> {
   const normalizedGroupData = serializeGroupData(rawGroupData)
+  console.log('normalizedGroupData', normalizedGroupData, forPaths)
 
   if (forPaths) {
     return normalizedGroupData
@@ -386,14 +394,14 @@ export async function augmentGroupData(
 
 function serializeRawItemData(rawItemData: RawItemData): Item {
   return {
-    kind: rawItemData?.kind?.toString(),
+    kind: toNumber(rawItemData?.kind?.toString()),
     id: rawItemData?.id?.toString(),
     parentId: rawItemData?.parentId.toString(),
     groupId: rawItemData?.groupId.toString(),
-    createdAtBlock: rawItemData?.createdAtBlock?.toNumber(),
+    createdAtBlock: toNumber(rawItemData?.createdAtBlock?.toString()),
     childIds: rawItemData?.childIds?.map(id => id.toString()),
-    upvote: rawItemData?.upvote?.toNumber(),
-    downvote: rawItemData?.downvote?.toNumber(),
+    upvote: toNumber(rawItemData?.upvote?.toString()),
+    downvote: toNumber(rawItemData?.downvote?.toString()),
     note: rawItemData?.note.toString(),
     ownerEpoch: rawItemData?.ownerEpoch?.toString(),
     ownerEpochKey: rawItemData?.ownerEpochKey?.toString(),
@@ -412,7 +420,7 @@ export async function augmentItemData(rawItemData: RawItemData): Promise<Item> {
         removed: true,
       }
     }
-    let content: any
+    let content
     if (normalizedItemData.kind == ContentType.COMMENT) {
       content = parseComment(stringifiedContent)
     } else {
@@ -425,5 +433,9 @@ export async function augmentItemData(rawItemData: RawItemData): Promise<Item> {
     }
   } catch (e) {
     console.error('augmentItemData', e)
+    return {
+      ...serializeRawItemData(rawItemData),
+      removed: true,
+    }
   }
 }

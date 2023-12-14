@@ -26,12 +26,11 @@ import type { SortByOption } from '@components/SortBy'
 import type { Group, Item } from '@/types/contract/ForumInterface'
 import type { CommentClass } from '@/lib/comment'
 import type { Post } from '@/lib/post'
-import type { ItemCreationRequest, ReputationProofStruct } from '@/lib/model'
+import type { ItemCreationRequest } from '@/lib/model'
 import { ContentType } from '@/lib/model'
 import CreatePollUI from '@components/CreatePollUI'
 import { Group as SemaphoreGroup } from '@semaphore-protocol/group'
 import { Identity } from '@semaphore-protocol/identity'
-import { UnirepUser } from '@/lib/unirep'
 import { useContentManagement } from '@/hooks/useContentManagement'
 import { createComment, vote } from '@/lib/api'
 import { generateProof } from '@semaphore-protocol/proof'
@@ -44,10 +43,9 @@ import {
   uploadIPFS,
 } from '@/lib/utils'
 import { mutate } from 'swr'
-import { getGroupWithPostAndCommentData } from '@/lib/fetcher'
+import { GroupPostCommentAPI } from '@/lib/fetcher'
 import { emptyPollRequest } from '@/lib/item'
 import { ScrollArea } from '@/shad/ui/scroll-area'
-import ReputationCard from '../ReputationCard'
 import AIDigestButton from '@components/buttons/AIPostDigestButton'
 import { Card } from '@/shad/ui/card'
 import { DynamicAccordion } from '@components/Post/DynamicAccordion'
@@ -119,9 +117,6 @@ export function PostPage({
         setResponses,
       }}
     >
-      {/*<div className="mb-6">*/}
-      {/*  <ReputationCard />*/}
-      {/*</div>*/}
       <Card className="flex h-screen min-h-full w-full grow flex-col rounded-lg border-0 bg-gradient-to-r from-background  from-25% to-background to-75% backdrop-blur-3xl  transition-colors  ">
         <ScrollArea className="flex-1 overflow-hidden ">
           <div className="flex h-full grow flex-col justify-stretch md:flex-row ">
@@ -175,7 +170,7 @@ export function PostPage({
                     ))}
                     {!sortedCommentsData.length && (
                       <div className="flex flex-col items-center justify-center gap-2">
-                        <div className="text-md">No comments yet</div>
+                        <div className="text-base">No comments yet</div>
                       </div>
                     )}
                   </Tab.Panel>
@@ -184,7 +179,7 @@ export function PostPage({
                   <Tab.Panel className="flex flex-col ">
                     {!sortedCommentsData.length && (
                       <div className="flex flex-col items-center justify-center gap-2">
-                        <div className="text-md">No Polls yet</div>
+                        <div className="text-base">No Polls yet</div>
                       </div>
                     )}
                     {sortedCommentsData
@@ -310,12 +305,10 @@ const CreateCommentUI = ({ group, post }: { group: Group; post: Item }) => {
   const {
     contentDescription,
     setContentDescription,
-    tempContents,
-    contentTitle,
-    setTempContents,
     setContentTitle,
     clearContent,
   } = useContentManagement({
+    isPostOrPoll: false,
     isPost: false,
     defaultContentDescription: undefined,
     defaultContentTitle: undefined,
@@ -358,28 +351,7 @@ const CreateCommentUI = ({ group, post }: { group: Group; post: Item }) => {
         `${address}_${group.id}_${activeUser?.name || 'anon'}`
       )
 
-      console.log('userIdentity', userIdentity)
-
-      const unirepUser = new UnirepUser(userIdentity)
-      await unirepUser.updateUserState()
-      const userState = await unirepUser.getUserState()
       const note = await createNote(userIdentity)
-
-      const reputationProof = await userState.genProveReputationProof({
-        epkNonce: 0,
-        minRep: 0,
-        graffitiPreImage: 0,
-      })
-
-      const epochData = unirepUser.getEpochData()
-      const epoch: ReputationProofStruct = {
-        publicSignals: epochData.publicSignals,
-        proof: epochData.proof,
-        publicSignalsQ: reputationProof.publicSignals,
-        proofQ: reputationProof.proof,
-        ownerEpoch: BigNumber.from(epochData.epoch)?.toString(),
-        ownerEpochKey: epochData.epochKey,
-      }
 
       const fullProof = await generateProof(
         userIdentity,
@@ -400,11 +372,10 @@ const CreateCommentUI = ({ group, post }: { group: Group; post: Item }) => {
         parentId: post.id.toString(),
         request: request,
         solidityProof: fullProof.proof,
-        unirepProof: epoch,
         asPoll: false,
         pollRequest: emptyPollRequest,
       }).then(async res => {
-        await mutate(getGroupWithPostAndCommentData(groupId, post.id))
+        await mutate(GroupPostCommentAPI(groupId, post.id))
         toast.success('Comment created successfully')
         clearContent()
         return res
@@ -489,15 +460,6 @@ export const VoteForItemUI = ({
       users.forEach(u => semaphoreGroup.addMember(BigInt(u)))
       const userIdentity = new Identity(`${address}_${group.id}_anon`)
 
-      const unirepUser = new UnirepUser(userIdentity)
-      await unirepUser.updateUserState()
-      const userState = await unirepUser.getUserState()
-      const reputationProof = await userState.genProveReputationProof({
-        epkNonce: 0,
-        minRep: 0,
-        graffitiPreImage: 0,
-      })
-
       const { proof, nullifierHash, merkleTreeRoot } = await generateProof(
         userIdentity,
         semaphoreGroup,
@@ -505,27 +467,16 @@ export const VoteForItemUI = ({
         signal
       )
 
-      const epochData = unirepUser.getEpochData()
-      const voteProofData: ReputationProofStruct = {
-        publicSignals: epochData.publicSignals,
-        proof: epochData.proof,
-        publicSignalsQ: reputationProof.publicSignals,
-        proofQ: reputationProof.proof,
-        ownerEpoch: BigNumber.from(epochData.epoch)?.toString(),
-        ownerEpochKey: epochData.epochKey,
-      }
-
       return vote(
         itemId.toString(),
         groupId,
         voteType,
         merkleTreeRoot.toString(),
         nullifierHash.toString(),
-        proof,
-        voteProofData
+        proof
       )
         .then(async res => {
-          await mutate(getGroupWithPostAndCommentData(groupId, postId))
+          await mutate(GroupPostCommentAPI(groupId, postId))
           toast.success('Vote created successfully')
           setIsLoading(false)
           return res

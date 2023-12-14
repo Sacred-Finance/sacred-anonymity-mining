@@ -8,13 +8,14 @@ import { toast } from 'react-toastify'
 import type { Group } from '@/types/contract/ForumInterface'
 import { PrimaryButton } from './index'
 import { useLeaveCommunity } from '@/hooks/useLeaveCommunity'
+import { toNumber } from 'lodash'
 
 interface JoinButtonProps {
   community: Group
 }
 
 export const LeaveCommunityButton = memo(({ community }: JoinButtonProps) => {
-  const { groupId, name: groupName } = community
+  const { groupId } = community
 
   const [isLoading, setIsLoading] = React.useState(false)
   const { t } = useTranslation()
@@ -23,7 +24,7 @@ export const LeaveCommunityButton = memo(({ community }: JoinButtonProps) => {
     groupId as string | number
   )
 
-  const { leaveCommunity } = useLeaveCommunity({ id: groupId })
+  const { leaveCommunity } = useLeaveCommunity({ id: toNumber(groupId) })
 
   const validateBeforeOpen = async (): Promise<boolean> => {
     if (!address) {

@@ -1,12 +1,11 @@
 import type { Proof } from '@semaphore-protocol/proof'
 import axios from 'axios'
 import type { BigNumberish } from 'ethers'
-import { RELAYER_URL } from '../constant/const'
+import { RELAYER_URL } from '@/constant/const'
 import type {
   CommunityDetails,
   ItemCreationRequest,
   PollRequestStruct,
-  ReputationProofStruct,
   Requirement,
 } from './model'
 
@@ -64,7 +63,6 @@ interface Post {
   groupId: string
   request: ItemCreationRequest
   solidityProof: Proof
-  unirepProof: ReputationProofStruct
   asPoll: boolean
   pollRequest: PollRequestStruct
 }
@@ -73,7 +71,6 @@ export async function createPost({
   groupId,
   request,
   solidityProof,
-  unirepProof,
   asPoll,
   pollRequest,
 }: Post) {
@@ -81,7 +78,6 @@ export async function createPost({
     groupId,
     request,
     solidityProof,
-    unirepProof,
     asPoll,
     pollRequest,
   })
@@ -92,7 +88,6 @@ interface Comment {
   parentId: string
   request: ItemCreationRequest
   solidityProof: Proof
-  unirepProof: ReputationProofStruct
   asPoll: boolean
   pollRequest: PollRequestStruct
 }
@@ -102,7 +97,6 @@ export async function createComment({
   parentId,
   request,
   solidityProof,
-  unirepProof,
   asPoll,
   pollRequest,
 }: Comment) {
@@ -111,7 +105,6 @@ export async function createComment({
     parentId,
     request,
     solidityProof,
-    unirepProof,
     asPoll,
     pollRequest,
   })
@@ -140,8 +133,7 @@ export async function vote(
   type: number,
   merkleRoot: string,
   nullifierHash: string,
-  solidityProof: Proof,
-  voteRepProof: ReputationProofStruct
+  solidityProof: Proof
 ) {
   return axios.post(`${RELAYER_URL}/vote`, {
     itemId,
@@ -150,17 +142,6 @@ export async function vote(
     merkleRoot,
     nullifierHash,
     solidityProof,
-    voteRepProof,
-  })
-}
-
-export async function userUnirepSignUp(
-  publicSignals: BigNumberish[],
-  proof: BigNumberish[]
-) {
-  return axios.post(`${RELAYER_URL}/user-unirep-sign-up`, {
-    publicSignals,
-    proof,
   })
 }
 
@@ -252,8 +233,7 @@ export async function votePoll(
   pollData: number[],
   merkleRoot: BigNumberish,
   nullifierHash: BigNumberish,
-  solidityProof: Proof,
-  voteRepProof: ReputationProofStruct
+  solidityProof: Proof
 ) {
   return axios.post(`${RELAYER_URL}/vote-poll`, {
     itemId,
@@ -262,6 +242,5 @@ export async function votePoll(
     merkleRoot,
     nullifierHash,
     solidityProof,
-    voteRepProof,
   })
 }

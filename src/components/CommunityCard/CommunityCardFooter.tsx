@@ -26,7 +26,7 @@ export const CommunityCardFooter = () => {
 
   return (
     <CardFooter
-      className={'relative z-40 flex justify-between gap-1  bg-opacity-10 p-2'}
+      className={'relative z-30 flex justify-between gap-1  bg-black/10 p-2'}
     >
       <div className="flex  shrink basis-[66%] flex-wrap   gap-1  rounded lg:basis-[75%]">
         <Button
@@ -38,7 +38,7 @@ export const CommunityCardFooter = () => {
         </Button>
         <Button
           variant="outline"
-          className={' flex min-w-[45px] max-w-[75px] grow gap-1 text-xs'}
+          className=" flex min-w-[45px] max-w-[75px] grow gap-1 text-xs"
         >
           {posts.length}
           <span> Posts</span>

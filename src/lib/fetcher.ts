@@ -5,15 +5,17 @@ export default async function fetcher<T>(url: string): Promise<T> {
 
   if (!res.ok) {
     const error = new Error('An error occurred while fetching the data')
-    ;(error as any).info = await res.json()
-    ;(error as any).status = res.status
+    ;(error as { info?: string }).info = await res.text()
+    ;(error as { status?: number }).status = res.status
     throw error
   }
 
   return res.json() as Promise<T>
 }
 
-export function getGroupWithPostData(groupId: string | string[] | undefined) {
+export function GroupPostAPI(
+  groupId: string | string[] | undefined
+): string | { error: string } | null {
   // if array throw error
   if (Array.isArray(groupId)) {
     throw new Error('groupId must be a string or undefined')
@@ -21,14 +23,18 @@ export function getGroupWithPostData(groupId: string | string[] | undefined) {
   if (groupId === undefined) {
     return null
   }
-  return !isNaN(groupId) ? `/api/groupWithPostData?groupId=${groupId}` : null
+  return `/api/groupWithPostData?groupId=${groupId}`
 }
 
-export function getGroupWithPostAndCommentData(
+export function GroupPostCommentAPI(
   groupId: string | string[] | undefined,
   postId: string | string[] | undefined
 ) {
-  return !isNaN(groupId)
-    ? `/api/groupWithPostAndCommentData?groupId=${groupId}&postId=${postId}`
-    : null
+  if (Array.isArray(groupId) || Array.isArray(postId)) {
+    throw new Error('groupId and postId must be a string or undefined')
+  }
+  if (groupId === undefined || postId === undefined) {
+    return null
+  }
+  return `/api/groupWithPostAndCommentData?groupId=${groupId}&postId=${postId}`
 }

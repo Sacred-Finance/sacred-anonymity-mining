@@ -14,11 +14,11 @@ interface SortByProps {
   targetType: 'comments' | 'posts' | 'polls'
 }
 
-const SortBy: React.FC<SortByProps> = ({ onSortChange, targetType }) => {
+const SortBy: React.FC<SortByProps> = ({ onSortChange }) => {
   const [selectedOption, setSelectedOption] = useState<SortByOption>('highest')
   const { t } = useTranslation()
 
-  const handleChange = e => {
+  const handleChange = (e: { target: { value: string } }) => {
     const newOption = e.target.value as SortByOption
     setSelectedOption(newOption)
     onSortChange(newOption)

@@ -26,9 +26,9 @@ const ReplyToDiscoursePost = ({
   const router = useRouter()
   const { groupId, topicId } = router.query
   const editorReference = useRef<EditorJS>()
-  const [description, setDescription] = useState<OutputData | null>(null)
+  const [description, setDescription] = useState<typeof OutputData | null>(null)
   const [selectedToReveal, setSelectedToReveal] = useState(0)
-  const { fetchBalance } = useFetchBalance()
+  const fetchBalance = useFetchBalance({})
   const onSubmit = async () => {
     if (!description) {
       return toast.error(t('error.emptyPost'))
@@ -37,7 +37,7 @@ const ReplyToDiscoursePost = ({
 
     if (selectedToReveal > 0) {
       try {
-        const balance = await fetchBalance()
+        const balance = (await fetchBalance)()
         if (balance) {
           const percentageToReveal = (balance * selectedToReveal) / 100
           const toAppend = `<br><br><br><i>Sacred Bot: User has chosen to reveal ${percentageToReveal} tokens. </i>`

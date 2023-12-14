@@ -69,6 +69,7 @@ export const getContent = async (CID: string) => {
     await startIPFS()
   }
   if (!CID) {
+    console.error('no CID')
     return ''
   }
   const decoder = new TextDecoder()
@@ -81,7 +82,7 @@ export const getContent = async (CID: string) => {
       content += decoder.decode(chunk, { stream: true })
     }
   } catch (error) {
-    console.log(error)
+    console.log('error', error)
   }
 
   console.log(CID + ' loaded')
@@ -231,6 +232,8 @@ export const startIPFS = async () => {
       },
     })
 
+    console.log('ipfs started')
+
     return ipfs
   } catch (error) {
     console.error('Error starting IPFS:', error)
@@ -306,7 +309,7 @@ export const removeDuplicates = (array, prop: string) => {
 
 export const hasUserJoined = async (group, identityCommitment) => {
   try {
-    return await forumContract.isMemberJoined(group, identityCommitment)
+    return await forumContract.read.isMemberJoined([group, identityCommitment])
   } catch (error) {
     console.log(error)
     return false
@@ -314,7 +317,8 @@ export const hasUserJoined = async (group, identityCommitment) => {
 }
 
 export const fetchUsersFromSemaphoreContract = async groupId => {
-  return semaphoreContract?.getGroupMembers(groupId?.toString())
+  console.log('fetching users from semaphore contract', groupId)
+  return semaphoreContract?.getGroupMembers(groupId.toString())
 }
 
 export const generateAvatar = async (seed: string, options: AvatarOptions) => {

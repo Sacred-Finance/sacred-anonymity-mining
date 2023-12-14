@@ -1,8 +1,7 @@
 import { forumContract } from '@/constant/const'
-import type { User } from '@/lib/model'
 import type { Group } from '@/types/contract/ForumInterface'
 import { augmentGroupData } from '@/utils/communityUtils'
-import { parseBytes32String } from 'ethers/lib/utils'
+import type { User } from '@/lib/model'
 
 export default async (req, res) => {
   if (!forumContract) {
@@ -13,7 +12,8 @@ export default async (req, res) => {
   let groupCount, rawCommunitiesData, communitiesData, users
 
   try {
-    groupCount = await forumContract.groupCount()
+    groupCount = await forumContract.read.groupCount()
+    groupCount = groupCount.toString()
   } catch (e) {
     console.error('Error fetching group count:', e)
     res
@@ -24,8 +24,13 @@ export default async (req, res) => {
 
   try {
     const groups = Array.from({ length: groupCount }, (_, i) => i)
+
     rawCommunitiesData = await Promise.all(
-      groups.map(groupId => forumContract.groupAt(groupId))
+      groups.map(groupId => {
+        //forumContract.read.groupAt(1)
+        console.error('groupId', groupId)
+        return forumContract.read.groupAt([groupId])
+      })
     )
   } catch (e) {
     console.error('Error fetching raw communities data:', e)
@@ -50,7 +55,7 @@ export default async (req, res) => {
   }
 
   try {
-    users = await forumContract.queryFilter(forumContract.filters.NewUser())
+    users = await forumContract.getEvents.NewUser()
   } catch (e) {
     console.error('Error querying users:', e)
     res.status(500).json({ error: 'An error occurred while querying users' })
@@ -60,7 +65,7 @@ export default async (req, res) => {
   res.status(200).json({
     communitiesData: communitiesData as Group[],
     users: users.map(({ args }) => ({
-      name: parseBytes32String(args.username),
+      name: args.username,
       groupId: +args.groupId.toString(),
       identityCommitment: args.identityCommitment.toString(),
     })) as unknown as User[],

@@ -7,7 +7,7 @@ import React, {
   useReducer,
 } from 'react'
 import type { User } from '@/lib/model'
-import { ethers } from 'ethers'
+import type { ethers } from 'ethers'
 import { Identity } from '@semaphore-protocol/identity'
 import _, { isBoolean, isUndefined } from 'lodash'
 import { useAccount } from 'wagmi'
@@ -37,8 +37,8 @@ type State = {
   communities: Group[]
   users: User[]
   usersGrouped: { [key: string]: User[] }
-  activeCommunity: ActiveCommunity
-  activePost: ActivePost
+  activeCommunity: ActiveCommunity | undefined
+  activePost: ActivePost | undefined
   isAdmin: boolean
   isModerator: boolean
   communitiesJoined: { [key: string]: User | boolean }
@@ -65,7 +65,10 @@ type Action =
   | { type: ActionType.SET_COMMUNITIES; payload: Group[] }
   | { type: ActionType.SET_USERS; payload: User[] }
   // a new type for active community, and will store community details, post list, and comments for each post
-  | { type: ActionType.SET_ACTIVE_COMMUNITY; payload: ActiveCommunity }
+  | {
+      type: ActionType.SET_ACTIVE_COMMUNITY
+      payload: ActiveCommunity | undefined
+    }
   | { type: ActionType.SET_ACTIVE_POST; payload: ActivePost }
   | {
       type: ActionType.SET_USER_ACCESS
@@ -97,15 +100,10 @@ const initialState: State = {
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'SET_ACTIVE_COMMUNITY':
+      console.log('SET_ACTIVE_COMMUNITY', action.payload)
       return {
         ...state,
-        activeCommunity: {
-          ...action.payload,
-          community: {
-            ...action.payload.community,
-            id: ethers.BigNumber.from(action.payload.community.id),
-          },
-        },
+        activeCommunity: action.payload,
       }
     case 'SET_ACTIVE_POST':
       return {
@@ -297,44 +295,49 @@ export function useUserIfJoined(communityId: string | number): User | false {
   const [userJoined, setUserJoined] = React.useState<User | boolean>(null)
 
   useEffect(() => {
+    const checkIfUserHasJoined = async () => {
+      if (!userAddress) {
+        return false
+      }
+      if (isUndefined(state.communitiesJoined[communityId])) {
+        const generatedIdentity = new Identity(
+          `${userAddress}_${communityId}_anon`
+        )
+        const userJoined = await hasUserJoined(
+          Number(communityId),
+          generatedIdentity.getCommitment().toString()
+        )
+        console.log(
+          'userJoined',
+          userJoined,
+          generatedIdentity.getCommitment().toString()
+        )
+        if (userJoined) {
+          const u = {
+            name: 'anon',
+            identityCommitment: generatedIdentity.getCommitment().toString(),
+            groupId: +communityId,
+            id: '',
+          }
+          setUserJoined(u)
+          dispatch({
+            type: ActionType.UPDATE_COMMUNITIES_JOINED,
+            payload: { communityId: Number(communityId), hasJoined: u },
+          })
+        } else {
+          dispatch({
+            type: ActionType.UPDATE_COMMUNITIES_JOINED,
+            payload: { communityId: Number(communityId), hasJoined: false },
+          })
+          setUserJoined(false)
+        }
+      } else {
+        setUserJoined(state.communitiesJoined[communityId])
+      }
+    }
     checkIfUserHasJoined()
   }, [userAddress, state.usersGrouped[communityId]?.length])
 
-  const checkIfUserHasJoined = async () => {
-    if (!userAddress) {
-      return false
-    }
-    if (isUndefined(state.communitiesJoined[communityId])) {
-      const generatedIdentity = new Identity(
-        `${userAddress}_${communityId}_anon`
-      )
-      const userJoined = await hasUserJoined(
-        Number(communityId),
-        generatedIdentity.getCommitment().toString()
-      )
-      if (userJoined) {
-        const u = {
-          name: 'anon',
-          identityCommitment: generatedIdentity.getCommitment().toString(),
-          groupId: +communityId,
-          id: '',
-        }
-        setUserJoined(u)
-        dispatch({
-          type: ActionType.UPDATE_COMMUNITIES_JOINED,
-          payload: { communityId: Number(communityId), hasJoined: u },
-        })
-      } else {
-        dispatch({
-          type: ActionType.UPDATE_COMMUNITIES_JOINED,
-          payload: { communityId: Number(communityId), hasJoined: false },
-        })
-        setUserJoined(false)
-      }
-    } else {
-      setUserJoined(state.communitiesJoined[communityId])
-    }
-  }
   return userJoined
 }
 

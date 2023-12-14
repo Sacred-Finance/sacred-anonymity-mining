@@ -1,16 +1,15 @@
 import { useActiveUser } from '@/contexts/CommunityProvider'
 import { createComment, createPost, votePoll } from '@/lib/api'
 import {
-  getGroupWithPostAndCommentData,
-  getGroupWithPostData,
+  GroupPostCommentAPI,
+  GroupPostAPI,
 } from '@/lib/fetcher'
 import type {
   ItemCreationRequest,
   PollRequestStruct,
   PostContent,
-  ReputationProofStruct,
 } from '@/lib/model'
-import { UnirepUser } from '@/lib/unirep'
+
 import {
   createNote,
   fetchUsersFromSemaphoreContract,
@@ -23,7 +22,6 @@ import type { Group, Item } from '@/types/contract/ForumInterface'
 import { Group as SemaphoreGroup } from '@semaphore-protocol/group'
 import { Identity } from '@semaphore-protocol/identity'
 import { generateProof } from '@semaphore-protocol/proof'
-import { BigNumber } from 'ethers'
 import { mutate } from 'swr'
 import { useAccount } from 'wagmi'
 
@@ -79,15 +77,7 @@ export const usePoll = ({ group }: { group: Group }) => {
         `${address}_${group.id}_${activeUser?.name || 'anon'}`
       )
 
-      const unirepUser = new UnirepUser(userIdentity)
-      await unirepUser.updateUserState()
-      const userState = await unirepUser.getUserState()
       const note = await createNote(userIdentity)
-      const reputationProof = await userState.genProveReputationProof({
-        epkNonce: 0,
-        minRep: 0,
-        graffitiPreImage: 0,
-      })
 
       const answerCIDs = []
       for (let i = 0; i < answers.length; i++) {
@@ -97,16 +87,6 @@ export const usePoll = ({ group }: { group: Group }) => {
         }
         const answerCID = getBytes32FromIpfsHash(cid)
         answerCIDs.push(answerCID)
-      }
-
-      const epochData = unirepUser.getEpochData()
-      const epoch: ReputationProofStruct = {
-        publicSignals: epochData.publicSignals,
-        proof: epochData.proof,
-        publicSignalsQ: reputationProof.publicSignals,
-        proofQ: reputationProof.proof,
-        ownerEpoch: BigNumber.from(epochData.epoch)?.toString(),
-        ownerEpochKey: epochData.epochKey,
       }
 
       const fullProof = await generateProof(
@@ -138,7 +118,6 @@ export const usePoll = ({ group }: { group: Group }) => {
               parentId: post.id.toString(),
               request: request,
               solidityProof: fullProof.proof,
-              unirepProof: epoch,
               asPoll: true,
               pollRequest: pollRequest,
             })
@@ -146,7 +125,6 @@ export const usePoll = ({ group }: { group: Group }) => {
               groupId: group.id.toString(),
               request: request,
               solidityProof: fullProof.proof,
-              unirepProof: epoch,
               asPoll: true,
               pollRequest: pollRequest,
             })
@@ -154,13 +132,13 @@ export const usePoll = ({ group }: { group: Group }) => {
         console.log(`A post posted by user ${address}`)
         if (post !== undefined) {
           await mutate(
-            getGroupWithPostAndCommentData(
+            GroupPostCommentAPI(
               group.id.toString(),
               post.id.toString()
             )
           )
         } else {
-          await mutate(getGroupWithPostData(group.id.toString()))
+          await mutate(GroupPostAPI(group.id.toString()))
         }
         onSuccessCallback()
       } else {
@@ -185,16 +163,7 @@ export const usePoll = ({ group }: { group: Group }) => {
       const users = await fetchUsersFromSemaphoreContract(group.id)
       users.forEach(u => semaphoreGroup.addMember(BigInt(u)))
       const userIdentity = new Identity(`${address}_${group.id}_anon`)
-
-      const unirepUser = new UnirepUser(userIdentity)
-      await unirepUser.updateUserState()
-      const userState = await unirepUser.getUserState()
-      const epochData = unirepUser.getEpochData()
-      const reputationProof = await userState.genProveReputationProof({
-        epkNonce: 0,
-        minRep: 0,
-        graffitiPreImage: 0,
-      })
+      console.log('userIdentity', userIdentity)
 
       const fullProof = await generateProof(
         userIdentity,
@@ -202,23 +171,13 @@ export const usePoll = ({ group }: { group: Group }) => {
         extraNullifier,
         signal
       )
-      const voteProofData: ReputationProofStruct = {
-        publicSignals: epochData.publicSignals,
-        proof: epochData.proof,
-        publicSignalsQ: reputationProof.publicSignals,
-        proofQ: reputationProof.proof,
-        ownerEpoch: 0,
-        ownerEpochKey: 0,
-      }
-
       const { status, data } = await votePoll(
         id.toString(),
         group.id.toString(),
         pollData,
         fullProof.merkleTreeRoot,
         fullProof.nullifierHash,
-        fullProof.proof,
-        voteProofData
+        fullProof.proof
       )
       if (status === 200) {
         onSuccessCallback(data)

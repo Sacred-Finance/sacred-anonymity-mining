@@ -5,10 +5,10 @@ import { useHandleFileImageUpload } from '../utils/communityUtils'
 import type { HandleSetImage } from '@pages/communities/[groupId]/edit'
 
 export const PictureUpload = (props: {
-  uploadedImageUrl: string | null
+  uploadedImageUrl: string | undefined
   displayName: string
   name: 'banner' | 'logo'
-  setImageFileState: Dispatch<SetStateAction<HandleSetImage>>
+  setImageFileState: ({ file, imageType }: HandleSetImage) => void
 }) => {
   const handleFileImageUpload = useHandleFileImageUpload(
     props.setImageFileState
@@ -60,7 +60,10 @@ export const PictureUpload = (props: {
               className=" h-52 w-full  object-contain transition-opacity "
               style={{ opacity: isDeleteIconVisible ? 0.5 : 1 }}
               onClick={() => {
-                props.setImageFileState({ imageType: props.name, file: null })
+                props.setImageFileState({
+                  imageType: props.name,
+                  file: undefined,
+                })
                 if (!inputRef.current) {
                   return
                 }
@@ -73,7 +76,10 @@ export const PictureUpload = (props: {
               <button
                 className="absolute inset-0 flex h-full w-full items-center justify-center"
                 onClick={() => {
-                  props.setImageFileState({ imageType: props.name, file: null })
+                  props.setImageFileState({
+                    imageType: props.name,
+                    file: undefined,
+                  })
                   if (!inputRef.current) {
                     return
                   }
@@ -100,6 +106,7 @@ export const PictureUpload = (props: {
           <div
             className={`hover:bg-primary-300 group flex h-52 w-full cursor-pointer items-center  justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-gray-100 px-6 hover:text-white  dark:bg-gray-900`}
             onClick={openFileUpload}
+            onFocus={() => setHovered(hovered + 45)}
             onMouseOver={() => setHovered(hovered + 45)}
             onMouseLeave={() => setHovered(hovered + 45)}
           >

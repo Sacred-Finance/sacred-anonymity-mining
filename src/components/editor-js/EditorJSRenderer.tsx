@@ -6,7 +6,7 @@ const editorJsHtml = require('editorjs-html')
 const EditorJsToHtml = editorJsHtml()
 
 interface Props {
-  data?: OutputData | string
+  data?: typeof OutputData | string
   isHtml?: boolean
   className?: string
 }
@@ -35,12 +35,7 @@ const EditorJsRenderer = ({ data, isHtml = false, className }: Props) => {
   }
 
   return (
-    <div
-      className={clsx(
-        'select:text-primary-400 bg-primary-950 prose-lg overflow-y-hidden',
-        className
-      )}
-    >
+    <div className={clsx('prose-lg overflow-y-hidden', className)}>
       {html.map((item, index) => {
         if (typeof item === 'string') {
           return (

@@ -86,7 +86,7 @@ function HomePage({
     }
   })
 
-  const handleSearchChange = e => {
+  const handleSearchChange = (e: { target: { value: string } }) => {
     const val = e.target.value
     setSearchTerm(val)
 
@@ -118,7 +118,7 @@ function HomePage({
   return (
     <>
       <Tabs defaultValue="logos" className="h-full space-y-6">
-        <div className="space-between flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <TabsList>
             <TabsTrigger value="logos" className="relative">
               Logos

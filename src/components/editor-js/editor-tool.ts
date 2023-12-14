@@ -15,7 +15,7 @@ import Raw from '@editorjs/raw'
 import Table from '@editorjs/table'
 import Warning from '@editorjs/warning'
 import Underline from '@editorjs/underline'
-import { uploadImageToIPFS } from '../../lib/utils'
+import { uploadImageToIPFS } from '@/lib/utils'
 import type { EditorConfig } from '@editorjs/editorjs'
 
 // Link: reuires backend implementation

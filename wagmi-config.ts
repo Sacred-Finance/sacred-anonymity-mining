@@ -20,7 +20,6 @@ import { alchemyProvider } from 'wagmi/providers/alchemy'
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc'
 import { ParticleNetwork } from '@particle-network/auth'
 import { particleWallet } from '@particle-network/rainbowkit-ext'
-import { createPublicClient, http } from 'viem'
 
 export const stallTimeout = 10_0000
 
@@ -110,11 +109,7 @@ const connectors = () => {
 }
 export const config = createConfig({
   autoConnect: true,
-  publicClient: createPublicClient({
-    chain: polygonMumbai,
-    transport: http(),
-  }),
-
+  publicClient: publicClient({ chainId: polygonMumbai.id }),
   webSocketPublicClient: webSocketPublicClient({ chainId: polygonMumbai.id }),
   connectors: connectors(),
   logger: {
