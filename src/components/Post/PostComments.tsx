@@ -7,12 +7,6 @@ import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { VoteForItemUI } from './PostPage'
 import AnimalAvatar from '../AnimalAvatar'
 
-export interface TempComment {
-  id: string
-  createdAt: Date
-  content: string
-}
-
 export const NewPostModal: {
   openFormButtonClosed: string
   editor: string
@@ -38,7 +32,11 @@ export const NewPostModal: {
     'h-full bg-primary text-white rounded-md hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600',
 }
 
-export const PostComment = ({ comment }: { comment: Item }) => {
+export const PostComment = ({
+  comment,
+}: {
+  comment: Item & { time?: Date } // where is time added!?
+}) => {
   const { state } = useCommunityContext()
   const community = state?.activeCommunity?.community as Group
   return (

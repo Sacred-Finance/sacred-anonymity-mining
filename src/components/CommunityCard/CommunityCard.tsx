@@ -7,8 +7,8 @@ import { useUserIfJoined } from '@/contexts/CommunityProvider'
 import type { User } from '@/lib/model'
 import { useAccount } from 'wagmi'
 import mobileLogo from '../../../public/logo.svg'
-import type { ActionItem } from '@components/buttons/SpeedDial'
-import { SpeedDial } from '@components/buttons/SpeedDial'
+import type { ActionItem } from '@components/buttons/CardDropDown'
+import { CardDropDown } from '@components/buttons/CardDropDown'
 import { PencilIcon } from '@heroicons/react/20/solid'
 import { useRouter } from 'next/router'
 import { useValidatedImage } from '@components/CommunityCard/UseValidatedImage'
@@ -112,7 +112,7 @@ export const CommunityCard = ({
                   </h2>
                 </div>
               </Link>
-              <SpeedDial
+              <CardDropDown
                 actions={[
                   isAdmin || isOwner
                     ? {

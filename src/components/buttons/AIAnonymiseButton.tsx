@@ -20,8 +20,6 @@ interface AnonymizeButtonProps {
   postData: EditorJsType
   postTitle?: string
   setDescription: (value: EditorJsType) => void
-  handleUpdate: (arg) => void
-  refToUpdateOnChange?: React.MutableRefObject<EditorJsType>
 }
 
 function convertEditorJsTypeToString(postData: EditorJsType) {
@@ -36,7 +34,6 @@ const AnonymizeButton: React.FC<AnonymizeButtonProps> = ({
   postData,
   postTitle,
   setDescription,
-  refToUpdateOnChange,
 }) => {
   const [analysis] = useGPTServerAnalysis([
     {
@@ -72,7 +69,7 @@ const AnonymizeButton: React.FC<AnonymizeButtonProps> = ({
       ],
     })
     toggleModal()
-  }, [data, refToUpdateOnChange, postData])
+  }, [data, postData])
 
   return (
     <div

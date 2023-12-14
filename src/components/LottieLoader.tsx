@@ -3,7 +3,7 @@ import type { Options } from 'react-lottie'
 import Lottie from 'react-lottie'
 import * as animationData from '../../public/lottie.json'
 
-type LottieControlProps = {}
+type LottieControlProps = NonNullable<unknown>
 
 const LottieControl: React.FC<LottieControlProps> = () => {
   const defaultOptions: Options = {

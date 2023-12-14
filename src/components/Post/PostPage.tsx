@@ -129,7 +129,7 @@ export function PostPage({
                   ))}
                 </Tab.List>
                 <Tab.Panels
-                  className={'scrollbar col-span-12 flex w-full flex-col gap-4'}
+                  className={'col-span-12 flex w-full flex-col gap-4'}
                 >
                   {/* Comments / Replies */}
                   <Tab.Panel className="flex flex-col gap-4 ">

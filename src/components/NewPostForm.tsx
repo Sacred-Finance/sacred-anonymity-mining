@@ -17,7 +17,7 @@ import { ScrollArea } from '@/shad/ui/scroll-area'
 export interface EditorJsType {
   blocks: {
     type: string
-    data: any
+    data: (typeof OutputData)['blocks'][0]['data']
   }[]
 }
 
@@ -30,7 +30,7 @@ const Editor = dynamic(() => import('./editor-js/Editor'), {
 export interface NewPostFormProps {
   editorId: string
   title: string | false
-  setTitle: Dispatch<SetStateAction<string | null>>
+  setTitle?: Dispatch<SetStateAction<string | null>>
   description: typeof OutputData | null
   setDescription: (value: EditorJsType) => void
   resetForm: (isEdited: boolean) => void
@@ -78,15 +78,12 @@ const getClassNames = (base, customClassNames, condition) => {
 
 function ContentSection({
   data,
-  inputs,
   onChange,
   readOnly,
   placeholder,
   holder,
 }: {
-  preview: boolean
   data: typeof OutputData | null
-  inputs: string | undefined
   onChange: (value: EditorJsType) => void
   readOnly: boolean
   placeholder: string | undefined
@@ -128,12 +125,11 @@ export const NewPostForm = ({
   submitButtonText,
   openFormButtonText,
   placeholder,
+  tokenBalanceReveal,
   showButtonWhenFormOpen = false,
   classes: c,
-  tokenBalanceReveal = null,
 }: NewPostFormProps) => {
   const { t } = useTranslation()
-  const [isPreview, setIsPreview] = useState(false)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const inputRef = useRef(null)
   const [error, setError] = useState<string | null>(null)
@@ -144,10 +140,12 @@ export const NewPostForm = ({
         setError('Please enter content')
         return
       }
-      await handleSubmit()
+      handleSubmit()
       setIsFormOpen(false)
-    } catch (error) {
-      setError(error.message)
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message)
+      }
       setIsFormOpen(false)
     }
   }, [description, handleSubmit])
@@ -167,13 +165,16 @@ export const NewPostForm = ({
   }
 
   const descriptionLength = React.useMemo(() => {
-    return description?.blocks?.reduce((acc, block) => {
-      try {
-        return acc + block.data.text.length
-      } catch (error) {
-        return acc
-      }
-    }, 0)
+    return description?.blocks?.reduce(
+      (acc: never, block: { data: { text: string[] } }) => {
+        try {
+          return acc + block.data.text.length
+        } catch (error) {
+          return acc
+        }
+      },
+      0
+    )
   }, [description])
 
   const disableSubmit = React.useMemo(() => {
@@ -216,7 +217,6 @@ export const NewPostForm = ({
 
               <Input
                 id={'title'}
-                disabled={isPreview}
                 className=" w-full rounded-xl border bg-gray-950/10   p-4 "
                 ref={inputRef}
                 placeholder={
@@ -238,9 +238,7 @@ export const NewPostForm = ({
               </CardHeader>
               <CardContent>
                 <ContentSection
-                  preview={isPreview}
                   data={description}
-                  inputs={c?.editor}
                   onChange={(value: EditorJsType) => {
                     setDescription(value)
                     setError(null)
@@ -262,8 +260,6 @@ export const NewPostForm = ({
             isSubmitting={isSubmitting}
             submitButtonText={submitButtonText}
             t={t}
-            c={c}
-            refToUpdateOnChange={inputRef}
             tokenBalanceReveal={tokenBalanceReveal}
           >
             <AnonymizeButton
@@ -294,10 +290,18 @@ const FormButtons = ({
   isSubmitting,
   submitButtonText,
   t,
-  c,
   disableSubmit,
   tokenBalanceReveal,
   children,
+}: {
+  handleClose: () => void
+  handleSubmitAction: () => void
+  isSubmitting?: boolean
+  submitButtonText?: string
+  t: (key: string) => string
+  disableSubmit: boolean
+  tokenBalanceReveal: NewPostFormProps['tokenBalanceReveal']
+  children: React.ReactNode
 }) => (
   <CardFooter className="flex justify-between">
     <PrimaryButton onClick={handleClose} variant={'destructive'}>
@@ -314,7 +318,7 @@ const FormButtons = ({
             key: `${tokenBalanceReveal.selectedValue}% Reveal`,
             value: tokenBalanceReveal?.selectedValue,
           }}
-          onSelect={value => tokenBalanceReveal?.onSelected(value)}
+          onSelect={value => tokenBalanceReveal?.onSelected(value as number)}
           disabled={false}
         />
       )}

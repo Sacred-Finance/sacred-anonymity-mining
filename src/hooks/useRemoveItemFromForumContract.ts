@@ -53,7 +53,7 @@ export const useRemoveItemFromForumContract = ({
     return true
   }
 
-  const deleteItem = async (itemId, itemType: number) => {
+  const deleteItem = async (itemId: string | number, itemType: ContentType) => {
     if (
       Number(itemType) != ContentType.POST &&
       itemType != ContentType.POLL &&

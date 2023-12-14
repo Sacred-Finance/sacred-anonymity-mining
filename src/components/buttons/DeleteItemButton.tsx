@@ -7,6 +7,7 @@ import { useRouter } from 'next/router'
 import { ContentType } from '@/lib/model'
 import { CustomModal } from '@components/CustomModal'
 import { TrashIcon } from '@heroicons/react/20/solid'
+import { Group } from '@/types/contract/ForumInterface'
 
 const DeleteItemButton = ({
   itemId,
@@ -16,7 +17,7 @@ const DeleteItemButton = ({
 }: {
   itemId: string
   itemType: ContentType
-  groupId: string
+  groupId: Group['groupId']
   isAdminOrModerator: boolean
 }) => {
   const { t } = useTranslation()
