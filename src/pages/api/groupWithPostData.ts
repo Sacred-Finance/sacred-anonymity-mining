@@ -4,7 +4,8 @@ import { augmentGroupData, augmentItemData } from '@/utils/communityUtils'
 import type {
   Group,
   RawItemData,
-  RawGroupData, Item,
+  RawGroupData,
+  Item,
 } from '@/types/contract/ForumInterface'
 import type { User } from '@/lib/model'
 import { multicall } from '@wagmi/core'
@@ -59,7 +60,7 @@ export default async function handler(
         !post.removed
     ) as RawItemData[]
 
-    const augmentedPosts = (await Promise.all(
+    const augmentedPosts = await Promise.all(
       filteredRawPosts.map(async post => {
         try {
           return await augmentItemData(post)
@@ -70,7 +71,7 @@ export default async function handler(
             .json({ error: 'An error occurred while augmenting post' })
         }
       })
-    ))
+    )
 
     const usersWithCommitment = await forumContract.read.groupUsers([
       bigIntGroupId,

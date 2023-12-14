@@ -1,4 +1,4 @@
-import { GetContractReturnType, PublicClient, WalletClient } from 'viem'
+import type { GetContractReturnType, PublicClient, WalletClient } from 'viem'
 
 export const abi = [
   {

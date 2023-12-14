@@ -13,10 +13,8 @@ import { polygonMumbai } from 'wagmi/chains'
 import { PictureUpload } from '@components/PictureUpload'
 import clsx from 'clsx'
 import { AnimatePresence, motion } from 'framer-motion'
-import {
-  ICreateCommunityArgs,
-  useCreateCommunity,
-} from '@/hooks/useCreateCommunity'
+import type { ICreateCommunityArgs } from '@/hooks/useCreateCommunity'
+import { useCreateCommunity } from '@/hooks/useCreateCommunity'
 import Link from 'next/link'
 import Dropdown from '@/components/buttons/Dropdown/Dropdown'
 import TagInput from '@/components/TagInput/TagInput'

@@ -22,7 +22,7 @@ import { useContentManagement } from '@/hooks/useContentManagement'
 import { NewPostModal } from '@components/Post/PostComments'
 import LoadingComponent from '@components/LoadingComponent'
 import { CommunityCard } from './CommunityCard/CommunityCard'
-import { User } from '@/lib/model'
+import type { User } from '@/lib/model'
 
 export function CommunityPage({
   community,

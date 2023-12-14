@@ -93,8 +93,6 @@ export function PostPage({
     setEnabled(initialEnabled)
   }, [])
 
-
-
   const [selectedTab, setSelectedTab] = useState(0)
   const handleTabChange = (index: number) => {
     setSelectedTab(index)

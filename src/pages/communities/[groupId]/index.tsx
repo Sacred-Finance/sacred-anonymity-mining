@@ -6,8 +6,8 @@ import { useRouter } from 'next/router'
 import fetcher, { GroupPostAPI } from '@/lib/fetcher'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
 import { GetStaticProps, InferGetStaticPropsType } from 'next'
-import { Group, Item } from '@/types/contract/ForumInterface'
-import { User } from '@/lib/model'
+import type { Group, Item } from '@/types/contract/ForumInterface'
+import type { User } from '@/lib/model'
 
 interface Data {
   group: Group

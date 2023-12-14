@@ -1,9 +1,6 @@
 import { useActiveUser } from '@/contexts/CommunityProvider'
 import { createComment, createPost, votePoll } from '@/lib/api'
-import {
-  GroupPostCommentAPI,
-  GroupPostAPI,
-} from '@/lib/fetcher'
+import { GroupPostCommentAPI, GroupPostAPI } from '@/lib/fetcher'
 import type {
   ItemCreationRequest,
   PollRequestStruct,
@@ -132,10 +129,7 @@ export const usePoll = ({ group }: { group: Group }) => {
         console.log(`A post posted by user ${address}`)
         if (post !== undefined) {
           await mutate(
-            GroupPostCommentAPI(
-              group.id.toString(),
-              post.id.toString()
-            )
+            GroupPostCommentAPI(group.id.toString(), post.id.toString())
           )
         } else {
           await mutate(GroupPostAPI(group.id.toString()))
