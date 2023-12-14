@@ -1,7 +1,4 @@
-import {
-  useActiveUser,
-  useCommunityContext,
-} from '@/contexts/CommunityProvider'
+import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
 import { leaveGroup } from '@/lib/api'
 import type { User } from '@/lib/model'
 import {
@@ -15,55 +12,79 @@ import { useAccount } from 'wagmi'
 
 const username = 'anon'
 
-export const useLeaveCommunity = ({ id }) => {
-  const activeUser = useActiveUser({ groupId: id })
+export const useLeaveCommunity = (id: string) => {
   const { address } = useAccount()
-  const { dispatch } = useCommunityContext() // Use the context hook to access the required context values
+  const { dispatch } = useCommunityContext()
 
-  const leaveCommunity = async () => {
-    console.log('Leaving group...')
-
-    const userIdentity = new Identity(`${address}_${id}_anon`)
-    const group = new Group(id)
-    const users = await fetchUsersFromSemaphoreContract(id)
+  const prepareGroupAndProof = async (
+    userIdentity: Identity,
+    groupId: string
+  ): Promise<{
+    proof: {
+      a: string[]
+      b: [string[], string[]]
+      c: string[]
+    }
+    siblings: bigint[]
+    pathIndices: number[]
+  }> => {
+    const group = new Group(groupId)
+    const users = await fetchUsersFromSemaphoreContract(groupId)
     users.forEach(u => group.addMember(BigInt(u)))
     const index = group.indexOf(BigInt(userIdentity.commitment))
-    // group.removeMember(index);
-
-    const { siblings, pathIndices, root } = group.generateMerkleProof(index)
+    const { siblings, pathIndices } = group.generateMerkleProof(index)
 
     const note = await createNote(userIdentity)
-    const input = {
+    const proofInput = {
       note: note,
       trapdoor: userIdentity.getTrapdoor(),
       nullifier: userIdentity.getNullifier(),
     }
 
-    const { a, b, c } = await generateGroth16Proof(
-      input,
+    const proof = await generateGroth16Proof(
+      proofInput,
       '/circuits/VerifyOwner__prod.wasm',
       '/circuits/VerifyOwner__prod.0.zkey'
     )
 
-    return await leaveGroup(
-      id,
-      userIdentity.commitment.toString(),
-      a,
-      b,
-      c,
-      siblings.map(s => s.toString()),
-      pathIndices
-    ).then(() => {
-      console.log('Left group')
+    return { proof, siblings, pathIndices }
+  }
+
+  const leaveCommunity = async () => {
+    if (!address) {
+      console.error('No account address found')
+      return
+    }
+
+    const userIdentity = new Identity(`${address}_${id}_${username}`)
+    try {
+      console.log('Leaving group...')
+      const { proof, siblings, pathIndices } = await prepareGroupAndProof(
+        userIdentity,
+        id
+      )
+
+      await leaveGroup({
+        groupId: id,
+        identityCommitment: userIdentity.commitment.toString(),
+        a: proof.a,
+        b: proof.b,
+        c: proof.c,
+        siblings: siblings.map(s => s.toString()),
+        pathIndices: pathIndices,
+      })
+
       dispatch({
-        type: 'REMOVE_USER',
+        type: ActionType.REMOVE_USER,
         payload: {
-          groupId: id.toString(),
+          groupId: id,
           name: username,
           identityCommitment: userIdentity.getCommitment().toString(),
         } as unknown as User,
       })
-    })
+    } catch (error) {
+      console.error('Error leaving the group:', error)
+    }
   }
 
   return { leaveCommunity }

@@ -150,23 +150,6 @@ export interface SetGroupTags {
   (args: GroupIdTags): void
 }
 
-export interface ReputationRequirement {
-  post: number
-  comment: number
-  upvote: number
-  downvote: number
-}
-
-export interface ReputationWeight {
-  post: number
-  comment: number
-  upvote: number
-  downvote: number
-  reply: number
-  upvoted: number
-  downvoted: number
-}
-
 export interface NewGroupCreated {
   groupId: number
   name: string
@@ -180,7 +163,7 @@ export interface Requirement {
   // The following are not part of the contract
   name?: string
   symbol?: string
-  decimals?: number
+  decimals?: string | number
 }
 
 export interface RawRequirement {
@@ -219,20 +202,6 @@ export interface Group {
   removed: boolean
   // The following are not part of the contract
   groupId?: string
-}
-
-// Definitions for each function
-export interface SetReputationRequirement {
-  repRequirement: ReputationRequirement
-}
-
-export interface SetReputationWeight {
-  repWeight: ReputationWeight
-}
-
-export interface AttesterSignUp {
-  attester: string
-  epochLength: number
 }
 
 export interface CreateGroup {
@@ -410,15 +379,6 @@ export type Item = {
   title?: string
   description?: typeof OutputData | undefined
   // blocks?: OutputBlockData[] | undefined
-}
-
-export type ReputationProof = {
-  publicSignals: number[]
-  proof: number[]
-  publicSignalsQ: number[]
-  proofQ: number[]
-  ownerEpoch: number
-  ownerEpochKey: number
 }
 
 export type VoteKind = number

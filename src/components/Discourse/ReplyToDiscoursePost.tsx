@@ -25,7 +25,6 @@ const ReplyToDiscoursePost = ({
   const { t } = useTranslation()
   const router = useRouter()
   const { groupId, topicId } = router.query
-  const editorReference = useRef<EditorJS>()
   const [description, setDescription] = useState<typeof OutputData | null>(null)
   const [selectedToReveal, setSelectedToReveal] = useState(0)
   const fetchBalance = useFetchBalance({})

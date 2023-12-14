@@ -93,15 +93,7 @@ export function PostPage({
     setEnabled(initialEnabled)
   }, [])
 
-  const [tempComments, setTempComments] = useState<TempComment[]>([])
 
-  const [commentsSortBy, setCommentsSortBy] = useState<SortByOption>('highest')
-
-  const sortedCommentsData = useItemsSortedByVote(
-    tempComments,
-    comments,
-    commentsSortBy
-  )
 
   const [selectedTab, setSelectedTab] = useState(0)
   const handleTabChange = (index: number) => {
@@ -160,7 +152,7 @@ export function PostPage({
                         )}
                       </div>
                     </div>
-                    {sortedCommentsData.map(comment => (
+                    {comments.map(comment => (
                       <div
                         key={`comment_${comment.id}`}
                         className="mb-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900"
@@ -168,7 +160,7 @@ export function PostPage({
                         <PostComment comment={comment} key={comment.id} />
                       </div>
                     ))}
-                    {!sortedCommentsData.length && (
+                    {!comments.length && (
                       <div className="flex flex-col items-center justify-center gap-2">
                         <div className="text-base">No comments yet</div>
                       </div>
@@ -177,12 +169,12 @@ export function PostPage({
 
                   {/* Polls */}
                   <Tab.Panel className="flex flex-col ">
-                    {!sortedCommentsData.length && (
+                    {!comments.length && (
                       <div className="flex flex-col items-center justify-center gap-2">
                         <div className="text-base">No Polls yet</div>
                       </div>
                     )}
-                    {sortedCommentsData
+                    {comments
                       .filter(comment => comment.kind == ContentType.POLL)
                       .map(comment => (
                         <div

@@ -4,9 +4,9 @@ import Image from 'next/image'
 
 interface DropdownProps {
   disabled?: boolean
-  options?: { key: string; value: any; image?: string }[]
-  onSelect: (value: any) => void
-  selected: { key: string; value: any; image?: string }
+  options?: { key: string; value: unknown; image?: string }[]
+  onSelect: (value: unknown) => void
+  selected: { key: string; value: unknown; image?: string }
 }
 
 const Dropdown = ({
@@ -47,7 +47,7 @@ const Dropdown = ({
           aria-orientation="vertical"
           aria-labelledby="options-menu"
         >
-          {options?.map((k, i) => (
+          {options?.map(k => (
             <button
               key={k.key}
               className="w-full px-3 py-2 text-left  hover:bg-gray-200 focus:outline-none dark:hover:bg-gray-500"

@@ -1,9 +1,8 @@
 import { useContractWrite } from 'wagmi'
 import { ForumContractAddress } from '../constant/const'
 import ForumABI from '../constant/abi/Forum.json'
-import { setCacheAtSpecificPath } from '../lib/redis'
-import type { CommunityId } from '../contexts/CommunityProvider'
-import { useCommunityContext } from '../contexts/CommunityProvider'
+import type { CommunityId } from '@/contexts/CommunityProvider'
+import {ActionType, useCommunityContext} from '@/contexts/CommunityProvider'
 import { toast } from 'react-toastify'
 import { useRouter } from 'next/router'
 import type { Address } from '@/types/common'
@@ -36,10 +35,9 @@ export const useRemoveGroup = (groupId: CommunityId) => {
     onSuccess: async (data, variables) => {
       setIsLoading(true)
       await data.wait()
-      await setCacheAtSpecificPath(`group_${groupId}`, true, '$.data.removed')
 
       dispatch({
-        type: 'REMOVE_COMMUNITY',
+        type: ActionType.REMOVE_COMMUNITY,
         payload: groupId,
       })
 

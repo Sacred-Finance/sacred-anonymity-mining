@@ -23,16 +23,26 @@ export async function joinGroup(
   })
 }
 
-export async function leaveGroup(
-  groupId: string,
-  identityCommitment: string,
-  a: any,
-  b: any,
-  c: any,
-  siblings: any[],
+interface LeaveGroupParams {
+  groupId: string
+  identityCommitment: string
+  a: Array<number | string>
+  b: [string[], string[]]
+  c: Array<number | string>
+  siblings: string[]
   pathIndices: number[]
-) {
-  return axios.post(`${RELAYER_URL}/leave-group`, {
+}
+
+export const leaveGroup = async ({
+  groupId,
+  identityCommitment,
+  a,
+  b,
+  c,
+  siblings,
+  pathIndices,
+}: LeaveGroupParams) =>
+  axios.post(`${RELAYER_URL}/leave-group`, {
     identityCommitment,
     groupId,
     a,
@@ -41,7 +51,6 @@ export async function leaveGroup(
     siblings,
     pathIndices,
   })
-}
 
 export async function createGroup(
   requirements: Requirement[],

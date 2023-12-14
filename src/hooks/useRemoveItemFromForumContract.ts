@@ -1,5 +1,4 @@
 import { mutate } from 'swr'
-import { setCacheAtSpecificPath } from '@/lib/redis'
 import { useAccount, useContractWrite } from 'wagmi' // import from the right location
 import ForumABI from '@/constant/abi/Forum.json'
 import { forumContract, ForumContractAddress } from '@/constant/const'
@@ -13,12 +12,19 @@ import { ContentType } from '@/lib/model'
 import { GroupPostCommentAPI } from '@/lib/fetcher'
 import type { Address } from '@/types/common'
 
-export const useRemoveItemFromForumContract = (
+interface UseRemoveItemFromForumContractParams {
+  groupId: any
+  postId: any
+  isAdminOrModerator: boolean
+  setIsLoading: (isLoading: boolean) => void
+}
+
+export const useRemoveItemFromForumContract = ({
   groupId,
   postId,
   isAdminOrModerator,
-  setIsLoading
-) => {
+  setIsLoading,
+}: UseRemoveItemFromForumContractParams) => {
   const { address } = useAccount()
   const users = useUsers()
   const member = useUserIfJoined(groupId)
@@ -100,11 +106,11 @@ export const useRemoveItemFromForumContract = (
       const itemId = variables.args[0]
       const item = (await forumContract.read.itemAt([itemId])) as PostContent
       if (item.kind == ContentType.POST || item.kind == ContentType.POLL) {
-        await setCacheAtSpecificPath(
-          postInstance?.specificId(itemId),
-          true,
-          '$.removed'
-        )
+        // await setCacheAtSpecificPath(
+        //   postInstance?.specificId(itemId),
+        //   true,
+        //   '$.removed'
+        // )
       } else if (item.kind == ContentType.COMMENT) {
         await handleCommentItem(itemId)
       }
@@ -116,11 +122,11 @@ export const useRemoveItemFromForumContract = (
   }
 
   const handleCommentItem = async itemId => {
-    await setCacheAtSpecificPath(
-      commentInstance.specificId(itemId),
-      true,
-      '$.removed'
-    )
+    // await setCacheAtSpecificPath(
+    //   commentInstance.specificId(itemId),
+    //   true,
+    //   '$.removed'
+    // )
     mutate(
       commentInstance.commentsCacheId(),
       data => {

@@ -1,5 +1,4 @@
 import { forumContract, getRpcProvider } from '@/constant/const'
-import { setCache } from '@/lib/redis'
 import {
   getContent,
   getIpfsHashFromBytes32,
@@ -7,7 +6,7 @@ import {
   parsePost,
   uploadImageToIPFS,
 } from '@/lib/utils'
-import type { CommunityDetails, Requirement } from '@/lib/model'
+import type { Requirement } from '@/lib/model'
 import { ContentType } from '@/lib/model'
 
 import pica from 'pica'
@@ -63,7 +62,9 @@ export const fetchCommunitiesData = async ({
         return undefined
       }
 
-      const requirementDetails = await addRequirementDetails(groupData)
+      const requirementDetails = await addRequirementDetails({
+        community: groupData,
+      })
 
       return {
         groupId,
@@ -127,80 +128,6 @@ export const uploadImages = async ({
   return { bannerCID, logoCID }
 }
 
-export const cacheGroupData = async ({
-  groupId,
-  groupData,
-  chainId,
-  requirements,
-  details,
-}: {
-  groupId: number
-  groupData: any
-  chainId: number
-  requirements: Requirement[]
-  details: CommunityDetails
-}): Promise<{
-  name?: string
-  groupId?: number
-  id?: any
-  note?: string
-  groupData: any
-  chainId: number
-  requirements: Requirement[]
-  removed: boolean
-  details: CommunityDetails
-  banner: string
-  logo: string
-}> => {
-  const {
-    blockHash,
-    args,
-    event,
-    transactionIndex,
-    blockNumber,
-    ...otherData
-  } = groupData
-  const [groupIdArg, nameArg, note] = args
-  const groupIdInt = parseInt(groupIdArg.hex, 16)
-
-  const cacheData: {
-    name?: string
-    groupId?: number
-    id?: any
-    note?: string
-    groupData: any
-    chainId: number
-    requirements: Requirement[]
-    removed: boolean
-    details: CommunityDetails
-    banner: string
-    logo: string
-  } = {
-    name: nameArg,
-    groupId: groupIdInt,
-    id: groupIdArg,
-    note: note.toString(),
-    groupData: {
-      blockHash,
-      args,
-      event,
-      transactionIndex,
-      blockNumber,
-      ...otherData,
-    },
-    chainId,
-    requirements,
-    removed: false,
-    details,
-    banner: details.bannerCID,
-    logo: details.logoCID,
-  }
-
-  await setCache(`group_${groupId}`, cacheData)
-
-  return cacheData
-}
-
 export const useHandleFileImageUpload = setImageFileState => {
   return useCallback(e => {
     console.log('e', e, setImageFileState)
@@ -210,7 +137,7 @@ export const useHandleFileImageUpload = setImageFileState => {
 
 export const handleFileImageUpload = (e, setImageFileState) => {
   const file = e?.target?.files?.[0]
-  const imageType = e?.target?.name
+  const imageType = e?.target?.name as 'banner' | 'logo'
   // Create a new Image object to check the dimensions
   const img = new Image()
   try {
@@ -266,10 +193,9 @@ export const handleFileImageUpload = (e, setImageFileState) => {
     }
   }
 }
-export const addRequirementDetails = async (
-  community: Group
-): Promise<Awaited<Requirement[]>> => {
-  if (!community.requirements) {
+
+export const addRequirementDetails = ({ community }: { community: Group }) => {
+  if (community.requirements.length === 0) {
     return []
   }
 
@@ -370,7 +296,7 @@ function serializeGroupData(rawGroupData: RawGroupData): Group {
     note: rawGroupData.note.toString(),
     userCount: Number(rawGroupData.userCount.toString()),
     chainId: Number(rawGroupData.chainId.toString()),
-    posts: rawGroupData.posts.map(p => p.toString()),
+    posts: rawGroupData.posts.map(p => Number(p.toString())),
     removed: rawGroupData.removed,
   }
 }
@@ -380,14 +306,14 @@ export async function augmentGroupData(
   forPaths = false
 ): Promise<Group> {
   const normalizedGroupData = serializeGroupData(rawGroupData)
-  console.log('normalizedGroupData', normalizedGroupData, forPaths)
 
   if (forPaths) {
     return normalizedGroupData
   }
 
-  normalizedGroupData.requirements =
-    await addRequirementDetails(normalizedGroupData)
+  normalizedGroupData.requirements = await addRequirementDetails({
+    community: normalizedGroupData,
+  })
 
   return normalizedGroupData
 }

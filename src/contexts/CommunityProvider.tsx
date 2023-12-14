@@ -41,7 +41,7 @@ type State = {
   activePost: ActivePost | undefined
   isAdmin: boolean
   isModerator: boolean
-  communitiesJoined: { [key: string]: User | boolean }
+  communitiesJoined: { [key: string]: User | false }
 }
 
 export enum ActionType {
@@ -273,7 +273,11 @@ export function useUsers(): User[] {
   return state.users
 }
 
-export function useActiveUser({ groupId }): User | undefined {
+export function useActiveUser({
+  groupId,
+}: {
+  groupId: string | number
+}): User | undefined {
   const { state } = useCommunityContext()
   const identity = useIdentity(
     groupId ? { groupId: groupId as string } : undefined
@@ -287,56 +291,70 @@ export function useActiveUser({ groupId }): User | undefined {
     [state.usersGrouped, identity]
   )
 }
-
 export function useUserIfJoined(communityId: string | number): User | false {
-  communityId = Number(communityId)
+  const numericCommunityId = Number(communityId)
   const { state, dispatch } = useCommunityContext()
   const { address: userAddress } = useAccount()
-  const [userJoined, setUserJoined] = React.useState<User | boolean>(null)
+  const [userJoined, setUserJoined] = React.useState<User | false>(
+    () => state?.communitiesJoined?.[numericCommunityId] || false
+  )
 
-  useEffect(() => {
+  React.useEffect(() => {
+    let isSubscribed = true
+
     const checkIfUserHasJoined = async () => {
       if (!userAddress) {
-        return false
+        return
       }
-      if (isUndefined(state.communitiesJoined[communityId])) {
+      // if numericCommunityId is not set (can be 0)
+      if (!numericCommunityId && numericCommunityId != 0) {
+        return
+      }
+      let newUserJoined = state.communitiesJoined[numericCommunityId]
+
+      if (newUserJoined === undefined) {
         const generatedIdentity = new Identity(
-          `${userAddress}_${communityId}_anon`
+          `${userAddress}_${numericCommunityId}_anon`
         )
-        const userJoined = await hasUserJoined(
-          Number(communityId),
-          generatedIdentity.getCommitment().toString()
-        )
-        console.log(
-          'userJoined',
-          userJoined,
-          generatedIdentity.getCommitment().toString()
-        )
-        if (userJoined) {
-          const u = {
-            name: 'anon',
-            identityCommitment: generatedIdentity.getCommitment().toString(),
-            groupId: +communityId,
-            id: '',
-          }
-          setUserJoined(u)
-          dispatch({
-            type: ActionType.UPDATE_COMMUNITIES_JOINED,
-            payload: { communityId: Number(communityId), hasJoined: u },
-          })
-        } else {
-          dispatch({
-            type: ActionType.UPDATE_COMMUNITIES_JOINED,
-            payload: { communityId: Number(communityId), hasJoined: false },
-          })
-          setUserJoined(false)
-        }
-      } else {
-        setUserJoined(state.communitiesJoined[communityId])
+        const hasJoined = await hasUserJoined({
+          groupId: BigInt(numericCommunityId),
+          identityCommitment: generatedIdentity.getCommitment(),
+        })
+
+        newUserJoined = hasJoined
+          ? {
+              name: 'anon',
+              identityCommitment: generatedIdentity.getCommitment().toString(),
+              groupId: numericCommunityId,
+              id: '',
+            }
+          : false
+
+        dispatch({
+          type: ActionType.UPDATE_COMMUNITIES_JOINED,
+          payload: {
+            communityId: numericCommunityId,
+            hasJoined: newUserJoined,
+          },
+        })
+      }
+
+      if (isSubscribed && newUserJoined !== userJoined) {
+        setUserJoined(newUserJoined)
       }
     }
+
     checkIfUserHasJoined()
-  }, [userAddress, state.usersGrouped[communityId]?.length])
+
+    return () => {
+      isSubscribed = false
+    }
+  }, [
+    userAddress,
+    numericCommunityId,
+    state.usersGrouped[numericCommunityId]?.length,
+    state.communitiesJoined,
+  ])
 
   return userJoined
 }
@@ -391,10 +409,10 @@ export function useCommunitiesJoinedByUser() {
             const generatedIdentity = new Identity(
               `${userAddress}_${Number(community.id)}_anon`
             )
-            return hasUserJoined(
-              Number(community.id),
-              generatedIdentity.commitment.toString()
-            ).then(userJoined => {
+            return hasUserJoined({
+              groupId: BigInt(community.id),
+              identityCommitment: generatedIdentity.commitment,
+            }).then(userJoined => {
               if (userJoined) {
                 communitiesJoined.push(community)
                 dispatch({

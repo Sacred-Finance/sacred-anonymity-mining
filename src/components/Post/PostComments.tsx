@@ -40,7 +40,7 @@ export const NewPostModal: {
 
 export const PostComment = ({ comment }: { comment: Item }) => {
   const { state } = useCommunityContext()
-  const community = state.activeCommunity.community as Group
+  const community = state?.activeCommunity?.community as Group
   return (
     <>
       {comment && (

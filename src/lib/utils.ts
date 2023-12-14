@@ -6,6 +6,7 @@ import { buildBabyjub, buildPedersenHash } from 'circomlibjs'
 import type { Identity } from '@semaphore-protocol/identity'
 import { forumContract, semaphoreContract } from '@/constant/const'
 import type { AvatarOptions } from 'animal-avatar-generator'
+import { Group } from '@/types/contract/ForumInterface'
 
 const { groth16 } = require('snarkjs')
 
@@ -307,9 +308,20 @@ export const removeDuplicates = (array, prop: string) => {
   })
 }
 
-export const hasUserJoined = async (group, identityCommitment) => {
+interface UserJoined {
+  groupId: bigint
+  identityCommitment: bigint
+}
+
+export const hasUserJoined = async ({
+  groupId,
+  identityCommitment,
+}: UserJoined) => {
   try {
-    return await forumContract.read.isMemberJoined([group, identityCommitment])
+    return await forumContract.read.isMemberJoined([
+      groupId,
+      identityCommitment,
+    ])
   } catch (error) {
     console.log(error)
     return false

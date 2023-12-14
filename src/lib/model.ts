@@ -45,15 +45,6 @@ export interface PostContent extends PostOrComment {
   description: typeof OutputData
 }
 
-export type ReputationProofStruct = {
-  publicSignals: BigNumberish[]
-  proof: BigNumberish[]
-  publicSignalsQ: BigNumberish[]
-  proofQ: BigNumberish[]
-  ownerEpoch: BigNumberish
-  ownerEpochKey: BigNumberish
-}
-
 export type PollRequestStruct = {
   pollType: BigNumberish
   duration: BigNumberish //hours

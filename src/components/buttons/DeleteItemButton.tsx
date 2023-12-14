@@ -13,16 +13,21 @@ const DeleteItemButton = ({
   itemType,
   groupId,
   isAdminOrModerator,
+}: {
+  itemId: string
+  itemType: ContentType
+  groupId: string
+  isAdminOrModerator: boolean
 }) => {
   const { t } = useTranslation()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { deleteItem } = useRemoveItemFromForumContract(
-    groupId,
-    itemId,
-    isAdminOrModerator,
-    setIsSubmitting
-  )
+  const { deleteItem } = useRemoveItemFromForumContract({
+    groupId: groupId,
+    postId: itemId,
+    isAdminOrModerator: isAdminOrModerator,
+    setIsLoading: setIsSubmitting,
+  })
   const router = useRouter()
   const [deleteConfirmation, setDeleteConfirmation] = useState('')
 
@@ -37,9 +42,16 @@ const DeleteItemButton = ({
         router.push(`/communities/${groupId}`)
       }
       console.log(result)
-    } catch (error) {
-      console.log(error)
-      toast.error(error.message ?? error)
+    } catch (error: unknown) {
+      // Correctly typed as unknown
+      if (error instanceof Error) {
+        // Safely assumed to be an Error object, can access message property.
+        toast.error(error.message)
+      } else {
+        // Handle the case where it's not an Error object.
+        // You could log this case or display a generic error message.
+        toast.error('An unexpected error occurred.')
+      }
       setIsSubmitting(false)
     }
   }

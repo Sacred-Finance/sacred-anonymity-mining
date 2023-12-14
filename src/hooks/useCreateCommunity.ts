@@ -3,7 +3,7 @@ import { Identity } from '@semaphore-protocol/identity'
 
 import { createGroup } from '@/lib/api'
 import { useHandleCommunityAction } from './useHandleCommunityAction'
-import { cacheGroupData, uploadImages } from '@/utils/communityUtils'
+import { uploadImages } from '@/utils/communityUtils'
 import { useAccount } from 'wagmi'
 import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
 import { constants } from 'ethers'
@@ -78,17 +78,6 @@ export const useCreateCommunity = (onCreateGroupClose: () => void) => {
             const groupIdInt = parseInt(groupIdHex, 16)
 
             if (groupIdInt) {
-              const groupData = {
-                event: data.event,
-                args: data.args,
-              }
-              await cacheGroupData({
-                groupId: groupIdInt,
-                details: communityDetails,
-                groupData,
-                chainId,
-                requirements,
-              })
               dispatch({
                 type: ActionType.ADD_COMMUNITY,
                 payload: {
