@@ -35,7 +35,7 @@ interface PostItemProps {
 }
 
 export const PostItem = ({ post, group, showAvatar = true }: PostItemProps) => {
-  const { groupId, parentId, id, kind } = post
+  const { groupId, parentId, id } = post
 
   const postId = parentId && +parentId > 0 ? parentId : id
 
@@ -51,7 +51,6 @@ export const PostItem = ({ post, group, showAvatar = true }: PostItemProps) => {
   const isAdminOrModerator = isAdmin || isModerator
 
   const isTypeOfPost = post.kind == ContentType.POST
-  const isTypeOfComment = post.kind == ContentType.COMMENT
   const isTypeOfPoll = post.kind == ContentType.POLL
 
   const { editItem } = useEditItem({

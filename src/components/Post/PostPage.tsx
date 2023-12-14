@@ -14,15 +14,12 @@ import { CommunityCard } from '@components/CommunityCard/CommunityCard'
 import { VoteDownButton, VoteUpButton } from '@components/buttons'
 import { OutputDataToHTML } from '@components/Discourse/OutputDataToMarkDown'
 import { PostItem } from '@components/Post/PostItem'
-import type { TempComment } from '@components/Post/PostComments'
 import { NewPostModal, PostComment } from '@components/Post/PostComments'
 import { Tab } from '@headlessui/react'
 import { SparklesIcon } from '@heroicons/react/20/solid'
 import { ChatIcon, InfoIcon, PollIcon } from '@components/CommunityActionTabs'
 import type { NewPostFormProps } from '@components/NewPostForm'
 import { NewPostForm } from '@components/NewPostForm'
-import { useItemsSortedByVote } from '@/hooks/useItemsSortedByVote'
-import type { SortByOption } from '@components/SortBy'
 import type { Group, Item } from '@/types/contract/ForumInterface'
 import type { CommentClass } from '@/lib/comment'
 import type { Post } from '@/lib/post'
@@ -115,11 +112,7 @@ export function PostPage({
                 <VoteForItemUI postId={post.id} post={post} group={community} />
               </div>
               <div className="rounded-xl border p-2 dark:border-gray-700 dark:bg-gray-900 ">
-                <ScrollArea
-                  className="col-span-12 flex max-h-[80vh]   w-full  flex-col gap-2  rounded   bg-white
-                p-3
-               dark:border-gray-950/80 dark:bg-gray-950/20"
-                >
+                <ScrollArea className="col-span-12 flex max-h-[80vh] w-full flex-col gap-2 rounded bg-white p-3 dark:border-gray-950/80 dark:bg-gray-950/20">
                   <PostItem post={post} group={community} />
                 </ScrollArea>
               </div>

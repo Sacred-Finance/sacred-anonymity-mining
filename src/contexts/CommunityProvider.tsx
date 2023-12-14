@@ -1,10 +1,11 @@
-import type { ReactNode } from 'react'
+import type { Dispatch, FC, ReactNode } from 'react'
 import React, {
   createContext,
   useContext,
   useEffect,
   useMemo,
   useReducer,
+  useState,
 } from 'react'
 import type { User } from '@/lib/model'
 import type { ethers } from 'ethers'
@@ -18,7 +19,7 @@ import { createNote, hasUserJoined } from '@/lib/utils'
 export type CommunityId = string | number | ethers.BigNumber
 type CommunityContextType = {
   state: State
-  dispatch: React.Dispatch<Action>
+  dispatch: Dispatch<Action>
   isLoading: boolean
 }
 
@@ -100,7 +101,6 @@ const initialState: State = {
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'SET_ACTIVE_COMMUNITY':
-      console.log('SET_ACTIVE_COMMUNITY', action.payload)
       return {
         ...state,
         activeCommunity: action.payload,
@@ -237,13 +237,13 @@ export function getGroupIdOrUserId(communityOrUser: Group | User): number {
     : Number(communityOrUser?.groupId)
 }
 
-export const CommunityProvider: React.FC<any> = ({
+export const CommunityProvider: FC<any> = ({
   children,
 }: {
   children: ReactNode
 }) => {
   const [state, dispatch] = useReducer(reducer, initialState)
-  const [isLoading, setIsLoading] = React.useState(true)
+  const [isLoading, setIsLoading] = useState(true)
 
   // when state has communities, stop loading
   useEffect(() => {
@@ -295,11 +295,11 @@ export function useUserIfJoined(communityId: string | number): User | false {
   const numericCommunityId = Number(communityId)
   const { state, dispatch } = useCommunityContext()
   const { address: userAddress } = useAccount()
-  const [userJoined, setUserJoined] = React.useState<User | false>(
+  const [userJoined, setUserJoined] = useState<User | false>(
     () => state?.communitiesJoined?.[numericCommunityId] || false
   )
 
-  React.useEffect(() => {
+  useEffect(() => {
     let isSubscribed = true
 
     const checkIfUserHasJoined = async () => {
@@ -352,8 +352,9 @@ export function useUserIfJoined(communityId: string | number): User | false {
   }, [
     userAddress,
     numericCommunityId,
-    state.usersGrouped[numericCommunityId]?.length,
     state.communitiesJoined,
+    userJoined,
+    dispatch,
   ])
 
   return userJoined
@@ -363,9 +364,7 @@ export function useUserIfJoined(communityId: string | number): User | false {
 export function useCommunitiesCreatedByUser() {
   const { state } = useCommunityContext()
   const { address: userAddress } = useAccount()
-  const [communitiesCreated, setCommunitiesCreated] = React.useState<Group[]>(
-    []
-  )
+  const [communitiesCreated, setCommunitiesCreated] = useState<Group[]>([])
 
   useEffect(() => {
     filterCommunitiesCreatedByUser()
@@ -394,7 +393,7 @@ export function useCommunitiesCreatedByUser() {
 export function useCommunitiesJoinedByUser() {
   const { state, dispatch } = useCommunityContext()
   const { address: userAddress } = useAccount()
-  const [communitiesJoined, setCommunitiesJoined] = React.useState<Group[]>([])
+  const [communitiesJoined, setCommunitiesJoined] = useState<Group[]>([])
 
   useEffect(() => {
     filterCommunitiesJoinedByUser()
@@ -436,13 +435,4 @@ export function useCommunitiesJoinedByUser() {
   }
 
   return { communitiesJoined }
-}
-
-export const addAvatarToUser = (user: User) => {
-  const avatar = getAvatarUrl(user?.identityCommitment?.toString())
-  return { ...user, avatar }
-}
-
-export const getAvatarUrl = (hash: string) => {
-  return `https://robohash.org/${hash}`
 }

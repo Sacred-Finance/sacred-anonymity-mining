@@ -6,7 +6,7 @@ import { buildBabyjub, buildPedersenHash } from 'circomlibjs'
 import type { Identity } from '@semaphore-protocol/identity'
 import { forumContract, semaphoreContract } from '@/constant/const'
 import type { AvatarOptions } from 'animal-avatar-generator'
-import { Group } from '@/types/contract/ForumInterface'
+import { GroupId } from '@/types/contract/ForumInterface'
 
 const { groth16 } = require('snarkjs')
 
@@ -285,29 +285,6 @@ export const parsePost = content => {
   return parsedPost
 }
 
-export const sortArray = (array: [], prop: string, asc: boolean) => {
-  const sort = asc ? -1 : 1
-  return array.sort((a, b) => {
-    if (a[prop] < b[prop]) {
-      return -1 * sort
-    }
-    if (a[prop] > b[prop]) {
-      return 1 * sort
-    }
-    return 0
-  })
-}
-
-export const removeDuplicates = (array, prop: string) => {
-  const set = new Set()
-  return array.filter(obj => {
-    const key = obj[prop]
-    const isNew = !set.has(key)
-    set.add(key)
-    return isNew
-  })
-}
-
 interface UserJoined {
   groupId: bigint
   identityCommitment: bigint
@@ -328,7 +305,7 @@ export const hasUserJoined = async ({
   }
 }
 
-export const fetchUsersFromSemaphoreContract = async groupId => {
+export const fetchUsersFromSemaphoreContract = async (groupId: GroupId) => {
   console.log('fetching users from semaphore contract', groupId)
   return semaphoreContract?.getGroupMembers(groupId.toString())
 }
@@ -337,3 +314,5 @@ export const generateAvatar = async (seed: string, options: AvatarOptions) => {
   const avatar = (await import('animal-avatar-generator')).default
   return avatar(seed, { size: 200, ...options })
 }
+export const HashZero =
+  '0x0000000000000000000000000000000000000000000000000000000000000000'

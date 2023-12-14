@@ -1,4 +1,3 @@
-// Web3 Configs
 import { configureChains, createConfig } from 'wagmi'
 
 import {
@@ -13,6 +12,7 @@ import {
   coinbaseWallet,
   injectedWallet,
   metaMaskWallet,
+  rainbowWallet,
 } from '@rainbow-me/rainbowkit/wallets'
 import { app } from '@/appConfig'
 import { connectorsForWallets } from '@rainbow-me/rainbowkit'
@@ -20,6 +20,7 @@ import { alchemyProvider } from 'wagmi/providers/alchemy'
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc'
 import { ParticleNetwork } from '@particle-network/auth'
 import { particleWallet } from '@particle-network/rainbowkit-ext'
+import { publicProvider } from 'wagmi/providers/public'
 
 export const stallTimeout = 10_0000
 
@@ -32,7 +33,7 @@ new ParticleNetwork({
 })
 
 export const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [polygonMumbai],
+  [polygonMumbai, goerli, mainnet, sepolia, localhost],
   [
     alchemyProvider({
       apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY as string,
@@ -45,11 +46,13 @@ export const { chains, publicClient, webSocketPublicClient } = configureChains(
             webSocket: process.env.NEXT_PUBLIC_LOCALHOST_URL ?? '',
           }
         } else if (chain.id === goerli.id) {
+          console.log('goerli', process.env.NEXT_PUBLIC_GOERLI_URL)
           return {
             http: process.env.NEXT_PUBLIC_GOERLI_URL ?? '',
             webSocket: process.env.NEXT_PUBLIC_LOCALHOST_URL ?? '',
           }
         } else if (chain.id === mainnet.id) {
+          console.log('mainnet', process.env.NEXT_PUBLIC_MAINNET_URL)
           return {
             http: process.env.NEXT_PUBLIC_MAINNET_URL ?? '',
             webSocket: process.env.NEXT_PUBLIC_LOCALHOST_URL ?? '',
@@ -69,9 +72,15 @@ export const { chains, publicClient, webSocketPublicClient } = configureChains(
         return null
       },
     }),
+    publicProvider(),
   ],
 
-  { stallTimeout: stallTimeout, pollingInterval: stallTimeout }
+  {
+    stallTimeout: stallTimeout,
+    pollingInterval: stallTimeout,
+    batch: { multicall: true },
+    rank: true,
+  }
 )
 const otherWallets = [
   braveWallet({ chains }),
@@ -81,7 +90,10 @@ const otherWallets = [
   particleWallet({ chains, authType: 'apple' }),
   particleWallet({ chains }),
   coinbaseWallet({ chains, appName: app.name }),
-  // rainbowWallet({ chains }),
+  rainbowWallet({
+    projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_ID as string,
+    chains,
+  }),
   //   walletConnectWallet({ chains }),
 ]
 const connectors = () => {
@@ -109,7 +121,7 @@ const connectors = () => {
 }
 export const config = createConfig({
   autoConnect: true,
-  publicClient: publicClient({ chainId: polygonMumbai.id }),
+  publicClient,
   webSocketPublicClient: webSocketPublicClient({ chainId: polygonMumbai.id }),
   connectors: connectors(),
   logger: {

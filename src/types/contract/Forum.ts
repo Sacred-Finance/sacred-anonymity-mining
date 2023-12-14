@@ -272,8 +272,6 @@ export interface Forum extends BaseContract {
         createdAtBlock: BigNumber
         contentCID: string
         removed: boolean
-        ownerEpoch: BigNumber
-        ownerEpochKey: BigNumber
         note: BigNumber
         downvote: BigNumber
         upvote: BigNumber

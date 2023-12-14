@@ -8,6 +8,7 @@ import {
 } from '@/lib/utils'
 import { toast } from 'react-toastify'
 import { useTranslation } from 'react-i18next'
+import type { CommunityId } from '@/contexts/CommunityProvider'
 import { useUserIfJoined } from '@/contexts/CommunityProvider'
 import { Post } from '@/lib/post'
 import { CommentClass } from '@/lib/comment'
@@ -21,9 +22,9 @@ import type { Item } from '@/types/contract/ForumInterface'
 
 interface UseEditItemParams {
   item: Item
-  commentId?: any
-  isAdminOrModerator: any
-  setIsLoading: any
+  commentId?: CommunityId
+  isAdminOrModerator: boolean
+  setIsLoading: (isLoading: boolean) => void
 }
 
 export interface EditItemParams {
@@ -98,7 +99,6 @@ export const useEditItem = ({
       const currentDate = new Date()
       const post = JSON.stringify(content)
       const message = currentDate.getTime().toString() + '#' + post
-      console.log(`Editing your anonymous post...`)
       let cid
       try {
         cid = await uploadIPFS(message)

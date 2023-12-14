@@ -1,8 +1,8 @@
-import type { Dispatch, SetStateAction } from 'react'
 import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'next-i18next'
 import { useHandleFileImageUpload } from '../utils/communityUtils'
 import type { HandleSetImage } from '@pages/communities/[groupId]/edit'
+import Image from 'next/image'
 
 export const PictureUpload = (props: {
   uploadedImageUrl: string | undefined
@@ -47,18 +47,25 @@ export const PictureUpload = (props: {
     }
   }, [])
 
-  const [hovered, setHovered] = useState(0)
   return (
     <>
       <div
         ref={imageRef}
-        className={`hover:bg-primary-300  relative rounded-2xl border-2 border-dashed border-gray-300 bg-gray-100  hover:text-white dark:bg-gray-900`}
+        className={`relative rounded-2xl border-2 border-dashed border-gray-300 bg-gray-100  hover:text-white dark:bg-gray-900`}
       >
         {props.uploadedImageUrl ? (
           <>
-            <img
+            <Image
+              width={500}
+              height={500}
               className=" h-52 w-full  object-contain transition-opacity "
               style={{ opacity: isDeleteIconVisible ? 0.5 : 1 }}
+              onFocus={() => setIsDeleteIconVisible(true)}
+              onKeyDown={e => {
+                if (e.key === 'Enter') {
+                  setIsDeleteIconVisible(true)
+                }
+              }}
               onClick={() => {
                 props.setImageFileState({
                   imageType: props.name,
@@ -103,12 +110,9 @@ export const PictureUpload = (props: {
             )}
           </>
         ) : (
-          <div
-            className={`hover:bg-primary-300 group flex h-52 w-full cursor-pointer items-center  justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-gray-100 px-6 hover:text-white  dark:bg-gray-900`}
+          <button
+            className={`group flex h-52 w-full cursor-pointer items-center  justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-gray-100 px-6 hover:text-white  dark:bg-gray-900`}
             onClick={openFileUpload}
-            onFocus={() => setHovered(hovered + 45)}
-            onMouseOver={() => setHovered(hovered + 45)}
-            onMouseLeave={() => setHovered(hovered + 45)}
           >
             <div className="flex items-center justify-center text-lg">
               {t('upload', { displayName: props.displayName })}
@@ -135,7 +139,7 @@ export const PictureUpload = (props: {
               accept="image/jpeg, image/png, image/jpg, image/webp, image/gif, image/svg+xml, image/avif"
               onChange={handleFileImageUpload}
             />
-          </div>
+          </button>
         )}
       </div>
     </>

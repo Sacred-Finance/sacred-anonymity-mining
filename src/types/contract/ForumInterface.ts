@@ -345,7 +345,7 @@ export interface EditItem {
 export type ItemKind = number
 
 export type RawItemData = {
-  kind: BigNumber
+  kind: BigNumber | number
   id: BigNumber
   parentId: BigNumber
   groupId: BigNumber
@@ -354,8 +354,6 @@ export type RawItemData = {
   upvote: BigNumber
   downvote: BigNumber
   note: BigNumber
-  ownerEpoch: BigNumber
-  ownerEpochKey: BigNumber
   contentCID: string
   removed: boolean
 }
@@ -370,8 +368,6 @@ export type Item = {
   upvote: number
   downvote: number
   note: string
-  ownerEpoch: string
-  ownerEpochKey: string
   contentCID: string
   removed: boolean
   // The following are not part of the contract

@@ -3,14 +3,15 @@ import { forumContract, ForumContractAddress } from '@/constant/const'
 import { augmentGroupData, augmentItemData } from '@/utils/communityUtils'
 import type {
   Group,
-  RawItemData,
-  RawGroupData,
   Item,
+  RawGroupData,
+  RawItemData,
 } from '@/types/contract/ForumInterface'
 import type { User } from '@/lib/model'
 import { multicall } from '@wagmi/core'
 import { abi } from '@/constant/abi'
 import { polygonMumbai } from 'wagmi/chains'
+import { HashZero } from '@/lib/utils'
 
 // get group details
 export default async function handler(
@@ -39,7 +40,7 @@ export default async function handler(
     } as const
 
     const postData = postIds.map(id => ({
-      address: ForumContractAddress,
+      address: ForumContractAddress as `0x${string}`,
       functionName: 'itemAt',
       abi: wagmigotchiContract.abi,
       args: [id],
@@ -54,13 +55,10 @@ export default async function handler(
     const rawPosts = rawPostResults.map(data => data.result) as RawItemData[]
 
     const filteredRawPosts = rawPosts.filter(
-      post =>
-        // post.contentCID &&
-        // post.contentCID !== ethers.constants.HashZero &&
-        !post.removed
+      post => post.contentCID && post.contentCID !== HashZero && !post.removed
     ) as RawItemData[]
 
-    const augmentedPosts = await Promise.all(
+    const augmentedPosts = (await Promise.all(
       filteredRawPosts.map(async post => {
         try {
           return await augmentItemData(post)
@@ -71,7 +69,8 @@ export default async function handler(
             .json({ error: 'An error occurred while augmenting post' })
         }
       })
-    )
+      // @ts-expect-error: filter removes nulls, needs to be fixed
+    )?.then(posts => posts.filter((p: Item) => !p.removed))) as Item[]
 
     const usersWithCommitment = await forumContract.read.groupUsers([
       bigIntGroupId,
@@ -80,17 +79,19 @@ export default async function handler(
     res.status(200).json({
       group,
       posts: augmentedPosts,
-      users: usersWithCommitment.map((c, i) => ({
+      users: usersWithCommitment.map(c => ({
         name: 'anon',
-        groupId: groupId.toString(),
+        groupId: groupId?.toString(),
         identityCommitment: c.toString(),
       })) as unknown as User[],
     })
-  } catch (err) {
-    console.trace(err)
-    if (err.message.includes('no group at index')) {
+  } catch (err: unknown) {
+    if (err instanceof Error && err.message.includes('no group at index')) {
       return res.status(404).json({ error: err.message })
     }
-    res.status(500).json({ error: err.message })
+    if (err instanceof Error) {
+      res.status(500).json({ error: err?.message || 'Unknown error' })
+    }
+    res.status(500).json({ error: 'Unknown error' })
   }
 }

@@ -12,6 +12,9 @@ export const CommunityCardBody: React.FC = () => {
 
   const requirements = community?.requirements || []
 
+  console.log('community', community)
+  console.log('tags', tags)
+  console.log('requirements', requirements)
   return (
     <div className={'flex  flex-col  gap-4 space-y-2 overflow-hidden'}>
       <h3 className={'space-x-2 text-lg  font-semibold'}>Tags</h3>
@@ -34,16 +37,8 @@ export const CommunityCardBody: React.FC = () => {
       <ul className={'list-inside list-disc'}>
         {requirements.map(r => (
           <li className={'text-sm text-gray-400'} key={r?.tokenAddress}>
-            {/* ETHERS FORMAT NUMBER */}
             <Badge>
-              {ethers.BigNumber.from(r?.minAmount)
-                .div(ethers.BigNumber.from(10).pow(r?.decimals || 0))
-                .toString()}
-              -
-              {ethers.constants.AddressZero !== r?.tokenAddress &&
-                ` ${r?.tokenAddress.slice(0, 6)}...${r?.tokenAddress.slice(
-                  -4
-                )}`}
+              {r.minAmount} {r.symbol}
             </Badge>
           </li>
         ))}

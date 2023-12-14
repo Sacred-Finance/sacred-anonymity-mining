@@ -1,9 +1,9 @@
 import { useAccount, useContractRead } from 'wagmi'
-import { ForumContractAddress } from '../constant/const'
+import { ForumContractAddress } from '@/constant/const'
 import ForumABI from '../constant/abi/Forum.json'
 import { useEffect, useState } from 'react'
 import type { Address } from '@/types/common'
-import { useCommunityContext } from '@/contexts/CommunityProvider'
+import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
 
 export const useCheckIfUserIsAdminOrModerator = (checkOnInit = false) => {
   const [isAdmin, setisAdmin] = useState<boolean | null>(null)
@@ -26,7 +26,7 @@ export const useCheckIfUserIsAdminOrModerator = (checkOnInit = false) => {
     },
     onSuccess(data: boolean) {
       setisAdmin(data)
-      dispatch({ type: 'SET_USER_ACCESS', payload: { isAdmin: data } })
+      dispatch({ type: ActionType.SET_USER_ACCESS, payload: { isAdmin: data } })
     },
     enabled: false,
   })
@@ -47,14 +47,16 @@ export const useCheckIfUserIsAdminOrModerator = (checkOnInit = false) => {
     onSuccess(data: boolean) {
       // console.log(data);
       setIsModerator(data)
-      dispatch({ type: 'SET_USER_ACCESS', payload: { isModerator: data } })
+      dispatch({
+        type: ActionType.SET_USER_ACCESS,
+        payload: { isModerator: data },
+      })
     },
     enabled: false,
   })
 
   useEffect(() => {
     if (checkOnInit && address) {
-      console.log('checkOnInit', checkOnInit)
       fetchIsAdmin()
       fetchIsModerator()
     }
@@ -63,7 +65,7 @@ export const useCheckIfUserIsAdminOrModerator = (checkOnInit = false) => {
   useEffect(() => {
     if (!address) {
       dispatch({
-        type: 'SET_USER_ACCESS',
+        type: ActionType.SET_USER_ACCESS,
         payload: { isModerator: false, isAdmin: false },
       })
     } else {
