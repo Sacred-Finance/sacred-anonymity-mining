@@ -23,6 +23,7 @@ import { NewPostModal } from '@components/Post/PostComments'
 import LoadingComponent from '@components/LoadingComponent'
 import { CommunityCard } from './CommunityCard/CommunityCard'
 import type { User } from '@/lib/model'
+import { ShowConnectIfNotConnected } from '@components/Connect/ConnectWallet'
 
 export function CommunityPage({
   community,
@@ -55,8 +56,10 @@ export function CommunityPage({
           />
 
           <div className="flex w-fit gap-4 rounded-lg ">
-            <CreatePollUI group={community} onSuccess={refreshData} />
-            <CreatePostUI group={community} onSuccess={refreshData} />
+            <ShowConnectIfNotConnected>
+              <CreatePollUI group={community} onSuccess={refreshData} />
+              <CreatePostUI group={community} onSuccess={refreshData} />
+            </ShowConnectIfNotConnected>
           </div>
           <PostList posts={sortedData} />
         </div>

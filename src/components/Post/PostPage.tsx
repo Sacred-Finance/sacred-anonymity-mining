@@ -49,6 +49,7 @@ import { DynamicAccordion } from '@components/Post/DynamicAccordion'
 import { analysisLabelsAndTypes } from '@components/Post/AiAccordionConfig'
 import { AnalysisCheckboxComponent } from '@components/Post/AiAnalysisCheckboxComponent'
 import { Button } from '@/shad/ui/button'
+import { ShowConnectIfNotConnected } from '@components/Connect/ConnectWallet'
 
 export const AIDigestContext = React.createContext<{
   enabled: { [key: string]: boolean }
@@ -109,7 +110,12 @@ export function PostPage({
           <div className="flex h-full grow flex-col justify-stretch md:flex-row ">
             <div className=" flex flex-col gap-4 p-3 md:w-1/2 ">
               <div className="sticky top-0 z-10 flex gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
-                <VoteForItemUI postId={post.id} post={post} group={community} />
+                <VoteForItemUI
+                  postId={post.id}
+                  post={post}
+                  group={community}
+                  onSuccess={refreshData}
+                />
               </div>
               <div className="rounded-xl border p-2 dark:border-gray-700 dark:bg-gray-900 ">
                 <ScrollArea className="col-span-12 flex max-h-[80vh] w-full flex-col gap-2 rounded bg-white p-3 dark:border-gray-950/80 dark:bg-gray-950/20">
@@ -134,22 +140,24 @@ export function PostPage({
                   {/* Comments / Replies */}
                   <Tab.Panel className="flex flex-col gap-4 ">
                     <div className="sticky top-0 z-10 flex gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
-                      <div className={'flex gap-4'}>
-                        {selectedTab === 0 && (
-                          <CreateCommentUI
-                            post={post}
-                            group={community}
-                            onSuccess={refreshData}
-                          />
-                        )}
-                        {(selectedTab === 1 || selectedTab === 0) && (
-                          <CreatePollUI
-                            post={post}
-                            group={community}
-                            onSuccess={refreshData}
-                          />
-                        )}
-                      </div>
+                      <ShowConnectIfNotConnected>
+                        <div className={'flex gap-4'}>
+                          {selectedTab === 0 && (
+                            <CreateCommentUI
+                              post={post}
+                              group={community}
+                              onSuccess={refreshData}
+                            />
+                          )}
+                          {(selectedTab === 1 || selectedTab === 0) && (
+                            <CreatePollUI
+                              post={post}
+                              group={community}
+                              onSuccess={refreshData}
+                            />
+                          )}
+                        </div>
+                      </ShowConnectIfNotConnected>
                     </div>
                     {comments.map(comment => (
                       <div
@@ -184,7 +192,11 @@ export function PostPage({
                           key={`comment_as_poll_${comment.id}`}
                           className="mb-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900"
                         >
-                          <PostComment comment={comment} key={comment.id} />
+                          <PostComment
+                            comment={comment}
+                            key={comment.id}
+                            onSuccess={refreshData}
+                          />
                         </div>
                       ))}
                   </Tab.Panel>
@@ -251,28 +263,6 @@ interface HandleVoteParams {
   setIsLoading: any
 }
 
-export const handleVote = async ({
-  e,
-  vote,
-  voteForPost,
-  itemId,
-  setIsLoading,
-}: HandleVoteParams): Promise<void> => {
-  e.stopPropagation()
-  e.preventDefault()
-  if (isNaN(itemId)) {
-    toast.error('Invalid post id')
-    return
-  }
-  setIsLoading(true)
-  const val = vote === 'upvote' ? 0 : 1
-  const voteResponse = await voteForPost(BigNumber.from(itemId).toNumber(), val)
-  if (voteResponse) {
-    console.log('voteResponse', voteResponse)
-  }
-  setIsLoading(false)
-}
-
 const CreateCommentUI = ({
   group,
   post,
@@ -312,7 +302,6 @@ const CreateCommentUI = ({
     clearContent,
   } = useContentManagement({
     isPostOrPoll: false,
-    isPost: false,
     defaultContentDescription: undefined,
     defaultContentTitle: undefined,
   })
