@@ -18,8 +18,6 @@ import { toast } from 'react-toastify'
 import { useEditItem } from '@/hooks/useEditItem'
 import dynamic from 'next/dynamic'
 import type { Group, Item } from '@/types/contract/ForumInterface'
-import { mutate } from 'swr'
-import { GroupPostCommentAPI } from '@/lib/fetcher'
 import EditorJsRenderer from '@components/editor-js/EditorJSRenderer'
 import type { Address } from '@/types/common'
 import AnimalAvatar from '../AnimalAvatar'
@@ -32,9 +30,15 @@ interface PostItemProps {
   post: Item
   group: Group
   showAvatar?: boolean
+  refreshData?: () => void
 }
 
-export const PostItem = ({ post, group, showAvatar = true }: PostItemProps) => {
+export const PostItem = ({
+  post,
+  group,
+  showAvatar = true,
+  refreshData,
+}: PostItemProps) => {
   const { groupId, parentId, id } = post
 
   const postId = parentId && +parentId > 0 ? parentId : id
@@ -89,7 +93,7 @@ export const PostItem = ({ post, group, showAvatar = true }: PostItemProps) => {
         itemType: post.kind,
         note: post.note,
       }).then(async value => {
-        await mutate(GroupPostCommentAPI(groupId, postId))
+        refreshData && refreshData()
         setIsContentEditing(false)
       })
 

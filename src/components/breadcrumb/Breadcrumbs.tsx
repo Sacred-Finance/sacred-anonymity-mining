@@ -42,7 +42,7 @@ export const Breadcrumbs = (): JSX.Element => {
 
   return (
     <nav
-      className="flex justify-between gap-4 rounded-t px-5 py-3 text-gray-700"
+      className="flex justify-between gap-4 rounded-t px-5 py-3 text-gray-700 h-10"
       aria-label="Breadcrumb"
     >
       <ol className="flex items-center gap-4 dark:text-white">
@@ -58,10 +58,6 @@ export const Breadcrumbs = (): JSX.Element => {
 }
 
 const BreadcrumbLink = ({ item }: { item: BreadCrumbItem }) => {
-  if (!item) {
-    return null
-  }
-
   return (
     <Link
       href={item.href}

@@ -51,14 +51,14 @@ export const PictureUpload = (props: {
     <>
       <div
         ref={imageRef}
-        className={`relative rounded-2xl border-2 border-dashed border-gray-300 bg-gray-100  hover:text-white dark:bg-gray-900`}
+        className={`relative text-clip rounded-2xl border-2 border-dashed border-gray-300 bg-gray-100 hover:text-white dark:bg-gray-900`}
       >
         {props.uploadedImageUrl ? (
           <>
             <Image
               width={500}
               height={500}
-              className=" h-52 w-full  object-contain transition-opacity "
+              className=" h-52 w-full  object-contain transition-opacity  "
               style={{ opacity: isDeleteIconVisible ? 0.5 : 1 }}
               onFocus={() => setIsDeleteIconVisible(true)}
               onKeyDown={e => {

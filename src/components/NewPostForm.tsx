@@ -304,7 +304,7 @@ const FormButtons = ({
   children: React.ReactNode
 }) => (
   <CardFooter className="flex justify-between">
-    <PrimaryButton onClick={handleClose} variant={'destructive'}>
+    <PrimaryButton onClick={handleClose} variant={'ghost'}>
       {t('button.closeForm')}
     </PrimaryButton>
     <div className="flex flex-row items-center gap-2">

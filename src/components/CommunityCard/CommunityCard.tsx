@@ -7,8 +7,8 @@ import { useUserIfJoined } from '@/contexts/CommunityProvider'
 import type { User } from '@/lib/model'
 import { useAccount } from 'wagmi'
 import mobileLogo from '../../../public/logo.svg'
-import type { ActionItem } from '@components/buttons/CardDropDown'
-import { CardDropDown } from '@components/buttons/CardDropDown'
+import type { ActionItem } from '@components/CommunityCard/DropdownCommunityCard'
+import { DropdownCommunityCard } from '@components/CommunityCard/DropdownCommunityCard'
 import { PencilIcon } from '@heroicons/react/20/solid'
 import { useRouter } from 'next/router'
 import { useValidatedImage } from '@components/CommunityCard/UseValidatedImage'
@@ -112,16 +112,13 @@ export const CommunityCard = ({
                   </h2>
                 </div>
               </Link>
-              <CardDropDown
+              <DropdownCommunityCard
                 actions={[
                   isAdmin || isOwner
                     ? {
                         label: 'Edit',
                         icon: <PencilIcon className={'h-full w-4'} />,
-                        onClick: () =>
-                          router.push(
-                            `/communities/${community?.groupId}/edit`
-                          ),
+                        href: `/communities/${community?.groupId}/edit`,
                       }
                     : false,
                   (isAdmin || isOwner) && (
