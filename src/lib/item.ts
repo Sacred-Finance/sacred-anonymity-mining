@@ -13,7 +13,7 @@ import { forumContract } from '@/constant/const'
 import { createComment, createPost, edit } from '@/lib/api'
 import { Group as SemaphoreGroup } from '@semaphore-protocol/group'
 import { mutate } from 'swr'
-import { GroupPostCommentAPI, GroupPostAPI } from '@/lib/fetcher'
+import { GroupPostAPI, GroupPostCommentAPI } from '@/lib/fetcher'
 import { generateProof } from '@semaphore-protocol/proof'
 
 export const emptyPollRequest = {
@@ -48,11 +48,8 @@ export async function handleDeleteItem(
     nullifier: userPosting.getNullifier(),
   }
 
-  const { a, b, c } = await generateGroth16Proof(
-    input,
-    '/circuits/VerifyOwner__prod.wasm',
-    '/circuits/VerifyOwner__prod.0.zkey'
-  )
+  const { a, b, c } = await generateGroth16Proof({ input: input })
+
   return edit(itemId.toString(), signal, note, a, b, c).then(async data => {
     if (this.postId) {
       await mutate(GroupPostCommentAPI(this.groupId, this.postId))
@@ -145,10 +142,14 @@ export async function create(
 }
 
 export async function editContent(
-  type,
-  content,
+  this: {
+    groupId: string
+    postId: string
+  },
+  type: 'post' | 'comment',
+  content: string,
   address: string,
-  itemId,
+  itemId: number,
   postedByUser: User
 ) {
   const currentDate = new Date()
@@ -156,56 +157,26 @@ export async function editContent(
     currentDate.getTime().toString() + '#' + JSON.stringify(content)
   console.log(`Editing your anonymous ${type}...`)
   let cid
-  try {
-    cid = await uploadIPFS(message)
-    if (!cid) {
-      throw Error('Upload to IPFS failed')
-    }
-    const signal = getBytes32FromIpfsHash(cid)
-
-    const userPosting = new Identity(
-      `${address}_${this.groupId}_${postedByUser?.name}`
-    )
-    const note = await createNote(userPosting)
-
-    const item = await forumContract.read.itemAt([itemId])
-
-    const input = {
-      trapdoor: userPosting.getTrapdoor(),
-      note: item.note,
-      nullifier: userPosting.getNullifier(),
-    }
-
-    const { a, b, c } = await generateGroth16Proof(
-      input,
-      '/circuits/VerifyOwner__prod.wasm',
-      '/circuits/VerifyOwner__prod.0.zkey'
-    )
-
-    return await edit(itemId, signal, note, a, b, c)
-      .then(async data => {
-        console.log('edited item!', data, this.groupId, itemId)
-        await mutate(GroupPostCommentAPI(this.groupId, this.postId ?? itemId))
-        return data
-      })
-      .catch(err => {
-        console.log('error', err)
-      })
-  } catch (error) {
-    throw error
+  cid = await uploadIPFS(message)
+  if (!cid) {
+    throw Error('Upload to IPFS failed')
   }
+  const signal = getBytes32FromIpfsHash(cid)
+
+  const userPosting = new Identity(
+    `${address}_${this.groupId}_${postedByUser?.name}`
+  )
+  const note = await createNote(userPosting)
+
+  const item = await forumContract.read.itemAt([BigInt(itemId)])
+
+  const input = {
+    trapdoor: userPosting.getTrapdoor(),
+    note: item.note,
+    nullifier: userPosting.getNullifier(),
+  }
+  const { a, b, c } = await generateGroth16Proof({ input: input })
+
+  return await edit(itemId.toString(), signal, note, a, b, c)
 }
 
-export async function updateContentVote(
-  itemId,
-  voteType,
-  confirmed: boolean,
-  type,
-  revert = false
-) {
-  if (type === 'post') {
-    await mutate(GroupPostAPI(this.groupId))
-  } else if (type === 'comment') {
-    await mutate(GroupPostCommentAPI(this.groupId, this.postId))
-  }
-}

@@ -21,7 +21,7 @@ import { toNumber } from 'lodash'
 import type { FetchTokenResult } from '@wagmi/core'
 import { fetchToken } from '@wagmi/core'
 import type { Unit } from 'wagmi'
-import { HandleSetImage } from '@/pages/communities/[groupId]/edit'
+import type { HandleSetImage } from '@/pages/communities/[groupId]/edit'
 
 type GroupId = number
 
@@ -53,6 +53,7 @@ export const fetchCommunitiesData = async ({
     const updatedDataPromises = groupIds.map(async groupId => {
       let groupData: Group
       try {
+        console.log('fetching group', groupId)
         groupData = (await forumContract.read.groupAt([
           groupId,
         ])) as unknown as Group
@@ -106,6 +107,7 @@ export const uploadImages = async ({
   bannerCID: string | null
   logoCID: string | null
 }> => {
+  // avoid uploading images if they are not provided or haven't changed
   const [bannerResult, logoResult] = await Promise.allSettled([
     bannerFile ? uploadImageToIPFS(bannerFile) : Promise.resolve(null),
     logoFile ? uploadImageToIPFS(logoFile) : Promise.resolve(null),
@@ -133,9 +135,12 @@ export const useHandleFileImageUpload = (setImageFileState: {
   ({ file, imageType }: HandleSetImage): void
   (arg0: { file: File; imageType: 'banner' | 'logo' }): void
 }) => {
-  return useCallback(e => {
-    handleFileImageUpload(e, setImageFileState)
-  }, [])
+  return useCallback(
+    (e: { target: { files: File[]; name: string } }) => {
+      handleFileImageUpload(e, setImageFileState)
+    },
+    [setImageFileState]
+  )
 }
 
 export const handleFileImageUpload = (
@@ -332,6 +337,7 @@ function serializeRawItemData(rawItemData: RawItemData): Item {
 export async function augmentItemData(rawItemData: RawItemData): Promise<Item> {
   try {
     const normalizedItemData = serializeRawItemData(rawItemData)
+    console.log('normalizedItemData', normalizedItemData)
     const stringifiedContent = await getContent(normalizedItemData.contentCID)
 
     if (!stringifiedContent) {

@@ -148,20 +148,10 @@ const CreatePostUI = ({
         setWaiting: setIsLoading,
         onIPFSUploadSuccess: post => {
           console.log('post', post)
-          toast.success('content stored correctly')
         },
       })
       try {
-        const { status, data, request, statusText, headers, config } = response
-        console.log('status', {
-          status,
-          data,
-          request,
-          statusText,
-          headers,
-          config,
-        })
-        if (status === 200) {
+        if (response?.status === 200) {
           setIsLoading(false)
           clearContent()
           onSuccess && onSuccess()

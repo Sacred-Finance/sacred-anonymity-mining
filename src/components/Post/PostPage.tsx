@@ -8,7 +8,7 @@ import { useTranslation } from 'next-i18next'
 import type { Dispatch, SetStateAction } from 'react'
 import React, { useContext, useEffect, useState } from 'react'
 import { useValidateUserBalance } from '@/utils/useValidateUserBalance'
-import { BigNumber, utils } from 'ethers'
+import { utils } from 'ethers'
 import { toast } from 'react-toastify'
 import { CommunityCard } from '@components/CommunityCard/CommunityCard'
 import { VoteDownButton, VoteUpButton } from '@components/buttons'
@@ -21,8 +21,6 @@ import { ChatIcon, InfoIcon, PollIcon } from '@components/CommunityActionTabs'
 import type { NewPostFormProps } from '@components/NewPostForm'
 import { NewPostForm } from '@components/NewPostForm'
 import type { Group, Item } from '@/types/contract/ForumInterface'
-import type { CommentClass } from '@/lib/comment'
-import type { Post } from '@/lib/post'
 import type { ItemCreationRequest } from '@/lib/model'
 import { ContentType } from '@/lib/model'
 import CreatePollUI from '@components/CreatePollUI'
@@ -39,8 +37,6 @@ import {
   hashBytes2,
   uploadIPFS,
 } from '@/lib/utils'
-import { mutate } from 'swr'
-import { GroupPostCommentAPI } from '@/lib/fetcher'
 import { emptyPollRequest } from '@/lib/item'
 import { ScrollArea } from '@/shad/ui/scroll-area'
 import AIDigestButton from '@components/buttons/AIPostDigestButton'
@@ -119,7 +115,7 @@ export function PostPage({
               </div>
               <div className="rounded-xl border p-2 dark:border-gray-700 dark:bg-gray-900 ">
                 <ScrollArea className="col-span-12 flex max-h-[80vh] w-full flex-col gap-2 rounded bg-white p-3 dark:border-gray-950/80 dark:bg-gray-950/20">
-                  <PostItem post={post} group={community} />
+                  <PostItem post={post} group={community} refreshData={refreshData} />
                 </ScrollArea>
               </div>
             </div>

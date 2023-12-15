@@ -14,11 +14,12 @@ import { Separator } from '@/shad/ui/separator'
 import { ScrollArea, ScrollBar } from '@/shad/ui/scroll-area'
 import LoadingComponent from '@components/LoadingComponent'
 import { SearchBar } from '@components/SearchBar'
+import Link from 'next/link'
 
 interface HomeProps {
   isAdmin: boolean
   isLoading: boolean
-  discourseCommunities: DiscourseCommunity[]
+  isValidating: boolean
 }
 
 function NoCommunities({ searchTerm }: { searchTerm: string }) {
@@ -69,7 +70,7 @@ function NoCommunities({ searchTerm }: { searchTerm: string }) {
 function HomePage({
   isLoading = false,
   isAdmin = false,
-  discourseCommunities,
+  isValidating = false,
 }: HomeProps) {
   const { state } = useCommunityContext()
   const { communities } = state
@@ -112,35 +113,37 @@ function HomePage({
     return <LoadingComponent />
   }
 
-  if (!communities.length) {
+  if (!communities.length && !isValidating) {
     return <NoCommunities searchTerm={searchTerm} />
   }
   return (
     <>
       <Tabs defaultValue="logos" className="h-full space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <TabsList>
-            <TabsTrigger value="logos" className="relative">
-              Logos
-            </TabsTrigger>
-            <TabsTrigger value="discourse">Discourse</TabsTrigger>
-          </TabsList>
-          <div className="ml-auto mr-4 flex w-full max-w-xl items-center">
-            <SearchBar
-              debouncedResults={debouncedResults}
-              searchTerm={searchTerm}
-            />
+        <div className="flex items-center w-full justify-between gap-2">
+          <div className={'flex w-full basis-1/4 items-center justify-between'}>
+            <TabsList>
+              <TabsTrigger value="logos" className="relative">
+                Logos
+              </TabsTrigger>
+              <TabsTrigger value="discourse">Discourse</TabsTrigger>
+            </TabsList>
           </div>
-          <div className="ml-auto mr-4">
-            <Button
-              variant={'default'}
-              onClick={() => {
-                router.push('/create-group')
-              }}
-            >
-              <IoAddCircle className="mr-2 h-4 w-4" />
-              Create Community
-            </Button>
+
+          <div className={'flex w-full basis-3/4 items-center justify-between'}>
+            <div className="flex basis-3/4 gap-2 justify-between w-fit  items-center">
+              <SearchBar
+                debouncedResults={debouncedResults}
+                searchTerm={searchTerm}
+              />
+            </div>
+            <div className="flex basis-1/4 items-center">
+              <Link href="/create-group">
+                <Button variant={'default'}>
+                  <IoAddCircle className={'h-6 w-6'} />
+                  Create Community
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
         <TabsContent value="logos" className="border-none p-0 outline-none">
@@ -192,7 +195,7 @@ function HomePage({
             transition={{ duration: 0.5 }}
             className="xs:justify-center flex flex-wrap gap-4 md:justify-start "
           >
-            <Communities communities={discourseCommunities} />
+            <Communities />
           </motion.div>
         </TabsContent>
       </Tabs>

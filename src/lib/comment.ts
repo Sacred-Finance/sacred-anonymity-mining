@@ -27,9 +27,6 @@ export class CommentClass {
     return this.postId + '_comments'
   }
 
-  specificId(commentId?: any) {
-    return `${this.postId}_comment_${this.id ?? commentId}`
-  }
 
   async create({
     commentContent,

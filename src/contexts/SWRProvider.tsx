@@ -13,24 +13,32 @@ function fetcher(resource, init) {
     })
     .catch(error => {
       toast.error('Network error: ' + error.message)
-      // Optionally report to error logging service here
       throw error
     })
 }
 
-const localStorageProvider = (): Map<unknown, unknown> => {
-  // When initializing, we restore the data from `localStorage` into a map.
-  const map = new Map(JSON.parse(localStorage.getItem('app-cache') || '[]'))
+const localStorageProvider = (() => {
+  let initialized = false
 
-  // Before unloading the app, we write back all the data into `localStorage`.
-  window.addEventListener('beforeunload', () => {
-    const appCache = JSON.stringify(Array.from(map.entries()))
-    localStorage.setItem('app-cache', appCache)
-  })
+  return (): Map<unknown, unknown> => {
+    // Check if we're running in a browser environment
+    if (typeof window === 'undefined') {
+      return new Map() // Return an empty map in a non-browser environment
+    }
 
-  // We still use the map for write & read for performance.
-  return map
-}
+    const map = new Map(JSON.parse(localStorage.getItem('app-cache') || '[]'))
+
+    if (!initialized) {
+      window.addEventListener('beforeunload', () => {
+        const appCache = JSON.stringify(Array.from(map.entries()))
+        localStorage.setItem('app-cache', appCache)
+      })
+      initialized = true
+    }
+
+    return map
+  }
+})()
 
 export const SWRProvider = ({ children }) => {
   const [isMounted, setIsMounted] = useState(false)

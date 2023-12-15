@@ -16,14 +16,12 @@ import { setGroupDetails } from '@/lib/api'
 import { toast } from 'react-toastify'
 import clsx from 'clsx'
 import { PictureUpload } from '@components/PictureUpload'
-import Link from 'next/link'
 import { PrimaryButton } from '@components/buttons'
 import { buttonVariants } from '@styles/classes'
 import type { HandleSetImage } from '@pages/communities/[groupId]/edit'
 import { isImageFile } from '@pages/communities/[groupId]/edit'
 import type { Group } from '@/types/contract/ForumInterface'
 import RemoveGroup from '@components/RemoveGroup'
-import DeleteItemButton from '@components/buttons/DeleteItemButton'
 import TagInput from './TagInput/TagInput'
 import { Card, CardContent } from '@/shad/ui/card'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
@@ -116,11 +114,8 @@ export function EditGroup({ group }: EditGroupProps) {
       setIsSubmitting(true)
       const user = new Identity(address as string)
       const input = await createInputNote(user)
-      const { a, b, c } = await generateGroth16Proof(
-        input,
-        '/circuits/VerifyOwner__prod.wasm',
-        '/circuits/VerifyOwner__prod.0.zkey'
-      )
+      const { a, b, c } = await generateGroth16Proof({ input: input })
+
       const images = {
         bannerFile: hasImageChanged.banner ? bannerFile : null,
         logoFile: hasImageChanged.logo ? logoFile : null,
@@ -251,13 +246,6 @@ export function EditGroup({ group }: EditGroupProps) {
         </div>
 
         <div className="flex flex-col justify-between space-x-0 py-2 md:flex-row md:space-x-2 md:py-4">
-          {/*<DeleteItemButton*/}
-          {/*  isAdminOrModerator={true}*/}
-          {/*  groupId={group.groupId}*/}
-          {/*  itemId={group.id}*/}
-          {/*  itemType={'group'}*/}
-          {/*/>*/}
-
           <PrimaryButton
             className={clsx(
               buttonVariants.primarySolid,
@@ -265,7 +253,7 @@ export function EditGroup({ group }: EditGroupProps) {
             )}
             onClick={togglePreview}
           >
-            {t('preview')}
+            {t('confirm')}
           </PrimaryButton>
         </div>
       </div>

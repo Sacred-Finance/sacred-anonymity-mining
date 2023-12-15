@@ -13,12 +13,11 @@ import { abi } from '@/constant/abi'
 import { polygonMumbai } from 'wagmi/chains'
 import { HashZero } from '@/lib/utils'
 
-export type GroupWithPostDataResponse =
- {
-      group: Group
-      posts: Item[] | []
-      users: User[] | []
-    }
+export type GroupWithPostDataResponse = {
+  group: Group
+  posts: Item[] | []
+  users: User[] | []
+}
 
 // get group details
 export default async function handler(
@@ -27,6 +26,8 @@ export default async function handler(
     { group: Group; posts: Item[]; users: User[] } | { error: string }
   >
 ) {
+  console.log('fetching data')
+
   try {
     const { groupId } = req.query
     const bigIntGroupId = BigInt(groupId as string)
@@ -37,9 +38,12 @@ export default async function handler(
     if (rawGroupData.removed) {
       return res.status(404).json({ error: 'Group not found' })
     }
+
     const group = await augmentGroupData(rawGroupData)
 
     const postIds = rawGroupData.posts.map(p => p)
+
+    console.log('postIds', postIds)
 
     const wagmigotchiContract = {
       address: ForumContractAddress,

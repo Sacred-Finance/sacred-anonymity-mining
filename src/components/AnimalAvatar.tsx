@@ -30,7 +30,7 @@ const AnimalAvatar = ({ seed, options = {} }: AnimalAvatarProps) => {
       )
     }
   }
-  return <img className="mr-auto" src={avatar} alt={'avatar'} />
+  return <img src={avatar} alt={'avatar'} />
 }
 
 export default AnimalAvatar

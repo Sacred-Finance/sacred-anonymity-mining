@@ -29,7 +29,7 @@ export default async (req, res) => {
       groups.map(groupId => {
         //forumContract.read.groupAt(1)
         console.error('groupId', groupId)
-        return forumContract.read.groupAt([groupId])
+        return forumContract.read.groupAt([BigInt(groupId.toString())])
       })
     )
   } catch (e) {

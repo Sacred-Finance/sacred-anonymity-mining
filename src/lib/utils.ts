@@ -6,14 +6,16 @@ import { buildBabyjub, buildPedersenHash } from 'circomlibjs'
 import type { Identity } from '@semaphore-protocol/identity'
 import { forumContract, semaphoreContract } from '@/constant/const'
 import type { AvatarOptions } from 'animal-avatar-generator'
-import { GroupId } from '@/types/contract/ForumInterface'
+import type { GroupId } from '@/types/contract/ForumInterface'
+import type { BabyJub, PedersenHash } from 'circomlibjs/index'
 
 const { groth16 } = require('snarkjs')
 
 let ipfs: IPFSHTTPClient
-let babyJub, pedersen
+let babyJub: BabyJub
+let pedersen: PedersenHash
 
-const pedersenHash = data =>
+const pedersenHash = (data: Uint8Array) =>
   BigInt(babyJub.F.toString(babyJub.unpackPoint(pedersen.hash(data))[0]))
 
 function unstringifyBigInts(o) {
@@ -58,7 +60,17 @@ async function convertProofToSolidityInput(proof, publicSignals) {
   return { a, b, c }
 }
 
-export const generateGroth16Proof = async (input, wasmFile, zkeyFileName) => {
+interface GenerateGroth16ProofParams {
+  input: any
+  wasmFile?: string
+  zkeyFileName?: string
+}
+
+export const generateGroth16Proof = async ({
+  input,
+  wasmFile = '/circuits/VerifyOwner__prod.wasm',
+  zkeyFileName = '/circuits/VerifyOwner__prod.0.zkey',
+}: GenerateGroth16ProofParams) => {
   const { proof: _proof, publicSignals: _publicSignals } =
     await groth16.fullProve(input, wasmFile, zkeyFileName)
   return await convertProofToSolidityInput(_proof, _publicSignals)
@@ -83,15 +95,18 @@ export const getContent = async (CID: string) => {
       content += decoder.decode(chunk, { stream: true })
     }
   } catch (error) {
-    console.log('error', error)
+    console.error('error', error)
   }
 
   console.log(CID + ' loaded')
 
   const indexMark = content.indexOf('#')
+  console.log('indexMark', indexMark)
   if (indexMark >= 0) {
     return content.substring(indexMark + 1)
   }
+
+  console.log('content', content)
   return content
 }
 
@@ -176,38 +191,31 @@ export const numToBuffer = (number, size, endianess): Buffer => {
   }
 }
 
-// note is a Buffer of 64 bytes based on the identity of the user or the content
-export const createNote = async (identity: Identity) => {
-  const trapdoor = identity.getTrapdoor() //getTrapDoor is not a function, error on posting a comment
-  const nullifier = identity.getNullifier()
-  const trapdoorBuffer = numToBuffer(trapdoor, 32, 'le')
-  const image = Buffer.concat([
+export const createNote = async (identity: Identity): Promise<bigint> => {
+  const trapdoor: bigint = identity.getTrapdoor()
+  const nullifier: bigint = identity.getNullifier()
+  const trapdoorBuffer: Buffer = numToBuffer(trapdoor, 32, 'le')
+  const image: Buffer = Buffer.concat([
     trapdoorBuffer,
     numToBuffer(nullifier, 32, 'le'),
   ])
+
   if (!babyJub) {
     babyJub = await buildBabyjub()
   }
+
   if (!pedersen) {
     pedersen = await buildPedersenHash()
   }
+
   return pedersenHash(image)
 }
+
 export const createInputNote = async (identity: Identity) => {
-  const trapdoor = identity.getTrapdoor() //getTrapDoor is not a function, error on posting a comment
+  const note = await createNote(identity)
+  const trapdoor = identity.getTrapdoor()
   const nullifier = identity.getNullifier()
-  const trapdoorBuffer = numToBuffer(trapdoor, 32, 'le')
-  const image = Buffer.concat([
-    trapdoorBuffer,
-    numToBuffer(nullifier, 32, 'le'),
-  ])
-  if (!babyJub) {
-    babyJub = await buildBabyjub()
-  }
-  if (!pedersen) {
-    pedersen = await buildPedersenHash()
-  }
-  return { note: pedersenHash(image), trapdoor: trapdoor, nullifier: nullifier }
+  return { note, trapdoor, nullifier }
 }
 
 export const startIPFS = async () => {
@@ -224,7 +232,7 @@ export const startIPFS = async () => {
           process.env.NEXT_PUBLIC_INFURA_IPFS_PROJECT_SECRET
       ).toString('base64')
 
-    ipfs = await create({
+    ipfs = create({
       host: 'ipfs.infura.io',
       port: 5001,
       protocol: 'https',
@@ -232,10 +240,6 @@ export const startIPFS = async () => {
         authorization: auth,
       },
     })
-
-    console.log('ipfs started')
-
-    return ipfs
   } catch (error) {
     console.error('Error starting IPFS:', error)
     throw error // Or handle the error as you see fit
@@ -251,14 +255,10 @@ export const commentIsConfirmed = (id: string) => {
   }
 }
 
-export const parseComment = content => {
+export const parseComment = (content: string) => {
   let parsedContent
   try {
-    if (typeof content == 'string') {
-      parsedContent = JSON.parse(content)
-    } else {
-      return content
-    }
+    parsedContent = JSON.parse(content)
   } catch (error) {
     parsedContent = {
       title: content,

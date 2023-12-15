@@ -119,11 +119,7 @@ export const useEditItem = ({
           nullifier: userPosting.getNullifier(),
         }
 
-        const { a, b, c } = await generateGroth16Proof(
-          input,
-          '/circuits/VerifyOwner__prod.wasm',
-          '/circuits/VerifyOwner__prod.0.zkey'
-        )
+        const { a, b, c } = await generateGroth16Proof({ input: input })
         return writeAsync
           ? writeAsync({
               recklesslySetUnpreparedArgs: [a, b, c, itemId, signal],

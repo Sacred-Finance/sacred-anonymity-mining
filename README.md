@@ -104,8 +104,8 @@ This app is open-source and licensed under the MIT license. For more details, ch
 
 ## 3. Comment Features
 
-- [ ] Creating Comments
-- [ ] Editing a Comment
+- [x] Creating Comments
+- [x] Editing a Comment
 - [ ] Deleting a Comment
 - [ ] Comment Loading Animation
 - [ ] Replying to a Comment - tbd

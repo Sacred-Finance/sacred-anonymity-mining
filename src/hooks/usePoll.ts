@@ -1,6 +1,6 @@
 import { useActiveUser } from '@/contexts/CommunityProvider'
 import { createComment, createPost, votePoll } from '@/lib/api'
-import { GroupPostCommentAPI, GroupPostAPI } from '@/lib/fetcher'
+import { GroupPostAPI, GroupPostCommentAPI } from '@/lib/fetcher'
 import type {
   ItemCreationRequest,
   PollRequestStruct,
@@ -43,7 +43,7 @@ interface SubmitPollParams {
 
 export const usePoll = ({ group }: { group: Group }) => {
   const { address } = useAccount()
-  const activeUser = useActiveUser({ groupId: group.id })
+  const activeUser = useActiveUser({ groupId: group?.id })
 
   const createPoll = async ({
     content,
@@ -67,7 +67,7 @@ export const usePoll = ({ group }: { group: Group }) => {
 
       const signal = getBytes32FromIpfsHash(cid)
       const extraNullifier = hashBytes(signal).toString()
-      const users = await fetchUsersFromSemaphoreContract(group.id)
+      const users = await fetchUsersFromSemaphoreContract(group.groupId)
       const semaphoreGroup = new SemaphoreGroup(group.id)
       users.forEach(u => semaphoreGroup.addMember(BigInt(u)))
       const userIdentity = new Identity(

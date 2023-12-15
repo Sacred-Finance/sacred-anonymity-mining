@@ -1,11 +1,11 @@
-import React, { useRef, useState } from 'react'
+import React, { useState } from 'react'
 import type { NewPostFormProps } from '@components/NewPostForm'
 import { NewPostForm } from '@components/NewPostForm'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import { OutputDataToMarkDown } from '@components/Discourse/OutputDataToMarkDown'
 import { useTranslation } from 'react-i18next'
-import type EditorJS, { OutputData } from '@editorjs/editorjs'
+import type { OutputData } from '@editorjs/editorjs'
 import type { Topic } from '@components/Discourse/types'
 import { useFetchBalance } from '@/hooks/useFetchBalance'
 import { useRouter } from 'next/router'
@@ -24,7 +24,7 @@ const ReplyToDiscoursePost = ({
 }) => {
   const { t } = useTranslation()
   const router = useRouter()
-  const { groupId, topicId } = router.query
+  const { groupId } = router.query
   const [description, setDescription] = useState<typeof OutputData | null>(null)
   const [selectedToReveal, setSelectedToReveal] = useState(0)
   const fetchBalance = useFetchBalance({})

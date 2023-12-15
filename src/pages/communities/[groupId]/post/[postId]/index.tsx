@@ -47,17 +47,18 @@ function PostIndex() {
   if (error) {
     return <div>Error: {error.message}</div>
   }
+  const { group, post, comments } = data || {}
+
   if (!data || isLoading) {
     return <LoadingComponent />
   }
 
-  const { group, post, comments } = data
   return (
     <PostPage
       post={post}
       community={group}
       comments={comments}
-        refreshData={mutate}
+      refreshData={mutate}
     />
   )
 }
