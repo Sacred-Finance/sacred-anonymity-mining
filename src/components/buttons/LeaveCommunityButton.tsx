@@ -1,9 +1,9 @@
-import type { User } from '../../lib/model'
+import type { User } from '@/lib/model'
 import { useAccount } from 'wagmi'
 
 import React, { memo } from 'react'
 import { useTranslation } from 'next-i18next'
-import { useUserIfJoined } from '../../contexts/CommunityProvider'
+import { useUserIfJoined } from '@/contexts/CommunityProvider'
 import { toast } from 'react-toastify'
 import type { Group } from '@/types/contract/ForumInterface'
 import { PrimaryButton } from './index'
@@ -20,9 +20,7 @@ export const LeaveCommunityButton = memo(({ community }: JoinButtonProps) => {
   const [isLoading, setIsLoading] = React.useState(false)
   const { t } = useTranslation()
   const { address } = useAccount()
-  const hasUserJoined: User | undefined | false = useUserIfJoined(
-    groupId as string | number
-  )
+  const hasUserJoined: User | undefined | false = useUserIfJoined(groupId)
 
   const { leaveCommunity } = useLeaveCommunity({ id: toNumber(groupId) })
 
