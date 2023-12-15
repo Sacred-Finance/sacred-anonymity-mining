@@ -46,13 +46,11 @@ export const { chains, publicClient, webSocketPublicClient } = configureChains(
             webSocket: process.env.NEXT_PUBLIC_LOCALHOST_URL ?? '',
           }
         } else if (chain.id === goerli.id) {
-          console.log('goerli', process.env.NEXT_PUBLIC_GOERLI_URL)
           return {
             http: process.env.NEXT_PUBLIC_GOERLI_URL ?? '',
             webSocket: process.env.NEXT_PUBLIC_LOCALHOST_URL ?? '',
           }
         } else if (chain.id === mainnet.id) {
-          console.log('mainnet', process.env.NEXT_PUBLIC_MAINNET_URL)
           return {
             http: process.env.NEXT_PUBLIC_MAINNET_URL ?? '',
             webSocket: process.env.NEXT_PUBLIC_LOCALHOST_URL ?? '',
