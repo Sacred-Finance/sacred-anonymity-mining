@@ -10,9 +10,10 @@ export default async function fetcher<T>(url: string): Promise<T> {
     throw error
   }
 
-  return res.json() as Promise<T>
+  return (await res.json()) as Promise<T>
 }
 
+// GroupWithPostDataResponse
 export function GroupPostAPI(
   groupId: string | string[] | undefined
 ): string | { error: string } | null {

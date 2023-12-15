@@ -68,12 +68,12 @@ export function PostPage({
   comments,
   post,
   community,
+  refreshData,
 }: {
-  postInstance: Post
   comments: Item[]
   post: Item
   community: Group
-  commentInstance: CommentClass
+  refreshData?: () => void
 }) {
   const {
     state: { isAdmin },
@@ -136,10 +136,18 @@ export function PostPage({
                     <div className="sticky top-0 z-10 flex gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
                       <div className={'flex gap-4'}>
                         {selectedTab === 0 && (
-                          <CreateCommentUI post={post} group={community} />
+                          <CreateCommentUI
+                            post={post}
+                            group={community}
+                            onSuccess={refreshData}
+                          />
                         )}
                         {(selectedTab === 1 || selectedTab === 0) && (
-                          <CreatePollUI post={post} group={community} />
+                          <CreatePollUI
+                            post={post}
+                            group={community}
+                            onSuccess={refreshData}
+                          />
                         )}
                       </div>
                     </div>
@@ -148,7 +156,11 @@ export function PostPage({
                         key={`comment_${comment.id}`}
                         className="mb-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900"
                       >
-                        <PostComment comment={comment} key={comment.id} />
+                        <PostComment
+                          comment={comment}
+                          key={comment.id}
+                          onSuccess={refreshData}
+                        />
                       </div>
                     ))}
                     {!comments.length && (
@@ -261,7 +273,15 @@ export const handleVote = async ({
   setIsLoading(false)
 }
 
-const CreateCommentUI = ({ group, post }: { group: Group; post: Item }) => {
+const CreateCommentUI = ({
+  group,
+  post,
+  onSuccess,
+}: {
+  group: Group
+  post: Item
+  onSuccess?: () => void
+}) => {
   const groupId = group.groupId
   const user = useUserIfJoined(group.id.toString())
   const activeUser = useActiveUser({ groupId: group.id })
@@ -358,7 +378,7 @@ const CreateCommentUI = ({ group, post }: { group: Group; post: Item }) => {
         asPoll: false,
         pollRequest: emptyPollRequest,
       }).then(async res => {
-        await mutate(GroupPostCommentAPI(groupId, post.id))
+        onSuccess && onSuccess()
         toast.success('Comment created successfully')
         clearContent()
         return res
@@ -396,10 +416,12 @@ export const VoteForItemUI = ({
   post,
   postId,
   group,
+  onSuccess,
 }: {
   post: Item
   postId: string
   group: Group
+  onSuccess?: () => void
 }) => {
   const groupId = group?.id?.toString()
   const user = useUserIfJoined(groupId)
@@ -459,7 +481,7 @@ export const VoteForItemUI = ({
         proof
       )
         .then(async res => {
-          await mutate(GroupPostCommentAPI(groupId, postId))
+          onSuccess && onSuccess()
           toast.success('Vote created successfully')
           setIsLoading(false)
           return res

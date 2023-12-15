@@ -34,8 +34,10 @@ export const NewPostModal: {
 
 export const PostComment = ({
   comment,
+  onSuccess,
 }: {
   comment: Item & { time?: Date } // where is time added!?
+  onSuccess?: () => void
 }) => {
   const { state } = useCommunityContext()
   const community = state?.activeCommunity?.community as Group
@@ -62,6 +64,7 @@ export const PostComment = ({
             postId={comment.parentId}
             post={comment}
             group={community}
+            onSuccess={onSuccess}
           />
 
           <p className="inline-block text-sm">

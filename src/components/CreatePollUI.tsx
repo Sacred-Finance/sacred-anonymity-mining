@@ -20,9 +20,10 @@ const Editor = dynamic(() => import('./editor-js/Editor'), {
 interface CreatePollUIProps {
   group: Group
   post?: Item
+  onSuccess?: () => void
 }
 
-const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
+const CreatePollUI = ({ post, group, onSuccess }: CreatePollUIProps) => {
   const [showModal, setShowModal] = React.useState(false)
   const [title, setTitle] = React.useState('Do you like this poll?')
   const [description, setDescription] = React.useState<
@@ -84,6 +85,7 @@ const CreatePollUI = ({ post, group }: CreatePollUIProps) => {
           toast.success('Poll created successfully')
           setLoading(false)
           setShowModal(false)
+          onSuccess && onSuccess()
         },
         onErrorCallback: err => {
           console.log(err)

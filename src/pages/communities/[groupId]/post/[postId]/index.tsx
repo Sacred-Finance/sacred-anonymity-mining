@@ -1,20 +1,18 @@
 import React, { useEffect } from 'react'
-import { Post } from '@/lib/post'
 import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
 import { PostPage } from '@components/Post/PostPage'
 import useSWR from 'swr'
 import fetcher, { GroupPostCommentAPI } from '@/lib/fetcher'
 import { useRouter } from 'next/router'
 import LoadingComponent from '@components/LoadingComponent'
-import { CommentClass } from '@/lib/comment'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
 
 function PostIndex() {
-  const { dispatch } = useCommunityContext()
+  const { dispatch, state } = useCommunityContext()
   const router = useRouter()
   const { groupId, postId } = router.query
 
-  const { data, error, isLoading } = useSWR(
+  const { data, error, isLoading, mutate } = useSWR(
     GroupPostCommentAPI(groupId, postId),
     fetcher
   )
@@ -25,21 +23,25 @@ function PostIndex() {
     if (!group || !post || !comments) {
       return
     }
-    dispatch({
-      type: ActionType.SET_ACTIVE_COMMUNITY,
-      payload: {
-        community: group,
-        postList: [post],
-      },
-    })
-    dispatch({
-      type: ActionType.SET_ACTIVE_POST,
-      payload: {
-        community: group,
-        post: post,
-        comments: comments,
-      },
-    })
+    if (state?.activeCommunity?.community?.groupId !== group.groupId) {
+      dispatch({
+        type: ActionType.SET_ACTIVE_COMMUNITY,
+        payload: {
+          community: group,
+          postList: [post],
+        },
+      })
+    }
+    if (state?.activePost?.post?.id === post.id) {
+      dispatch({
+        type: ActionType.SET_ACTIVE_POST,
+        payload: {
+          community: group,
+          post: post,
+          comments: comments,
+        },
+      })
+    }
   }, [data])
 
   if (error) {
@@ -50,15 +52,12 @@ function PostIndex() {
   }
 
   const { group, post, comments } = data
-  const postInstance = new Post(post.id, group.groupId)
-  const commentInstance = new CommentClass(group.groupId, post.id, null)
   return (
     <PostPage
-      postInstance={postInstance}
       post={post}
       community={group}
       comments={comments}
-      commentInstance={commentInstance}
+        refreshData={mutate}
     />
   )
 }

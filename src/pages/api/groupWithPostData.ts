@@ -13,6 +13,13 @@ import { abi } from '@/constant/abi'
 import { polygonMumbai } from 'wagmi/chains'
 import { HashZero } from '@/lib/utils'
 
+export type GroupWithPostDataResponse =
+ {
+      group: Group
+      posts: Item[] | []
+      users: User[] | []
+    }
+
 // get group details
 export default async function handler(
   req: NextApiRequest,
@@ -76,7 +83,7 @@ export default async function handler(
       bigIntGroupId,
     ])
 
-    res.status(200).json({
+    res.status(200).json(<GroupWithPostDataResponse>{
       group,
       posts: augmentedPosts,
       users: usersWithCommitment.map(c => ({

@@ -27,9 +27,11 @@ import type { User } from '@/lib/model'
 export function CommunityPage({
   community,
   posts,
+  refreshData,
 }: {
   community: Group
   posts?: Item[]
+  refreshData?: () => void
 }) {
   const [sortBy, setSortBy] = useState<SortByOption>('highest')
 
@@ -53,8 +55,8 @@ export function CommunityPage({
           />
 
           <div className="flex w-fit gap-4 rounded-lg ">
-            <CreatePollUI group={community} />
-            <CreatePostUI group={community} />
+            <CreatePollUI group={community} onSuccess={refreshData} />
+            <CreatePostUI group={community} onSuccess={refreshData} />
           </div>
           <PostList posts={sortedData} />
         </div>
@@ -63,7 +65,13 @@ export function CommunityPage({
   )
 }
 
-const CreatePostUI = ({ group }: { group: Group }) => {
+const CreatePostUI = ({
+  group,
+  onSuccess,
+}: {
+  group: Group
+  onSuccess?: () => void
+}) => {
   const groupId = group.groupId
   const user = useUserIfJoined(group.id.toString())
   const activeUser = useActiveUser({ groupId: group.id.toString() })
@@ -153,6 +161,7 @@ const CreatePostUI = ({ group }: { group: Group }) => {
         if (status === 200) {
           setIsLoading(false)
           clearContent()
+          onSuccess && onSuccess()
           console.log('post created successfully')
         } else {
           console.log('error', response)

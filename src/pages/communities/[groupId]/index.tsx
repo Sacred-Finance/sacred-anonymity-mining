@@ -5,21 +5,15 @@ import useSWR from 'swr'
 import { useRouter } from 'next/router'
 import fetcher, { GroupPostAPI } from '@/lib/fetcher'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
-import { GetStaticProps, InferGetStaticPropsType } from 'next'
-import type { Group, Item } from '@/types/contract/ForumInterface'
-import type { User } from '@/lib/model'
-
-interface Data {
-  group: Group
-  posts: Item[]
-  users: User[]
-}
+import { GroupWithPostDataResponse } from '@pages/api/groupWithPostData'
 
 export default function Page() {
   const router = useRouter()
   const { groupId } = router.query
 
-  const { data, error, isValidating } = useSWR(GroupPostAPI(groupId), fetcher)
+  const { data, error, isValidating, isLoading, mutate } =
+    useSWR<GroupWithPostDataResponse>(GroupPostAPI(groupId), fetcher)
+
   const { dispatch } = useCommunityContext()
   useCheckIfUserIsAdminOrModerator(true)
 
@@ -32,8 +26,9 @@ export default function Page() {
     }
   }, [data])
 
+
   useEffect(() => {
-    if (data?.group && data?.posts) {
+    if (data?.group) {
       dispatch({
         type: ActionType.SET_ACTIVE_COMMUNITY,
         payload: {
@@ -42,18 +37,13 @@ export default function Page() {
         },
       })
     }
-  }, [data?.group, data?.posts])
+    return () => {
+      dispatch({
+        type: ActionType.SET_ACTIVE_COMMUNITY,
+        payload: undefined,
+      })
+    }
+  }, [data?.group])
 
-  // if (error) {
-  //   return <div>failed to load</div>
-  // }
-  // if (!data) {
-  //   return <div>loading...</div>
-  // }
-
-  return (
-    <div>
-      <CommunityPage community={data?.group} posts={data?.posts} />
-    </div>
-  )
+  return <CommunityPage community={data?.group} posts={data?.posts} refreshData={mutate} />
 }
