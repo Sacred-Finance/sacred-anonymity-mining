@@ -21,7 +21,7 @@
     "@typescript-eslint/consistent-type-imports": "error",
     "react/react-in-jsx-scope": "off",
     "react/prop-types": "off",
-    "curly": "error",
+    "curly": [2, "multi-line"],
     "no-nested-ternary": "error",
     "camelcase": "error"
   }

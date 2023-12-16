@@ -8,6 +8,16 @@ import { ContentType } from '@/lib/model'
 import { CustomModal } from '@components/CustomModal'
 import { TrashIcon } from '@heroicons/react/20/solid'
 import { Group } from '@/types/contract/ForumInterface'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/shad/ui/dialog'
+import { Input } from '@/shad/ui/input'
 
 const DeleteItemButton = ({
   itemId,
@@ -42,7 +52,6 @@ const DeleteItemButton = ({
       if (itemType === ContentType.POST || itemType === ContentType.POLL) {
         router.push(`/communities/${groupId}`)
       }
-      console.log(result)
     } catch (error: unknown) {
       // Correctly typed as unknown
       if (error instanceof Error) {
@@ -64,48 +73,28 @@ const DeleteItemButton = ({
 
   return (
     <>
-      <PrimaryButton
-        isLoading={isSubmitting}
-        className="bg-red-500 text-white hover:bg-red-600"
-        onClick={() => setIsModalOpen(true)}
-        startIcon={<TrashIcon className="h-5 w-5" />}
-      >
-        {t('button.delete')}
-      </PrimaryButton>
-
-      <CustomModal
-        isOpen={isModalOpen}
-        setIsOpen={isOpen => {
-          setIsModalOpen(isOpen)
-          setDeleteConfirmation('')
-        }}
-      >
-        <div className="rounded-lg bg-white shadow dark:bg-gray-800">
-          <div className="p-6 text-center">
-            <TrashIcon className="mx-auto h-12 w-12 text-red-500" />
-            <h3 className="mt-2 text-lg font-medium text-gray-900 dark:text-gray-100">
-              Are you sure you want to delete this?
-            </h3>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              This action cannot be undone.
-            </p>
-
-            <input
-              className="mt-4 w-full rounded border border-gray-300 px-3 py-2 text-center shadow-sm focus:border-red-300 focus:ring focus:ring-red-200 focus:ring-opacity-50"
+      <Dialog>
+        <DialogTrigger>
+          <PrimaryButton
+            isLoading={isSubmitting}
+            className="bg-red-500 text-white hover:bg-red-600 z-2"
+            onClick={() => setIsModalOpen(true)}
+            startIcon={<TrashIcon className="h-5 w-5" />}
+          >
+            {t('button.delete')}
+          </PrimaryButton>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader className={'space-y-4'}>
+            <DialogTitle>Are you sure absolutely sure?</DialogTitle>
+          </DialogHeader>{' '}
+          <DialogDescription>
+            <Input
               onChange={e => setDeleteConfirmation(e.target.value)}
               placeholder='Type "delete" to confirm'
             />
-          </div>
-          <div className="flex justify-end space-x-2 rounded-b-lg bg-gray-100 p-6 dark:bg-gray-700">
-            <PrimaryButton
-              onClick={() => {
-                setIsModalOpen(false)
-                setDeleteConfirmation('')
-              }}
-              className="bg-gray-500 text-white hover:bg-gray-600"
-            >
-              {t('button.cancel')}
-            </PrimaryButton>
+          </DialogDescription>
+          <DialogFooter>
             <PrimaryButton
               disabled={deleteConfirmation !== 'delete'}
               onClick={handleDeleteConfirmation}
@@ -113,9 +102,9 @@ const DeleteItemButton = ({
             >
               Delete
             </PrimaryButton>
-          </div>
-        </div>
-      </CustomModal>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

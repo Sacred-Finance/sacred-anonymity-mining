@@ -103,20 +103,24 @@ export function PostPage({
     >
       <Card className="flex h-screen min-h-full w-full grow flex-col rounded-lg border-0 bg-gradient-to-r from-background  from-25% to-background to-75% backdrop-blur-3xl  transition-colors  ">
         <ScrollArea className="flex-1 overflow-hidden ">
-          <div className="flex h-full grow flex-col justify-stretch md:flex-row ">
-            <div className=" flex flex-col gap-4 p-3 md:w-1/2 ">
-              <div className="sticky top-0 z-10 flex gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
-                <VoteForItemUI
-                  postId={post.id}
-                  post={post}
-                  group={community}
-                  onSuccess={refreshData}
-                />
-              </div>
-              <div className="rounded-xl border p-2 dark:border-gray-700 dark:bg-gray-900 ">
-                <ScrollArea className="col-span-12 flex max-h-[80vh] w-full flex-col gap-2 rounded bg-white p-3 dark:border-gray-950/80 dark:bg-gray-950/20">
-                  <PostItem post={post} group={community} refreshData={refreshData} />
-                </ScrollArea>
+          <div className="flex  h-full grow flex-col justify-stretch md:flex-row ">
+            <div className="  flex flex-col gap-4 p-3 md:w-1/2 ">
+              <div className="sticky top-0">
+                <div className="rounded-xl border p-2 dark:border-gray-700 dark:bg-gray-900 ">
+                  <VoteForItemUI
+                    postId={post.id}
+                    post={post}
+                    group={community}
+                    onSuccess={refreshData}
+                  />
+                  <ScrollArea className="col-span-12 flex max-h-[80vh] w-full flex-col gap-2 rounded bg-white p-3 dark:border-gray-950/80 dark:bg-gray-950/20">
+                    <PostItem
+                      post={post}
+                      group={community}
+                      refreshData={refreshData}
+                    />
+                  </ScrollArea>
+                </div>
               </div>
             </div>
             <div className=" flex h-full grow flex-col gap-4 overflow-y-auto p-3 md:w-1/2">
@@ -485,7 +489,7 @@ export const VoteForItemUI = ({
     <>
       <VoteUpButton
         isConnected={!!address}
-        isJoined={user ? true : false}
+        isJoined={!!user}
         isLoading={isLoading}
         onClick={e => voteForPost(Number(post.id), 0)}
         disabled={isLoading || !address}
@@ -496,7 +500,7 @@ export const VoteForItemUI = ({
       </VoteUpButton>
       <VoteDownButton
         isConnected={!!address}
-        isJoined={user ? true : false}
+        isJoined={!!user}
         isLoading={isLoading}
         onClick={e => voteForPost(Number(post.id), 1)}
         disabled={isLoading || !address}

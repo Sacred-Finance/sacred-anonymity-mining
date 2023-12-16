@@ -5,7 +5,13 @@ import { NoPosts } from '@components/Post/NoPosts'
 import { CircularLoader } from '@components/buttons/JoinCommunityButton'
 import EditorJsRenderer from '@components/editor-js/EditorJSRenderer'
 import { PostTitle } from '@components/Post/PostTitle'
-import { Card, CardContent, CardHeader } from '@/shad/ui/card'
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/shad/ui/card'
 import { Badge } from '@/shad/ui/badge'
 import { ScrollArea, ScrollBar } from '@/shad/ui/scroll-area'
 import AnimalAvatar from '../AnimalAvatar'
@@ -23,25 +29,37 @@ export const PostList = ({ posts }: { posts: Item[] }) => {
     return (
       <Card
         key={p.id}
-        className={'flex w-96 shrink flex-col justify-between overflow-visible'}
+        className={
+          'group relative flex flex-col !min-w-40 w-full !max-w-96 justify-between divide-y divide-gray-300/20 overflow-hidden rounded-lg  bg-gray-300/20 dark:divide-gray-800/50 dark:bg-gray-800/50'
+        }
       >
-        <CardHeader className={'flex items-center flex-row justify-between'}>
-          <PostTitle post={p} title={p.title} onPostPage={false} id={''} />
-          <div
-            className={'flex basis-1/2 items-center gap-4 justify-end w-full'}
+        <CardHeader
+          className={'relative z-10   flex w-full flex-col py-1  px-3'}
+        >
+          <CardTitle
+            className={'flex w-full items-center justify-between gap-4'}
           >
-            <AnimalAvatar
-              seed={`${p.note}_${Number(p.groupId)}`}
-              options={{ size: 30 }}
-            />
-
-            <Badge className="flex gap-4">{p.childIds.length} Posts</Badge>
-          </div>
+            <PostTitle post={p} title={p.title} onPostPage={false} id={''} />
+          </CardTitle>
         </CardHeader>
 
-        <CardContent className={' overflow-hidden'}>
+        <CardContent className={' overflow-hidden py-6 px-3'}>
           <EditorJsRenderer data={p.description} className={'line-clamp-4'} />
         </CardContent>
+        <CardFooter
+          className={
+            'relative z-30 flex justify-between gap-1  bg-black/10 p-2'
+          }
+        >
+          <AnimalAvatar
+            seed={`${p.note}_${Number(p.groupId)}`}
+            options={{ size: 30 }}
+          />
+
+          <Badge className="flex gap-4 text-xs">
+            {p.childIds.length} {p.childIds.length === 1 ? 'Reply' : 'Replies'}
+          </Badge>
+        </CardFooter>
       </Card>
     )
   })
@@ -51,7 +69,7 @@ export const PostList = ({ posts }: { posts: Item[] }) => {
       {renderedPosts?.length === 0 && <NoPosts />}
 
       <ScrollArea className={'h-full'}>
-        <div className=" items-stretch justify-center gap-6 rounded-lg  md:grid lg:grid-cols-2 xl:grid-cols-3">
+        <div className="grid-cols-auto flex grow flex-col  gap-6 rounded-lg p-0 md:grid  md:py-8 lg:grid-cols-2 xl:grid-cols-3">
           {renderedPosts === undefined ? (
             <CircularLoader />
           ) : (

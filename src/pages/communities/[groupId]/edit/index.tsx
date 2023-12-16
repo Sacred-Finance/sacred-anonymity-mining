@@ -1,7 +1,15 @@
-import React from 'react'
-import { useCommunityById } from '@/contexts/CommunityProvider'
+import React, { useEffect } from 'react'
+import {
+  ActionType,
+  useCommunityById,
+  useCommunityContext,
+} from '@/contexts/CommunityProvider'
 import { useRouter } from 'next/router'
 import { EditGroup } from '@components/EditGroup'
+import useSWR from 'swr'
+import { GroupWithPostDataResponse } from '@pages/api/groupWithPostData'
+import fetcher, { GroupPostAPI } from '@/lib/fetcher'
+import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
 
 export interface HandleSetImage {
   file: File | undefined
@@ -15,19 +23,45 @@ export const isImageFile = (file: File) => {
 function EditGroupForm() {
   const router = useRouter()
   const { groupId } = router.query
-  const [isMounted, setIsMounted] = React.useState(false)
-  React.useEffect(() => {
-    setIsMounted(true)
-  }, [])
-  const community = useCommunityById(groupId as string)
-  if (!isMounted) {
+
+  const { data } = useSWR<GroupWithPostDataResponse>(
+    GroupPostAPI(groupId),
+    fetcher
+  )
+
+  const { dispatch } = useCommunityContext()
+  useCheckIfUserIsAdminOrModerator(true)
+
+  useEffect(() => {
+    if (data?.users) {
+      dispatch({
+        type: ActionType.SET_USERS,
+        payload: data?.users,
+      })
+    }
+  }, [data])
+
+  useEffect(() => {
+    if (data?.group) {
+      dispatch({
+        type: ActionType.SET_ACTIVE_COMMUNITY,
+        payload: {
+          community: data?.group,
+          postList: data?.posts,
+        },
+      })
+    }
+    return () => {
+      dispatch({
+        type: ActionType.SET_ACTIVE_COMMUNITY,
+        payload: undefined,
+      })
+    }
+  }, [data?.group])
+  if (!data?.group) {
     return null
   }
-  if (!community || isNaN(community?.groupId)) {
-    router?.push('/')
-    return null
-  }
-  return <EditGroup group={community} />
+  return <EditGroup group={data?.group} />
 }
 
 export default EditGroupForm

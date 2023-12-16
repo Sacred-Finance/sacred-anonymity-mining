@@ -28,9 +28,7 @@ export const useFetchItemsCreatedByUser = () => {
 
         for (const item of res) {
           const decodedItem = item.decode?.(item.data, item.topics)
-          const identity = new Identity(
-            `${address}_${Number(decodedItem.groupId)}_anon`
-          )
+          const identity = new Identity(address)
           const note = await createNote(identity)
           if (
             decodedItem.contentCID &&

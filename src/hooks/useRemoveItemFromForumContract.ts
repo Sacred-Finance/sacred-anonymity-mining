@@ -11,6 +11,7 @@ import type { PostContent, User } from '@/lib/model'
 import { ContentType } from '@/lib/model'
 import { GroupPostCommentAPI } from '@/lib/fetcher'
 import type { Address } from '@/types/common'
+import { useCallback } from 'react'
 
 interface UseRemoveItemFromForumContractParams {
   groupId: any
@@ -36,7 +37,7 @@ export const useRemoveItemFromForumContract = ({
     console.log('test-log', { data, error })
   }
 
-  const validateRequirements = () => {
+  const validateRequirements = useCallback(() => {
     if (!address) {
       return toast.error(t('toast.error.notLoggedIn'), {
         type: 'error',
@@ -51,7 +52,7 @@ export const useRemoveItemFromForumContract = ({
     }
 
     return true
-  }
+  }, [address, member])
 
   const deleteItem = async (itemId: string | number, itemType: ContentType) => {
     if (
@@ -122,12 +123,7 @@ export const useRemoveItemFromForumContract = ({
   }
 
   const handleCommentItem = async itemId => {
-    // await setCacheAtSpecificPath(
-    //   commentInstance.specificId(itemId),
-    //   true,
-    //   '$.removed'
-    // )
-    mutate(
+    await mutate(
       commentInstance.commentsCacheId(),
       data => {
         const commentsListCopy = [...data]

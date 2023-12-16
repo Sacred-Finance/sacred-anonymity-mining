@@ -26,7 +26,6 @@ export default function Page() {
     }
   }, [data])
 
-
   useEffect(() => {
     if (data?.group) {
       dispatch({
@@ -45,5 +44,11 @@ export default function Page() {
     }
   }, [data?.group])
 
-  return <CommunityPage community={data?.group} posts={data?.posts} refreshData={mutate} />
+  return (
+    <CommunityPage
+      community={data?.group}
+      posts={data?.posts}
+      refreshData={mutate}
+    />
+  )
 }

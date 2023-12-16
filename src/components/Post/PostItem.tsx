@@ -7,7 +7,7 @@ import { useAccount } from 'wagmi'
 import { Identity } from '@semaphore-protocol/identity'
 import { createNote } from '@/lib/utils'
 import { BigNumber } from 'ethers'
-import { PollUI } from '@components/PollIUI'
+import { PollUI } from '@components/PollIUI2'
 import { ContentActions } from '@components/Post/ContentActions'
 import { PostTitle } from '@components/Post/PostTitle'
 import type { User } from '@/lib/model'
@@ -188,13 +188,9 @@ export const PostItem = ({
         {isTypeOfPoll && <PollUI group={group} post={post} />}
 
         <div className="sticky bottom-0 flex items-center justify-between gap-4">
-          {parentId && Number(parentId) == 0 && showAvatar && (
-            <AnimalAvatar
-              seed={`${post.note}_${Number(groupId)}`}
-              options={{ size: 40 }}
-            />
-          )}
+
           <ContentActions
+            group={group}
             item={post}
             contentId={post.id}
             isContentEditable={isContentEditable}

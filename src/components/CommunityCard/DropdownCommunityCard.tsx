@@ -5,7 +5,7 @@ import { Button } from '@/shad/ui/button'
 import Link from 'next/link'
 
 interface CardDropDownProps {
-  actions: Array<ActionItem | false>
+  actions: Array<ActionItem | false | ReactNode>
   onOpen?: () => void
 }
 
@@ -49,7 +49,7 @@ export const DropdownCommunityCard: React.FC<CardDropDownProps> = ({
   )
 }
 
-interface ActionItem {
+export interface ActionItem {
   icon: ReactNode
   label: ReactNode
   onClick?: () => void

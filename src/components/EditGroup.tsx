@@ -25,6 +25,9 @@ import RemoveGroup from '@components/RemoveGroup'
 import TagInput from './TagInput/TagInput'
 import { Card, CardContent } from '@/shad/ui/card'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
+import { ArrowLeftIcon } from '@heroicons/react/20/solid'
+import { Button } from '@/shad/ui/button'
+import Link from 'next/link'
 
 interface EditGroupProps {
   group: Group
@@ -179,12 +182,17 @@ export function EditGroup({ group }: EditGroupProps) {
     groupName,
   ])
 
+  const previousPageUrl = router.query.previousPageUrl as string
+
   return (
-    <div
-      className={clsx(
-        'relative  z-50 grid  w-full max-w-screen-2xl grid-cols-1 gap-4 sm:p-8 md:p-24'
-      )}
-    >
+    <div className="relative  z-50 grid  w-full max-w-screen-2xl grid-cols-1 gap-4 sm:p-8 md:p-24">
+      <Link
+        className={'w-32 pl-0 flex items-center'}
+        href={previousPageUrl ? previousPageUrl : `/communities/${group.id}`}
+      >
+        <ArrowLeftIcon className="h-6 w-6 text-gray-700 dark:text-gray-300" />
+        go back
+      </Link>
       <div className="z-[-1] flex flex-col space-y-4 sm:col-span-full md:col-span-6 lg:col-span-6">
         <div className="flex flex-row items-center justify-between py-4">
           <h1 className="text-2xl font-semibold text-gray-700 dark:text-gray-300">

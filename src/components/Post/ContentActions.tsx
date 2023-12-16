@@ -7,10 +7,15 @@ import {
 } from '@heroicons/react/20/solid'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import type { Item } from '@/types/contract/ForumInterface'
+import type {Group, Item} from '@/types/contract/ForumInterface'
 import clsx from 'clsx'
+import { commentIsConfirmed } from '@/lib/utils'
+import AnimalAvatar from '@components/AnimalAvatar'
+import { VoteForItemUI } from '@components/Post/PostPage'
+import { formatDistanceToNow } from 'date-fns'
 
 export const ContentActions = ({
+                                 group,
   isContentEditable,
   onContentPage,
   item,
@@ -24,6 +29,7 @@ export const ContentActions = ({
   isLoading,
   hidden,
 }: {
+  group:Group;
   isContentEditable: boolean
   onContentPage: boolean
   item: Item
@@ -44,6 +50,37 @@ export const ContentActions = ({
   if (isContentEditable && onContentPage) {
     return (
       <>
+        <div className="pt-3 text-gray-600 dark:text-gray-400">
+          <div
+            className="flex items-center gap-4"
+            style={{
+              visibility: commentIsConfirmed(item.id) ? 'visible' : 'hidden',
+            }}
+          >
+            {
+              <AnimalAvatar
+                seed={`${item.note}_${Number(item.groupId)}`}
+                options={{ size: 30 }}
+              />
+            }
+
+            <VoteForItemUI
+              postId={item.parentId}
+              post={item}
+              group={group}
+              // onSuccess={onSuccess}
+            />
+
+            <p className="inline-block text-sm">
+              🕛{' '}
+              {item?.description?.time || item?.time
+                ? formatDistanceToNow(
+                    new Date(item?.description?.time || item?.time).getTime()
+                  )
+                : '-'}
+            </p>
+          </div>
+        </div>
         {!isEditing && (
           <>
             <PrimaryButton
