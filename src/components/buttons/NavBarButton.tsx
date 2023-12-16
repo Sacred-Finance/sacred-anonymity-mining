@@ -15,7 +15,7 @@ export function NavBarButton({
   return (
     <Link
       href={href}
-      className={'flex flex-col items-center justify-center hover:text-primary'}
+      className="flex flex-col items-center justify-center hover:text-primary"
       {...rest}
     >
       {children}

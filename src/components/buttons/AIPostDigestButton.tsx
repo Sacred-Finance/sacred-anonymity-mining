@@ -97,12 +97,12 @@ const AIDigestButton = ({ postData }: { postData: string }) => {
 
   return (
     <PrimaryButton
-      variant={'default'}
+      variant="default"
       className={ctaClass}
       onClick={handleFetchData}
       disabled={anyLoading || postData.length < 25 || allResponses || disabled}
       isLoading={anyLoading}
-      endIcon={<SparklesIcon className={'h-5 w-5 text-white'} height={20} />}
+      endIcon={<SparklesIcon className="h-5 w-5 text-white" height={20} />}
     >
       {getButtonText()}
     </PrimaryButton>

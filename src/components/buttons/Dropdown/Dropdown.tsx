@@ -25,9 +25,9 @@ const Dropdown = ({
           {selected?.image && (
             <Image
               src={selected.image}
-              alt={'ChainLogo'}
-              width={'20'}
-              height={'20'}
+              alt="ChainLogo"
+              width="20"
+              height="20"
               style={{ height: 20, width: 20 }}
               className="rounded"
             />
@@ -57,7 +57,7 @@ const Dropdown = ({
                 {k?.image && (
                   <Image
                     src={k.image}
-                    alt={'ChainLogo'}
+                    alt="ChainLogo"
                     width={25}
                     height={25}
                     className="rounded"

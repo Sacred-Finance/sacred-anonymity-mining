@@ -26,7 +26,7 @@ export const Logo = ({
       alt={logo || 'logo'}
       className={className}
       unoptimized
-      fetchPriority={'high'}
+      fetchPriority="high"
     />
   )
 }

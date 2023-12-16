@@ -16,14 +16,16 @@ interface JoinButtonProps {
 export const LeaveCommunityButton = memo(({ community }: JoinButtonProps) => {
   const { groupId } = community
 
-  console.log('groupId', groupId)
-
   const [isLoading, setIsLoading] = React.useState(false)
   const { t } = useTranslation()
   const { address } = useAccount()
-  const hasUserJoined: User | undefined | false = useUserIfJoined(groupId)
+  const hasUserJoined: User | undefined | false = useUserIfJoined(
+    groupId as string
+  )
 
-  const { leaveCommunity } = useLeaveCommunity({ id: BigInt(groupId) })
+  const { leaveCommunity } = useLeaveCommunity({
+    id: BigInt(groupId as string),
+  })
 
   const validateBeforeOpen = async (): Promise<boolean> => {
     if (!address) {
@@ -45,20 +47,15 @@ export const LeaveCommunityButton = memo(({ community }: JoinButtonProps) => {
     if (hasUserJoined) {
       try {
         await leaveCommunity()
-      } catch (error) {
-        console.error(error)
-        toast.error(error?.message ?? error)
+      } catch (error: unknown) {
+        if (error instanceof Error) toast.error(error?.message ?? error)
       }
     }
     setIsLoading(false)
   }
 
   return (
-    <PrimaryButton
-      isLoading={isLoading}
-      onClick={leave}
-      variant={'destructive'}
-    >
+    <PrimaryButton isLoading={isLoading} onClick={leave} variant="destructive">
       {t('button.leave', { count: hasUserJoined ? 0 : 1 })}
     </PrimaryButton>
   )

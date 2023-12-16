@@ -43,7 +43,7 @@ const TopicPosts = ({
   }
 
   return (
-    <div className={'flex flex-col'}>
+    <div className="flex flex-col">
       {nestedPosts.map(post => (
         <RecursivePostRenderer
           key={post.id}

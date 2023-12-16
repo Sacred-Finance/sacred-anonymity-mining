@@ -16,7 +16,7 @@ const Header = () => {
 
   return (
     <nav
-      id={'header'}
+      id="header"
       className={clsx(
         'flex  bg-white p-4 text-gray-800 dark:bg-gray-900 dark:text-white',
         menuOpen
@@ -62,7 +62,7 @@ const Header = () => {
           menuOpen ? 'flex flex-wrap justify-center gap-4 ' : 'hidden md:flex'
         )}
       >
-        <div className={'flex h-10 shrink-0 grow '}>
+        <div className="flex h-10 shrink-0 grow ">
           <ConnectWallet />
         </div>
         <NavBarButton
@@ -72,14 +72,14 @@ const Header = () => {
           className="flex flex-col items-center text-gray-600  hover:!text-purple-500 dark:text-gray-300"
         >
           <FaDiscord className="h-8 w-8" />
-          <span className={'text-sm'}>Discord</span>
+          <span className="text-sm">Discord</span>
         </NavBarButton>
         <NavBarButton
           href="/account"
           className="flex flex-col items-center text-gray-600 hover:!text-purple-500 dark:text-gray-300"
         >
           <UserCircleIcon className="h-8 w-8" />
-          <span className={'text-sm'}>Account</span>
+          <span className="text-sm">Account</span>
         </NavBarButton>
         <ThemeToggleButton />
       </div>

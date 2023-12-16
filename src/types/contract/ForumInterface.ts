@@ -1,5 +1,6 @@
 import type { BigNumber } from 'ethers'
 import type { OutputData } from '@editorjs/editorjs'
+import type { BigNumberish } from '@semaphore-protocol/group'
 
 export interface Admins {
   _admins: string[]
@@ -67,7 +68,7 @@ export interface Address {
 }
 
 export interface GroupId {
-  groupId: number
+  groupId: BigNumberish
 }
 
 export interface ItemId {
@@ -201,7 +202,7 @@ export interface Group {
   posts: number[]
   removed: boolean
   // The following are not part of the contract
-  groupId?: string
+  groupId?: BigNumberish
 }
 
 export interface CreateGroup {

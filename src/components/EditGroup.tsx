@@ -26,7 +26,6 @@ import TagInput from './TagInput/TagInput'
 import { Card, CardContent } from '@/shad/ui/card'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { ArrowLeftIcon } from '@heroicons/react/20/solid'
-import { Button } from '@/shad/ui/button'
 import Link from 'next/link'
 
 interface EditGroupProps {
@@ -49,7 +48,7 @@ export function EditGroup({ group }: EditGroupProps) {
   const [groupDescriptionState, setGroupDescriptionState] = useState<string>('')
   const [bannerFile, setBannerFile] = useState<File | null>(null)
   const [logoFile, setLogoFile] = useState<File | null>(null)
-  const [previewCard, setPreviewCard] = useState<boolean>(false)
+  const [confirmModal, setConfirmModal] = useState<boolean>(false)
 
   const [hasImageChanged, setHasImageChanged] = useState({
     banner: false,
@@ -105,12 +104,12 @@ export function EditGroup({ group }: EditGroupProps) {
     setGroupDescriptionState(e.target.value)
   }
 
-  const hidePreview = () => {
-    setPreviewCard(false)
+  const hideConfirmModal = () => {
+    setConfirmModal(false)
   }
 
-  const togglePreview = () => {
-    setPreviewCard(!previewCard)
+  const toggleConfirmModal = () => {
+    setConfirmModal(!confirmModal)
   }
   const submitAllGroupDetails = useCallback(async () => {
     try {
@@ -154,23 +153,23 @@ export function EditGroup({ group }: EditGroupProps) {
           await handleUpdateStateAfterEdit()
           toast.success('Group details updated')
           setIsSubmitting(false)
-          setPreviewCard(false)
-          router.push(`/communities/${group.groupId}`)
+          setConfirmModal(false)
+          await router.push(`/communities/${group.groupId}`)
         })
         .catch(error => {
           toast.error(`Something went wrong ${error.message}`)
           setIsSubmitting(false)
-          setPreviewCard(false)
+          setConfirmModal(false)
         })
     } catch (error: unknown) {
       if (error instanceof Error) {
         toast.error(error.message)
       }
       setIsSubmitting(false)
-      setPreviewCard(false)
+      setConfirmModal(false)
     } finally {
       setIsSubmitting(false)
-      setPreviewCard(false)
+      setConfirmModal(false)
     }
   }, [
     bannerFile,
@@ -187,11 +186,11 @@ export function EditGroup({ group }: EditGroupProps) {
   return (
     <div className="relative  z-50 grid  w-full max-w-screen-2xl grid-cols-1 gap-4 sm:p-8 md:p-24">
       <Link
-        className={'w-32 pl-0 flex items-center'}
+        className="flex w-fit items-center gap-2 rounded border bg-primary p-2  text-primary-foreground"
         href={previousPageUrl ? previousPageUrl : `/communities/${group.id}`}
       >
-        <ArrowLeftIcon className="h-6 w-6 text-gray-700 dark:text-gray-300" />
-        go back
+        <ArrowLeftIcon className="h-6 w-6" />
+        Back
       </Link>
       <div className="z-[-1] flex flex-col space-y-4 sm:col-span-full md:col-span-6 lg:col-span-6">
         <div className="flex flex-row items-center justify-between py-4">
@@ -209,7 +208,7 @@ export function EditGroup({ group }: EditGroupProps) {
           </label>
           <input
             className="rounded border px-3 py-2 text-gray-700 transition-colors focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:focus:border-blue-400"
-            placeholder={'An awesome community name'}
+            placeholder="An awesome community name"
             type="text"
             value={groupName}
             onChange={handleNameChange}
@@ -241,14 +240,14 @@ export function EditGroup({ group }: EditGroupProps) {
               bannerFile ? URL.createObjectURL(bannerFile) : null
             }
             displayName={t('banner')}
-            name={'banner'}
+            name="banner"
             setImageFileState={handleSetImage}
           />
 
           <PictureUpload
             uploadedImageUrl={logoFile ? URL.createObjectURL(logoFile) : null}
             displayName={t('logo')}
-            name={'logo'}
+            name="logo"
             setImageFileState={handleSetImage}
           />
         </div>
@@ -259,14 +258,14 @@ export function EditGroup({ group }: EditGroupProps) {
               buttonVariants.primarySolid,
               ' border bg-primary text-primary-foreground transition-colors hover:bg-blue-600 dark:hover:bg-blue-800'
             )}
-            onClick={togglePreview}
+            onClick={toggleConfirmModal}
           >
             {t('confirm')}
           </PrimaryButton>
         </div>
       </div>
 
-      {previewCard && (
+      {confirmModal && (
         <div className="fixed inset-0 z-10 flex items-center justify-center">
           <div className="absolute inset-0 bg-gray-900/80 transition-colors"></div>
           <Card className="relative z-20 mx-auto max-w-lg rounded-lg bg-card p-4 shadow-lg">
@@ -278,7 +277,7 @@ export function EditGroup({ group }: EditGroupProps) {
               <div className="flex w-full justify-around pt-4">
                 <PrimaryButton
                   className="bg-red-400 hover:bg-red-500"
-                  onClick={hidePreview}
+                  onClick={hideConfirmModal}
                   isLoading={isSubmitting}
                 >
                   Cancel

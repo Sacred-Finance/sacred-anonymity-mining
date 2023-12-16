@@ -134,14 +134,12 @@ export function PostPage({
                     <TooltipTab key={index} name={name} Icon={Icon} />
                   ))}
                 </Tab.List>
-                <Tab.Panels
-                  className={'col-span-12 flex w-full flex-col gap-4'}
-                >
+                <Tab.Panels className="col-span-12 flex w-full flex-col gap-4">
                   {/* Comments / Replies */}
                   <Tab.Panel className="flex flex-col gap-4 ">
                     <div className="sticky top-0 z-10 flex gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
                       <ShowConnectIfNotConnected>
-                        <div className={'flex gap-4'}>
+                        <div className="flex gap-4">
                           {selectedTab === 0 && (
                             <CreateCommentUI
                               post={post}
@@ -203,11 +201,7 @@ export function PostPage({
 
                   <Tab.Panel className="flex flex-col gap-4">
                     <div className="mb-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
-                      <div
-                        className={
-                          'grid grid-cols-2 gap-4 md:grid-cols-2 xl:grid-cols-3'
-                        }
-                      >
+                      <div className="grid grid-cols-2 gap-4 md:grid-cols-2 xl:grid-cols-3">
                         <AnalysisCheckboxComponent />
                         <AIDigestButton
                           postData={OutputDataToHTML(post?.description)}
@@ -220,7 +214,7 @@ export function PostPage({
                   {/* Community Tab */}
                   <Tab.Panel className="mb-2 flex flex-col gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
                     <CommunityCard
-                      variant={'banner'}
+                      variant="banner"
                       community={community}
                       isAdmin={isAdmin || false}
                     />
@@ -250,18 +244,11 @@ const TooltipTab = ({ name, Icon }) => (
     }
   >
     <Button variant="outline">
-      <Icon className={'h-5 w-5'} />
+      <Icon className="h-5 w-5" />
       {name}
     </Button>
   </Tab>
 )
-interface HandleVoteParams {
-  e: any
-  vote: 'upvote' | 'downvote'
-  voteForPost: (itemId: number, voteType: 0 | 1) => Promise<void>
-  itemId: any
-  setIsLoading: any
-}
 
 const CreateCommentUI = ({
   group,
@@ -339,7 +326,7 @@ const CreateCommentUI = ({
     users.forEach(u => semaphoreGroup.addMember(BigInt(u)))
 
     try {
-      const userIdentity = new Identity(`${address}`)
+      const userIdentity = new Identity(address)
 
       const note = await createNote(userIdentity)
 
@@ -450,7 +437,7 @@ export const VoteForItemUI = ({
       const semaphoreGroup = new SemaphoreGroup(BigInt(groupId))
       const users = await fetchUsersFromSemaphoreContract(groupId)
       users.forEach(u => semaphoreGroup.addMember(BigInt(u)))
-      const userIdentity = new Identity(`${address}`)
+      const userIdentity = new Identity(address)
 
       const { proof, nullifierHash, merkleTreeRoot } = await generateProof(
         userIdentity,
@@ -502,7 +489,7 @@ export const VoteForItemUI = ({
         isConnected={!!address}
         isJoined={!!user}
         isLoading={isLoading}
-        onClick={e => voteForPost(Number(post.id), 1)}
+        onClick={() => voteForPost(Number(post.id), 1)}
         disabled={isLoading || !address}
       >
         <span className="font-bold  text-gray-500 dark:text-gray-300">

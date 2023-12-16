@@ -21,7 +21,7 @@ function AiAccordionItem({
   return (
     <AccordionItem value={config.key}>
       <AccordionTrigger>
-        <span className={'inline-flex gap-4'}>
+        <span className="inline-flex gap-4">
           <CheckCircle
             className={
               responses[config.key] ? 'text-green-500' : 'text-gray-500'

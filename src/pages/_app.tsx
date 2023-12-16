@@ -22,9 +22,9 @@ import { chains, config } from '../../wagmi-config'
 function App({ Component, pageProps }: AppProps) {
   return (
     <ThemeProvider
-      attribute={'class'}
-      defaultTheme={'dark'}
-      storageKey={'theme-color'}
+      attribute="class"
+      defaultTheme="dark"
+      storageKey="theme-color"
     >
       <Web3Wrapper>
         <HeadGlobal />
@@ -70,7 +70,7 @@ export function Web3Wrapper({ children }: { children: React.ReactNode }) {
         initialChain={polygonMumbai.id} // Optional, initialChain={1}, initialChain={chain.mainnet}, initialChain={gnosisChain}
         showRecentTransactions={false}
         theme={myTheme}
-        id={'rainbowkit'}
+        id="rainbowkit"
       >
         <CommunityProvider>
           <ErrorBoundary>{children}</ErrorBoundary>

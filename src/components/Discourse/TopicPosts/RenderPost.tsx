@@ -27,11 +27,7 @@ export const RenderPost = ({
         'flex flex-col gap-8 rounded-lg border border-gray-300 bg-white p-6 shadow-md transition-colors duration-300 hover:bg-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:hover:bg-gray-900/80'
       )}
     >
-      <div
-        className={
-          'flex w-full items-center justify-start gap-4 border-b-2 border-gray-300 pb-2 dark:border-gray-600'
-        }
-      >
+      <div className="flex w-full items-center justify-start gap-4 border-b-2 border-gray-300 pb-2 dark:border-gray-600">
         <StatsBadge icon={<PostAuthorInformation post={post} />} />
         <StatsBadge
           value={post.post_number}
@@ -48,7 +44,7 @@ export const RenderPost = ({
             formatDistanceToNow(new Date(post.created_at), { addSuffix: true })
           )}
           icon={
-            <ClockIcon className={'w-6 p-0 text-gray-600 dark:text-gray-400'} />
+            <ClockIcon className="w-6 p-0 text-gray-600 dark:text-gray-400" />
           }
         />
       </div>

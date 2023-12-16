@@ -96,7 +96,7 @@ export const TosConfirmationWrapper: React.FC<TosConfirmationWrapperProps> = ({
                   onChange={e => setIsChecked(e.target.checked)}
                   className="mr-2 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-0 dark:border-gray-600 dark:text-blue-400"
                 />
-                <label htmlFor={'agree'} className="">
+                <label htmlFor="agree" className="">
                   {t('termsOfService.agreeCheckBox')}
                 </label>
               </div>

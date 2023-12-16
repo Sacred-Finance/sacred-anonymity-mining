@@ -11,10 +11,13 @@ import {
 } from '@/lib/utils'
 import { forumContract } from '@/constant/const'
 import { createComment, createPost, edit } from '@/lib/api'
+import type { BigNumberish } from '@semaphore-protocol/group'
 import { Group as SemaphoreGroup } from '@semaphore-protocol/group'
 import { mutate } from 'swr'
 import { GroupPostAPI, GroupPostCommentAPI } from '@/lib/fetcher'
 import { generateProof } from '@semaphore-protocol/proof'
+import type { GroupId } from '@/types/contract/ForumInterface'
+import type { Address } from 'wagmi'
 
 export const emptyPollRequest = {
   pollType: 0,
@@ -27,17 +30,15 @@ export const emptyPollRequest = {
 
 export async function handleDeleteItem(
   this: {
-    groupId: string
-    postId: string
+    groupId: BigNumberish
+    postId: BigNumberish
   },
-  address: string,
+  address: Address,
   postedByUser: User,
   itemId: bigint
 ) {
   const signal = ethers.constants.HashZero
-  const userPosting = new Identity(
-    `${address}_${this.groupId}_${postedByUser?.name}`
-  )
+  const userPosting = new Identity(address)
 
   const note = await createNote(userPosting)
 
@@ -63,17 +64,17 @@ export async function handleDeleteItem(
 // todo: create works, but it fails in either the caching, or updating the UI after its made - fix currently is refreshing the page.
 export async function create(
   this: {
-    groupId: string
-    postId: string
+    groupId: BigNumberish
+    postId: BigNumberish
   },
-  content,
-  type,
-  address,
-  users,
-  postedByUser,
-  groupId,
-  setWaiting,
-  onIPFSUploadSuccess
+  content: any,
+  type: string,
+  address: string | undefined,
+  users: any,
+  postedByUser: any,
+  groupId: BigNumberish | GroupId,
+  setWaiting: any,
+  onIPFSUploadSuccess: (arg0: any, arg1: string) => void
 ) {
   const currentDate = new Date()
   const message =
@@ -87,9 +88,7 @@ export async function create(
     onIPFSUploadSuccess(content, cid)
 
     const signal = getBytes32FromIpfsHash(cid)
-    const userPosting = new Identity(
-      `${address}_${this.groupId}_${postedByUser?.name || 'anon'}`
-    )
+    const userPosting = new Identity(address)
 
     const extraNullifier = hashBytes(signal).toString()
     const note = await createNote(userPosting)

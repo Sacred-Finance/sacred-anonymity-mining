@@ -15,7 +15,7 @@ const LottieControl: React.FC<LottieControlProps> = () => {
     },
   }
 
-  return <Lottie options={defaultOptions} height={'50vw'} width={'50vw'} />
+  return <Lottie options={defaultOptions} height="50vw" width="50vw" />
 }
 
 export default LottieControl

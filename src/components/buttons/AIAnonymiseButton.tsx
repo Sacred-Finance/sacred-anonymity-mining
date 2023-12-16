@@ -41,7 +41,7 @@ const AnonymizeButton: React.FC<AnonymizeButtonProps> = ({
       template: Template.Anonymize,
     },
   ])
-  const { isLoading, data, error, fetchData } = analysis
+  const { isLoading, data, fetchData } = analysis
   const [showModal, setShowModal] = React.useState(!isLoading && data)
 
   const toggleModal = () => {
@@ -122,7 +122,7 @@ const AnonymizeButton: React.FC<AnonymizeButtonProps> = ({
               />
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className={'flex shrink-0 grow gap-1'}>
+          <DialogFooter className="flex shrink-0 grow gap-1">
             <PrimaryButton
               disabled={!data || isLoading}
               endIcon={
@@ -135,8 +135,8 @@ const AnonymizeButton: React.FC<AnonymizeButtonProps> = ({
                 />
               }
               isLoading={isLoading}
-              variant={'secondary'}
-              className={''}
+              variant="secondary"
+              className=""
               onClick={() => {
                 toggleModal()
                 fetchData()
@@ -146,7 +146,7 @@ const AnonymizeButton: React.FC<AnonymizeButtonProps> = ({
             </PrimaryButton>
 
             <PrimaryButton
-              variant={'default'}
+              variant="default"
               disabled={!data || isLoading}
               onClick={useThis}
             >

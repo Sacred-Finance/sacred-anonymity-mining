@@ -7,7 +7,7 @@ import { useAccount } from 'wagmi'
 import { Identity } from '@semaphore-protocol/identity'
 import { createNote } from '@/lib/utils'
 import { BigNumber } from 'ethers'
-import { PollUI } from '@components/PollIUI2'
+import { PollUI } from '@components/PollIUI'
 import { ContentActions } from '@components/Post/ContentActions'
 import { PostTitle } from '@components/Post/PostTitle'
 import type { User } from '@/lib/model'
@@ -20,7 +20,6 @@ import dynamic from 'next/dynamic'
 import type { Group, Item } from '@/types/contract/ForumInterface'
 import EditorJsRenderer from '@components/editor-js/EditorJSRenderer'
 import type { Address } from '@/types/common'
-import AnimalAvatar from '../AnimalAvatar'
 
 const Editor = dynamic(() => import('../editor-js/Editor'), {
   ssr: false,
@@ -188,7 +187,6 @@ export const PostItem = ({
         {isTypeOfPoll && <PollUI group={group} post={post} />}
 
         <div className="sticky bottom-0 flex items-center justify-between gap-4">
-
           <ContentActions
             group={group}
             item={post}
@@ -254,7 +252,7 @@ const checkIfPostIsEditable = async ({
   userName: string
   canDelete: boolean
 }): Promise<boolean> => {
-  const userPosting = new Identity(`${address}`)
+  const userPosting = new Identity(address)
   const generatedNote = await createNote(userPosting)
   const generatedNoteAsBigNumber = BigNumber.from(generatedNote).toString()
   const noteBigNumber = BigNumber.from(post.note).toString()

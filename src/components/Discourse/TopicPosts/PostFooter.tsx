@@ -9,11 +9,11 @@ export const PostFooter = ({ post, addReplyToPosts, readonly = false }) => (
       <StatsBadge label="reads" value={post.reads.toString()} />
       <StatsBadge
         pluralizeLabel
-        label={'Reply'}
+        label="Reply"
         value={post.reply_count.toString()}
       />
     </div>
-    <div className={'flex h-full items-center gap-4'}>
+    <div className="flex h-full items-center gap-4">
       <ReplyToDiscoursePost
         post={post}
         addReplyToPosts={addReplyToPosts}

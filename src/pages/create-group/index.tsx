@@ -203,7 +203,7 @@ function CreateGroupFormUI({
           <label className="text-lg ">{t('placeholder.communityName')}</label>
           <input
             className="form-input rounded border border-gray-400 px-3 py-2 focus:border-primary focus:outline-none dark:border-gray-600 dark:bg-gray-700"
-            placeholder={'An awesome community name'}
+            placeholder="An awesome community name"
             type="text"
             value={groupName}
             onChange={handleNameChange}
@@ -228,13 +228,13 @@ function CreateGroupFormUI({
             <PictureUpload
               uploadedImageUrl={bannerUrl}
               displayName={t('banner')}
-              name={'banner'}
+              name="banner"
               setImageFileState={handleSetImage}
             />
             <PictureUpload
               uploadedImageUrl={logoUrl}
               displayName={t('logo')}
-              name={'logo'}
+              name="logo"
               setImageFileState={handleSetImage}
             />
           </div>
@@ -245,18 +245,16 @@ function CreateGroupFormUI({
                 <HoverCardTrigger asChild>
                   <Button
                     variant="outline"
-                    className={
-                      ' flex items-center justify-center rounded p-3 text-xs'
-                    }
+                    className=" flex items-center justify-center rounded p-3 text-xs"
                   >
-                    <FaCircleInfo className={'h-4 w-4 shrink-0'} />
+                    <FaCircleInfo className="h-4 w-4 shrink-0" />
                   </Button>
                 </HoverCardTrigger>
                 <HoverCardContent className="pointer-events-auto max-h-96 w-96 overflow-y-auto ">
                   <div className="space-y-1">
                     <span className="max-h-72 text-muted-foreground">
                       {t('toolTip.tokenGating.title')}
-                      <hr className={'mb-2 mt-1'} />
+                      <hr className="mb-2 mt-1" />
                       {t('toolTip.tokenGating.message') || ''}
                     </span>
                   </div>

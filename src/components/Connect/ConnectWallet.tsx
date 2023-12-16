@@ -14,7 +14,7 @@ export default function ConnectWallet({ show = 'always' }: Props) {
   ) {
     return null
   }
-  return <ConnectButton chainStatus={'none'} />
+  return <ConnectButton chainStatus="none" />
 }
 
 export const ShowConnectIfNotConnected = ({

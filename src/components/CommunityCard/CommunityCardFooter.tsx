@@ -25,13 +25,11 @@ export const CommunityCardFooter = () => {
   }
 
   return (
-    <CardFooter
-      className={'relative z-30 flex justify-between gap-1  bg-black/10 p-2'}
-    >
+    <CardFooter className="relative z-30 flex justify-between gap-1  bg-black/10 p-2">
       <div className="flex  shrink basis-[66%] flex-wrap   gap-1  rounded lg:basis-[75%]">
         <Button
           variant="outline"
-          className={' flex min-w-[45px] max-w-[75px] grow gap-1 text-xs'}
+          className=" flex min-w-[45px] max-w-[75px] grow gap-1 text-xs"
         >
           {userCount ?? 0}
           <span> Users</span>
@@ -47,9 +45,9 @@ export const CommunityCardFooter = () => {
           <HoverCardTrigger asChild>
             <Button
               variant="outline"
-              className={' min-w-[45px] max-w-[75px] text-xs'}
+              className=" min-w-[45px] max-w-[75px] text-xs"
             >
-              <FaCircleInfo className={'h-4 w-4 shrink-0'} />
+              <FaCircleInfo className="h-4 w-4 shrink-0" />
               Info
             </Button>
           </HoverCardTrigger>
@@ -76,18 +74,14 @@ export const CommunityCardFooter = () => {
           <span>{supportedChains?.[community?.chainId]?.name}</span>
           <Image
             src={chainLogos[community.chainId]}
-            alt={'ChainLogo'}
+            alt="ChainLogo"
             width={35}
             height={35}
             className="h-4 w-4  rounded "
           />
         </ToolTip>
       </div>
-      <div
-        className={
-          'flex h-full shrink grow basis-1/4 items-end justify-end self-end justify-self-end'
-        }
-      >
+      <div className="flex h-full shrink grow basis-1/4 items-end justify-end self-end justify-self-end">
         <LeaveJoinCommunityButton
           community={community}
           hasUserJoined={hasUserJoined}

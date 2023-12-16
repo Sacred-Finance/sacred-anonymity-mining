@@ -7,7 +7,7 @@ import Footer from '@components/Footer'
 
 export default function StandardLayout({ children }) {
   return (
-    <div className={'flex h-full min-h-screen flex-col justify-between'}>
+    <div className="flex h-full min-h-screen flex-col justify-between">
       <div>
         <Header />
         <Breadcrumbs />

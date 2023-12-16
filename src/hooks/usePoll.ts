@@ -4,7 +4,7 @@ import { GroupPostAPI, GroupPostCommentAPI } from '@/lib/fetcher'
 import type {
   ItemCreationRequest,
   PollRequestStruct,
-  PostContent,
+  NewPostContent,
 } from '@/lib/model'
 
 import {
@@ -23,7 +23,7 @@ import { mutate } from 'swr'
 import { useAccount } from 'wagmi'
 
 interface Poll {
-  content: PostContent
+  content: NewPostContent
   pollType: number
   duration: number
   answers: string[]
@@ -70,7 +70,7 @@ export const usePoll = ({ group }: { group: Group }) => {
       const users = await fetchUsersFromSemaphoreContract(group.groupId)
       const semaphoreGroup = new SemaphoreGroup(group.id)
       users.forEach(u => semaphoreGroup.addMember(BigInt(u)))
-      const userIdentity = new Identity(`${address}`)
+      const userIdentity = new Identity(address)
 
       const note = await createNote(userIdentity)
 
@@ -154,7 +154,7 @@ export const usePoll = ({ group }: { group: Group }) => {
       const semaphoreGroup = new SemaphoreGroup(group.id)
       const users = await fetchUsersFromSemaphoreContract(group.id)
       users.forEach(u => semaphoreGroup.addMember(BigInt(u)))
-      const userIdentity = new Identity(`${address}`)
+      const userIdentity = new Identity(address)
 
       const fullProof = await generateProof(
         userIdentity,

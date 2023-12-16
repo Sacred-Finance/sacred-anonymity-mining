@@ -84,7 +84,7 @@ const EditorBlock = ({
         )}
         id={holder}
       />
-      {!isReady && <CircularLoader className={'h-12'} />}
+      {!isReady && <CircularLoader className="h-12" />}
     </>
   )
 }

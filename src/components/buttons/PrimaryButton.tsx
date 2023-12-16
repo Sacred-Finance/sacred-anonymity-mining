@@ -33,13 +33,14 @@ export function PrimaryButton({
   requirements,
   isConnected,
   isJoined,
-  resetClasses,
   loadingPosition = 'end',
   variant = 'default',
   ...rest
 }: PrimaryButtonProps & ButtonHTMLAttributes<HTMLButtonElement>): JSX.Element {
   const { t } = useTranslation()
-  const wrappedOnClick = e => {
+  const wrappedOnClick = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
     if (requirements?.needsConnected && !isConnected) {
       return toast.error(t('alert.connectWallet'), { toastId: 'connectWallet' })
     }
@@ -49,6 +50,7 @@ export function PrimaryButton({
     if (rest.onClick) {
       rest.onClick(e)
     }
+    return null
   }
 
   // filter out props that are spreadable to the button

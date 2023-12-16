@@ -60,11 +60,7 @@ const Index = () => {
       {DiscourseCommunityBanner(loading, community)}
       <div className="xs:justify-center flex flex-wrap gap-4 md:justify-start">
         {topicList?.topics?.map(topic => (
-          <TopicCommunityCard
-            key={topic.id}
-            topic={topic}
-            variant={'default'}
-          />
+          <TopicCommunityCard key={topic.id} topic={topic} variant="default" />
         ))}
       </div>
     </>

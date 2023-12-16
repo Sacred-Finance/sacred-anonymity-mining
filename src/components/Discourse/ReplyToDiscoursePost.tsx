@@ -89,10 +89,10 @@ const ReplyToDiscoursePost = ({
       isReadOnly={readonly}
       isEditable={true}
       handleSubmit={onSubmit}
-      openFormButtonText={'Reply'}
-      actionType={'new'}
+      openFormButtonText="Reply"
+      actionType="new"
       showButtonWhenFormOpen={true}
-      submitButtonText={'Submit'}
+      submitButtonText="Submit"
       {...formProps}
       classes={{
         rootOpen:

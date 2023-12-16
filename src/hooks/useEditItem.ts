@@ -19,6 +19,7 @@ import { mutate } from 'swr'
 import { GroupPostCommentAPI } from '@/lib/fetcher'
 import type { Address } from '@/types/common'
 import type { Item } from '@/types/contract/ForumInterface'
+import type { BigNumberish } from '@semaphore-protocol/group'
 
 interface UseEditItemParams {
   item: Item
@@ -29,7 +30,7 @@ interface UseEditItemParams {
 
 export interface EditItemParams {
   content: PostContent
-  itemId: number
+  itemId: BigNumberish
   itemType: ContentType
   note: number
 }
@@ -100,37 +101,32 @@ export const useEditItem = ({
       const post = JSON.stringify(content)
       const message = currentDate.getTime().toString() + '#' + post
       let cid
-      try {
-        cid = await uploadIPFS(message)
-        if (!cid) {
-          throw Error('Upload to IPFS failed')
-        }
-        console.log(`IPFS CID: ${cid}`)
-        const signal = getBytes32FromIpfsHash(cid)
-        if (!member) {
-          throw Error('Member not found')
-        }
-        const userPosting = new Identity(address)
-        const input = {
-          trapdoor: userPosting.getTrapdoor(),
-          note: BigInt(note),
-          nullifier: userPosting.getNullifier(),
-        }
-
-        const { a, b, c } = await generateGroth16Proof({ input: input })
-        return writeAsync
-          ? writeAsync({
-              recklesslySetUnpreparedArgs: [a, b, c, itemId, signal],
-            }).then(async value => {
-              return await value.wait().then(async () => {
-                await mutate(GroupPostCommentAPI(groupId, postId))
-              })
-            })
-          : null
-      } catch (error) {
-        // this.undoNewPost(groupId, cid);
-        throw error
+      cid = await uploadIPFS(message)
+      if (!cid) {
+        throw Error('Upload to IPFS failed')
       }
+      console.log(`IPFS CID: ${cid}`)
+      const signal = getBytes32FromIpfsHash(cid)
+      if (!member) {
+        throw Error('Member not found')
+      }
+      const userPosting = new Identity(address)
+      const input = {
+        trapdoor: userPosting.getTrapdoor(),
+        note: BigInt(note),
+        nullifier: userPosting.getNullifier(),
+      }
+
+      const { a, b, c } = await generateGroth16Proof({ input: input })
+      return writeAsync
+        ? writeAsync({
+            recklesslySetUnpreparedArgs: [a, b, c, itemId, signal],
+          }).then(async value => {
+            return await value.wait().then(async () => {
+              await mutate(GroupPostCommentAPI(groupId, postId))
+            })
+          })
+        : null
     } else {
       return itemType == 0 || itemType == 2
         ? postInstance?.edit(

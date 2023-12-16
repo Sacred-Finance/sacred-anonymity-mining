@@ -1,4 +1,5 @@
-import React, { MouseEvent, ReactNode, useState } from 'react'
+import type { MouseEvent, ReactNode } from 'react'
+import React, { useState } from 'react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/20/solid'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shad/ui/popover'
 import { Button } from '@/shad/ui/button'
@@ -38,7 +39,7 @@ export const DropdownCommunityCard: React.FC<CardDropDownProps> = ({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className={'w-full'}
+        className="w-full"
         onBlur={() => {
           setIsOpen(false)
         }}

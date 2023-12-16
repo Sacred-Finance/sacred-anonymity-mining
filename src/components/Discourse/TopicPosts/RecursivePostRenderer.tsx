@@ -72,7 +72,7 @@ const ResponseAccordion = ({
   }
 
   return (
-    <AnimatePresence mode={'wait'}>
+    <AnimatePresence mode="wait">
       <button
         onClick={toggleShow}
         className="flex w-full items-center justify-between gap-2 text-sm text-gray-500 transition-colors duration-200 hover:text-gray-700 focus:outline-none "

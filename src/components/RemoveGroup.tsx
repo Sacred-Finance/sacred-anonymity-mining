@@ -38,9 +38,9 @@ const RemoveGroup: React.FC<RemoveGroupProps> = ({ groupId, hidden }) => {
     <>
       {(isAdmin || isModerator) && (
         <Button
-          variant={'destructive'}
+          variant="destructive"
           id="edit-community-button"
-          className={'w-full'}
+          className="w-full"
           onClick={onClick}
           aria-label="edit community"
         >

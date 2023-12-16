@@ -7,7 +7,7 @@ import {
 } from '@heroicons/react/20/solid'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import type {Group, Item} from '@/types/contract/ForumInterface'
+import type { Group, Item } from '@/types/contract/ForumInterface'
 import clsx from 'clsx'
 import { commentIsConfirmed } from '@/lib/utils'
 import AnimalAvatar from '@components/AnimalAvatar'
@@ -15,7 +15,7 @@ import { VoteForItemUI } from '@components/Post/PostPage'
 import { formatDistanceToNow } from 'date-fns'
 
 export const ContentActions = ({
-                                 group,
+  group,
   isContentEditable,
   onContentPage,
   item,
@@ -29,7 +29,7 @@ export const ContentActions = ({
   isLoading,
   hidden,
 }: {
-  group:Group;
+  group: Group
   isContentEditable: boolean
   onContentPage: boolean
   item: Item
@@ -57,12 +57,10 @@ export const ContentActions = ({
               visibility: commentIsConfirmed(item.id) ? 'visible' : 'hidden',
             }}
           >
-            {
-              <AnimalAvatar
-                seed={`${item.note}_${Number(item.groupId)}`}
-                options={{ size: 30 }}
-              />
-            }
+            <AnimalAvatar
+              seed={`${item.note}_${Number(item.groupId)}`}
+              options={{ size: 30 }}
+            />
 
             <VoteForItemUI
               postId={item.parentId}
@@ -88,7 +86,7 @@ export const ContentActions = ({
               className="bg-blue-500 text-sm text-white hover:bg-blue-600"
               onClick={() => setIsContentEditing(!isEditing)}
               startIcon={<PencilIcon className="h-4 w-4" />}
-              loadingPosition={'start'}
+              loadingPosition="start"
             >
               {t('button.edit')}
             </PrimaryButton>
@@ -114,7 +112,7 @@ export const ContentActions = ({
               }
               onClick={() => save()}
               startIcon={<PaperAirplaneIcon className="mr-1 h-4 w-4" />}
-              loadingPosition={'start'}
+              loadingPosition="start"
             >
               {t('button.save')}
             </PrimaryButton>
@@ -125,7 +123,7 @@ export const ContentActions = ({
                 'text-slate-200'
               )}
               startIcon={<XCircleIcon className="mr-1 h-4 w-4" />}
-              loadingPosition={'start'}
+              loadingPosition="start"
               onClick={() => onClickCancel()}
             >
               {t('button.cancel')}

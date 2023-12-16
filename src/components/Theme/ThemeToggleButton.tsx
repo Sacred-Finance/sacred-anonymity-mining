@@ -50,7 +50,7 @@ export const ThemeToggleButton = ({ noTabIndex = false }) => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <MotionButton
-        layoutId={'active'}
+        layoutId="active"
         whileHover={{ opacity: 0 }}
         className={clsx(
           'z-[1] flex items-center justify-center gap-1 bg-transparent p-0 text-xs hover:bg-transparent'
@@ -67,7 +67,7 @@ export const ThemeToggleButton = ({ noTabIndex = false }) => {
       <AnimatePresence>
         {isHovered && (
           <motion.span
-            layoutId={'preview'}
+            layoutId="preview"
             className="absolute left-0 top-0  flex h-full w-full items-center justify-center"
             variants={iconVariants}
             initial="initial"

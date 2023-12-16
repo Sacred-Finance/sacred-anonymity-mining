@@ -31,9 +31,7 @@ export const NoComments = ({
   return (
     <div
       onClick={onClick}
-      className={
-        'absolute inset-0 flex h-96 select-none flex-col items-center justify-center rounded border p-2 text-center text-xl font-bold '
-      }
+      className="absolute inset-0 flex h-96 select-none flex-col items-center justify-center rounded border p-2 text-center text-xl font-bold "
     >
       {t('noCommentsFound')}
       {children}

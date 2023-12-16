@@ -36,7 +36,6 @@ export const PollUI = ({ group, post }: { group: Group; post: Item }) => {
     forumContract.read
       .pollAt([BigInt(id)])
       .then(async res => {
-        console.log(res)
         let {
           answerCIDs,
           pollType,

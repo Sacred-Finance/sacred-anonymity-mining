@@ -29,28 +29,18 @@ export const PostList = ({ posts }: { posts: Item[] }) => {
     return (
       <Card
         key={p.id}
-        className={
-          'group relative flex flex-col !min-w-40 w-full !max-w-96 justify-between divide-y divide-gray-300/20 overflow-hidden rounded-lg  bg-gray-300/20 dark:divide-gray-800/50 dark:bg-gray-800/50'
-        }
+        className="group relative flex flex-col justify-between divide-y divide-gray-300/20 overflow-hidden rounded-lg  bg-gray-300/20 dark:divide-gray-800/50 dark:bg-gray-800/50"
       >
-        <CardHeader
-          className={'relative z-10   flex w-full flex-col py-1  px-3'}
-        >
-          <CardTitle
-            className={'flex w-full items-center justify-between gap-4'}
-          >
-            <PostTitle post={p} title={p.title} onPostPage={false} id={''} />
+        <CardHeader className="relative z-10   flex w-full flex-col px-3  py-1">
+          <CardTitle className="flex w-full items-center justify-between gap-4">
+            <PostTitle post={p} title={p.title} onPostPage={false} id="" />
           </CardTitle>
         </CardHeader>
 
-        <CardContent className={' overflow-hidden py-6 px-3'}>
-          <EditorJsRenderer data={p.description} className={'line-clamp-4'} />
+        <CardContent className=" overflow-hidden px-3 py-6">
+          <EditorJsRenderer data={p.description} className="line-clamp-4" />
         </CardContent>
-        <CardFooter
-          className={
-            'relative z-30 flex justify-between gap-1  bg-black/10 p-2'
-          }
-        >
+        <CardFooter className="relative z-30 flex justify-between gap-1  bg-black/10 p-2">
           <AnimalAvatar
             seed={`${p.note}_${Number(p.groupId)}`}
             options={{ size: 30 }}
@@ -68,7 +58,7 @@ export const PostList = ({ posts }: { posts: Item[] }) => {
     <div className="flex flex-wrap gap-2">
       {renderedPosts?.length === 0 && <NoPosts />}
 
-      <ScrollArea className={'h-full'}>
+      <ScrollArea className="h-full">
         <div className="grid-cols-auto flex grow flex-col  gap-6 rounded-lg p-0 md:grid  md:py-8 lg:grid-cols-2 xl:grid-cols-3">
           {renderedPosts === undefined ? (
             <CircularLoader />

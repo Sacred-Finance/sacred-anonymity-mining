@@ -4,9 +4,7 @@ import { CommunityCard } from '@components/CommunityCard/CommunityCard'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { motion } from 'framer-motion'
 import type { Group } from '@/types/contract/ForumInterface'
-import type { DiscourseCommunity } from '@/lib/model'
 import Communities from './Discourse/Communities'
-import { useRouter } from 'next/router'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shad/ui/tabs'
 import { Button } from '@/shad/ui/button'
 import { IoAddCircle } from 'react-icons/io5'
@@ -23,7 +21,6 @@ interface HomeProps {
 }
 
 function NoCommunities({ searchTerm }: { searchTerm: string }) {
-  const router = useRouter()
   return (
     <>
       <div className="col-span-full flex w-full flex-col items-center justify-center space-y-4">
@@ -51,17 +48,12 @@ function NoCommunities({ searchTerm }: { searchTerm: string }) {
             .
           </>
         </motion.p>
-        <motion.button
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="rounded bg-purple-500 px-4 py-2 font-bold text-white shadow dark:bg-purple-700 dark:text-gray-200"
-          onClick={() => {
-            router.push('/create-group')
-          }}
-        >
-          Create a new community
-        </motion.button>
+        <Link href="/create-group">
+          <Button variant="default">
+            <IoAddCircle className="h-6 w-6" />
+            New Community
+          </Button>
+        </Link>
       </div>
     </>
   )
@@ -79,7 +71,6 @@ function HomePage({
   const [filteredCommunities, setFilteredCommunities] =
     useState<Group[]>(communities)
   const [searchTerm, setSearchTerm] = useState('')
-  const router = useRouter()
 
   useEffect(() => {
     return () => {
@@ -119,8 +110,8 @@ function HomePage({
   return (
     <>
       <Tabs defaultValue="logos" className="h-full space-y-6">
-        <div className="flex items-center w-full justify-between gap-2">
-          <div className={'flex w-full basis-1/4 items-center justify-between'}>
+        <div className="flex w-full items-center justify-between gap-2">
+          <div className="flex w-full basis-1/4 items-center justify-between">
             <TabsList>
               <TabsTrigger value="logos" className="relative">
                 Logos
@@ -129,8 +120,8 @@ function HomePage({
             </TabsList>
           </div>
 
-          <div className={'flex w-full basis-3/4 items-center justify-between'}>
-            <div className="flex basis-3/4 gap-2 justify-between w-fit  items-center">
+          <div className="flex w-full basis-3/4 items-center justify-between gap-4">
+            <div className="flex w-full max-w-[600px] basis-3/4 items-center justify-between  gap-2">
               <SearchBar
                 debouncedResults={debouncedResults}
                 searchTerm={searchTerm}
@@ -138,9 +129,9 @@ function HomePage({
             </div>
             <div className="flex basis-1/4 items-center">
               <Link href="/create-group">
-                <Button variant={'default'}>
-                  <IoAddCircle className={'h-6 w-6'} />
-                  Create Community
+                <Button variant="default">
+                  <IoAddCircle className="h-6 w-6" />
+                  New Community
                 </Button>
               </Link>
             </div>
@@ -156,18 +147,20 @@ function HomePage({
           </div>
           <Separator className="my-4" />
           <div className="relative">
-            <ScrollArea className={'h-full'}>
+            <ScrollArea className="h-full">
               <div className="grid-cols-auto flex grow flex-col  gap-6 rounded-lg p-0 md:grid  md:py-8 lg:grid-cols-2 xl:grid-cols-3">
-                {(filteredCommunities.length
-                  ? filteredCommunities
-                  : communities
-                ).map(community => (
-                  <CommunityCard
-                    key={`$community_${community.id}`}
-                    community={community}
-                    isAdmin={isAdmin || false}
-                  />
-                ))}
+                {(searchTerm ? filteredCommunities : communities).map(
+                  community => (
+                    <CommunityCard
+                      key={`$community_${community.id}`}
+                      community={community}
+                      isAdmin={isAdmin || false}
+                    />
+                  )
+                )}
+                {!filteredCommunities.length && searchTerm && (
+                  <NoCommunities searchTerm={searchTerm} />
+                )}
               </div>
               <ScrollBar orientation="vertical" />
             </ScrollArea>

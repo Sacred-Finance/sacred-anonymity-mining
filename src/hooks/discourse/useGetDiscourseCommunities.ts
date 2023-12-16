@@ -1,5 +1,5 @@
 import useSWR from 'swr'
-import { DiscourseCommunity } from '@/lib/model'
+import type { DiscourseCommunity } from '@/lib/model'
 
 export const useGetDiscourseCommunities = (): {
   data: DiscourseCommunity[] | undefined

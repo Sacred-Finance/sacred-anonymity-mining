@@ -5,9 +5,8 @@ import { useRemoveItemFromForumContract } from '@/hooks/useRemoveItemFromForumCo
 import { toast } from 'react-toastify'
 import { useRouter } from 'next/router'
 import { ContentType } from '@/lib/model'
-import { CustomModal } from '@components/CustomModal'
 import { TrashIcon } from '@heroicons/react/20/solid'
-import { Group } from '@/types/contract/ForumInterface'
+import type { Group } from '@/types/contract/ForumInterface'
 import {
   Dialog,
   DialogContent,
@@ -77,7 +76,7 @@ const DeleteItemButton = ({
         <DialogTrigger>
           <PrimaryButton
             isLoading={isSubmitting}
-            className="bg-red-500 text-white hover:bg-red-600 z-2"
+            className="z-2 bg-red-500 text-white hover:bg-red-600"
             onClick={() => setIsModalOpen(true)}
             startIcon={<TrashIcon className="h-5 w-5" />}
           >
@@ -85,7 +84,7 @@ const DeleteItemButton = ({
           </PrimaryButton>
         </DialogTrigger>
         <DialogContent>
-          <DialogHeader className={'space-y-4'}>
+          <DialogHeader className="space-y-4">
             <DialogTitle>Are you sure absolutely sure?</DialogTitle>
           </DialogHeader>{' '}
           <DialogDescription>

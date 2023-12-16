@@ -5,7 +5,7 @@ import useSWR from 'swr'
 import { useRouter } from 'next/router'
 import fetcher, { GroupPostAPI } from '@/lib/fetcher'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
-import { GroupWithPostDataResponse } from '@pages/api/groupWithPostData'
+import type { GroupWithPostDataResponse } from '@pages/api/groupWithPostData'
 
 export default function Page() {
   const router = useRouter()

@@ -1,11 +1,7 @@
 import React from 'react'
-import { commentIsConfirmed } from '@/lib/utils'
-import { formatDistanceToNow } from 'date-fns'
 import type { Group, Item } from '@/types/contract/ForumInterface'
 import { PostItem } from '@components/Post/PostItem'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
-import { VoteForItemUI } from './PostPage'
-import AnimalAvatar from '../AnimalAvatar'
 
 export const NewPostModal: {
   openFormButtonClosed: string
@@ -46,7 +42,6 @@ export const PostComment = ({
       {comment && (
         <PostItem post={comment} group={community} showAvatar={false} />
       )}
-
     </>
   )
 }

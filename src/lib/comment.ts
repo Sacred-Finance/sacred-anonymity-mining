@@ -1,6 +1,7 @@
 import type { User } from './model'
 import { create, editContent, handleDeleteItem } from '@/lib/item'
 import type { Address } from '@/types/common'
+import type { BigNumberish } from '@semaphore-protocol/group'
 
 interface CreateParams {
   commentContent: string
@@ -27,7 +28,6 @@ export class CommentClass {
     return this.postId + '_comments'
   }
 
-
   async create({
     commentContent,
     address,
@@ -53,10 +53,10 @@ export class CommentClass {
   async edit(
     commentContent,
     address: Address,
-    itemId,
+    itemId: BigNumberish,
     postedByUser: User,
     groupId: string,
-    setWaiting: Function
+    setWaiting: (waiting: boolean) => void
   ) {
     return await editContent.call(
       this,

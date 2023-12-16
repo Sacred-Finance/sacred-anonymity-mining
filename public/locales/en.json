@@ -2,7 +2,7 @@
   "newPost": "New Post",
   "newCommunity": "New Community",
   "createPost": "Create Post",
-  "createCommunity": "Create Community",
+  "createCommunity": "New Community",
   "editCommunity": "Edit Community",
   "editPost": "Edit Post",
   "banner": "Banner",
@@ -141,7 +141,7 @@
     "externalHelpLink": "External Help Link",
     "connectWallet_one": "Connect your wallet",
     "connectWallet_other": "Disconnect your wallet",
-    "createCommunity": "Create Community",
+    "createCommunity": "New Community",
     "homePage": "Home Page",
     "delete": "Delete",
     "editCommunity": {

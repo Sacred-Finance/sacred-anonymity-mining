@@ -15,7 +15,6 @@ import { useConnectModal } from '@rainbow-me/rainbowkit'
 
 interface JoinButtonProps {
   community: Group
-  hideIfJoined?: boolean
 }
 
 export function CircularLoader({ className }: { className?: string }) {
@@ -41,93 +40,87 @@ export function CircularLoader({ className }: { className?: string }) {
   )
 }
 
-export const JoinCommunityButton = memo(
-  ({ community, hideIfJoined }: JoinButtonProps) => {
-    const { openConnectModal } = useConnectModal()
+export const JoinCommunityButton = memo(({ community }: JoinButtonProps) => {
+  const { openConnectModal } = useConnectModal()
 
-    const { groupId, name: groupName } = community
+  const { groupId, name: groupName } = community
 
-    const [isLoading, setIsLoading] = React.useState(false)
-    const { t } = useTranslation()
-    const { address } = useAccount()
-    const hasUserJoined: User | undefined | false = useUserIfJoined(
-      groupId as string | number
-    )
+  const [isLoading, setIsLoading] = React.useState(false)
+  const { t } = useTranslation()
+  const { address } = useAccount()
+  const hasUserJoined: User | undefined | false = useUserIfJoined(
+    groupId as string | number
+  )
 
-    const { checkUserBalance } = useValidateUserBalance(community, address)
+  const { checkUserBalance } = useValidateUserBalance(community, address)
 
-    const joinCommunity = useJoinCommunity()
+  const joinCommunity = useJoinCommunity()
 
-    const validateBeforeOpen = async (): Promise<boolean | undefined> => {
-      if (!address) {
-        if (openConnectModal) {
-          openConnectModal()
-        }
-        toast.error(t('alert.connectWallet'), { toastId: 'connectWallet' })
-
-        return false
+  const validateBeforeOpen = async (): Promise<boolean | undefined> => {
+    if (!address) {
+      if (openConnectModal) {
+        openConnectModal()
       }
-      return checkUserBalance()
+      toast.error(t('alert.connectWallet'), { toastId: 'connectWallet' })
+
+      return false
     }
-    const join = async () => {
-      if (isLoading) {
-        return
-      }
-      setIsLoading(true)
-      const result = await validateBeforeOpen()
-      if (!result) {
-        return
-      }
-      if (!hasUserJoined) {
-        await joinCommunity(groupName, groupId)
-      }
-      setIsLoading(false)
-    }
-    const joinButton = (
-      <PrimaryButton
-        isLoading={isLoading}
-        onClick={join}
-        variant={hasUserJoined ? 'secondary' : 'default'}
-      >
-        {hasUserJoined ? (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            className="h-5 w-5"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M5 13l4 4L19 7"
-            />
-          </svg>
-        ) : null}
-        {t('button.join', { count: hasUserJoined ? 0 : 1 })}
-      </PrimaryButton>
-    )
-    return (
-      <>
-        {hasUserJoined ? (
-          hideIfJoined ? (
-            ''
-          ) : (
-            joinButton
-          )
-        ) : (
-          <TosConfirmationWrapper
-            buttonElement={joinButton}
-            headerText={t('termsOfService.header')}
-            descriptionText={t('termsOfService.description')}
-            onAgree={join}
-            validationBeforeOpen={validateBeforeOpen}
-          />
-        )}
-      </>
-    )
+    return checkUserBalance()
   }
-)
+  const join = async () => {
+    if (isLoading) {
+      return
+    }
+    setIsLoading(true)
+    const result = await validateBeforeOpen()
+    if (!result) {
+      return
+    }
+    if (!hasUserJoined) {
+      await joinCommunity(groupName, groupId)
+    }
+    setIsLoading(false)
+  }
+  const joinButton = (
+    <PrimaryButton
+      isLoading={isLoading}
+      onClick={join}
+      variant={hasUserJoined ? 'secondary' : 'default'}
+    >
+      {hasUserJoined ? (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          className="h-5 w-5"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M5 13l4 4L19 7"
+          />
+        </svg>
+      ) : null}
+      {t('button.join', { count: hasUserJoined ? 0 : 1 })}
+    </PrimaryButton>
+  )
+  return (
+    <>
+      {hasUserJoined ? (
+        joinButton
+      ) : (
+        <TosConfirmationWrapper
+          buttonElement={joinButton}
+          headerText={t('termsOfService.header')}
+          descriptionText={t('termsOfService.description')}
+          onAgree={join}
+          validationBeforeOpen={validateBeforeOpen}
+        />
+      )}
+    </>
+  )
+})
 
 JoinCommunityButton.displayName = 'JoinCommunityButton'

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'next-i18next'
-import { useHandleFileImageUpload } from '../utils/communityUtils'
+import { useHandleFileImageUpload } from '@/utils/communityUtils'
 import type { HandleSetImage } from '@pages/communities/[groupId]/edit'
 import Image from 'next/image'
 
@@ -51,14 +51,14 @@ export const PictureUpload = (props: {
     <>
       <div
         ref={imageRef}
-        className={`relative text-clip rounded-2xl border-2 border-dashed border-gray-300 bg-gray-100 hover:text-white dark:bg-gray-900`}
+        className="relative overflow-hidden rounded-2xl border-2 border-dashed border-gray-300 bg-gray-100 hover:text-white  dark:bg-gray-900"
       >
         {props.uploadedImageUrl ? (
           <>
             <Image
               width={500}
               height={500}
-              className=" h-52 w-full  object-contain transition-opacity  "
+              className="h-52 w-full object-contain transition-opacity"
               style={{ opacity: isDeleteIconVisible ? 0.5 : 1 }}
               onFocus={() => setIsDeleteIconVisible(true)}
               onKeyDown={e => {
@@ -111,7 +111,7 @@ export const PictureUpload = (props: {
           </>
         ) : (
           <button
-            className={`group flex h-52 w-full cursor-pointer items-center  justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-gray-100 px-6 hover:text-white  dark:bg-gray-900`}
+            className="group flex h-52 w-full cursor-pointer items-center  justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-gray-100 px-6 hover:text-white  dark:bg-gray-900"
             onClick={openFileUpload}
           >
             <div className="flex items-center justify-center text-lg">

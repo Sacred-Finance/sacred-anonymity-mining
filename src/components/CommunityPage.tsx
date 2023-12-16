@@ -50,7 +50,7 @@ export function CommunityPage({
       <div className="relative flex min-h-screen gap-6 rounded-lg  p-6 transition-colors ">
         <div className="sticky top-0 flex w-full flex-col gap-6">
           <CommunityCard
-            variant={'banner'}
+            variant="banner"
             community={community}
             isAdmin={isAdmin}
           />

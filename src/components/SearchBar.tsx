@@ -26,11 +26,11 @@ export const SearchBar = ({
   const inputRef = React.useRef<HTMLInputElement>(null)
   return (
     <div className=" flex h-10 w-full items-center  rounded hover:shadow-md  dark:bg-gray-900 dark:text-white">
-      <div className={'flex justify-center p-3'}>
-        <AnimatePresence mode={'popLayout'}>
+      <div className="flex justify-center p-2">
+        <AnimatePresence mode="popLayout">
           {searchTerm ? (
             <motion.button
-              key={'cancel'}
+              key="cancel"
               variants={animationVariants}
               initial="initial"
               animate="animate"
@@ -48,7 +48,7 @@ export const SearchBar = ({
             </motion.button>
           ) : (
             <motion.div
-              key={'search'}
+              key="search"
               variants={animationVariants}
               initial="initial"
               animate="animate"

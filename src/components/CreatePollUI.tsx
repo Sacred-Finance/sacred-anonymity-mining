@@ -139,7 +139,7 @@ const CreatePollUI = ({ post, group, onSuccess }: CreatePollUIProps) => {
                         <input
                           className="relative float-left h-5 w-5 appearance-none rounded-full border-2 border-solid border-neutral-300 before:pointer-events-none  before:absolute before:h-4 before:w-4 before:scale-0 before:rounded-full before:bg-transparent before:opacity-0 before:shadow-[0px_0px_0px_13px_transparent] before:content-[''] after:absolute after:z-[1] after:block after:h-4 after:w-4 after:rounded-full after:content-[''] checked:border-primary checked:before:opacity-[0.16] checked:after:absolute checked:after:left-1/2 checked:after:top-1/2 checked:after:h-[0.625rem] checked:after:w-[0.625rem] checked:after:rounded-full checked:after:border-primary checked:after:bg-primary checked:after:content-[''] checked:after:[transform:translate(-50%,-50%)] hover:cursor-pointer hover:before:opacity-[0.04] hover:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:shadow-none focus:outline-none focus:ring-0 focus:before:scale-100 focus:before:opacity-[0.12] focus:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:before:transition-[box-shadow_0.2s,transform_0.2s] checked:focus:border-primary checked:focus:before:scale-100 checked:focus:before:shadow-[0px_0px_0px_13px_#3b71ca] checked:focus:before:transition-[box-shadow_0.2s,transform_0.2s] dark:border-neutral-600 dark:checked:border-primary dark:checked:after:border-primary dark:checked:after:bg-primary dark:focus:before:shadow-[0px_0px_0px_13px_rgba(255,255,255,0.4)] dark:checked:focus:border-primary dark:checked:focus:before:shadow-[0px_0px_0px_13px_#3b71ca]"
                           type="radio"
-                          name={`POLL_TYPE`}
+                          name="POLL_TYPE"
                           checked={i.value === pollType}
                           onChange={() => setPollType(i.value)}
                           id={`${i.value}`}
@@ -157,7 +157,7 @@ const CreatePollUI = ({ post, group, onSuccess }: CreatePollUIProps) => {
 
                   {/* Title */}
                   <div className="flex w-full flex-col gap-2">
-                    <label htmlFor={'title'} className="text-base">
+                    <label htmlFor="title" className="text-base">
                       Title (Max 60)
                     </label>
                     <input
@@ -165,7 +165,7 @@ const CreatePollUI = ({ post, group, onSuccess }: CreatePollUIProps) => {
                       className=" w-full  rounded border border-gray-400 px-3 py-2 focus:border-primary focus:outline-none dark:border-gray-600 dark:bg-gray-700"
                       onClick={e => e.currentTarget.select()}
                       maxLength={60}
-                      placeholder={'Poll Title'}
+                      placeholder="Poll Title"
                       type="text"
                       value={title}
                       onChange={e => setTitle(e.target.value)}
@@ -173,7 +173,7 @@ const CreatePollUI = ({ post, group, onSuccess }: CreatePollUIProps) => {
                   </div>
 
                   <ScrollArea className="flex max-h-[calc(35vh)] w-full flex-col gap-2 ">
-                    <label htmlFor={'content'} className="text-base">
+                    <label htmlFor="content" className="text-base">
                       Content
                     </label>
                     <Editor
@@ -185,8 +185,8 @@ const CreatePollUI = ({ post, group, onSuccess }: CreatePollUIProps) => {
                       data={description}
                       onChange={debouncedSetDescription}
                       readOnly={false}
-                      placeholder={'Poll Description'}
-                      holder={`create-poll`}
+                      placeholder="Poll Description"
+                      holder="create-poll"
                     />
                   </ScrollArea>
 
@@ -197,7 +197,7 @@ const CreatePollUI = ({ post, group, onSuccess }: CreatePollUIProps) => {
                         <div className="text-base">Rate Scale From</div>
                         <input
                           className=" w-full  rounded border border-gray-400 px-3 py-2 focus:border-primary focus:outline-none dark:border-gray-600 dark:bg-gray-700"
-                          placeholder={'Rate Scale From'}
+                          placeholder="Rate Scale From"
                           type="number"
                           value={rateScaleFrom}
                           onChange={e => setRateScaleFrom(+e.target.value)}
@@ -207,7 +207,7 @@ const CreatePollUI = ({ post, group, onSuccess }: CreatePollUIProps) => {
                         <div className="text-base">Rate Scale To</div>
                         <input
                           className=" w-full  rounded border border-gray-400 px-3 py-2 focus:border-primary focus:outline-none dark:border-gray-600 dark:bg-gray-700"
-                          placeholder={'Rate Scale To'}
+                          placeholder="Rate Scale To"
                           type="number"
                           value={rateScaleTo}
                           onChange={e => setRateScaleTo(+e.target.value)}
@@ -227,7 +227,7 @@ const CreatePollUI = ({ post, group, onSuccess }: CreatePollUIProps) => {
                           <input
                             tabIndex={index}
                             className=" w-full  rounded border border-gray-400 px-3 py-2 focus:border-primary focus:outline-none dark:border-gray-600 dark:bg-gray-700"
-                            placeholder={'Option'}
+                            placeholder="Option"
                             type="text"
                             value={option}
                             onChange={e => {
@@ -280,7 +280,7 @@ const CreatePollUI = ({ post, group, onSuccess }: CreatePollUIProps) => {
                     <div className="text-base">Duration (In Hours)</div>
                     <input
                       className=" w-full  rounded border border-gray-400 px-3 py-2 focus:border-primary focus:outline-none dark:border-gray-600 dark:bg-gray-700"
-                      placeholder={'In Hours, 1 Week = 168 Hours'}
+                      placeholder="In Hours, 1 Week = 168 Hours"
                       type="number"
                       value={duration}
                       onChange={e => setDuration(+e.target.value)}

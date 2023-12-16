@@ -15,6 +15,8 @@ import { cn } from '@/shad/lib/utils'
 import { ScrollArea } from '@/shad/ui/scroll-area'
 
 export interface EditorJsType {
+  time: number
+  version: string
   blocks: {
     type: string
     data: (typeof OutputData)['blocks'][0]['data']
@@ -210,13 +212,13 @@ export const NewPostForm = ({
           )}
         >
           {itemType === 'post' && title !== false && (
-            <CardContent className={'flex flex-col gap-2'}>
-              <Label htmlFor={'title'} className="text-base">
+            <CardContent className="flex flex-col gap-2">
+              <Label htmlFor="title" className="text-base">
                 Title (Max 60)
               </Label>
 
               <Input
-                id={'title'}
+                id="title"
                 className=" w-full rounded-xl border bg-gray-950/10   p-4 "
                 ref={inputRef}
                 placeholder={
@@ -227,13 +229,13 @@ export const NewPostForm = ({
                   ) as string
                 }
                 value={title}
-                onChange={e => setTitle(e.target.value)}
+                onChange={e => (setTitle ? setTitle(e.target.value) : null)}
               />
             </CardContent>
           )}
           <Tab.Group>
             <Tab.Panels>
-              <CardHeader className={'flex justify-between'}>
+              <CardHeader className="flex justify-between">
                 <Label className="text-base">Content</Label>
               </CardHeader>
               <CardContent>
@@ -304,7 +306,7 @@ const FormButtons = ({
   children: React.ReactNode
 }) => (
   <CardFooter className="flex justify-between">
-    <PrimaryButton onClick={handleClose} variant={'ghost'}>
+    <PrimaryButton onClick={handleClose} variant="ghost">
       {t('button.closeForm')}
     </PrimaryButton>
     <div className="flex flex-row items-center gap-2">

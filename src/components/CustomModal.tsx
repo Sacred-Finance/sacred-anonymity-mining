@@ -29,7 +29,7 @@ export function CustomModal({
   }, [ref])
 
   return (
-    <AnimatePresence mode={'wait'}>
+    <AnimatePresence mode="wait">
       {isOpen && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -41,11 +41,7 @@ export function CustomModal({
             className
           )}
         >
-          <div
-            className={
-              'absolute inset-0 flex items-center justify-center sm:p-0 md:px-4 md:py-8'
-            }
-          >
+          <div className="absolute inset-0 flex items-center justify-center sm:p-0 md:px-4 md:py-8">
             <motion.div
               initial={{ scale: 0.7 }}
               animate={{ scale: 1 }}
@@ -53,13 +49,9 @@ export function CustomModal({
               transition={{ duration: 0.2 }}
               ref={ref}
             >
-              <div className={'flex justify-end bg-transparent '}>
+              <div className="flex justify-end bg-transparent ">
                 <button onClick={() => setIsOpen(false)} className={clsx()}>
-                  <XMarkIcon
-                    className={
-                      'h-6 w-6 text-white transition-all duration-700 group-hover:rotate-[240deg] '
-                    }
-                  />
+                  <XMarkIcon className="h-6 w-6 text-white transition-all duration-700 group-hover:rotate-[240deg] " />
                 </button>
               </div>
 

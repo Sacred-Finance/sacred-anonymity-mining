@@ -45,6 +45,8 @@ export interface PostContent extends PostOrComment {
   description: typeof OutputData
 }
 
+export type NewPostContent = Pick<PostContent, 'title' | 'description'>
+
 export type PollRequestStruct = {
   pollType: BigNumberish
   duration: BigNumberish //hours

@@ -23,6 +23,10 @@
     "react/prop-types": "off",
     "curly": [2, "multi-line"],
     "no-nested-ternary": "error",
-    "camelcase": "error"
+    "camelcase": "error",
+    "react/jsx-curly-brace-presence": [
+      "error",
+      { "props": "never", "children": "never" }
+    ]
   }
 }

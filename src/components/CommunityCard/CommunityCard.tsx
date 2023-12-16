@@ -20,7 +20,6 @@ import {
   CardTitle,
 } from '@/shad/ui/card'
 import { ScrollArea } from '@/shad/ui/scroll-area'
-import RemoveGroup from '@components/RemoveGroup'
 
 export const CommunityCardContext = React.createContext<
   | (Group & {
@@ -59,205 +58,89 @@ export const CommunityCard = ({
   const bannerSrc = useValidatedImage(community?.groupDetails?.bannerCID)
   const logoSrc = useValidatedImage(community?.groupDetails?.logoCID)
 
+  const finalActions = [
+    ...(isAdmin || isOwner
+      ? [
+          {
+            label: 'Edit',
+            icon: <PencilIcon className="h-full w-4" />,
+            href: `/communities/${community.groupId}/edit`,
+          },
+        ]
+      : []),
+    ...actions,
+  ]
+
   if (!community) {
     return <></>
   }
 
-  if (isAdmin || isOwner) {
-    return (
-      <CommunityCardContext.Provider
-        value={{
-          ...community,
-          variant,
-          user,
-          setShowBackground,
-          showBackground,
-          bannerSrc,
-        }}
+  return (
+    <CommunityCardContext.Provider
+      value={{
+        ...community,
+        variant,
+        user,
+        setShowBackground,
+        showBackground,
+        bannerSrc,
+      }}
+    >
+      <Card
+        onMouseLeave={() => setShowBackground(false)}
+        onClick={() => setShowBackground(false)}
+        className="group relative flex flex-col justify-between divide-y divide-gray-300/20 overflow-hidden rounded-lg  bg-gray-300/20 dark:divide-gray-800/50 dark:bg-gray-800/50"
       >
-        <Card
-          onMouseLeave={() => setShowBackground(false)}
-          onClick={() => setShowBackground(false)}
-          className={
-            'group relative flex flex-col justify-between divide-y divide-gray-300/20 overflow-hidden rounded-lg  bg-gray-300/20 dark:divide-gray-800/50 dark:bg-gray-800/50'
-          }
-        >
-          <CardHeader
-            className={'relative z-10  flex w-full flex-col   py-2  '}
-          >
-            <CardTitle
-              className={'flex w-full items-center justify-between gap-4'}
-            >
-              <Image
-                className="pointer-events-none  z-10 aspect-[1] h-[75px] w-[75px] rounded-full opacity-75"
-                src={logoSrc || mobileLogo}
-                alt={'community banner'}
-                width={75}
-                height={75}
-                unoptimized
-              />
-              <div className="flex w-full items-center justify-between rounded-md">
-                <Link
-                  onClick={e => {
-                    if (showBackground) {
-                      e.preventDefault()
-                      e.stopPropagation()
-                    }
-                  }}
-                  href={`/communities/${community?.groupId}`}
-                >
-                  <div className="space-y-1">
-                    <h2 className="text-2xl font-semibold tracking-tight">
-                      {community.name}
-                    </h2>
-                  </div>
-                </Link>
-                <DropdownCommunityCard
-                  actions={[
-                    isAdmin || isOwner
-                      ? {
-                          label: 'Edit',
-                          icon: <PencilIcon className={'h-full w-4'} />,
-                          href: `/communities/${community?.groupId}/edit`,
-                        }
-                      : false,
-                    <RemoveGroup
-                      key={'removeGroup'}
-                      groupId={community.id}
-                      hidden={false}
-                    />,
-                    ...actions,
-                  ]}
-                />
-              </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className={'min-h-[120px] pb-0 pt-2'}>
-            {bannerSrc && (
-              <Image
-                className="pointer-events-none h-full w-full rounded-lg object-cover opacity-40 transition-opacity duration-300 ease-in-out group-hover:opacity-80"
-                src={bannerSrc}
-                alt={'community banner'}
-                fill={true}
-                unoptimized
-              />
-            )}
-
-            <ScrollArea
-              className={
-                'h-full rounded p-1 transition-colors delay-300 duration-500 hover:bg-card'
-              }
-            >
-              <CardDescription
-                className={
-                  'z-10  h-24  text-base leading-snug text-card-foreground'
-                }
+        <CardHeader className="relative z-10  flex w-full flex-col   py-2  ">
+          <CardTitle className="flex w-full items-center justify-between gap-4">
+            <Image
+              className="pointer-events-none  z-10 aspect-[1] h-[75px] w-[75px] rounded-full opacity-75"
+              src={logoSrc || mobileLogo}
+              alt="community banner"
+              width={75}
+              height={75}
+              unoptimized
+            />
+            <div className="flex w-full items-center justify-between rounded-md">
+              <Link
+                onClick={e => {
+                  if (showBackground) {
+                    e.preventDefault()
+                    e.stopPropagation()
+                  }
+                }}
+                href={`/communities/${community?.groupId}`}
               >
-                {community?.groupDetails?.description}
-              </CardDescription>
-            </ScrollArea>
-          </CardContent>
+                <div className="space-y-1">
+                  <h2 className="text-2xl font-semibold tracking-tight">
+                    {community.name}
+                  </h2>
+                </div>
+              </Link>
+              <DropdownCommunityCard actions={finalActions} />
+            </div>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="min-h-[120px] pb-0 pt-2">
+          {bannerSrc && (
+            <Image
+              className="pointer-events-none h-full w-full rounded-lg object-cover opacity-40 transition-opacity duration-300 ease-in-out group-hover:opacity-80"
+              src={bannerSrc}
+              alt="community banner"
+              fill={true}
+              unoptimized
+            />
+          )}
 
-          <CommunityCardFooter />
-          {/*<CardOverlay />*/}
-        </Card>
-      </CommunityCardContext.Provider>
-    )
-  } else {
-    return (
-      <CommunityCardContext.Provider
-        value={{
-          ...community,
-          variant,
-          user,
-          setShowBackground,
-          showBackground,
-          bannerSrc,
-        }}
-      >
-        <Card
-          onMouseLeave={() => setShowBackground(false)}
-          onClick={() => setShowBackground(false)}
-          className={
-            'group relative flex flex-col justify-between divide-y divide-gray-300/20 overflow-hidden rounded-lg  bg-gray-300/20 dark:divide-gray-800/50 dark:bg-gray-800/50'
-          }
-        >
-          <CardHeader
-            className={'relative z-10  flex w-full flex-col   py-2  '}
-          >
-            <CardTitle
-              className={'flex w-full items-center justify-between gap-4'}
-            >
-              <Image
-                className="pointer-events-none  z-10 aspect-[1] h-[75px] w-[75px] rounded-full opacity-75"
-                src={logoSrc || mobileLogo}
-                alt={'community banner'}
-                width={75}
-                height={75}
-                unoptimized
-              />
-              <div className="flex w-full items-center justify-between rounded-md">
-                <Link
-                  onClick={e => {
-                    if (showBackground) {
-                      e.preventDefault()
-                      e.stopPropagation()
-                    }
-                  }}
-                  href={`/communities/${community?.groupId}`}
-                >
-                  <div className="space-y-1">
-                    <h2 className="text-2xl font-semibold tracking-tight">
-                      {community.name}
-                    </h2>
-                  </div>
-                </Link>
-                <DropdownCommunityCard
-                  actions={[
-                    isAdmin || isOwner
-                      ? {
-                          label: 'Edit',
-                          icon: <PencilIcon className={'h-full w-4'} />,
-                          href: `/communities/${community?.groupId}/edit`,
-                        }
-                      : false,
-                    false,
-                    ...actions,
-                  ]}
-                />
-              </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className={'min-h-[120px] pb-0 pt-2'}>
-            {bannerSrc && (
-              <Image
-                className="pointer-events-none h-full w-full rounded-lg object-cover opacity-40 transition-opacity duration-300 ease-in-out group-hover:opacity-80"
-                src={bannerSrc}
-                alt={'community banner'}
-                fill={true}
-                unoptimized
-              />
-            )}
+          <ScrollArea className="h-full rounded p-1 transition-colors delay-300 duration-500 hover:bg-card">
+            <CardDescription className="z-10  h-24  text-base leading-snug text-card-foreground">
+              {community?.groupDetails?.description}
+            </CardDescription>
+          </ScrollArea>
+        </CardContent>
 
-            <ScrollArea
-              className={
-                'h-full rounded p-1 transition-colors delay-300 duration-500 hover:bg-card'
-              }
-            >
-              <CardDescription
-                className={
-                  'z-10  h-24  text-base leading-snug text-card-foreground'
-                }
-              >
-                {community?.groupDetails?.description}
-              </CardDescription>
-            </ScrollArea>
-          </CardContent>
-
-          <CommunityCardFooter />
-          {/*<CardOverlay />*/}
-        </Card>
-      </CommunityCardContext.Provider>
-    )
-  }
+        <CommunityCardFooter />
+      </Card>
+    </CommunityCardContext.Provider>
+  )
 }

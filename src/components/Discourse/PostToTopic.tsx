@@ -102,8 +102,8 @@ const PostToTopic = ({
         }}
         title={false}
         isEditable={true}
-        itemType={'post'}
-        actionType={'new'}
+        itemType="post"
+        actionType="new"
         submitButtonText={t('button.post') as string}
         openFormButtonText={t('button.newPost') as string}
         tokenBalanceReveal={{
