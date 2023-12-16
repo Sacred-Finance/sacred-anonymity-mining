@@ -28,18 +28,19 @@ export const DropdownCommunityCard: React.FC<CardDropDownProps> = ({
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
-        <Button onClick={handleButtonClick} variant="ghost">
-          {isOpen ? (
-            <XMarkIcon className="h-6 w-6 text-white" />
-          ) : (
-            <Bars3Icon className="h-6 w-6 text-white" />
-          )}
-          <span className="sr-only">Open actions menu</span>
-        </Button>
+      <PopoverTrigger
+        asChild
+        className="!p-0 text-white  hover:scale-105 hover:text-white/90"
+        onClick={handleButtonClick}
+      >
+        {isOpen ? (
+          <XMarkIcon className="h-6 w-6" />
+        ) : (
+          <Bars3Icon className="h-6 w-6" />
+        )}
       </PopoverTrigger>
       <PopoverContent
-        className="w-full"
+        className="w-full !p-1"
         onBlur={() => {
           setIsOpen(false)
         }}

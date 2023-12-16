@@ -27,6 +27,7 @@ import {
 } from '@/shad/ui/hover-card'
 import { Button } from '@/shad/ui/button'
 import { FaCircleInfo } from 'react-icons/fa6'
+import { ArrowLeftIcon } from '@heroicons/react/20/solid'
 
 export interface HandleSetImage {
   file: File | undefined
@@ -192,9 +193,17 @@ function CreateGroupFormUI({
       </Head>
       <div
         className={clsx(
-          'text-primary-600 w-full max-w-screen-xl space-y-6 rounded-lg shadow dark:bg-gray-900 dark:text-gray-200 sm:p-8 md:p-12 '
+          'text-primary-600 w-full max-w-screen-xl space-y-6 rounded-lg p-2 shadow dark:bg-gray-900 dark:text-gray-200 md:p-12 '
         )}
       >
+        <Link
+          className="flex w-fit items-center gap-2 rounded border bg-primary p-2 text-primary-foreground  hover:bg-primary/50"
+          href="/"
+        >
+          <ArrowLeftIcon className="h-5 w-5" />
+          Back
+        </Link>
+
         <div className="flex items-center justify-between py-4">
           <h1 className="text-2xl font-semibold">{t('createCommunity')}</h1>
         </div>
@@ -331,7 +340,7 @@ function CreateGroupFormUI({
                         <motion.div
                           key={i}
                           layout
-                          className="flex h-auto items-center space-x-4"
+                          className="flex h-full items-center space-x-4"
                           initial={{ opacity: 0, y: 20, overflowY: 'visible' }}
                           animate={{ opacity: 1, y: 0, overflowY: 'hidden' }}
                           exit={{ opacity: 0, y: 20, overflowY: 'hidden' }}
@@ -377,7 +386,7 @@ function CreateGroupFormUI({
                                 remove(i)
                               }
                             }}
-                            className="flex h-10 w-6 items-center justify-center rounded border border-red-500 text-red-500 transition-colors hover:bg-red-500 hover:text-white focus:outline-none"
+                            className="flex  items-center justify-center rounded border border-red-500 text-red-500 transition-colors hover:bg-red-500 hover:text-white focus:outline-none"
                           >
                             <RemoveIcon />
                           </button>
@@ -389,13 +398,7 @@ function CreateGroupFormUI({
               </motion.form>
             </AnimatePresence>
           </FormikProvider>
-          <div className="flex flex-col justify-between space-x-0 py-2 md:flex-row md:space-x-2 md:py-4">
-            <Link
-              href="/"
-              className="rounded border-2 border-red-400 p-2 text-red-500 hover:bg-red-500 hover:text-white md:px-4"
-            >
-              Close
-            </Link>
+          <div className="flex flex-col justify-end space-x-0 py-2 md:flex-row md:space-x-2 md:py-4">
             <PrimaryButton
               disabled={isSubmitDisabled || isSubmitting}
               onClick={submit}

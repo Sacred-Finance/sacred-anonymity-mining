@@ -252,7 +252,7 @@ export function EditGroup({ group }: EditGroupProps) {
           />
         </div>
 
-        <div className="flex flex-col justify-between space-x-0 py-2 md:flex-row md:space-x-2 md:py-4">
+        <div className="flex flex-col justify-end space-x-0 py-2 md:flex-row md:space-x-2 md:py-4">
           <PrimaryButton
             className={clsx(
               buttonVariants.primarySolid,
@@ -260,7 +260,7 @@ export function EditGroup({ group }: EditGroupProps) {
             )}
             onClick={toggleConfirmModal}
           >
-            {t('confirm')}
+            {t('editCommunity')}
           </PrimaryButton>
         </div>
       </div>
