@@ -80,7 +80,7 @@ const ActionButton: React.FC<ActionButtonProps> = ({ action }) => {
       </Link>
     )
   }
-  return null
+  return action
 }
 
 interface ActionButtonsProps {

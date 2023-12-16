@@ -17,6 +17,7 @@ import {
   DialogTrigger,
 } from '@/shad/ui/dialog'
 import { Input } from '@/shad/ui/input'
+import { CircularLoader } from '@components/CircularLoader'
 
 const DeleteItemButton = ({
   itemId,
@@ -31,7 +32,6 @@ const DeleteItemButton = ({
 }) => {
   const { t } = useTranslation()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isModalOpen, setIsModalOpen] = useState(false)
   const { deleteItem } = useRemoveItemFromForumContract({
     groupId: groupId,
     postId: itemId,
@@ -44,7 +44,7 @@ const DeleteItemButton = ({
   const onDelete = async () => {
     setIsSubmitting(true)
     try {
-      const result = await deleteItem(itemId, itemType)
+      await deleteItem(itemId, itemType)
       toast.success(t('alert.deleteSuccess'))
       setIsSubmitting(false)
 
@@ -52,6 +52,8 @@ const DeleteItemButton = ({
         router.push(`/communities/${groupId}`)
       }
     } catch (error: unknown) {
+      // @devs: This is a type guard, it checks if the error is an instance of Error.
+      // we should do this for all errors that are not typed.
       // Correctly typed as unknown
       if (error instanceof Error) {
         // Safely assumed to be an Error object, can access message property.
@@ -66,22 +68,16 @@ const DeleteItemButton = ({
   }
 
   const handleDeleteConfirmation = () => {
-    setIsModalOpen(false)
     onDelete()
   }
 
   return (
     <>
       <Dialog>
-        <DialogTrigger>
-          <PrimaryButton
-            isLoading={isSubmitting}
-            className="z-2 bg-red-500 text-white hover:bg-red-600"
-            onClick={() => setIsModalOpen(true)}
-            startIcon={<TrashIcon className="h-5 w-5" />}
-          >
-            {t('button.delete')}
-          </PrimaryButton>
+        <DialogTrigger className="z-[2] flex  items-stretch py-2.5 px-4 gap-2 rounded-md bg-red-500 h-full text-sm font-medium text-white hover:bg-red-600">
+          {isSubmitting && <CircularLoader />}
+          <TrashIcon className="h-5 w-5" />
+          {t('button.delete')}
         </DialogTrigger>
         <DialogContent>
           <DialogHeader className="space-y-4">

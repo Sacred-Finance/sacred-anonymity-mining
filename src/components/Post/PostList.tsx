@@ -1,6 +1,6 @@
 import React from 'react'
 import { ContentType } from '@/lib/model'
-import type { Item } from '@/types/contract/ForumInterface'
+import type { Group, Item } from '@/types/contract/ForumInterface'
 import { NoPosts } from '@components/Post/NoPosts'
 import { CircularLoader } from '@components/buttons/JoinCommunityButton'
 import EditorJsRenderer from '@components/editor-js/EditorJSRenderer'
@@ -15,8 +15,17 @@ import {
 import { Badge } from '@/shad/ui/badge'
 import { ScrollArea, ScrollBar } from '@/shad/ui/scroll-area'
 import AnimalAvatar from '../AnimalAvatar'
+import { VoteForItemUI } from '@components/Post/PostPage'
 
-export const PostList = ({ posts }: { posts: Item[] }) => {
+export const PostList = ({
+  posts,
+  group,
+  refreshData,
+}: {
+  posts: Item[]
+  group: Group
+  refreshData?: () => void
+}) => {
   if (!posts) {
     return null
   }
@@ -34,6 +43,9 @@ export const PostList = ({ posts }: { posts: Item[] }) => {
         <CardHeader className="relative z-10   flex w-full flex-col px-3  py-1">
           <CardTitle className="flex w-full items-center justify-between gap-4">
             <PostTitle post={p} title={p.title} onPostPage={false} id="" />
+            <span className={'basis-1/4 flex gap-2'}>
+              <VoteForItemUI post={p} group={group} onSuccess={refreshData} />
+            </span>
           </CardTitle>
         </CardHeader>
 

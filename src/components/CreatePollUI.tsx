@@ -70,10 +70,8 @@ const CreatePollUI = ({ post, group, onSuccess }: CreatePollUIProps) => {
     try {
       await createPoll({
         post: post,
-        group: group,
         pollType: pollType,
         duration: duration,
-        options: options,
         answers: options,
         rateScaleFrom: rateScaleFrom,
         rateScaleTo: rateScaleTo,
@@ -88,14 +86,14 @@ const CreatePollUI = ({ post, group, onSuccess }: CreatePollUIProps) => {
           onSuccess && onSuccess()
         },
         onErrorCallback: err => {
-          console.log(err)
+          console.error(err)
           setShowModal(false)
           toast.error(err?.message ?? err)
           setLoading(false)
         },
       })
-    } catch (error) {
-      toast.error(error?.message ?? error)
+    } catch (error: unknown) {
+      if (error instanceof Error) toast.error(error?.message ?? error)
 
       setLoading(false)
     }

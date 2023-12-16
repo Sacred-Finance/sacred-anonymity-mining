@@ -329,6 +329,7 @@ const FormButtons = ({
       <PrimaryButton
         onClick={handleSubmitAction}
         isLoading={isSubmitting}
+        loadingPosition="start"
         disabled={isSubmitting || disableSubmit}
       >
         {submitButtonText}

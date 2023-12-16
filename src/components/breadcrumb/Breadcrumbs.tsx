@@ -21,18 +21,19 @@ function useBreadcrumbs(): BreadCrumbItem[] {
 
   useEffect(() => {
     const { activeCommunity, activePost } = state
-    if (!activeCommunity?.community || !activePost?.post) {
+    if (!activeCommunity?.community && !activePost?.post) {
       setBreadcrumbItems([])
       return
     }
+
     setBreadcrumbItems(
       generateBreadcrumbItems({
-        community: activeCommunity.community,
-        post: activePost.post,
+        community: activeCommunity?.community,
+        post: activePost?.post,
         pathname: router.pathname,
       })
     )
-  }, [state, router.pathname])
+  }, [state?.activeCommunity, state?.activePost, router.pathname])
 
   return breadcrumbItems
 }

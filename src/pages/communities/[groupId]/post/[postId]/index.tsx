@@ -6,6 +6,8 @@ import fetcher, { GroupPostCommentAPI } from '@/lib/fetcher'
 import { useRouter } from 'next/router'
 import LoadingComponent from '@components/LoadingComponent'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
+import { NextApiResponse } from 'next/types'
+import { Group, Item } from '@/types/contract/ForumInterface'
 
 function PostIndex() {
   const { dispatch, state } = useCommunityContext()
@@ -15,34 +17,32 @@ function PostIndex() {
   const { data, error, isLoading, mutate } = useSWR(
     GroupPostCommentAPI(groupId, postId),
     fetcher
-  )
+  ) as unknown as NextApiResponse<{
+    data: { group: Group; post: Item; comments: Item[] } | { error: string }
+  }>
   useCheckIfUserIsAdminOrModerator(true)
 
   useEffect(() => {
     const { group, post, comments } = data || {}
-    if (!group || !post || !comments) {
+    if (!group) {
       return
     }
-    if (state?.activeCommunity?.community?.groupId !== group.groupId) {
-      dispatch({
-        type: ActionType.SET_ACTIVE_COMMUNITY,
-        payload: {
-          community: group,
-          postList: [post],
-        },
-      })
-    }
-    if (state?.activePost?.post?.id === post.id) {
-      dispatch({
-        type: ActionType.SET_ACTIVE_POST,
-        payload: {
-          community: group,
-          post: post,
-          comments: comments,
-        },
-      })
-    }
-  }, [data])
+    dispatch({
+      type: ActionType.SET_ACTIVE_COMMUNITY,
+      payload: {
+        community: group,
+        postList: [post],
+      },
+    })
+    dispatch({
+      type: ActionType.SET_ACTIVE_POST,
+      payload: {
+        community: group,
+        post: post,
+        comments: comments,
+      },
+    })
+  }, [data?.group, data?.post, data?.comments])
 
   if (error) {
     return <div>Error: {error.message}</div>

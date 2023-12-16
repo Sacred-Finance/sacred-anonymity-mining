@@ -107,12 +107,12 @@ export function PostPage({
             <div className="  flex flex-col gap-4 p-3 md:w-1/2 ">
               <div className="sticky top-0">
                 <div className="rounded-xl border p-2 dark:border-gray-700 dark:bg-gray-900 ">
-                  <VoteForItemUI
-                    postId={post.id}
-                    post={post}
-                    group={community}
-                    onSuccess={refreshData}
-                  />
+                  {/*<VoteForItemUI*/}
+                  {/*  postId={post.id}*/}
+                  {/*  post={post}*/}
+                  {/*  group={community}*/}
+                  {/*  onSuccess={refreshData}*/}
+                  {/*/>*/}
                   <ScrollArea className="col-span-12 flex max-h-[80vh] w-full flex-col gap-2 rounded bg-white p-3 dark:border-gray-950/80 dark:bg-gray-950/20">
                     <PostItem
                       post={post}
@@ -235,7 +235,7 @@ const tabData = {
   Info: InfoIcon,
 }
 
-const TooltipTab = ({ name, Icon }) => (
+const TooltipTab = ({ name, Icon }: { name: string; Icon: unknown }) => (
   <Tab
     className={({ selected }) =>
       ` bg-secondary text-secondary-foreground dark:bg-gray-950/50 ${
@@ -261,7 +261,7 @@ const CreateCommentUI = ({
 }) => {
   const groupId = group.groupId
   const user = useUserIfJoined(group.id.toString())
-  const activeUser = useActiveUser({ groupId: group.id })
+  useActiveUser({ groupId: group.id })
   const { t } = useTranslation()
   const { address } = useAccount()
   const { checkUserBalance } = useValidateUserBalance(group, address)
@@ -388,12 +388,10 @@ const CreateCommentUI = ({
 
 export const VoteForItemUI = ({
   post,
-  postId,
   group,
   onSuccess,
 }: {
   post: Item
-  postId: string
   group: Group
   onSuccess?: () => void
 }) => {
@@ -475,26 +473,24 @@ export const VoteForItemUI = ({
   return (
     <>
       <VoteUpButton
+        className="p-0 text-sm text-white"
         isConnected={!!address}
         isJoined={!!user}
         isLoading={isLoading}
-        onClick={e => voteForPost(Number(post.id), 0)}
+        onClick={() => voteForPost(Number(post.id), 0)}
         disabled={isLoading || !address}
       >
-        <span className="font-bold text-gray-500 dark:text-gray-300">
-          {post.upvote}
-        </span>
+        {post.upvote}
       </VoteUpButton>
       <VoteDownButton
+        className="p-0 text-sm  text-white"
         isConnected={!!address}
         isJoined={!!user}
         isLoading={isLoading}
         onClick={() => voteForPost(Number(post.id), 1)}
         disabled={isLoading || !address}
       >
-        <span className="font-bold  text-gray-500 dark:text-gray-300">
-          {post.downvote}
-        </span>
+        {post.downvote}
       </VoteDownButton>
     </>
   )

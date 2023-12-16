@@ -8,7 +8,7 @@ import fetcher, { GroupPostAPI } from '@/lib/fetcher'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
 
 export interface HandleSetImage {
-  file: File | undefined
+  file: File | undefined | null
   imageType: 'logo' | 'banner'
 }
 

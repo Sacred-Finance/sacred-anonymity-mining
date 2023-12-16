@@ -22,6 +22,9 @@ export const generateBreadcrumbItems = ({
   post,
   pathname,
 }: GenerateBreadcrumbItemsParams): BreadCrumbItem[] => {
+  if (!community) {
+    return []
+  }
   // Default breadcrumb item
   const items: BreadCrumbItem[] = [{ ...HOME_BREADCRUMB }]
 
@@ -33,12 +36,12 @@ export const generateBreadcrumbItems = ({
   let communityLabel = 'Community'
   let postLabel = 'Post'
 
-  if ('name' in community) {
-    communityLabel = community.name // Assuming community has a 'name' property
+  if (community && 'name' in community) {
+    communityLabel = community?.name || 'Community' // Assuming community has a 'name' property
   }
 
-  if ('title' in post) {
-    postLabel = post.title as string // Assuming post has a 'title' property
+  if (post && 'title' in post) {
+    postLabel = (post?.title as string) || 'Post' // Assuming post has a 'title' property
   }
 
   // Path-specific breadcrumbs

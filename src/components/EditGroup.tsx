@@ -46,8 +46,8 @@ export function EditGroup({ group }: EditGroupProps) {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const [groupName, setGroupName] = useState<string>('')
   const [groupDescriptionState, setGroupDescriptionState] = useState<string>('')
-  const [bannerFile, setBannerFile] = useState<File | null>(null)
-  const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [bannerFile, setBannerFile] = useState<File | undefined>(undefined)
+  const [logoFile, setLogoFile] = useState<File | undefined>(undefined)
   const [confirmModal, setConfirmModal] = useState<boolean>(false)
 
   const [hasImageChanged, setHasImageChanged] = useState({
@@ -91,7 +91,7 @@ export function EditGroup({ group }: EditGroupProps) {
       setHasImageChanged(prev => ({ ...prev, [imageType]: true }))
     }
     const setImage = imageType === 'logo' ? setLogoFile : setBannerFile
-    setImage(file)
+    setImage(file as File)
   }
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -114,13 +114,13 @@ export function EditGroup({ group }: EditGroupProps) {
   const submitAllGroupDetails = useCallback(async () => {
     try {
       setIsSubmitting(true)
-      const user = new Identity(address as string)
+      const user = new Identity(address)
       const input = await createInputNote(user)
-      const { a, b, c } = await generateGroth16Proof({ input: input })
+      const { a, b, c } = await generateGroth16Proof({ input })
 
       const images = {
-        bannerFile: hasImageChanged.banner ? bannerFile : null,
-        logoFile: hasImageChanged.logo ? logoFile : null,
+        bannerFile: hasImageChanged.banner ? bannerFile : undefined,
+        logoFile: hasImageChanged.logo ? logoFile : undefined,
       }
 
       const { bannerCID, logoCID } = await uploadImages(images)
@@ -237,7 +237,7 @@ export function EditGroup({ group }: EditGroupProps) {
         <div className="flex gap-4 ">
           <PictureUpload
             uploadedImageUrl={
-              bannerFile ? URL.createObjectURL(bannerFile) : null
+              bannerFile ? URL.createObjectURL(bannerFile) : undefined
             }
             displayName={t('banner')}
             name="banner"
@@ -245,7 +245,9 @@ export function EditGroup({ group }: EditGroupProps) {
           />
 
           <PictureUpload
-            uploadedImageUrl={logoFile ? URL.createObjectURL(logoFile) : null}
+            uploadedImageUrl={
+              logoFile ? URL.createObjectURL(logoFile) : undefined
+            }
             displayName={t('logo')}
             name="logo"
             setImageFileState={handleSetImage}

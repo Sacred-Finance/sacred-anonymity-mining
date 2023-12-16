@@ -28,6 +28,7 @@ import {
 import { Button } from '@/shad/ui/button'
 import { FaCircleInfo } from 'react-icons/fa6'
 import { ArrowLeftIcon } from '@heroicons/react/20/solid'
+import { useRouter } from 'next/router'
 
 export interface HandleSetImage {
   file: File | undefined
@@ -64,6 +65,7 @@ function CreateGroupFormUI({
 }: {
   onCreate: (params: ICreateCommunityArgs) => Promise<void>
 }) {
+  const router = useRouter()
   const { t } = useTranslation()
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -160,6 +162,7 @@ function CreateGroupFormUI({
       note: BigInt(0).toString(),
     })
     setIsSubmitting(false)
+    router.push('/')
   }
 
   const selectChain = async (c: Chain) => {

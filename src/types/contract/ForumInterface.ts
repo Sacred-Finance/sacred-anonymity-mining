@@ -361,9 +361,9 @@ export type RawItemData = {
 
 export type Item = {
   kind: ItemKind
-  id: string
-  parentId: string
-  groupId: string
+  id: BigNumberish
+  parentId: BigNumberish
+  groupId: BigNumberish
   createdAtBlock: number
   childIds: string[]
   upvote: number

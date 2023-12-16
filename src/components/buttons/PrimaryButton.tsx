@@ -17,7 +17,7 @@ export type PrimaryButtonProps = {
   resetClasses?: boolean
   endIcon?: React.ReactNode
   startIcon?: React.ReactNode
-  loadingPosition?: 'start' | 'end'
+  loadingPosition?: 'start' | 'end' | 'replace'
   toolTip?: string | boolean
   variant?:
     | 'default'
@@ -82,7 +82,12 @@ export function PrimaryButton({
         !isLoading &&
         loadingPosition === 'start' &&
         rest.startIcon}
-      {children}
+      {isLoading && loadingPosition === 'replace' ? (
+        <CircularLoader />
+      ) : (
+        children
+      )}
+
       {rest.endIcon && !isLoading && loadingPosition === 'end' && rest.endIcon}
       {isLoading && loadingPosition === 'end' && <CircularLoader />}
     </Button>

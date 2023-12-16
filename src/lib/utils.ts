@@ -6,8 +6,8 @@ import { buildBabyjub, buildPedersenHash } from 'circomlibjs'
 import type { Identity } from '@semaphore-protocol/identity'
 import { forumContract, semaphoreContract } from '@/constant/const'
 import type { AvatarOptions } from 'animal-avatar-generator'
-import type { GroupId } from '@/types/contract/ForumInterface'
 import type { BabyJub, PedersenHash } from 'circomlibjs/index'
+import type { BigNumberish } from '@semaphore-protocol/group'
 
 const { groth16 } = require('snarkjs')
 
@@ -305,8 +305,12 @@ export const hasUserJoined = async ({
   }
 }
 
-export const fetchUsersFromSemaphoreContract = async (groupId: GroupId) => {
-  console.log('fetching users from semaphore contract', groupId)
+export const fetchUsersFromSemaphoreContract = async (
+  groupId?: BigNumberish
+) => {
+  if (!groupId) {
+    return []
+  }
   return semaphoreContract?.getGroupMembers(groupId.toString())
 }
 

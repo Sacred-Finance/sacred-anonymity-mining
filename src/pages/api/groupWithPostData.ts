@@ -26,8 +26,6 @@ export default async function handler(
     { group: Group; posts: Item[]; users: User[] } | { error: string }
   >
 ) {
-  console.log('fetching data')
-
   try {
     const { groupId } = req.query
     const bigIntGroupId = BigInt(groupId as string)
@@ -42,8 +40,6 @@ export default async function handler(
     const group = await augmentGroupData(rawGroupData)
 
     const postIds = rawGroupData.posts.map(p => p)
-
-    console.log('postIds', postIds)
 
     const wagmigotchiContract = {
       address: ForumContractAddress,

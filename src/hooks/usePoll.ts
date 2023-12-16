@@ -3,8 +3,8 @@ import { createComment, createPost, votePoll } from '@/lib/api'
 import { GroupPostAPI, GroupPostCommentAPI } from '@/lib/fetcher'
 import type {
   ItemCreationRequest,
-  PollRequestStruct,
   NewPostContent,
+  PollRequestStruct,
 } from '@/lib/model'
 
 import {
@@ -16,6 +16,7 @@ import {
   uploadIPFS,
 } from '@/lib/utils'
 import type { Group, Item } from '@/types/contract/ForumInterface'
+import type { BigNumberish } from '@semaphore-protocol/group'
 import { Group as SemaphoreGroup } from '@semaphore-protocol/group'
 import { Identity } from '@semaphore-protocol/identity'
 import { generateProof } from '@semaphore-protocol/proof'
@@ -31,19 +32,37 @@ interface Poll {
   rateScaleTo: number
   post?: Item // if post is undefined, it means it's a post, otherwise it's a comment
   onSuccessCallback: () => void
-  onErrorCallback: (err) => void
+  onErrorCallback: (
+    err:
+      | string
+      | {
+          message: string
+        }
+  ) => void
 }
 
 interface SubmitPollParams {
-  id: any
+  id: BigNumberish
   pollData: number[]
-  onSuccessCallback: any
-  onErrorCallback: any
+  onSuccessCallback?: (
+    data:
+      | {
+          message: string
+        }
+      | undefined
+  ) => void
+  onErrorCallback?: (
+    err:
+      | string
+      | {
+          message: string
+        }
+  ) => void
 }
 
 export const usePoll = ({ group }: { group: Group }) => {
   const { address } = useAccount()
-  const activeUser = useActiveUser({ groupId: group?.id })
+  useActiveUser({ groupId: group?.id })
 
   const createPoll = async ({
     content,
@@ -55,7 +74,9 @@ export const usePoll = ({ group }: { group: Group }) => {
     post,
     onSuccessCallback,
     onErrorCallback,
-  }: Poll): Promise<any> => {
+  }: Poll): Promise<{
+    message: string
+  } | void> => {
     try {
       const currentDate = new Date()
       const _message = currentDate.getTime() + '#' + JSON.stringify(content)
@@ -68,8 +89,12 @@ export const usePoll = ({ group }: { group: Group }) => {
       const signal = getBytes32FromIpfsHash(cid)
       const extraNullifier = hashBytes(signal).toString()
       const users = await fetchUsersFromSemaphoreContract(group.groupId)
-      const semaphoreGroup = new SemaphoreGroup(group.id)
-      users.forEach(u => semaphoreGroup.addMember(BigInt(u)))
+      const semaphoreGroup = new SemaphoreGroup(
+        group.id,
+        20,
+        users?.map(u => BigInt(u)) ?? []
+      )
+
       const userIdentity = new Identity(address)
 
       const note = await createNote(userIdentity)
@@ -137,8 +162,11 @@ export const usePoll = ({ group }: { group: Group }) => {
         onErrorCallback('Creating a post failed!')
         throw new Error('Creating a post failed!')
       }
-    } catch (error) {
-      onErrorCallback(error)
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        onErrorCallback(error ?? 'Creating a post failed!')
+      }
+      console.error(error)
     }
   }
 

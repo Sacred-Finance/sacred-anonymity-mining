@@ -17,6 +17,7 @@ export const VoteUpButton = ({
   ...props
 }: { props?: VoteButton; children: ReactNode } & PrimaryButtonProps) => (
   <PrimaryButton
+    loadingPosition="replace"
     aria-label="upvote"
     {...props}
     requirements={{
@@ -25,15 +26,16 @@ export const VoteUpButton = ({
     }}
     isConnected={props.isConnected}
     isJoined={props.isJoined}
-    variant="link"
+    className={clsx(props.className, 'group/like rounded-full p-0.5')}
+    variant="ghost"
   >
-    <div className="flex items-center gap-2 ">
+    <span className="flex items-center gap-1 ">
       <HandThumbUpIcon
-        className={clsx('border-1 w-6 p-1 group-hover:fill-green-300')}
-        stroke="#a49f9f"
+        className="w-6 stroke-blue-400 group-hover/like:scale-105 group-hover/like:fill-blue-400"
+        strokeWidth={1.5}
       />
       {children}
-    </div>
+    </span>
   </PrimaryButton>
 )
 export const VoteDownButton = ({
@@ -41,6 +43,7 @@ export const VoteDownButton = ({
   ...props
 }: { props?: VoteButton; children: ReactNode } & PrimaryButtonProps) => (
   <PrimaryButton
+    loadingPosition="replace"
     aria-label="downvote"
     {...props}
     requirements={{
@@ -49,15 +52,15 @@ export const VoteDownButton = ({
     }}
     isConnected={props.isConnected}
     isJoined={props.isJoined}
-    className={clsx(props.className)}
-    variant="link"
+    className={clsx(props.className, 'group/dislike rounded-full  p-0.5')}
+    variant="ghost"
   >
-    <div className="flex items-center gap-2 ">
+    <span className="flex items-center gap-1">
       <HandThumbDownIcon
-        className={clsx('border-1  w-6 p-1 group-hover:fill-red-300')}
+        className="w-6 stroke-red-400 group-hover/dislike:scale-110 group-hover/dislike:fill-red-400"
         stroke="#a49f9f"
       />
       {children}
-    </div>
+    </span>
   </PrimaryButton>
 )

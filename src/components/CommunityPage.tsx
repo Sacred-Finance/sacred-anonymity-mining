@@ -61,7 +61,11 @@ export function CommunityPage({
               <CreatePostUI group={community} onSuccess={refreshData} />
             </ShowConnectIfNotConnected>
           </div>
-          <PostList posts={sortedData} />
+          <PostList
+            posts={sortedData}
+            group={community}
+            refreshData={refreshData}
+          />
         </div>
       </div>
     </div>

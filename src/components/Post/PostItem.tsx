@@ -5,7 +5,7 @@ import {
 import React, { useEffect, useState } from 'react'
 import { useAccount } from 'wagmi'
 import { Identity } from '@semaphore-protocol/identity'
-import { createNote } from '@/lib/utils'
+import { commentIsConfirmed, createNote } from '@/lib/utils'
 import { BigNumber } from 'ethers'
 import { PollUI } from '@components/PollIUI'
 import { ContentActions } from '@components/Post/ContentActions'
@@ -20,6 +20,10 @@ import dynamic from 'next/dynamic'
 import type { Group, Item } from '@/types/contract/ForumInterface'
 import EditorJsRenderer from '@components/editor-js/EditorJSRenderer'
 import type { Address } from '@/types/common'
+import AnimalAvatar from '@components/AnimalAvatar'
+import { VoteForItemUI } from '@components/Post/PostPage'
+import { formatDistanceToNow } from 'date-fns'
+import { DropdownCommunityCard } from '@components/CommunityCard/DropdownCommunityCard'
 
 const Editor = dynamic(() => import('../editor-js/Editor'), {
   ssr: false,
@@ -185,28 +189,54 @@ export const PostItem = ({
         </div>
 
         {isTypeOfPoll && <PollUI group={group} post={post} />}
-
-        <div className="sticky bottom-0 flex items-center justify-between gap-4">
-          <ContentActions
-            group={group}
-            item={post}
-            contentId={post.id}
-            isContentEditable={isContentEditable}
-            isEditing={isContentEditing}
-            onContentPage={isPostPage}
-            save={() => saveEditedPost()}
-            groupId={groupId}
-            isAdminOrModerator={isAdminOrModerator}
-            setIsContentEditing={value => {
-              setIsContentEditing(value)
-              if (value) {
-                setContentDescription(post.description)
-                setContentTitle && setContentTitle(post.title)
-              }
+        <div className="flex items-center justify-between border-t pt-2">
+          <div
+            className="flex items-center justify-between gap-4"
+            style={{
+              visibility: commentIsConfirmed(post.id) ? 'visible' : 'hidden',
             }}
-            onClickCancel={() => setIsContentEditing(false)}
-            isLoading={isLoading}
-            hidden={false}
+          >
+            <AnimalAvatar
+              seed={`${post.note}_${Number(post.groupId)}`}
+              options={{ size: 30 }}
+            />
+
+            <VoteForItemUI post={post} group={group} onSuccess={refreshData} />
+
+            <p className="inline-block text-sm">
+              🕛{' '}
+              {post?.description?.time || post?.time
+                ? formatDistanceToNow(
+                    new Date(post?.description?.time || post?.time).getTime()
+                  )
+                : '-'}
+            </p>
+          </div>
+          <DropdownCommunityCard
+            actions={[
+              <ContentActions
+                group={group}
+                item={post}
+                refreshData={refreshData}
+                contentId={post.id}
+                isContentEditable={isContentEditable}
+                isEditing={isContentEditing}
+                onContentPage={isPostPage}
+                save={() => saveEditedPost()}
+                groupId={groupId}
+                isAdminOrModerator={isAdminOrModerator}
+                setIsContentEditing={value => {
+                  setIsContentEditing(value)
+                  if (value) {
+                    setContentDescription(post.description)
+                    setContentTitle && setContentTitle(post.title)
+                  }
+                }}
+                onClickCancel={() => setIsContentEditing(false)}
+                isLoading={isLoading}
+                hidden={false}
+              />,
+            ]}
           />
         </div>
       </div>
