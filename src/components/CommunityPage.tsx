@@ -1,50 +1,65 @@
-import React, { Dispatch, SetStateAction, useState } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
+import React, { useState } from 'react'
 import { Post } from '@/lib/post'
-import { useActiveUser, useCommunityContext, useUserIfJoined, useUsers } from '@/contexts/CommunityProvider'
+import {
+  useActiveUser,
+  useCommunityContext,
+  useUserIfJoined,
+  useUsers,
+} from '@/contexts/CommunityProvider'
 import { useAccount } from 'wagmi'
 import { useTranslation } from 'react-i18next'
-import { SortByOption } from '@components/SortBy'
-import { useUnirepSignUp } from '@/hooks/useUnirepSignup'
-import { User } from '@/lib/model'
+import type { SortByOption } from '@components/SortBy'
 import { useValidateUserBalance } from '@/utils/useValidateUserBalance'
 import { toast } from 'react-toastify'
 import { useItemsSortedByVote } from '@/hooks/useItemsSortedByVote'
-import { NewPostForm, NewPostFormProps } from '@components/NewPostForm'
+import type { NewPostFormProps } from '@components/NewPostForm'
+import { NewPostForm } from '@components/NewPostForm'
 import { PostList } from '@components/Post/PostList'
-import { Group, Item } from '@/types/contract/ForumInterface'
+import type { Group, Item } from '@/types/contract/ForumInterface'
 import CreatePollUI from './CreatePollUI'
 import { useContentManagement } from '@/hooks/useContentManagement'
 import { NewPostModal } from '@components/Post/PostComments'
 import LoadingComponent from '@components/LoadingComponent'
-import ReputationCard from './ReputationCard'
 import { CommunityCard } from './CommunityCard/CommunityCard'
+import type { User } from '@/lib/model'
+import { ShowConnectIfNotConnected } from '@components/Connect/ConnectWallet'
 
-export function CommunityPage({ community, posts }: { community: Group; posts?: Item[] }) {
-  const groupId = community.id.toString()
-  const user = useUserIfJoined(groupId as string)
-  useUnirepSignUp({ groupId: groupId, name: (user as User)?.name })
-
+export function CommunityPage({
+  community,
+  posts,
+  refreshData,
+}: {
+  community: Group
+  posts?: Item[]
+  refreshData?: () => void
+}) {
   const [sortBy, setSortBy] = useState<SortByOption>('highest')
 
   const sortedData = useItemsSortedByVote([], posts, sortBy)
   const {
-    state: { isAdmin, isModerator },
+    state: { isAdmin },
   } = useCommunityContext()
 
-  if (!community || !community?.id) return <LoadingComponent />
+  if (!community) {
+    return <LoadingComponent />
+  }
 
   return (
     <div>
-      <div className="ml-6">
-        <ReputationCard />
-      </div>
       <div className="relative flex min-h-screen gap-6 rounded-lg  p-6 transition-colors ">
         <div className="sticky top-0 flex w-full flex-col gap-6">
-          <CommunityCard variant={'banner'} community={community} isAdmin={isAdmin} />
+          <CommunityCard
+            variant={'banner'}
+            community={community}
+            isAdmin={isAdmin}
+          />
 
           <div className="flex w-fit gap-4 rounded-lg ">
-            <CreatePollUI group={community} />
-            <CreatePostUI group={community} />
+            <ShowConnectIfNotConnected>
+              <CreatePollUI group={community} onSuccess={refreshData} />
+              <CreatePostUI group={community} onSuccess={refreshData} />
+            </ShowConnectIfNotConnected>
           </div>
           <PostList posts={sortedData} />
         </div>
@@ -53,7 +68,13 @@ export function CommunityPage({ community, posts }: { community: Group; posts?: 
   )
 }
 
-const CreatePostUI = ({ group }: { group: Group }) => {
+const CreatePostUI = ({
+  group,
+  onSuccess,
+}: {
+  group: Group
+  onSuccess?: () => void
+}) => {
   const groupId = group.groupId
   const user = useUserIfJoined(group.id.toString())
   const activeUser = useActiveUser({ groupId: group.id.toString() })
@@ -66,8 +87,15 @@ const CreatePostUI = ({ group }: { group: Group }) => {
   const [isLoading, setIsLoading] = useState(false)
 
   const validateRequirements = () => {
-    if (!address) return toast.error(t('alert.connectWallet'), { toastId: 'connectWallet' })
-    if (!user) return toast.error(t('toast.error.notJoined'), { type: 'error', toastId: 'min' })
+    if (!address) {
+      return toast.error(t('alert.connectWallet'), { toastId: 'connectWallet' })
+    }
+    if (!user) {
+      return toast.error(t('toast.error.notJoined'), {
+        type: 'error',
+        toastId: 'min',
+      })
+    }
 
     return true
   }
@@ -75,9 +103,7 @@ const CreatePostUI = ({ group }: { group: Group }) => {
   const {
     contentDescription,
     setContentDescription,
-    tempContents,
     contentTitle,
-    setTempContents,
     setContentTitle,
     clearContent,
   } = useContentManagement({
@@ -87,21 +113,30 @@ const CreatePostUI = ({ group }: { group: Group }) => {
   })
 
   const addPost: () => Promise<void> = async () => {
-    if (validateRequirements() !== true) return
+    if (validateRequirements() !== true) {
+      return
+    }
 
     if (!contentTitle || !contentDescription) {
       console.log('Please enter a title and description')
-      toast.error('Please enter a title and description', { toastId: 'missingTitleOrDesc' })
+      toast.error('Please enter a title and description', {
+        toastId: 'missingTitleOrDesc',
+      })
       return
     }
 
     const hasSufficientBalance = await checkUserBalance()
-    if (!hasSufficientBalance) return
+    if (!hasSufficientBalance) {
+      return
+    }
 
     setIsLoading(true)
 
     try {
-      const { status } = await postInstance?.create({
+      if (postInstance === undefined) {
+        return
+      }
+      const response = await postInstance?.create({
         postContent: {
           title: contentTitle,
           description: contentDescription,
@@ -111,18 +146,26 @@ const CreatePostUI = ({ group }: { group: Group }) => {
         postedByUser: activeUser as User,
         groupId: groupId as string,
         setWaiting: setIsLoading,
-        onIPFSUploadSuccess: (post, cid) => {
-          toast.success('content stored correctly')
+        onIPFSUploadSuccess: post => {
+          console.log('post', post)
         },
       })
-
-      if (status === 200) {
-        setIsLoading(false)
-        clearContent()
-      } else {
+      try {
+        if (response?.status === 200) {
+          setIsLoading(false)
+          clearContent()
+          onSuccess && onSuccess()
+          console.log('post created successfully')
+        } else {
+          console.log('error', response)
+          setIsLoading(false)
+        }
+      } catch (error) {
+        console.log('error', error)
         setIsLoading(false)
       }
     } catch (error) {
+      console.log('error', error)
       setIsLoading(false)
     }
   }

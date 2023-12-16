@@ -61,7 +61,6 @@
 /*    --icon-size: 20px;*/
 /*    --icon-size--mobile: 28px;*/
 
-
 /*    !***/
 /*     * The main `.cdx-block` wrapper has such vertical paddings*/
 /*     * And the Block Actions toggler too*/
@@ -224,8 +223,6 @@
 /*    }*/
 /*}*/
 
-
-
 /*.cdx-warning {*/
 /*    position: relative;*/
 
@@ -253,7 +250,6 @@
 /*    opacity: 0;*/
 /*}*/
 
-
 /*.cdx-warning::before {*/
 /*    content: '';*/
 /*    background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='5' y='5' width='14' height='14' rx='4' stroke='black' stroke-width='2'/%3E%3Cline x1='12' y1='9' x2='12' y2='12' stroke='black' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M12 15.02V15.01' stroke='black' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");*/
@@ -278,7 +274,6 @@
 /*.cdx-warning__title {*/
 /*    margin-bottom: 6px;*/
 /*}*/
-
 
 /*@keyframes fade-in {*/
 /*    from {*/
@@ -462,7 +457,6 @@
 /*        stroke: currentColor;*/
 /*    }*/
 
-
 /*    !***/
 /*    * Set color for native selection*/
 /*    *!*/
@@ -470,7 +464,6 @@
 /*        background-color: var(--inlineSelectionColor);*/
 /*    }*/
 /*}*/
-
 
 /*.codex-editor--toolbox-opened [contentEditable=true][data-placeholder]:focus::before {*/
 /*    opacity: 0 !important;*/
@@ -549,7 +542,6 @@
 /*     *!*/
 /*    --icon-size: 20px;*/
 /*    --icon-size--mobile: 28px;*/
-
 
 /*    !***/
 /*     * The main `.cdx-block` wrapper has such vertical paddings*/

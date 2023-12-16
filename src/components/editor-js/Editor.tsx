@@ -1,5 +1,6 @@
 import React, { memo, useEffect, useRef, useState } from 'react'
-import EditorJS, { OutputData } from '@editorjs/editorjs'
+import type { OutputData } from '@editorjs/editorjs'
+import EditorJS from '@editorjs/editorjs'
 import clsx from 'clsx'
 import { CircularLoader } from '@components/buttons/JoinCommunityButton' // Consider renaming or reorganizing this if `CircularLoader` doesn't belong to a button component.
 import { EDITOR_TOOLS } from './editor-tool'
@@ -10,8 +11,8 @@ type DivProps = {
 }
 
 type Props = {
-  data?: OutputData
-  onChange(val: OutputData): void
+  data?: typeof OutputData
+  onChange(val: typeof OutputData): void
   holder: string
   placeholder?: string
   readOnly?: boolean
@@ -54,7 +55,9 @@ const EditorBlock = ({
           const inputs = el?.getElementsByTagName('input') || []
           const textareas = el?.getElementsByTagName('textarea') || []
 
-          ;[...inputs, ...textareas].forEach(input => input.setAttribute('readonly', 'readonly'))
+          ;[...inputs, ...textareas].forEach(input =>
+            input.setAttribute('readonly', 'readonly')
+          )
         }
         setIsReady(true)
       },
@@ -73,7 +76,12 @@ const EditorBlock = ({
     <>
       <div
         {...divProps}
-        className={clsx(isReady ? 'prose-lg h-full w-full text-black dark:text-white' : 'hidden', divProps.className)}
+        className={clsx(
+          isReady
+            ? 'prose-lg h-full w-full text-black dark:text-white'
+            : 'hidden',
+          divProps.className
+        )}
         id={holder}
       />
       {!isReady && <CircularLoader className={'h-12'} />}

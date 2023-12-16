@@ -1,6 +1,7 @@
-import { PrimaryButton, PrimaryButtonProps } from '@components/buttons/PrimaryButton'
+import type { PrimaryButtonProps } from '@components/buttons/PrimaryButton'
+import { PrimaryButton } from '@components/buttons/PrimaryButton'
 import clsx from 'clsx'
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { HandThumbDownIcon, HandThumbUpIcon } from '@heroicons/react/20/solid'
 
 interface VoteButton {
@@ -26,7 +27,10 @@ export const VoteUpButton = ({
     variant={'link'}
   >
     <div className={'flex items-center gap-2 '}>
-      <HandThumbUpIcon className={clsx('border-1 w-6 p-1 group-hover:fill-green-300')} stroke={'#a49f9f'} />
+      <HandThumbUpIcon
+        className={clsx('border-1 w-6 p-1 group-hover:fill-green-300')}
+        stroke={'#a49f9f'}
+      />
       {children}
     </div>
   </PrimaryButton>
@@ -48,7 +52,10 @@ export const VoteDownButton = ({
     variant={'link'}
   >
     <div className={'flex items-center gap-2 '}>
-      <HandThumbDownIcon className={clsx('border-1  w-6 p-1 group-hover:fill-red-300')} stroke={'#a49f9f'} />
+      <HandThumbDownIcon
+        className={clsx('border-1  w-6 p-1 group-hover:fill-red-300')}
+        stroke={'#a49f9f'}
+      />
       {children}
     </div>
   </PrimaryButton>

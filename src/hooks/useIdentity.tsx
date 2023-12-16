@@ -3,20 +3,19 @@ import { Identity } from '@semaphore-protocol/identity'
 
 interface Created {
   groupId?: string | undefined
-  postId?: string | undefined
 }
-
-export const useIdentity = ({ groupId, postId }: Created = { groupId: undefined, postId: undefined }) => {
+export const useIdentity = ({ groupId }: Created = {}) => {
   const { address, isConnected } = useAccount()
 
-  try {
-    if (!address || !isConnected) {
-      return
-    }
+  // Return early if not connected or address is not available.
+  if (!isConnected || !address) {
+    return null // Return null explicitly for better predictability.
+  }
 
+  try {
     return new Identity(address)
   } catch (e) {
-    console.error('error in useIdentity', e)
-    return new Identity()
+    console.error('Error in useIdentity:', e)
+    return null // Return null instead of an empty Identity for error cases.
   }
 }

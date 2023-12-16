@@ -1,13 +1,8 @@
-import { BigNumber, ethers } from 'ethers'
-import {OutputData} from "@editorjs/editorjs";
-import {OutputBlockData} from "@editorjs/editorjs/types/data-formats/output-data";
+import type { BigNumber } from 'ethers'
+import type { OutputData } from '@editorjs/editorjs'
 
 export interface Admins {
   _admins: string[]
-}
-
-export interface Moderators {
-  _moderators: string[]
 }
 
 export interface Index {
@@ -17,14 +12,6 @@ export interface Index {
 export interface addressItem {
   // named item in the contract
   address: string // named item in the contract
-}
-
-export interface GroupId {
-  groupId: number
-}
-
-export interface ItemId {
-  itemId: number
 }
 
 export interface AddAdmins {
@@ -163,33 +150,10 @@ export interface SetGroupTags {
   (args: GroupIdTags): void
 }
 
-export interface ReputationRequirement {
-  post: number
-  comment: number
-  upvote: number
-  downvote: number
-}
-
-export interface ReputationWeight {
-  post: number
-  comment: number
-  upvote: number
-  downvote: number
-  reply: number
-  upvoted: number
-  downvoted: number
-}
-
 export interface NewGroupCreated {
   groupId: number
   name: string
   note: number
-}
-
-export interface NewUser {
-  groupId: number
-  identityCommitment: number
-  username: string
 }
 
 export interface Requirement {
@@ -199,29 +163,29 @@ export interface Requirement {
   // The following are not part of the contract
   name?: string
   symbol?: string
-  decimals?: number
+  decimals?: string | number
 }
 
 export interface RawRequirement {
   tokenAddress: string
-  minAmount: ethers.BigNumber,
-  // maxAmount: ethers.BigNumber
+  minAmount: bigint
+  // maxAmount: bigint
 }
 
 export type RawGroupData = {
-  id: ethers.BigNumber
+  id: bigint
   name: string
   groupDetails: {
-    bannerCID: ethers.BigNumber
-    logoCID: ethers.BigNumber
-    description: ethers.BigNumber
-    tags: ethers.BigNumber[]
+    bannerCID: bigint
+    logoCID: bigint
+    description: bigint
+    tags: bigint[]
   }
   requirements: RawRequirement[]
-  note: ethers.BigNumber
-  userCount: ethers.BigNumber
-  chainId: ethers.BigNumber
-  posts: ethers.BigNumber[]
+  note: bigint
+  userCount: bigint
+  chainId: bigint
+  posts: bigint[]
   removed: boolean
 }
 
@@ -234,24 +198,10 @@ export interface Group {
   userCount: number
   ownerIdentity?: string
   chainId: number
-  posts: Item[]
+  posts: number[]
   removed: boolean
   // The following are not part of the contract
   groupId?: string
-}
-
-// Definitions for each function
-export interface SetReputationRequirement {
-  repRequirement: ReputationRequirement
-}
-
-export interface SetReputationWeight {
-  repWeight: ReputationWeight
-}
-
-export interface AttesterSignUp {
-  attester: string
-  epochLength: number
 }
 
 export interface CreateGroup {
@@ -292,27 +242,53 @@ export interface PostsInGroup {
 }
 
 export interface SetGroupBannerByOwner {
-  (a: number[], b: number[][], c: number[], groupId: number, bannerCID: string): Promise<void> // The function that doesn't return a value, hence Promise<void>
+  (
+    a: number[],
+    b: number[][],
+    c: number[],
+    groupId: number,
+    bannerCID: string
+  ): Promise<void> // The function that doesn't return a value, hence Promise<void>
 }
 
 export interface SetGroupDescriptionByOwner {
-  (a: number[], b: number[][], c: number[], groupId: number, description: string): Promise<void> // The function that doesn't return a value, hence Promise<void>
+  (
+    a: number[],
+    b: number[][],
+    c: number[],
+    groupId: number,
+    description: string
+  ): Promise<void> // The function that doesn't return a value, hence Promise<void>
 }
 
 export interface SetGroupDetailsByOwner {
-  (a: number[], b: number[][], c: number[], groupId: number, details: GroupDetails): Promise<void> // The function that doesn't return a value, hence Promise<void>
+  (
+    a: number[],
+    b: number[][],
+    c: number[],
+    groupId: number,
+    details: GroupDetails
+  ): Promise<void> // The function that doesn't return a value, hence Promise<void>
 }
 
 export interface SetGroupLogoByOwner {
-  (a: number[], b: number[][], c: number[], groupId: number, logoCID: string): Promise<void> // The function that doesn't return a value, hence Promise<void>
+  (
+    a: number[],
+    b: number[][],
+    c: number[],
+    groupId: number,
+    logoCID: string
+  ): Promise<void> // The function that doesn't return a value, hence Promise<void>
 }
 
 export interface SetGroupTagsByOwner {
-  (a: number[], b: number[][], c: number[], groupId: number, tags: string[]): Promise<void> // The function that doesn't return a value, hence Promise<void>
-}
-
-export interface UserUnirepSignUp {
-  (attester: string, publicSignals: number[], proof: number[]): Promise<void> // The function that doesn't return a value, hence Promise<void>
+  (
+    a: number[],
+    b: number[][],
+    c: number[],
+    groupId: number,
+    tags: string[]
+  ): Promise<void> // The function that doesn't return a value, hence Promise<void>
 }
 
 // Events
@@ -347,7 +323,6 @@ export interface AddComment {
   nullifierHash: number // uint256
   note: number // uint256
   semaphoreProof: number[] // uint256[8]
-  unirepProof: ReputationProof // struct ReputationProof
 }
 
 export interface AddPost {
@@ -357,7 +332,6 @@ export interface AddPost {
   nullifierHash: number // uint256
   note: number // uint256
   semaphoreProof: number[] // uint256[8]
-  unirepProof: ReputationProof // struct ReputationProof
 }
 
 export interface EditItem {
@@ -371,7 +345,7 @@ export interface EditItem {
 export type ItemKind = number
 
 export type RawItemData = {
-  kind: BigNumber
+  kind: BigNumber | number
   id: BigNumber
   parentId: BigNumber
   groupId: BigNumber
@@ -380,8 +354,6 @@ export type RawItemData = {
   upvote: BigNumber
   downvote: BigNumber
   note: BigNumber
-  ownerEpoch: BigNumber
-  ownerEpochKey: BigNumber
   contentCID: string
   removed: boolean
 }
@@ -396,24 +368,13 @@ export type Item = {
   upvote: number
   downvote: number
   note: string
-  ownerEpoch: string
-  ownerEpochKey: string
   contentCID: string
   removed: boolean
   // The following are not part of the contract
-  createdAt: Date
+  // createdAt: Date
   title?: string
-  description?: OutputData | undefined
+  description?: typeof OutputData | undefined
   // blocks?: OutputBlockData[] | undefined
-}
-
-export type ReputationProof = {
-  publicSignals: number[]
-  proof: number[]
-  publicSignalsQ: number[]
-  proofQ: number[]
-  ownerEpoch: number
-  ownerEpochKey: number
 }
 
 export type VoteKind = number
@@ -441,7 +402,6 @@ export interface VoteFunction {
     voteType: VoteKind,
     merkleTreeRoot: number,
     nullifierHash: number,
-    semaphoreProof: number[],
-    unirepProof: ReputationProof
+    semaphoreProof: number[]
   ): Promise<void>
 }

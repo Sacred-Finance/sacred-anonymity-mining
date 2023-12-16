@@ -1,16 +1,27 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { Post, Topic } from '@components/Discourse/types'
-import '../topic-post.scss'
+import type { Post, Topic } from '@components/Discourse/types'
 import { useAnimation } from 'framer-motion'
 import { RecursivePostRenderer } from '@components/Discourse/TopicPosts/RecursivePostRenderer'
 import { nestPosts } from '@components/Discourse/TopicPosts/helper'
 
-const TopicPosts = ({ topic, mutate, readonly }: { topic: Topic; mutate: (newPost: Post) => void, readonly: boolean }) => {
-  const postRefs = useRef<{ [key: number]: React.RefObject<HTMLDivElement> }>({})
+const TopicPosts = ({
+  topic,
+  mutate,
+  readonly,
+}: {
+  topic: Topic
+  mutate: (newPost: Post) => void
+  readonly: boolean
+}) => {
+  const postRefs = useRef<{ [key: number]: React.RefObject<HTMLDivElement> }>(
+    {}
+  )
   const [targetPostNumber, setTargetPostNumber] = useState<number | null>(null)
   const [postsInView, setPostsInView] = useState([])
 
-  const filteredPosts = topic.post_stream.posts.filter(post => !post?.hidden && !post?.deleted_at)
+  const filteredPosts = topic.post_stream.posts.filter(
+    post => !post?.hidden && !post?.deleted_at
+  )
 
   useEffect(() => {
     if (targetPostNumber) {
@@ -37,8 +48,6 @@ const TopicPosts = ({ topic, mutate, readonly }: { topic: Topic; mutate: (newPos
         <RecursivePostRenderer
           key={post.id}
           post={post}
-          postRefs={postRefs}
-          setPostsInView={setPostsInView}
           controls={controls}
           setTargetPostNumber={setTargetPostNumber}
           addReplyToPosts={mutate}

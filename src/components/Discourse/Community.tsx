@@ -1,10 +1,16 @@
-import { DiscourseCommunity } from '@/lib/model'
+import type { DiscourseCommunity } from '@/lib/model'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useFetchMetadata } from '@/hooks/discourse/useFetchMetadata'
 import { CircularLoader } from '../buttons/JoinCommunityButton'
 
-const Community = ({ apiKey, username, endpoint, id, readonly }: DiscourseCommunity) => {
+const Community = ({
+  apiKey,
+  username,
+  endpoint,
+  id,
+  readonly,
+}: DiscourseCommunity) => {
   const router = useRouter()
   const { groupId } = router.query
   const { community, loading } = useFetchMetadata(id)
@@ -30,7 +36,9 @@ const Community = ({ apiKey, username, endpoint, id, readonly }: DiscourseCommun
                   <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                     {community?.name}
                   </h5>
-                  <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">{community?.description}</p>
+                  <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">
+                    {community?.description}
+                  </p>
                 </div>
               </div>
             </div>

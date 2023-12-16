@@ -1,15 +1,15 @@
 import { useAccount, useContractRead } from 'wagmi'
-import { ForumContractAddress } from '../constant/const'
+import { ForumContractAddress } from '@/constant/const'
 import ForumABI from '../constant/abi/Forum.json'
 import { useEffect, useState } from 'react'
-import {Address} from "@/types/common";
-import { useCommunityContext } from '@/contexts/CommunityProvider';
+import type { Address } from '@/types/common'
+import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
 
 export const useCheckIfUserIsAdminOrModerator = (checkOnInit = false) => {
   const [isAdmin, setisAdmin] = useState<boolean | null>(null)
   const [isModerator, setIsModerator] = useState<boolean | null>(null)
-  const { address } = useAccount();
-  const { dispatch } = useCommunityContext();
+  const { address } = useAccount()
+  const { dispatch } = useCommunityContext()
   const {
     refetch: fetchIsAdmin,
     isLoading: isLoadingAdmin,
@@ -25,8 +25,8 @@ export const useCheckIfUserIsAdminOrModerator = (checkOnInit = false) => {
       setisAdmin(false)
     },
     onSuccess(data: boolean) {
-      setisAdmin(data);
-      dispatch({ type: 'SET_USER_ACCESS', payload: {isAdmin: data} })
+      setisAdmin(data)
+      dispatch({ type: ActionType.SET_USER_ACCESS, payload: { isAdmin: data } })
     },
     enabled: false,
   })
@@ -47,14 +47,16 @@ export const useCheckIfUserIsAdminOrModerator = (checkOnInit = false) => {
     onSuccess(data: boolean) {
       // console.log(data);
       setIsModerator(data)
-      dispatch({ type: 'SET_USER_ACCESS', payload: {isModerator: data} })
+      dispatch({
+        type: ActionType.SET_USER_ACCESS,
+        payload: { isModerator: data },
+      })
     },
     enabled: false,
   })
 
   useEffect(() => {
     if (checkOnInit && address) {
-      console.log('checkOnInit', checkOnInit)
       fetchIsAdmin()
       fetchIsModerator()
     }
@@ -62,7 +64,10 @@ export const useCheckIfUserIsAdminOrModerator = (checkOnInit = false) => {
 
   useEffect(() => {
     if (!address) {
-      dispatch({ type: 'SET_USER_ACCESS', payload: {isModerator: false, isAdmin: false} })
+      dispatch({
+        type: ActionType.SET_USER_ACCESS,
+        payload: { isModerator: false, isAdmin: false },
+      })
     } else {
       fetchIsAdmin()
       fetchIsModerator()
@@ -72,6 +77,7 @@ export const useCheckIfUserIsAdminOrModerator = (checkOnInit = false) => {
   return {
     isAdmin: address && isAdmin,
     isModerator: address && isModerator,
+    isAdminOrModerator: address && (isModerator || isAdmin),
     fetchIsAdmin,
     fetchIsModerator,
     isLoading: isLoadingAdmin || isLoadingModerator,

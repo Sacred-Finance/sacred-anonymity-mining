@@ -1,4 +1,5 @@
-import React, { ButtonHTMLAttributes } from 'react'
+import type { ButtonHTMLAttributes } from 'react'
+import React from 'react'
 import { CircularLoader } from '@components/buttons/JoinCommunityButton'
 import { toast } from 'react-toastify'
 import { useTranslation } from 'next-i18next'
@@ -18,7 +19,13 @@ export type PrimaryButtonProps = {
   startIcon?: React.ReactNode
   loadingPosition?: 'start' | 'end'
   toolTip?: string | boolean
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
+  variant?:
+    | 'default'
+    | 'destructive'
+    | 'outline'
+    | 'secondary'
+    | 'ghost'
+    | 'link'
 } & ButtonHTMLAttributes<HTMLButtonElement>
 export function PrimaryButton({
   children,
@@ -62,9 +69,17 @@ export function PrimaryButton({
   )
 
   return (
-    <Button variant={variant} {...buttonProps} disabled={rest.disabled || isLoading} onClick={wrappedOnClick}>
+    <Button
+      variant={variant}
+      {...buttonProps}
+      disabled={rest.disabled || isLoading}
+      onClick={wrappedOnClick}
+    >
       {isLoading && loadingPosition === 'start' && <CircularLoader />}
-      {rest.startIcon && !isLoading && loadingPosition === 'start' && rest.startIcon}
+      {rest.startIcon &&
+        !isLoading &&
+        loadingPosition === 'start' &&
+        rest.startIcon}
       {children}
       {rest.endIcon && !isLoading && loadingPosition === 'end' && rest.endIcon}
       {isLoading && loadingPosition === 'end' && <CircularLoader />}

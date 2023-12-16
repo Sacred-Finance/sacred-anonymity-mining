@@ -1,12 +1,12 @@
-import { OutputData } from '@editorjs/editorjs'
-import React, {memo} from 'react'
+import type { OutputData } from '@editorjs/editorjs'
+import React, { memo } from 'react'
 import clsx from 'clsx'
 
 const editorJsHtml = require('editorjs-html')
 const EditorJsToHtml = editorJsHtml()
 
 interface Props {
-  data?: OutputData | string
+  data?: typeof OutputData | string
   isHtml?: boolean
   className?: string
 }
@@ -20,7 +20,12 @@ const EditorJsRenderer = ({ data, isHtml = false, className }: Props) => {
 
   if (isHtml && typeof data === 'string') {
     html = [data]
-  } else if (data && 'blocks' in data && Array.isArray(data.blocks) && data.blocks.length) {
+  } else if (
+    data &&
+    'blocks' in data &&
+    Array.isArray(data.blocks) &&
+    data.blocks.length
+  ) {
     html = EditorJsToHtml?.parse(data) as (string | JSX.Element)[]
   }
 
@@ -30,10 +35,12 @@ const EditorJsRenderer = ({ data, isHtml = false, className }: Props) => {
   }
 
   return (
-    <div className={clsx('select:text-primary-400 bg-primary-950 prose-lg overflow-y-hidden', className)}>
+    <div className={clsx('prose-lg overflow-y-hidden', className)}>
       {html.map((item, index) => {
         if (typeof item === 'string') {
-          return <div dangerouslySetInnerHTML={{ __html: item }} key={index}></div>
+          return (
+            <div dangerouslySetInnerHTML={{ __html: item }} key={index}></div>
+          )
         }
         // Assuming the object can be represented by its keys. Adjust if needed.
         return <div key={index}>{Object.keys(item).join(', ')}</div>

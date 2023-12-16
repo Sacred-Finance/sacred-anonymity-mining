@@ -1,18 +1,14 @@
-import React, { useEffect } from 'react'
-import { useGPTServerAnalysis } from '../../hooks/useGPTServerAnalysis' // Import the custom hook
-import { PrimaryButton } from '@components/buttons/PrimaryButton'
-import { SparklesIcon } from '@heroicons/react/20/solid'
-import EditorJsRenderer from '@components/editor-js/EditorJSRenderer'
-import clsx from 'clsx'
-import { Template } from '@pages/api/gpt-server/logos-ai'
-import { Button } from '@/shad/ui/button'
+import React from 'react'
 
 interface SummaryButtonProps {
   postData: string
   postTitle?: string
 }
 
-const SummaryButton: React.FC<SummaryButtonProps> = ({ postData, postTitle }) => {
+const SummaryButton: React.FC<SummaryButtonProps> = ({
+  postData,
+  postTitle,
+}) => {
   return <></>
   // const [
   //   { isLoading, data, error, fetchData },

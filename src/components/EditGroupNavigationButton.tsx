@@ -6,8 +6,12 @@ import { Identity } from '@semaphore-protocol/identity'
 import { useAccount } from 'wagmi'
 import Link from 'next/link'
 import ToolTip from '@components/HOC/ToolTip'
+import type { Group } from '@/types/contract/ForumInterface'
 
-export const useCheckIsOwner = (community, address) => {
+export const useCheckIsOwner = (
+  community: Group & { variant?: 'banner' | 'default' | undefined },
+  address: unknown
+) => {
   const [isOwner, setIsOwner] = useState(false)
 
   useEffect(() => {
@@ -15,8 +19,12 @@ export const useCheckIsOwner = (community, address) => {
   }, [address])
 
   const checkIsOwner = async () => {
-    if (!address) return false
-    if (!community?.note) return false
+    if (!address) {
+      return false
+    }
+    if (!community?.note) {
+      return false
+    }
     const user = new Identity(address as string)
     const note = await createNote(user)
     return community.note.toString() === note.toString()
@@ -25,16 +33,21 @@ export const useCheckIsOwner = (community, address) => {
   return { isOwner }
 }
 
-function EditGroupNavigationButton({ community }) {
+function EditGroupNavigationButton({ community }: { community: Group }) {
   const { address } = useAccount()
   const { t } = useTranslation()
 
   const { isOwner } = useCheckIsOwner(community, address)
 
-  if (!isOwner) return null
+  if (!isOwner) {
+    return null
+  }
 
   return (
-    <ToolTip tooltip={t('toolTip.editCommunity.title')} buttonProps={{ variant: 'secondary', className: 'flex gap-4' }}>
+    <ToolTip
+      tooltip={t('toolTip.editCommunity.title')}
+      buttonProps={{ variant: 'secondary', className: 'flex gap-4' }}
+    >
       <Link
         id="edit-community-button"
         className={`absolute right-0 z-20 rounded-full bg-gray-200 p-2 transition-all duration-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 ${

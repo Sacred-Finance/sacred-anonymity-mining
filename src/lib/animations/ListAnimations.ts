@@ -8,7 +8,7 @@ export const listVariants = {
       staggerChildren: 0.15, // Increase the stagger effect
     },
   },
-};
+}
 
 export const itemVariants = {
   hidden: {
@@ -25,4 +25,4 @@ export const itemVariants = {
       ease: [0.6, -0.05, 0.01, 0.99], // Use a custom cubic bezier curve for easing
     },
   },
-};
+}

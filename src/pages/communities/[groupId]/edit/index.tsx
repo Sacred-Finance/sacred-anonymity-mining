@@ -2,10 +2,9 @@ import React from 'react'
 import { useCommunityById } from '@/contexts/CommunityProvider'
 import { useRouter } from 'next/router'
 import { EditGroup } from '@components/EditGroup'
-// todo: figure out when/if it's beneficial to make calls to individual contract updates vs editing the entire group at once
 
 export interface HandleSetImage {
-  file: File | null
+  file: File | undefined
   imageType: 'logo' | 'banner'
 }
 
@@ -13,7 +12,7 @@ export const isImageFile = (file: File) => {
   return file && file.type.startsWith('image/')
 }
 
-function CreateGroupForm() {
+function EditGroupForm() {
   const router = useRouter()
   const { groupId } = router.query
   const [isMounted, setIsMounted] = React.useState(false)
@@ -21,8 +20,6 @@ function CreateGroupForm() {
     setIsMounted(true)
   }, [])
   const community = useCommunityById(groupId as string)
-  // todo: this is a hack for when we refresh on the edit page and don't have the community data.
-  // todo: we should fetch it here if it doesn't exist
   if (!isMounted) {
     return null
   }
@@ -33,4 +30,4 @@ function CreateGroupForm() {
   return <EditGroup group={community} />
 }
 
-export default CreateGroupForm
+export default EditGroupForm

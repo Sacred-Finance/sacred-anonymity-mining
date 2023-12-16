@@ -1,22 +1,36 @@
-import { RefCallback, useRef, useCallback, useMemo } from 'react'
-import { createPopper, Options } from '@popperjs/core'
+import type { RefCallback } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
+import type { Options } from '@popperjs/core'
+import { createPopper } from '@popperjs/core'
 
 /**
  * Example implementation to use Popper: https://popper.js.org/
  */
-export function usePopper(options?: Partial<Options>): [RefCallback<Element | null>, RefCallback<HTMLElement | null>] {
-  let reference = useRef<Element>(null)
-  let popper = useRef<HTMLElement>(null)
+export function usePopper(
+  options?: Partial<Options>
+): [RefCallback<Element | null>, RefCallback<HTMLElement | null>] {
+  const reference = useRef<Element>(null)
+  const popper = useRef<HTMLElement>(null)
 
-  let cleanupCallback = useRef(() => {})
+  const cleanupCallback = useRef(() => {})
 
-  let instantiatePopper = useCallback(() => {
-    if (!reference.current) return
-    if (!popper.current) return
+  const instantiatePopper = useCallback(() => {
+    if (!reference.current) {
+      return
+    }
+    if (!popper.current) {
+      return
+    }
 
-    if (cleanupCallback.current) cleanupCallback.current()
+    if (cleanupCallback.current) {
+      cleanupCallback.current()
+    }
 
-    cleanupCallback.current = createPopper(reference.current, popper.current, options).destroy
+    cleanupCallback.current = createPopper(
+      reference.current,
+      popper.current,
+      options
+    ).destroy
   }, [reference, popper, cleanupCallback, options])
 
   return useMemo(

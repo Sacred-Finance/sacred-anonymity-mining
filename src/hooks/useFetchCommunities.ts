@@ -1,13 +1,13 @@
 import { forumContract } from '@/constant/const'
 import { fetchCommunitiesData } from '@/utils/communityUtils'
-import { useCommunityContext } from '@/contexts/CommunityProvider'
+import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
 import { useEffect, useRef } from 'react'
-import { Event } from '@ethersproject/contracts'
-import { Group } from '@/types/contract/ForumInterface'
-
 
 type GroupId = number // Define GroupId type or replace it with your actual type
-export const useFetchCommunitiesByIds = (groupIds: GroupId[], loadOnInit = true) => {
+export const useFetchCommunitiesByIds = (
+  groupIds: GroupId[],
+  loadOnInit = true
+) => {
   const { dispatch, state } = useCommunityContext()
 
   const fetchCommunities = async () => {
@@ -16,16 +16,24 @@ export const useFetchCommunitiesByIds = (groupIds: GroupId[], loadOnInit = true)
       return
     }
     try {
-      if (!groupIds) return
+      if (!groupIds) {
+        return
+      }
       const communitiesData = await fetchCommunitiesData({ groups: groupIds })
 
+      console.log('communitiesData', communitiesData)
+
       // Merge new and existing communities, and remove duplicates
-      const existingGroupIds = new Set(state.communities.map(community => community.groupId))
-      const uniqueCommunities = communitiesData.filter(community => !existingGroupIds.has(community.groupId))
+      const existingGroupIds = new Set(
+        state.communities.map(community => community.groupId)
+      )
+      const uniqueCommunities = communitiesData.filter(
+        community => !existingGroupIds.has(community.groupId)
+      )
       const mergedCommunities = [...state.communities, ...uniqueCommunities]
 
       dispatch({
-        type: 'SET_COMMUNITIES',
+        type: ActionType.SET_COMMUNITIES,
         payload: mergedCommunities,
       })
 
@@ -38,9 +46,13 @@ export const useFetchCommunitiesByIds = (groupIds: GroupId[], loadOnInit = true)
   const didLoadRef = useRef(false)
 
   useEffect(() => {
-    if (didLoadRef.current) return
+    if (didLoadRef.current) {
+      return
+    }
     didLoadRef.current = true
-    if (loadOnInit) fetchCommunities()
+    if (loadOnInit) {
+      fetchCommunities()
+    }
   }, [groupIds, loadOnInit])
 
   return fetchCommunities

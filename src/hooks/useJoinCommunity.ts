@@ -1,68 +1,92 @@
 import { useCallback } from 'react'
 import { Identity } from '@semaphore-protocol/identity'
-
-import { joinGroup } from '../lib/api'
+import { joinGroup } from '@/lib/api'
 import { useHandleCommunityAction } from './useHandleCommunityAction'
-import { useCommunityContext } from '../contexts/CommunityProvider'
+import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
 import { useAccount } from 'wagmi'
-import { ethers } from 'ethers'
-import _ from 'lodash'
-import { User } from '../lib/model' // Import the CommunityProvider context hook
+import type { ethers } from 'ethers'
 import { createNote } from '@/lib/utils'
+import type { User } from '@/lib/model'
 
 export const useJoinCommunity = () => {
   const { address, isConnected } = useAccount()
-
-  const { dispatch } = useCommunityContext() // Use the context hook to access the required context values
+  const { dispatch } = useCommunityContext()
   const handleCommunityAction = useHandleCommunityAction()
 
+  // Improved parameter validation
+  const isValidGroupId = (
+    groupId: string | number | ethers.BigNumber
+  ): boolean => {
+    return typeof groupId !== 'undefined' && !isNaN(Number(groupId))
+  }
+
+  // Extracted action logic into a separate function
+  const performJoinCommunity = async (
+    groupId: string | number | ethers.BigNumber,
+    groupName: string,
+    username: string = 'anon'
+  ): Promise<any> => {
+    const freshUser = new Identity(address)
+    const note = await createNote(freshUser)
+    try {
+      const joinResponse = await joinGroup(
+        groupId.toString(),
+        freshUser.getCommitment().toString(),
+        username,
+        note.toString()
+      )
+
+      dispatch({
+        type: ActionType.ADD_USER,
+        payload: {
+          groupId: +groupId,
+          name: username,
+          identityCommitment: freshUser.getCommitment().toString(),
+        } as User,
+      })
+
+      return joinResponse
+    } catch (error) {
+      dispatch({
+        type: ActionType.REMOVE_USER,
+        payload: {
+          groupId: +groupId,
+          name: username,
+          identityCommitment: freshUser.getCommitment().toString(),
+        } as User,
+      })
+      throw error
+    }
+  }
+
   return useCallback(
-    async (groupName: string, groupId: string | number | ethers.BigNumber, successCallback?: () => void) => {
-      if (!isConnected || !address || typeof groupId === 'undefined' || isNaN(<number>groupId) || !groupName) {
-        console.error('Missing required parameters', isConnected, address, groupId, groupName)
+    async (
+      groupName: string,
+      groupId: string | number | ethers.BigNumber,
+      successCallback?: () => void
+    ) => {
+      if (!isConnected || !address || !isValidGroupId(groupId) || !groupName) {
+        console.error(
+          'Missing required parameters',
+          isConnected,
+          address,
+          groupId,
+          groupName
+        )
         return
       }
 
-      const actionFn = async () => {
-        const username = 'anon'
-        const freshUser = new Identity(`${address}`)
-        const note = await createNote(freshUser)
-        try {
-          // Attempt to join the community
-          const joinResponse = await joinGroup(groupId.toString(), freshUser.getCommitment().toString(), username, note.toString())
-          // Call the prependUser function from the context provider instead of dispatching the action
-
-          dispatch({
-            type: 'ADD_USER',
-            payload: {
-              groupId: +groupId.toString(),
-              name: username,
-              identityCommitment: freshUser.getCommitment().toString(),
-            } as unknown as User,
-          })
-
-          if (successCallback) {
-            successCallback()
-          }
-          return joinResponse
-        } catch (error) {
-          // If the transaction fails, roll back the state update by calling the removeUser function from the context provider
-          //@ts-ignore
-
-          dispatch({
-            type: 'REMOVE_USER',
-            payload: {
-              groupId: +groupId.toString(),
-              name: username,
-              identityCommitment: freshUser.getCommitment().toString(),
-            } as unknown as User,
-          })
-          return error
+      try {
+        const joinResponse = await performJoinCommunity(groupId, groupName)
+        if (successCallback) {
+          successCallback()
         }
+        return joinResponse
+      } catch (error) {
+        console.error(`Failed to join ${groupName}:`, error)
+        throw error
       }
-
-      return await handleCommunityAction(actionFn, [], `Successfully joined ${groupName}`, successCallback)
     },
-    [isConnected, address, handleCommunityAction, dispatch] // Update the dependencies array
+    [isConnected, address, handleCommunityAction, dispatch]
   )
 }

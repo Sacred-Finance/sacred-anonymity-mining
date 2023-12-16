@@ -1,8 +1,10 @@
-import { Group } from '@/types/contract/ForumInterface'
-import { User } from '@/lib/model'
+import type { Group } from '@/types/contract/ForumInterface'
+import type { User } from '@/lib/model'
 import React from 'react'
 import { LeaveCommunityButton } from '@components/buttons/LeaveCommunityButton'
-import { CircularLoader, JoinCommunityButton } from '@components/buttons/JoinCommunityButton'
+import { JoinCommunityButton } from '@components/buttons/JoinCommunityButton'
+import { useAccount } from 'wagmi'
+import { ConnectButton } from '@rainbow-me/rainbowkit'
 
 export function LeaveJoinCommunityButton(props: {
   community: Group & {
@@ -12,27 +14,40 @@ export function LeaveJoinCommunityButton(props: {
     showBackground: boolean
     bannerSrc: string | undefined
   }
-  hasUserJoined: User | boolean
+  hasUserJoined: User | boolean | null
 }) {
+  const { address } = useAccount()
+
+  if (!address) {
+    return <ConnectButton label={'Connect'} />
+  }
+
   return (
     <>
       {props.community ? (
-        <React.Fragment>
+        <>
           {props.hasUserJoined ? (
             <LeaveCommunityButton community={props.community} />
           ) : (
-            <React.Fragment>
-              {props.hasUserJoined == null ? (
-                <CircularLoader />
-              ) : (
-                <JoinCommunityButton community={props.community} hideIfJoined={props.community.variant === 'banner'} />
-              )}
-            </React.Fragment>
+            <JoinCommunityButton
+              community={props.community}
+              hideIfJoined={props.community.variant === 'banner'}
+            />
           )}
-        </React.Fragment>
+        </>
       ) : (
-        <svg className="h-5 w-5 animate-spin text-blue-600 dark:text-blue-400" viewBox="0 0 24 24">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+        <svg
+          className="h-5 w-5 animate-spin text-blue-600 dark:text-blue-400"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          ></circle>
           <path
             className="opacity-75"
             fill="currentColor"

@@ -1,43 +1,49 @@
 import React, { useEffect } from 'react'
-import LoadingPage from '@components/LoadingComponent'
 import { CommunityPage } from '@components/CommunityPage'
-import { useCommunityContext } from '@/contexts/CommunityProvider'
-import { ethers } from 'ethers'
+import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
 import useSWR from 'swr'
 import { useRouter } from 'next/router'
-import fetcher, { getGroupWithPostData } from '@/lib/fetcher'
+import fetcher, { GroupPostAPI } from '@/lib/fetcher'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
+import { GroupWithPostDataResponse } from '@pages/api/groupWithPostData'
 
-function Group() {
+export default function Page() {
   const router = useRouter()
-  const { groupId, postId } = router.query
-  const { data, error, isValidating } = useSWR(getGroupWithPostData(groupId), fetcher)
+  const { groupId } = router.query
+
+  const { data, error, isValidating, isLoading, mutate } =
+    useSWR<GroupWithPostDataResponse>(GroupPostAPI(groupId), fetcher)
+
   const { dispatch } = useCommunityContext()
   useCheckIfUserIsAdminOrModerator(true)
 
   useEffect(() => {
-    if (data && !isValidating && !error && !data?.error) {
+    if (data?.users) {
       dispatch({
-        type: 'SET_ACTIVE_COMMUNITY',
-        payload: {
-          community: data.group,
-          posts: data.posts,
-        },
-      })
-      dispatch({
-        type: 'SET_USERS',
+        type: ActionType.SET_USERS,
         payload: data?.users,
       })
     }
-  }, [data?.group, data?.posts, data?.users, isValidating])
-  if (error) return <div>Error: {error.message}</div>
-  if (!data) return <LoadingPage />
+  }, [data])
 
-  const { group, posts } = data
 
-  group.id = ethers.BigNumber.from(group.id)
+  useEffect(() => {
+    if (data?.group) {
+      dispatch({
+        type: ActionType.SET_ACTIVE_COMMUNITY,
+        payload: {
+          community: data?.group,
+          postList: data?.posts,
+        },
+      })
+    }
+    return () => {
+      dispatch({
+        type: ActionType.SET_ACTIVE_COMMUNITY,
+        payload: undefined,
+      })
+    }
+  }, [data?.group])
 
-  return <CommunityPage community={group} posts={posts} />
+  return <CommunityPage community={data?.group} posts={data?.posts} refreshData={mutate} />
 }
-
-export default Group
