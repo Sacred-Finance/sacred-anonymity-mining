@@ -110,9 +110,7 @@ export const useEditItem = ({
         if (!member) {
           throw Error('Member not found')
         }
-        const userPosting = new Identity(
-          `${address}_${groupId}_${member?.name}`
-        )
+        const userPosting = new Identity(address)
         const input = {
           trapdoor: userPosting.getTrapdoor(),
           note: BigInt(note),

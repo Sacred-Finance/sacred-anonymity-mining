@@ -313,9 +313,7 @@ export function useUserIfJoined(communityId: string | number): User | false {
       let newUserJoined = state.communitiesJoined[numericCommunityId]
 
       if (newUserJoined === undefined) {
-        const generatedIdentity = new Identity(
-          `${userAddress}_${numericCommunityId}_anon`
-        )
+        const generatedIdentity = new Identity(userAddress)
         const hasJoined = await hasUserJoined({
           groupId: BigInt(numericCommunityId),
           identityCommitment: generatedIdentity.getCommitment(),
@@ -374,7 +372,7 @@ export function useCommunitiesCreatedByUser() {
     if (userAddress && state.communities?.length) {
       const communitiesCreated: Group[] = []
       for (let i = 0; i < state.communities.length; i++) {
-        const generatedIdentity = new Identity(`${userAddress}`)
+        const generatedIdentity = new Identity(userAddress)
         const generatedNote = (await createNote(generatedIdentity)).toString()
         if (state.communities[i].note === generatedNote) {
           communitiesCreated.push(state.communities[i])
@@ -405,9 +403,7 @@ export function useCommunitiesJoinedByUser() {
       await Promise.all(
         state?.communities.map(community => {
           if (isUndefined(state.communitiesJoined[Number(community.id)])) {
-            const generatedIdentity = new Identity(
-              `${userAddress}_${Number(community.id)}_anon`
-            )
+            const generatedIdentity = new Identity(userAddress)
             return hasUserJoined({
               groupId: BigInt(community.id),
               identityCommitment: generatedIdentity.commitment,

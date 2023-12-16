@@ -335,9 +335,7 @@ const CreateCommentUI = ({
     users.forEach(u => semaphoreGroup.addMember(BigInt(u)))
 
     try {
-      const userIdentity = new Identity(
-        `${address}_${group.id}_${activeUser?.name || 'anon'}`
-      )
+      const userIdentity = new Identity(`${address}`)
 
       const note = await createNote(userIdentity)
 
@@ -448,7 +446,7 @@ export const VoteForItemUI = ({
       const semaphoreGroup = new SemaphoreGroup(BigInt(groupId))
       const users = await fetchUsersFromSemaphoreContract(groupId)
       users.forEach(u => semaphoreGroup.addMember(BigInt(u)))
-      const userIdentity = new Identity(`${address}_${group.id}_anon`)
+      const userIdentity = new Identity(`${address}`)
 
       const { proof, nullifierHash, merkleTreeRoot } = await generateProof(
         userIdentity,

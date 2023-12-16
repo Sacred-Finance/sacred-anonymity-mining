@@ -59,7 +59,7 @@ export const useLeaveCommunity = ({ id }: UseLeaveCommunityParams) => {
       return
     }
     console.log(`address: ${address}`, `id: ${id}`, `username: ${username}`)
-    const userIdentity = new Identity(`${address}_${id}_${username}`)
+    const userIdentity = new Identity(address)
     try {
       console.log('Leaving group...')
       const { proof, siblings, pathIndices } = await prepareGroupAndProof(

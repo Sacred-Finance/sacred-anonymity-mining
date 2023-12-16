@@ -12,11 +12,8 @@ export const useIdentity = ({ groupId }: Created = {}) => {
     return null // Return null explicitly for better predictability.
   }
 
-  // Use template strings for better readability.
-  const identityString = groupId ? `${address}_${groupId}_anon` : address
-
   try {
-    return new Identity(identityString)
+    return new Identity(address)
   } catch (e) {
     console.error('Error in useIdentity:', e)
     return null // Return null instead of an empty Identity for error cases.

@@ -106,9 +106,7 @@ export class Post {
       const signal = utils.hexZeroPad('0x' + voteCmdNum.toString(16), 32)
       const extraNullifier = voteCmdNum.toString()
       const g = new Group(groupId)
-      const userPosting = new Identity(
-        `${address}_${this.groupId}_${postedByUser?.name}`
-      )
+      const userPosting = new Identity(`${address}`)
 
       const filteredUsers = users.filter(u => u?.groupId === +this.groupId)
       if (filteredUsers.length === 0) {

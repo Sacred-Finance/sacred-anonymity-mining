@@ -156,16 +156,13 @@ export async function editContent(
   const message =
     currentDate.getTime().toString() + '#' + JSON.stringify(content)
   console.log(`Editing your anonymous ${type}...`)
-  let cid
-  cid = await uploadIPFS(message)
+  const cid = await uploadIPFS(message)
   if (!cid) {
     throw Error('Upload to IPFS failed')
   }
   const signal = getBytes32FromIpfsHash(cid)
 
-  const userPosting = new Identity(
-    `${address}_${this.groupId}_${postedByUser?.name}`
-  )
+  const userPosting = new Identity(address)
   const note = await createNote(userPosting)
 
   const item = await forumContract.read.itemAt([BigInt(itemId)])
@@ -179,4 +176,3 @@ export async function editContent(
 
   return await edit(itemId.toString(), signal, note, a, b, c)
 }
-

@@ -26,7 +26,7 @@ export const useJoinCommunity = () => {
     groupName: string,
     username: string = 'anon'
   ): Promise<any> => {
-    const freshUser = new Identity(`${address}_${groupId}_${username}`)
+    const freshUser = new Identity(address)
     const note = await createNote(freshUser)
     try {
       const joinResponse = await joinGroup(
