@@ -1,37 +1,59 @@
-import { usePrepareContractWrite, useContractWrite } from 'wagmi'
-import { ForumContractAddress } from '@/constant/const'
+import { useContractWrite } from 'wagmi'
+import { ForumContractAddress } from '../constant/const'
 import ForumABI from '../constant/abi/Forum.json'
-import { useState } from 'react'
+import type { CommunityId } from '@/contexts/CommunityProvider'
+import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
 import { toast } from 'react-toastify'
 import { useRouter } from 'next/router'
-import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
-import type { CommunityId } from '@/contexts/CommunityProvider'
+import type { Address } from '@/types/common'
+import { useState } from 'react'
 
 export const useRemoveGroup = (groupId: CommunityId) => {
-  const { dispatch } = useCommunityContext()
+  const { dispatch, state } = useCommunityContext()
+
   const [isLoading, setIsLoading] = useState(false)
+
   const router = useRouter()
 
-  const { config, error: prepareError } = usePrepareContractWrite({
-    address: ForumContractAddress,
+  return useContractWrite({
+    address: ForumContractAddress as Address,
     abi: ForumABI.abi,
     functionName: 'removeGroup',
-    args: [groupId],
-  })
-
-  const { write, error: writeError } = useContractWrite({
-    ...config,
-    onMutate: () => setIsLoading(true),
-    onError: error => {
-      toast.error(error.message)
+    mode: 'recklesslyUnprepared',
+    args: [],
+    onError(error, variables, context) {
+      toast.error(error.name, {
+        autoClose: 7000,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        toastId: 'removalFailed',
+      })
       setIsLoading(false)
     },
-    onSuccess: async data => {
-      dispatch({ type: ActionType.REMOVE_COMMUNITY, payload: groupId })
+    onSuccess: async (data, variables) => {
+      setIsLoading(true)
+      await data.wait()
+
+      dispatch({
+        type: ActionType.REMOVE_COMMUNITY,
+        payload: groupId,
+      })
+
+      toast.success('Removed Successfully!', {
+        autoClose: 7000,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      })
       setIsLoading(false)
-      router.push('/')
+      if (router.pathname === '/') {
+        router.reload()
+      } else {
+        router.push('/')
+      }
     },
   })
-
-  return { write, isLoading, prepareError, writeError }
 }
