@@ -35,19 +35,11 @@ export const useRemoveGroup = (groupId: CommunityId) => {
     onSuccess: async (data, variables) => {
       setIsLoading(true)
       await data.wait()
-
       dispatch({
         type: ActionType.REMOVE_COMMUNITY,
         payload: groupId,
       })
 
-      toast.success('Removed Successfully!', {
-        autoClose: 7000,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      })
       setIsLoading(false)
       if (router.pathname === '/') {
         router.reload()
