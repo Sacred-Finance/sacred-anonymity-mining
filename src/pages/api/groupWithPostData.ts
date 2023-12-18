@@ -53,15 +53,20 @@ export default async function handler(
       args: [id],
     }))
 
-    const rawPostResults = await multicall({
-      allowFailure: true,
-      chainId: polygonMumbai.id,
-      contracts: postData,
-    })
+    const rawPostResults = (await Promise.all(
+      postData.map(async (data, i) => {
+        try {
+          return await forumContract.read.itemAt([postIds[i]])
+        } catch (err) {
+          console.error('Error fetching post:', err)
+          return res
+            .status(500)
+            .json({ error: 'An error occurred while fetching post' })
+        }
+      })
+    )) as unknown as RawItemData[]
 
-    const rawPosts = rawPostResults.map(data => data.result) as RawItemData[]
-
-    const filteredRawPosts = rawPosts.filter(
+    const filteredRawPosts = rawPostResults.filter(
       post => post.contentCID && post.contentCID !== HashZero && !post.removed
     ) as RawItemData[]
 
