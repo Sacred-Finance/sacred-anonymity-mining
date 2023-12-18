@@ -83,7 +83,7 @@ export default async function handler(
       bigIntGroupId,
     ])
 
-    res.status(200).json(<GroupWithPostDataResponse>{
+    return res.status(200).json(<GroupWithPostDataResponse>{
       group,
       posts: augmentedPosts,
       users: usersWithCommitment.map(c => ({
@@ -97,8 +97,8 @@ export default async function handler(
       return res.status(404).json({ error: err.message })
     }
     if (err instanceof Error) {
-      res.status(500).json({ error: err?.message || 'Unknown error' })
+      return res.status(500).json({ error: err?.message || 'Unknown error' })
     }
-    res.status(500).json({ error: 'Unknown error' })
+    return res.status(500).json({ error: 'Unknown error' })
   }
 }
