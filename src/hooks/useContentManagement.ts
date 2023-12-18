@@ -1,17 +1,18 @@
-import { Dispatch, SetStateAction, useState } from 'react'
-import { OutputData } from '@editorjs/editorjs'
+import type { Dispatch, SetStateAction } from 'react'
+import { useState } from 'react'
+import type { OutputData } from '@editorjs/editorjs'
 
 type ContentManagementConfig = {
   isPostOrPoll: boolean
   defaultContentTitle?: string | null
-  defaultContentDescription?: OutputData | null
+  defaultContentDescription?: typeof OutputData | null
 }
 
 type ContentManagementResult = {
   contentTitle?: string | null
   setContentTitle?: Dispatch<SetStateAction<string | null>>
-  contentDescription: OutputData | null
-  setContentDescription: Dispatch<SetStateAction<OutputData | null>>
+  contentDescription: typeof OutputData | null
+  setContentDescription: Dispatch<SetStateAction<typeof OutputData | null>>
   tempContents: any[]
   setTempContents: Dispatch<SetStateAction<any[]>>
   isContentEditable: boolean
@@ -20,11 +21,15 @@ type ContentManagementResult = {
   setIsContentEditing: Dispatch<SetStateAction<boolean>>
   clearContent: () => void
 }
-export function useContentManagement(config: ContentManagementConfig): ContentManagementResult {
-  const [contentTitle, setContentTitle] = useState<string | null>(config.defaultContentTitle || null)
-  const [contentDescription, setContentDescription] = useState<OutputData | null>(
-    config.defaultContentDescription || null
+export function useContentManagement(
+  config: ContentManagementConfig
+): ContentManagementResult {
+  const [contentTitle, setContentTitle] = useState<string | null>(
+    config.defaultContentTitle || null
   )
+  const [contentDescription, setContentDescription] = useState<
+    typeof OutputData | null
+  >(config.defaultContentDescription || null)
   const [tempContents, setTempContents] = useState([])
   const [isContentEditable, setIsContentEditable] = useState(false)
   const [isContentEditing, setIsContentEditing] = useState(false)
@@ -47,7 +52,7 @@ export function useContentManagement(config: ContentManagementConfig): ContentMa
       setIsContentEditable,
       isContentEditing,
       setIsContentEditing,
-      clearContent
+      clearContent,
     }
   } else {
     return {
@@ -59,7 +64,7 @@ export function useContentManagement(config: ContentManagementConfig): ContentMa
       setIsContentEditable,
       isContentEditing,
       setIsContentEditing,
-      clearContent
+      clearContent,
     }
   }
 }

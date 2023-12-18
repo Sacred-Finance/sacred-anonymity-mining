@@ -1,15 +1,23 @@
-import React, { useContext, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { useGPTServerAnalysis } from '@/hooks/useGPTServerAnalysis'
 import { SparklesIcon } from '@heroicons/react/20/solid'
-import clsx from 'clsx'
 import { Template } from '@pages/api/gpt-server/logos-ai'
-import { CircularLoader } from '@components/buttons/JoinCommunityButton'
 import { PrimaryButton } from '@components/buttons/PrimaryButton'
-import { AIDigestContext, useAIDigest } from '@components/Post/PostPage'
+import { useAIDigest } from '@components/Post/PostPage'
 
 const analysisLabelsAndTypes = [
-  { key: Template.Summarize_ToSimpleMarkdown, label: 'Summarize', setter: 'setSummarizeResponse', enabled: true },
-  { key: Template.SWOT_ToSimpleMarkdown, label: 'SWOT', setter: 'setSwotResponse', enabled: true },
+  {
+    key: Template.Summarize_ToSimpleMarkdown,
+    label: 'Summarize',
+    setter: 'setSummarizeResponse',
+    enabled: true,
+  },
+  {
+    key: Template.SWOT_ToSimpleMarkdown,
+    label: 'SWOT',
+    setter: 'setSwotResponse',
+    enabled: true,
+  },
   {
     key: Template.CausalChain_ToSimpleMarkdown,
     label: 'Causal Chain',
@@ -60,7 +68,9 @@ const AIDigestButton = ({ postData }: { postData: string }) => {
   }
 
   const getButtonText = () => {
-    const enabledAnalyses = analysisLabelsAndTypes.filter(({ key }) => enabled[key])
+    const enabledAnalyses = analysisLabelsAndTypes.filter(
+      ({ key }) => enabled[key]
+    )
     const allResponses = enabledAnalyses.every(({ key }) => responses[key])
     if (allResponses) {
       return 'Digest Complete'
@@ -87,18 +97,19 @@ const AIDigestButton = ({ postData }: { postData: string }) => {
 
   return (
     <PrimaryButton
-      variant={'default'}
+      variant="default"
       className={ctaClass}
       onClick={handleFetchData}
       disabled={anyLoading || postData.length < 25 || allResponses || disabled}
       isLoading={anyLoading}
-      endIcon={<SparklesIcon className={'h-5 w-5 text-white'} height={20} />}
+      endIcon={<SparklesIcon className="h-5 w-5 text-white" height={20} />}
     >
       {getButtonText()}
     </PrimaryButton>
   )
 }
 
-const ctaClass = 'text-sm !bg-primary-400 !text-primary-foreground hover:!bg-primary-500 hover:!text-primary-foreground'
+const ctaClass =
+  'text-sm !bg-primary-400 !text-primary-foreground hover:!bg-primary hover:!text-primary-foreground'
 
 export default AIDigestButton

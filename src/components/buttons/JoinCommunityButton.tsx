@@ -1,27 +1,36 @@
-import { User } from '../../lib/model'
+import type { User } from '@/lib/model'
 import { useAccount } from 'wagmi'
-import { useJoinCommunity } from '../../hooks/useJoinCommunity'
+import { useJoinCommunity } from '@/hooks/useJoinCommunity'
 
 import React, { memo } from 'react'
 import { TosConfirmationWrapper } from '../TermsOfService/TosConfirmationWrapper'
-import { useValidateUserBalance } from '../../utils/useValidateUserBalance'
+import { useValidateUserBalance } from '@/utils/useValidateUserBalance'
 import { useTranslation } from 'next-i18next'
-import { useUserIfJoined } from '../../contexts/CommunityProvider'
+import { useUserIfJoined } from '@/contexts/CommunityProvider'
 import { toast } from 'react-toastify'
-import { Group } from '@/types/contract/ForumInterface'
+import type { Group } from '@/types/contract/ForumInterface'
 import clsx from 'clsx'
 import { PrimaryButton } from './index'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 
 interface JoinButtonProps {
   community: Group
-  hideIfJoined?: boolean
 }
 
 export function CircularLoader({ className }: { className?: string }) {
   return (
-    <svg className={clsx('h-5 w-5 animate-spin', className)} viewBox="0 0 24 24">
-      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+    <svg
+      className={clsx('h-5 w-5 animate-spin', className)}
+      viewBox="0 0 24 24"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      ></circle>
       <path
         className="opacity-75"
         fill="currentColor"
@@ -31,7 +40,7 @@ export function CircularLoader({ className }: { className?: string }) {
   )
 }
 
-export const JoinCommunityButton = memo(({ community, hideIfJoined }: JoinButtonProps) => {
+export const JoinCommunityButton = memo(({ community }: JoinButtonProps) => {
   const { openConnectModal } = useConnectModal()
 
   const { groupId, name: groupName } = community
@@ -39,13 +48,15 @@ export const JoinCommunityButton = memo(({ community, hideIfJoined }: JoinButton
   const [isLoading, setIsLoading] = React.useState(false)
   const { t } = useTranslation()
   const { address } = useAccount()
-  const hasUserJoined: User | undefined | false = useUserIfJoined(groupId as string | number)
+  const hasUserJoined: User | undefined | false = useUserIfJoined(
+    groupId as string | number
+  )
 
   const { checkUserBalance } = useValidateUserBalance(community, address)
 
   const joinCommunity = useJoinCommunity()
 
-  const validateBeforeOpen = async (): Promise<boolean> => {
+  const validateBeforeOpen = async (): Promise<boolean | undefined> => {
     if (!address) {
       if (openConnectModal) {
         openConnectModal()
@@ -54,18 +65,28 @@ export const JoinCommunityButton = memo(({ community, hideIfJoined }: JoinButton
 
       return false
     }
-    return await checkUserBalance()
+    return checkUserBalance()
   }
   const join = async () => {
-    if (isLoading) return
+    if (isLoading) {
+      return
+    }
     setIsLoading(true)
     const result = await validateBeforeOpen()
-    if (!result) return
-    if (!hasUserJoined) await joinCommunity(groupName, groupId)
+    if (!result) {
+      return
+    }
+    if (!hasUserJoined) {
+      await joinCommunity(groupName, groupId)
+    }
     setIsLoading(false)
   }
   const joinButton = (
-    <PrimaryButton isLoading={isLoading} onClick={join} variant={hasUserJoined ? 'secondary' : 'default'}>
+    <PrimaryButton
+      isLoading={isLoading}
+      onClick={join}
+      variant={hasUserJoined ? 'secondary' : 'default'}
+    >
       {hasUserJoined ? (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -74,7 +95,12 @@ export const JoinCommunityButton = memo(({ community, hideIfJoined }: JoinButton
           stroke="currentColor"
           className="h-5 w-5"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M5 13l4 4L19 7"
+          />
         </svg>
       ) : null}
       {t('button.join', { count: hasUserJoined ? 0 : 1 })}
@@ -83,11 +109,7 @@ export const JoinCommunityButton = memo(({ community, hideIfJoined }: JoinButton
   return (
     <>
       {hasUserJoined ? (
-        hideIfJoined ? (
-          ''
-        ) : (
-          joinButton
-        )
+        joinButton
       ) : (
         <TosConfirmationWrapper
           buttonElement={joinButton}

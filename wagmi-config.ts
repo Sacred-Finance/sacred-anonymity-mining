@@ -1,14 +1,26 @@
-// Web3 Configs
-import { configureChains, createClient } from 'wagmi'
-import { goerli, localhost, mainnet, polygonMumbai, sepolia } from 'wagmi/chains'
-import { braveWallet, coinbaseWallet, injectedWallet, metaMaskWallet } from '@rainbow-me/rainbowkit/wallets'
+import { configureChains, createConfig } from 'wagmi'
+
+import {
+  goerli,
+  localhost,
+  mainnet,
+  polygonMumbai,
+  sepolia,
+} from 'wagmi/chains'
+import {
+  braveWallet,
+  coinbaseWallet,
+  injectedWallet,
+  metaMaskWallet,
+  rainbowWallet,
+} from '@rainbow-me/rainbowkit/wallets'
 import { app } from '@/appConfig'
 import { connectorsForWallets } from '@rainbow-me/rainbowkit'
 import { alchemyProvider } from 'wagmi/providers/alchemy'
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc'
-import { publicProvider } from 'wagmi/providers/public'
 import { ParticleNetwork } from '@particle-network/auth'
 import { particleWallet } from '@particle-network/rainbowkit-ext'
+import { publicProvider } from 'wagmi/providers/public'
 
 export const stallTimeout = 10_0000
 
@@ -16,16 +28,16 @@ new ParticleNetwork({
   appId: process.env.NEXT_PUBLIC_PARTICLE_APP_ID || '',
   clientKey: process.env.NEXT_PUBLIC_PARTICLE_CLIENT_KEY || '',
   projectId: process.env.NEXT_PUBLIC_PARTICLE_PROJECT_ID || '',
+  chainId: polygonMumbai.id,
+  chainName: 'Polygon',
 })
 
-export const { chains, provider, webSocketProvider } = configureChains(
-  [polygonMumbai],
+export const { chains, publicClient, webSocketPublicClient } = configureChains(
+  [polygonMumbai, goerli, mainnet, sepolia, localhost],
   [
     alchemyProvider({
       apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY as string,
-      stallTimeout,
     }),
-
     jsonRpcProvider({
       rpc: chain => {
         if (chain.id === localhost.id) {
@@ -57,13 +69,16 @@ export const { chains, provider, webSocketProvider } = configureChains(
         console.error(`No RPC URL for chain ${chain.name}`)
         return null
       },
-      stallTimeout: stallTimeout,
     }),
-
-    publicProvider({ stallTimeout: stallTimeout }),
+    publicProvider(),
   ],
 
-  { stallTimeout: stallTimeout, pollingInterval: stallTimeout }
+  {
+    stallTimeout: stallTimeout,
+    pollingInterval: stallTimeout,
+    batch: { multicall: true },
+    rank: true,
+  }
 )
 const otherWallets = [
   braveWallet({ chains }),
@@ -73,24 +88,40 @@ const otherWallets = [
   particleWallet({ chains, authType: 'apple' }),
   particleWallet({ chains }),
   coinbaseWallet({ chains, appName: app.name }),
-  // rainbowWallet({ chains }),
+  rainbowWallet({
+    projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_ID as string,
+    chains,
+  }),
   //   walletConnectWallet({ chains }),
 ]
-const connectors = connectorsForWallets([
-  {
-    groupName: 'Recommended',
-    wallets: [injectedWallet({ chains, shimDisconnect: true }), metaMaskWallet({ chains, shimDisconnect: true })],
-  },
-  {
-    groupName: 'Other Wallets',
-    wallets: otherWallets,
-  },
-])
-export const client = createClient({
+const connectors = () => {
+  if (!process.env.NEXT_PUBLIC_WALLET_CONNECT_ID) {
+    throw new Error('Missing NEXT_PUBLIC_WALLET_CONNECT_ID')
+  }
+
+  return connectorsForWallets([
+    {
+      groupName: 'Recommended',
+      wallets: [
+        injectedWallet({ chains, shimDisconnect: true }),
+        metaMaskWallet({
+          chains,
+          shimDisconnect: true,
+          projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_ID as string,
+        }),
+      ],
+    },
+    {
+      groupName: 'Other Wallets',
+      wallets: otherWallets,
+    },
+  ])
+}
+export const config = createConfig({
   autoConnect: true,
-  provider: provider({ chainId: polygonMumbai.id }),
-  webSocketProvider: webSocketProvider({ chainId: polygonMumbai.id }),
-  connectors: connectors,
+  publicClient,
+  webSocketPublicClient: webSocketPublicClient({ chainId: polygonMumbai.id }),
+  connectors: connectors(),
   logger: {
     warn: message => console.warn('Wagmi warning', message),
   },

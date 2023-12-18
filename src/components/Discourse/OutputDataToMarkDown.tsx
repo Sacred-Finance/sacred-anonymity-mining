@@ -1,6 +1,6 @@
-import { OutputData } from '@editorjs/editorjs'
+import type { OutputData } from '@editorjs/editorjs'
 
-export function OutputDataToMarkDown(description: OutputData) {
+export function OutputDataToMarkDown(description: typeof OutputData) {
   return description?.blocks?.reduce((acc, block, idx) => {
     let content = ''
     if (idx !== 0) {
@@ -15,7 +15,10 @@ export function OutputDataToMarkDown(description: OutputData) {
         content = `# ${block.data.text}`
         break
       case 'list':
-        content = block.data.items.reduce((acc, item) => acc + `- ${item}\n`, '')
+        content = block.data.items.reduce(
+          (acc, item) => acc + `- ${item}\n`,
+          ''
+        )
         break
       case 'code':
         content = `\`\`\`${block.data.language}\n${block.data.code}\n\`\`\``
@@ -45,7 +48,10 @@ export function OutputDataToMarkDown(description: OutputData) {
         content = `${block.data.html}`
         break
       case 'checklist':
-        content = block.data.items.reduce((acc, item) => acc + `- [${item.checked ? 'x' : ' '}] ${item.text}\n`, '')
+        content = block.data.items.reduce(
+          (acc, item) => acc + `- [${item.checked ? 'x' : ' '}] ${item.text}\n`,
+          ''
+        )
         break
       default:
         content = ''
@@ -56,8 +62,10 @@ export function OutputDataToMarkDown(description: OutputData) {
   }, '')
 }
 
-export const OutputDataToHTML = (description: OutputData | undefined) => {
-  var convertedHtml = ''
+export const OutputDataToHTML = (
+  description: typeof OutputData | undefined
+) => {
+  let convertedHtml = ''
   description?.blocks?.map(block => {
     switch (block.type) {
       case 'header':

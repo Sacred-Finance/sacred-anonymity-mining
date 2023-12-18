@@ -1,8 +1,8 @@
-import { useContractRead, useContractWrite } from "wagmi";
-import { ForumContractAddress } from "../constant/const";
-import ForumABI from "../constant/abi/Forum.json";
-import { useState } from "react";
-import {Address} from "@/types/common";
+import { useContractRead } from 'wagmi'
+import { ForumContractAddress } from '../constant/const'
+import ForumABI from '../constant/abi/Forum.json'
+import { useState } from 'react'
+import type { Address } from '@/types/common'
 
 export const useFetchAdminsAndModerators = () => {
   const {
@@ -13,16 +13,16 @@ export const useFetchAdminsAndModerators = () => {
   } = useContractRead({
     abi: ForumABI.abi,
     address: ForumContractAddress as Address,
-    functionName: "getAdmins",
+    functionName: 'getAdmins',
     onError(err) {
-      setAdmins([]);
+      setAdmins([])
     },
     onSuccess(data) {
       // console.log(data)
-      setAdmins(data as string[]);
+      setAdmins(data as string[])
     },
     // enabled: false
-  });
+  })
   const {
     refetch: fetchModerators,
     isLoading: isLoadingModerator,
@@ -31,19 +31,19 @@ export const useFetchAdminsAndModerators = () => {
   } = useContractRead({
     abi: ForumABI.abi,
     address: ForumContractAddress as Address,
-    functionName: "getModerators",
+    functionName: 'getModerators',
     onError(err) {
-      setModerators([]);
+      setModerators([])
     },
     onSuccess(data) {
       // console.log(data);
-      setModerators(data as string[]);
+      setModerators(data as string[])
     },
     // enabled: false
-  });
+  })
 
-  const [admins, setAdmins] = useState<string[]>([]);
-  const [moderators, setModerators] = useState<string[]>([]);
+  const [admins, setAdmins] = useState<string[]>([])
+  const [moderators, setModerators] = useState<string[]>([])
 
   return {
     admins,
@@ -53,5 +53,5 @@ export const useFetchAdminsAndModerators = () => {
     isLoading: isLoadingAdmin || isLoadingModerator,
     isFetching: isFetchingAdmin || isFetchingModerator,
     isFetched: isAdminFetched || isModeratorFetched,
-  };
-};
+  }
+}

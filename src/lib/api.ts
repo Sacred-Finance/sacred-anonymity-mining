@@ -1,11 +1,20 @@
-import { Proof } from '@semaphore-protocol/proof'
+import type { Proof } from '@semaphore-protocol/proof'
 import axios from 'axios'
-import { BigNumberish } from 'ethers'
-import { RELAYER_URL } from '../constant/const'
-import { CommunityDetails, ItemCreationRequest, PollRequestStruct, ReputationProofStruct, Requirement } from './model'
-import { Item } from '@/types/contract/ForumInterface'
+import type { BigNumberish } from 'ethers'
+import { RELAYER_URL } from '@/constant/const'
+import type {
+  CommunityDetails,
+  ItemCreationRequest,
+  PollRequestStruct,
+  Requirement,
+} from './model'
 
-export async function joinGroup(groupId: string, identityCommitment: string, username: string, note: string) {
+export async function joinGroup(
+  groupId: string,
+  identityCommitment: string,
+  username: string,
+  note: string
+) {
   return axios.post(`${RELAYER_URL}/join-group`, {
     identityCommitment,
     groupId,
@@ -14,16 +23,26 @@ export async function joinGroup(groupId: string, identityCommitment: string, use
   })
 }
 
-export async function leaveGroup(
-  groupId: string,
-  identityCommitment: string,
-  a: any,
-  b: any,
-  c: any,
-  siblings: any[],
+interface LeaveGroupParams {
+  groupId: string
+  identityCommitment: string
+  a: Array<number | string>
+  b: [string[], string[]]
+  c: Array<number | string>
+  siblings: string[]
   pathIndices: number[]
-) {
-  return axios.post(`${RELAYER_URL}/leave-group`, {
+}
+
+export const leaveGroup = async ({
+  groupId,
+  identityCommitment,
+  a,
+  b,
+  c,
+  siblings,
+  pathIndices,
+}: LeaveGroupParams) =>
+  axios.post(`${RELAYER_URL}/leave-group`, {
     identityCommitment,
     groupId,
     a,
@@ -32,7 +51,6 @@ export async function leaveGroup(
     siblings,
     pathIndices,
   })
-}
 
 export async function createGroup(
   requirements: Requirement[],
@@ -54,17 +72,21 @@ interface Post {
   groupId: string
   request: ItemCreationRequest
   solidityProof: Proof
-  unirepProof: ReputationProofStruct
   asPoll: boolean
   pollRequest: PollRequestStruct
 }
 
-export async function createPost({ groupId, request, solidityProof, unirepProof, asPoll, pollRequest }: Post) {
+export async function createPost({
+  groupId,
+  request,
+  solidityProof,
+  asPoll,
+  pollRequest,
+}: Post) {
   return axios.post(`${RELAYER_URL}/post`, {
     groupId,
     request,
     solidityProof,
-    unirepProof,
     asPoll,
     pollRequest,
   })
@@ -75,7 +97,6 @@ interface Comment {
   parentId: string
   request: ItemCreationRequest
   solidityProof: Proof
-  unirepProof: ReputationProofStruct
   asPoll: boolean
   pollRequest: PollRequestStruct
 }
@@ -85,7 +106,6 @@ export async function createComment({
   parentId,
   request,
   solidityProof,
-  unirepProof,
   asPoll,
   pollRequest,
 }: Comment) {
@@ -94,13 +114,19 @@ export async function createComment({
     parentId,
     request,
     solidityProof,
-    unirepProof,
     asPoll,
     pollRequest,
   })
 }
 
-export async function edit(itemId: string, contentCID: string, note: BigInt, a, b, c) {
+export async function edit(
+  itemId: string,
+  contentCID: string,
+  note: bigint,
+  a,
+  b,
+  c
+) {
   return axios.post(`${RELAYER_URL}/edit`, {
     a,
     b,
@@ -116,8 +142,7 @@ export async function vote(
   type: number,
   merkleRoot: string,
   nullifierHash: string,
-  solidityProof: Proof,
-  voteRepProof: ReputationProofStruct
+  solidityProof: Proof
 ) {
   return axios.post(`${RELAYER_URL}/vote`, {
     itemId,
@@ -126,14 +151,6 @@ export async function vote(
     merkleRoot,
     nullifierHash,
     solidityProof,
-    voteRepProof,
-  })
-}
-
-export async function userUnirepSignUp(publicSignals: BigNumberish[], proof: BigNumberish[]) {
-  return axios.post(`${RELAYER_URL}/user-unirep-sign-up`, {
-    publicSignals,
-    proof,
   })
 }
 
@@ -155,7 +172,13 @@ export async function setGroupDetails(
   })
 }
 
-export async function setGroupDescription(groupId: string, a: any, b: any, c: any, description: string) {
+export async function setGroupDescription(
+  groupId: string,
+  a: any,
+  b: any,
+  c: any,
+  description: string
+) {
   return axios.post(`${RELAYER_URL}/set-group-description`, {
     groupId,
     a,
@@ -165,7 +188,13 @@ export async function setGroupDescription(groupId: string, a: any, b: any, c: an
   })
 }
 
-export async function setGroupTags(groupId: string, a: any, b: any, c: any, tags: string[]) {
+export async function setGroupTags(
+  groupId: string,
+  a: any,
+  b: any,
+  c: any,
+  tags: string[]
+) {
   return axios.post(`${RELAYER_URL}/set-group-tags`, {
     groupId,
     a,
@@ -175,7 +204,13 @@ export async function setGroupTags(groupId: string, a: any, b: any, c: any, tags
   })
 }
 
-export async function setGroupBanner(groupId: string, a: any, b: any, c: any, bannerCID: string) {
+export async function setGroupBanner(
+  groupId: string,
+  a: any,
+  b: any,
+  c: any,
+  bannerCID: string
+) {
   return axios.post(`${RELAYER_URL}/set-group-banner`, {
     groupId,
     a,
@@ -185,7 +220,13 @@ export async function setGroupBanner(groupId: string, a: any, b: any, c: any, ba
   })
 }
 
-export async function setGroupLogo(groupId: string, a: any, b: any, c: any, logoCID: string) {
+export async function setGroupLogo(
+  groupId: string,
+  a: any,
+  b: any,
+  c: any,
+  logoCID: string
+) {
   return axios.post(`${RELAYER_URL}/set-group-logo`, {
     groupId,
     a,
@@ -201,8 +242,7 @@ export async function votePoll(
   pollData: number[],
   merkleRoot: BigNumberish,
   nullifierHash: BigNumberish,
-  solidityProof: Proof,
-  voteRepProof: ReputationProofStruct
+  solidityProof: Proof
 ) {
   return axios.post(`${RELAYER_URL}/vote-poll`, {
     itemId,
@@ -211,6 +251,5 @@ export async function votePoll(
     merkleRoot,
     nullifierHash,
     solidityProof,
-    voteRepProof,
   })
 }

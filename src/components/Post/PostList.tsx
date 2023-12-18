@@ -1,18 +1,34 @@
 import React from 'react'
 import { ContentType } from '@/lib/model'
-import { Item } from '@/types/contract/ForumInterface'
+import type { Group, Item } from '@/types/contract/ForumInterface'
 import { NoPosts } from '@components/Post/NoPosts'
 import { CircularLoader } from '@components/buttons/JoinCommunityButton'
 import EditorJsRenderer from '@components/editor-js/EditorJSRenderer'
 import { PostTitle } from '@components/Post/PostTitle'
-import { BookOpenIcon } from '@heroicons/react/20/solid'
-import { Card, CardContent, CardFooter, CardHeader } from '@/shad/ui/card'
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/shad/ui/card'
 import { Badge } from '@/shad/ui/badge'
 import { ScrollArea, ScrollBar } from '@/shad/ui/scroll-area'
 import AnimalAvatar from '../AnimalAvatar'
+import { VoteForItemUI } from '@components/Post/PostPage'
 
-export const PostList = ({ posts }: { posts: Item[] }) => {
-  if (!posts) return null
+export const PostList = ({
+  posts,
+  group,
+  refreshData,
+}: {
+  posts: Item[]
+  group: Group
+  refreshData?: () => void
+}) => {
+  if (!posts) {
+    return null
+  }
 
   const renderedPosts = posts.map(p => {
     if (ContentType[p?.kind] === undefined) {
@@ -20,18 +36,31 @@ export const PostList = ({ posts }: { posts: Item[] }) => {
     }
 
     return (
-      <Card key={p.id} className={'flex flex-col justify-between'}>
-        <CardHeader>
-          <PostTitle post={p} title={p.title} onPostPage={false} id={''} />
+      <Card
+        key={p.id}
+        className="group relative flex flex-col justify-between divide-y divide-gray-300/20 overflow-hidden rounded-lg  bg-gray-300/20 dark:divide-gray-800/50 dark:bg-gray-800/50"
+      >
+        <CardHeader className="relative z-10   flex w-full flex-col px-3  py-1">
+          <CardTitle className="flex w-full items-center justify-between gap-4">
+            <PostTitle post={p} title={p.title} onPostPage={false} id="" />
+            <span className={'basis-1/4 flex gap-2'}>
+              <VoteForItemUI post={p} group={group} onSuccess={refreshData} />
+            </span>
+          </CardTitle>
         </CardHeader>
 
-        <CardContent className={'overflow-hidden'}>
-          <EditorJsRenderer data={p.description} className={'line-clamp-4'} />
+        <CardContent className=" overflow-hidden px-3 py-6">
+          <EditorJsRenderer data={p.description} className="line-clamp-4" />
         </CardContent>
+        <CardFooter className="relative z-30 flex justify-between gap-1  bg-black/10 p-2">
+          <AnimalAvatar
+            seed={`${p.note}_${Number(p.groupId)}`}
+            options={{ size: 30 }}
+          />
 
-        <CardFooter className={'flex items-center justify-self-end bg-card-foreground/5 py-4 text-xs'}>
-          {<AnimalAvatar seed={`${p.note}_${Number(p.groupId)}`} options={{ size: 30 }} />}
-          {p.childIds.length} Posts
+          <Badge className="flex gap-4 text-xs">
+            {p.childIds.length} {p.childIds.length === 1 ? 'Reply' : 'Replies'}
+          </Badge>
         </CardFooter>
       </Card>
     )
@@ -41,9 +70,13 @@ export const PostList = ({ posts }: { posts: Item[] }) => {
     <div className="flex flex-wrap gap-2">
       {renderedPosts?.length === 0 && <NoPosts />}
 
-      <ScrollArea className={'h-full'}>
-        <div className="hidden items-stretch justify-center gap-6 rounded-lg  md:grid lg:grid-cols-2 xl:grid-cols-3">
-          {renderedPosts === undefined ? <CircularLoader /> : <>{renderedPosts}</>}
+      <ScrollArea className="h-full">
+        <div className="grid-cols-auto flex grow flex-col  gap-6 rounded-lg p-0 md:grid  md:py-8 lg:grid-cols-2 xl:grid-cols-3">
+          {renderedPosts === undefined ? (
+            <CircularLoader />
+          ) : (
+            <>{renderedPosts}</>
+          )}
         </div>
         <ScrollBar orientation="vertical" />
       </ScrollArea>

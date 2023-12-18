@@ -7,7 +7,8 @@ import { usePoll } from '@/hooks/usePoll'
 import { toast } from 'react-toastify'
 import { CircularLoader } from './buttons/JoinCommunityButton'
 import clsx from 'clsx'
-import { Group, Item } from '@/types/contract/ForumInterface'
+import type { Group, Item } from '@/types/contract/ForumInterface'
+import { hexToNumber } from 'viem'
 
 export const PollUI = ({ group, post }: { group: Group; post: Item }) => {
   const [answers, setAnswers] = React.useState([])
@@ -32,11 +33,27 @@ export const PollUI = ({ group, post }: { group: Group; post: Item }) => {
 
   const fetchPollDetails = async () => {
     setIsFetching(true)
-    forumContract
-      .pollAt(id)
+    forumContract.read
+      .pollAt([BigInt(id)])
       .then(async res => {
-        console.log(res)
-        const { answerCIDs, pollType, duration, startTime, answerCount, rateScaleFrom, rateScaleTo, results } = res
+        let {
+          answerCIDs,
+          pollType,
+          duration,
+          startTime,
+          answerCount,
+          rateScaleFrom,
+          rateScaleTo,
+          results,
+        } = res
+        // viem to number
+        answerCount = hexToNumber(answerCount)
+        duration = hexToNumber(duration)
+        startTime = hexToNumber(startTime)
+        rateScaleFrom = hexToNumber(rateScaleFrom)
+        rateScaleTo = hexToNumber(rateScaleTo)
+        results = results.map(hexToNumber)
+
         const pollExpiration = (Number(startTime) + duration * 60 * 60) * 1000
         setDuration(duration)
         setPollExpiresAt(pollExpiration)
@@ -54,7 +71,9 @@ export const PollUI = ({ group, post }: { group: Group; post: Item }) => {
           results.forEach((result, index) => {
             emptyArray[index] = Number(result)
           })
-          if (emptyArray.length) setTotalVotes(emptyArray?.reduce((a, b) => a + b))
+          if (emptyArray.length) {
+            setTotalVotes(emptyArray?.reduce((a, b) => a + b))
+          }
           return emptyArray
         })
         setAnswers(answersFromIPFS)
@@ -83,17 +102,25 @@ export const PollUI = ({ group, post }: { group: Group; post: Item }) => {
   }
 
   const isVoteDisabled = () => {
-    if (pollType == PollType.SINGLE_ANSWER || pollType == PollType.MULTI_ANSWER) {
+    if (
+      pollType == PollType.SINGLE_ANSWER ||
+      pollType == PollType.MULTI_ANSWER
+    ) {
       return !answersToSubmit.some(answer => answer >= 1)
     } else {
-      return !answersToSubmit.every(answer => answer >= range.from && answer <= range.to)
+      return !answersToSubmit.every(
+        answer => answer >= range.from && answer <= range.to
+      )
     }
   }
 
   const VoteIndicator = ({ progress }) => {
     return (
       <div className="my-auto h-1 w-[90%] bg-neutral-200 dark:bg-neutral-600">
-        <div style={{ width: `${progress}%` }} className={clsx(`h-1 bg-primary`)}></div>
+        <div
+          style={{ width: `${progress}%` }}
+          className={clsx(`h-1 bg-primary`)}
+        ></div>
       </div>
     )
   }
@@ -106,15 +133,22 @@ export const PollUI = ({ group, post }: { group: Group; post: Item }) => {
         <div className="justify-left flex flex-col justify-items-center">
           {pollType == PollType.SINGLE_ANSWER &&
             answers.map((answer, i) => (
-              <div key={`${post.id}_${i}`} className="mb-[0.125rem] mr-4 min-h-[1.5rem]">
+              <div
+                key={`${post.id}_${i}`}
+                className="mb-[0.125rem] mr-4 min-h-[1.5rem]"
+              >
                 <div className="flex flex-row">
                   <label className="w-[85%]">{answer}</label>
                   <label className="w-[5%] text-end">
-                    <span className="text-sm font-bold text-gray-500">{`${Number(results[i])}`}</span>
+                    <span className="text-sm font-bold text-gray-500">{`${Number(
+                      results[i]
+                    )}`}</span>
                   </label>
                 </div>
                 <div className="flex flex-row">
-                  <VoteIndicator progress={results[i] ? (results[i] / totalVotes) * 100 : 0} />
+                  <VoteIndicator
+                    progress={results[i] ? (results[i] / totalVotes) * 100 : 0}
+                  />
                   <div className="ml-[8px]">
                     <input
                       disabled={pollExpired}
@@ -138,15 +172,22 @@ export const PollUI = ({ group, post }: { group: Group; post: Item }) => {
             ))}
           {pollType == PollType.MULTI_ANSWER &&
             answers.map((answer, i) => (
-              <div key={`${post.id}_${i}`} className="mb-[0.125rem] mr-4 min-h-[1.5rem]">
+              <div
+                key={`${post.id}_${i}`}
+                className="mb-[0.125rem] mr-4 min-h-[1.5rem]"
+              >
                 <div className="flex flex-row">
                   <label className="w-[85%]">{answer}</label>
                   <label className="w-[5%] text-end">
-                    <span className="text-sm font-bold text-gray-500">{`${Number(results[i])}`}</span>
+                    <span className="text-sm font-bold text-gray-500">{`${Number(
+                      results[i]
+                    )}`}</span>
                   </label>
                 </div>
                 <div className="flex flex-row">
-                  <VoteIndicator progress={results[i] ? (results[i] / totalVotes) * 100 : 0} />
+                  <VoteIndicator
+                    progress={results[i] ? (results[i] / totalVotes) * 100 : 0}
+                  />
                   <div className="ml-[8px]">
                     <input
                       disabled={pollExpired}
@@ -168,15 +209,22 @@ export const PollUI = ({ group, post }: { group: Group; post: Item }) => {
             ))}
           {pollType == PollType.NUMERIC_RATING &&
             answers.map((answer, i) => (
-              <div key={`${post.id}_${i}`} className="mb-[0.125rem] mr-4 min-h-[1.5rem]">
+              <div
+                key={`${post.id}_${i}`}
+                className="mb-[0.125rem] mr-4 min-h-[1.5rem]"
+              >
                 <div className="flex flex-row">
                   <label className="w-[85%]">{answer}</label>
                   <label className="w-[5%] text-start">
-                    <span className="text-sm font-bold text-gray-500">{`${Number(results[i])}`}</span>
+                    <span className="text-sm font-bold text-gray-500">{`${Number(
+                      results[i]
+                    )}`}</span>
                   </label>
                 </div>
                 <div className="flex flex-row">
-                  <VoteIndicator progress={results[i] ? (results[i] / totalVotes) * 100 : 0} />
+                  <VoteIndicator
+                    progress={results[i] ? (results[i] / totalVotes) * 100 : 0}
+                  />
                   <div className="">
                     {!pollExpired && (
                       <input
@@ -192,7 +240,7 @@ export const PollUI = ({ group, post }: { group: Group; post: Item }) => {
                           })
                         }}
                         placeholder={`Range: ${range.from} - ${range.to}`}
-                        className="ml-3 rounded border-0 bg-white px-2 py-1 text-sm text-slate-600 placeholder-slate-300 shadow outline-none focus:outline-none focus:ring"
+                        className="ml-3 rounded border-0 bg-white px-2 py-1 text-sm text-slate-600 shadow outline-none placeholder:text-slate-300 focus:outline-none focus:ring"
                       />
                     )}
                   </div>
@@ -201,7 +249,7 @@ export const PollUI = ({ group, post }: { group: Group; post: Item }) => {
             ))}
           <PrimaryButton
             className={clsx(
-              'w-fit my-2',
+              'my-2 w-fit',
               'border border-gray-500 text-sm text-slate-200 transition-colors duration-150 hover:bg-gray-500 hover:text-white dark:text-slate-200'
             )}
             type="button"

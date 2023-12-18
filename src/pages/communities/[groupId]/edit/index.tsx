@@ -1,11 +1,14 @@
-import React from 'react'
-import { useCommunityById } from '@/contexts/CommunityProvider'
+import React, { useEffect } from 'react'
+import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
 import { useRouter } from 'next/router'
 import { EditGroup } from '@components/EditGroup'
-// todo: figure out when/if it's beneficial to make calls to individual contract updates vs editing the entire group at once
+import useSWR from 'swr'
+import type { GroupWithPostDataResponse } from '@pages/api/groupWithPostData'
+import fetcher, { GroupPostAPI } from '@/lib/fetcher'
+import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
 
 export interface HandleSetImage {
-  file: File | null
+  file: File | undefined | null
   imageType: 'logo' | 'banner'
 }
 
@@ -13,24 +16,48 @@ export const isImageFile = (file: File) => {
   return file && file.type.startsWith('image/')
 }
 
-function CreateGroupForm() {
+function EditGroupForm() {
   const router = useRouter()
   const { groupId } = router.query
-  const [isMounted, setIsMounted] = React.useState(false)
-  React.useEffect(() => {
-    setIsMounted(true)
-  }, [])
-  const community = useCommunityById(groupId as string)
-  // todo: this is a hack for when we refresh on the edit page and don't have the community data.
-  // todo: we should fetch it here if it doesn't exist
-  if (!isMounted) {
+
+  const { data } = useSWR<GroupWithPostDataResponse>(
+    GroupPostAPI(groupId),
+    fetcher
+  )
+
+  const { dispatch } = useCommunityContext()
+  useCheckIfUserIsAdminOrModerator(true)
+
+  useEffect(() => {
+    if (data?.users) {
+      dispatch({
+        type: ActionType.SET_USERS,
+        payload: data?.users,
+      })
+    }
+  }, [data])
+
+  useEffect(() => {
+    if (data?.group) {
+      dispatch({
+        type: ActionType.SET_ACTIVE_COMMUNITY,
+        payload: {
+          community: data?.group,
+          postList: data?.posts,
+        },
+      })
+    }
+    return () => {
+      dispatch({
+        type: ActionType.SET_ACTIVE_COMMUNITY,
+        payload: undefined,
+      })
+    }
+  }, [data?.group])
+  if (!data?.group) {
     return null
   }
-  if (!community || isNaN(community?.groupId)) {
-    router?.push('/')
-    return null
-  }
-  return <EditGroup group={community} />
+  return <EditGroup group={data?.group} />
 }
 
-export default CreateGroupForm
+export default EditGroupForm

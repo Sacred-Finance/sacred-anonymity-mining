@@ -1,7 +1,7 @@
-import { OutputData } from '@editorjs/editorjs'
-import { BigNumberish } from 'ethers'
-import { Requirement as ContractRequirement } from '@/types/contract/ForumInterface'
-import { Identity } from '@semaphore-protocol/identity'
+import type { OutputData } from '@editorjs/editorjs'
+import type { BigNumberish } from 'ethers'
+import type { Requirement as ContractRequirement } from '@/types/contract/ForumInterface'
+import type { Identity } from '@semaphore-protocol/identity'
 
 export interface Requirement extends ContractRequirement {
   name?: string
@@ -42,17 +42,10 @@ export interface PostOrComment {
 
 export interface PostContent extends PostOrComment {
   title?: string
-  description: OutputData
+  description: typeof OutputData
 }
 
-export type ReputationProofStruct = {
-  publicSignals: BigNumberish[]
-  proof: BigNumberish[]
-  publicSignalsQ: BigNumberish[]
-  proofQ: BigNumberish[]
-  ownerEpoch: BigNumberish
-  ownerEpochKey: BigNumberish
-}
+export type NewPostContent = Pick<PostContent, 'title' | 'description'>
 
 export type PollRequestStruct = {
   pollType: BigNumberish
@@ -77,9 +70,9 @@ export enum PollType {
 }
 
 export type DiscourseCommunity = {
-  apiKey?: string,
-  username?: string,
-  endpoint?: string,
-  id?: number,
+  apiKey?: string
+  username?: string
+  endpoint?: string
+  id?: number
   readonly?: boolean
 }

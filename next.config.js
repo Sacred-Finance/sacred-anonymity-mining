@@ -13,23 +13,22 @@ module.exports = {
       },
       {
         protocol: 'https',
-        hostname: 'raw.githubusercontent.com'
+        hostname: 'raw.githubusercontent.com',
       },
       {
         protocol: 'https',
-        hostname: 'assets.coingecko.com'
+        hostname: 'assets.coingecko.com',
       },
       {
         protocol: 'https',
-        hostname: 'cloudflare-ipfs.com'
+        hostname: 'cloudflare-ipfs.com',
       },
       {
         protocol: 'https',
-        hostname: 'arweave.net'
-      }
+        hostname: 'arweave.net',
+      },
     ],
     minimumCacheTTL: 60,
-
   },
   typescript: {
     // Dangerously allow production builds to successfully complete even if your project has type errors.

@@ -1,11 +1,11 @@
 import React from 'react'
-import { useGPTServerAnalysis } from '../../hooks/useGPTServerAnalysis' // Import the custom hook
+import { useGPTServerAnalysis } from '@/hooks/useGPTServerAnalysis' // Import the custom hook
 import { PrimaryButton } from '@components/buttons/PrimaryButton'
 import { SparklesIcon } from '@heroicons/react/20/solid'
 import EditorJsRenderer from '@components/editor-js/EditorJSRenderer'
 import clsx from 'clsx'
 import { Template } from '@pages/api/gpt-server/logos-ai'
-import { EditorJsType } from '@components/NewPostForm'
+import type { EditorJsType } from '@components/NewPostForm'
 import {
   Dialog,
   DialogContent,
@@ -20,8 +20,6 @@ interface AnonymizeButtonProps {
   postData: EditorJsType
   postTitle?: string
   setDescription: (value: EditorJsType) => void
-  handleUpdate: (arg) => void
-  refToUpdateOnChange?: React.MutableRefObject<EditorJsType>
 }
 
 function convertEditorJsTypeToString(postData: EditorJsType) {
@@ -36,7 +34,6 @@ const AnonymizeButton: React.FC<AnonymizeButtonProps> = ({
   postData,
   postTitle,
   setDescription,
-  refToUpdateOnChange,
 }) => {
   const [analysis] = useGPTServerAnalysis([
     {
@@ -44,7 +41,7 @@ const AnonymizeButton: React.FC<AnonymizeButtonProps> = ({
       template: Template.Anonymize,
     },
   ])
-  const { isLoading, data, error, fetchData } = analysis
+  const { isLoading, data, fetchData } = analysis
   const [showModal, setShowModal] = React.useState(!isLoading && data)
 
   const toggleModal = () => {
@@ -72,7 +69,7 @@ const AnonymizeButton: React.FC<AnonymizeButtonProps> = ({
       ],
     })
     toggleModal()
-  }, [data, refToUpdateOnChange, postData])
+  }, [data, postData])
 
   return (
     <div
@@ -92,11 +89,19 @@ const AnonymizeButton: React.FC<AnonymizeButtonProps> = ({
               postData?.blocks?.length < 5
                 ? 'Post content too short to summarize'
                 : data
-                ? 'View summary'
-                : 'Summarize post'
+                  ? 'View summary'
+                  : 'Summarize post'
             }
             variant="outlined"
-            endIcon={<SparklesIcon className={clsx('h-5 w-5', data ? 'text-blue-300' : 'text-blue-500')} height={20} />}
+            endIcon={
+              <SparklesIcon
+                className={clsx(
+                  'h-5 w-5',
+                  data ? 'text-blue-300' : 'text-blue-500'
+                )}
+                height={20}
+              />
+            }
             isLoading={isLoading}
           >
             {data ? 'Anonymized' : 'Anonymize'}
@@ -104,20 +109,34 @@ const AnonymizeButton: React.FC<AnonymizeButtonProps> = ({
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle> {!postTitle ? 'Anonymized Text' : postTitle}</DialogTitle>
+            <DialogTitle>
+              {' '}
+              {!postTitle ? 'Anonymized Text' : postTitle}
+            </DialogTitle>
             <DialogDescription>
-              <EditorJsRenderer data={data ? JSON.parse(data)?.anonymized : 'Loading summary...'} isHtml={true} />
+              <EditorJsRenderer
+                data={
+                  data ? JSON.parse(data)?.anonymized : 'Loading summary...'
+                }
+                isHtml={true}
+              />
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className={'flex flex-shrink-0 grow gap-1'}>
+          <DialogFooter className="flex shrink-0 grow gap-1">
             <PrimaryButton
               disabled={!data || isLoading}
               endIcon={
-                <SparklesIcon className={clsx('h-5 w-5', data ? 'text-blue-500' : 'text-primary')} height={20} />
+                <SparklesIcon
+                  className={clsx(
+                    'h-5 w-5',
+                    data ? 'text-blue-500' : 'text-primary'
+                  )}
+                  height={20}
+                />
               }
               isLoading={isLoading}
-              variant={'secondary'}
-              className={''}
+              variant="secondary"
+              className=""
               onClick={() => {
                 toggleModal()
                 fetchData()
@@ -126,7 +145,11 @@ const AnonymizeButton: React.FC<AnonymizeButtonProps> = ({
               {data && 'Retry Anonymization'}
             </PrimaryButton>
 
-            <PrimaryButton variant={'default'} disabled={!data || isLoading} onClick={useThis}>
+            <PrimaryButton
+              variant="default"
+              disabled={!data || isLoading}
+              onClick={useThis}
+            >
               Update Message
             </PrimaryButton>
           </DialogFooter>

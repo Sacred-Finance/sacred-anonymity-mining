@@ -1,9 +1,7 @@
-import React, { useEffect } from 'react'
-import { useTranslation } from 'next-i18next'
+import React from 'react'
 
 import { TrashIcon } from '@heroicons/react/20/solid'
 import { useRemoveGroup } from '@/hooks/useRemoveGroup'
-import { useAccount } from 'wagmi'
 import { CircularLoader } from './buttons/JoinCommunityButton'
 import { Button } from '@/shad/ui/button'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
@@ -14,11 +12,11 @@ interface RemoveGroupProps {
 }
 
 const RemoveGroup: React.FC<RemoveGroupProps> = ({ groupId, hidden }) => {
-  const { t } = useTranslation()
   const { writeAsync } = useRemoveGroup(groupId)
 
-  const { address } = useAccount()
-  const { state: { isAdmin, isModerator } } = useCommunityContext()
+  const {
+    state: { isAdmin, isModerator },
+  } = useCommunityContext()
   const [isLoading, setIsLoading] = React.useState(false)
 
   const onClick = () => {
@@ -28,17 +26,21 @@ const RemoveGroup: React.FC<RemoveGroupProps> = ({ groupId, hidden }) => {
     })
   }
 
-  if (hidden) return null
+  if (hidden) {
+    return null
+  }
 
-  if (isLoading) return <CircularLoader />
+  if (isLoading) {
+    return <CircularLoader />
+  }
 
   return (
     <>
       {(isAdmin || isModerator) && (
         <Button
-          variant={'destructive'}
+          variant="destructive"
           id="edit-community-button"
-          className={'w-full'}
+          className="w-full"
           onClick={onClick}
           aria-label="edit community"
         >

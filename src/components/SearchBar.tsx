@@ -4,22 +4,33 @@ import { FaMagnifyingGlass } from 'react-icons/fa6'
 import React from 'react'
 
 const animationVariants = {
-  initial: { opacity: 0, scale: 0.8, y: '-100%', transition: { duration: 0.2 } },
+  initial: {
+    opacity: 0,
+    scale: 0.8,
+    y: '-100%',
+    transition: { duration: 0.2 },
+  },
   animate: { opacity: 1, scale: 1, y: '0%', transition: { duration: 0.2 } },
   exit: { opacity: 0, scale: 0.8, y: '100%', transition: { duration: 0.2 } },
 }
 
 const transition = { duration: 0.2 }
 
-export const SearchBar = ({ searchTerm, debouncedResults }) => {
+export const SearchBar = ({
+  searchTerm,
+  debouncedResults,
+}: {
+  searchTerm: string
+  debouncedResults: (e: { target: { value: string } }) => void
+}) => {
   const inputRef = React.useRef<HTMLInputElement>(null)
   return (
-    <div className="form-input flex h-10 w-full items-center  rounded hover:shadow-md  dark:bg-gray-900 dark:text-white">
-      <div className={'flex justify-center p-3'}>
-        <AnimatePresence mode={'popLayout'}>
+    <div className=" flex h-10 w-full items-center  rounded hover:shadow-md  dark:bg-gray-900 dark:text-white">
+      <div className="flex justify-center p-2">
+        <AnimatePresence mode="popLayout">
           {searchTerm ? (
             <motion.button
-              key={'cancel'}
+              key="cancel"
               variants={animationVariants}
               initial="initial"
               animate="animate"
@@ -27,8 +38,9 @@ export const SearchBar = ({ searchTerm, debouncedResults }) => {
               transition={transition}
               disabled={!searchTerm}
               onClick={() => {
-                  if (inputRef.current)
-                inputRef.current.value = ''
+                if (inputRef.current) {
+                  inputRef.current.value = ''
+                }
                 debouncedResults({ target: { value: '' } })
               }}
             >
@@ -36,7 +48,7 @@ export const SearchBar = ({ searchTerm, debouncedResults }) => {
             </motion.button>
           ) : (
             <motion.div
-              key={'search'}
+              key="search"
               variants={animationVariants}
               initial="initial"
               animate="animate"
