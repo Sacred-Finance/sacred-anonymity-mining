@@ -39,18 +39,16 @@ export default async function handler(
 
     const group = await augmentGroupData(rawGroupData)
 
-    const postIds = rawGroupData.posts.map(p => p)
-
     const wagmigotchiContract = {
       address: ForumContractAddress,
       abi: abi,
     } as const
 
-    const postData = postIds.map(id => ({
+    const postData = rawGroupData.posts.map(postId => ({
       address: ForumContractAddress as `0x${string}`,
       functionName: 'itemAt',
       abi: wagmigotchiContract.abi,
-      args: [id],
+      args: [postId],
     }))
 
     const rawPostResults = await multicall({
