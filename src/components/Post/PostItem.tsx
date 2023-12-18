@@ -100,7 +100,6 @@ export const PostItem = ({
         setIsContentEditing(false)
       })
 
-      toast.success(t('alert.postEditSuccess'))
     } catch (error) {
       console.log(error)
       toast.error(t('alert.editFailed'))

@@ -96,7 +96,6 @@ export const PollUI = ({ group, post }: { group: Group; post: Item }) => {
         console.log(data)
         await fetchPollDetails()
         setIsLoading(false)
-        toast.success('Poll submitted successfully')
       },
     })
   }

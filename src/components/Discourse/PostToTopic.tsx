@@ -62,7 +62,6 @@ const PostToTopic = ({
       )
 
       if (newPost.data.post) {
-        toast.success(t('alert.postCreateSuccess'))
         mutate(newPost.data.post)
       }
       // mutate where key includes topic_id and post_id

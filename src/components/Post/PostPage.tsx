@@ -353,7 +353,6 @@ const CreateCommentUI = ({
         pollRequest: emptyPollRequest,
       }).then(async res => {
         onSuccess && onSuccess()
-        toast.success('Comment created successfully')
         clearContent()
         return res
       })
@@ -454,7 +453,6 @@ export const VoteForItemUI = ({
       )
         .then(async res => {
           onSuccess && onSuccess()
-          toast.success('Vote created successfully')
           setIsLoading(false)
           return res
         })
