@@ -12,7 +12,7 @@ interface RemoveGroupProps {
 }
 
 const RemoveGroup: React.FC<RemoveGroupProps> = ({ groupId, hidden }) => {
-  const { writeAsync } = useRemoveGroup(groupId)
+  const { write } = useRemoveGroup(groupId)
 
   const {
     state: { isAdmin, isModerator },
@@ -21,9 +21,9 @@ const RemoveGroup: React.FC<RemoveGroupProps> = ({ groupId, hidden }) => {
 
   const onClick = () => {
     setIsLoading(true)
-    writeAsync?.({ recklesslySetUnpreparedArgs: [groupId] }).finally(() => {
-      setIsLoading(false)
-    })
+    if (write) {
+      write()
+    }
   }
 
   if (hidden) {

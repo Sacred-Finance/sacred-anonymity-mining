@@ -17,7 +17,7 @@ import ErrorBoundary from '../components/ErrorBoundary'
 import StandardLayout from '@components/HOC/StandardLayout'
 import { merge } from 'lodash'
 import { SWRProvider } from '@/contexts/SWRProvider'
-import { chains, config } from '../../wagmi-config'
+import { chains, config } from '@/wagmi-config'
 
 function App({ Component, pageProps }: AppProps) {
   return (
