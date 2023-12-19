@@ -223,7 +223,7 @@ function CreateGroupFormUI({
         </div>
         <div className="flex flex-col space-y-4">
           <label className="text-lg">{t('placeholder.communityTags')}</label>
-          <TagInput onChange={t => setTags(t)} selected={tags} />
+          {/*<TagInput onChange={t => setTags(t)} selected={tags} />*/}
           <div className="flex flex-col space-y-4">
             <label className="text-lg ">
               {t('placeholder.communityDescription')}

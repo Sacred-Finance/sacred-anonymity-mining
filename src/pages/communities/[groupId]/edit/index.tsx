@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
 import { useRouter } from 'next/router'
-import { EditGroup } from '@components/EditGroup'
+import { EditGroup } from '@components/form/EditGroup'
 import useSWR from 'swr'
 import type { GroupWithPostDataResponse } from '@pages/api/groupWithPostData'
 import fetcher, { GroupPostAPI } from '@/lib/fetcher'
