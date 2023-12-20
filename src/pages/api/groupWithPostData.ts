@@ -39,18 +39,16 @@ export default async function handler(
 
     const group = await augmentGroupData(rawGroupData)
 
-    const postIds = rawGroupData.posts.map(p => p)
-
     const wagmigotchiContract = {
       address: ForumContractAddress,
       abi: abi,
     } as const
 
-    const postData = postIds.map(id => ({
+    const postData = rawGroupData.posts.map(postId => ({
       address: ForumContractAddress as `0x${string}`,
       functionName: 'itemAt',
       abi: wagmigotchiContract.abi,
-      args: [id],
+      args: [postId],
     }))
 
     const rawPostResults = (await Promise.all(
@@ -88,7 +86,7 @@ export default async function handler(
       bigIntGroupId,
     ])
 
-    res.status(200).json(<GroupWithPostDataResponse>{
+    return res.status(200).json(<GroupWithPostDataResponse>{
       group,
       posts: augmentedPosts,
       users: usersWithCommitment.map(c => ({
@@ -102,8 +100,8 @@ export default async function handler(
       return res.status(404).json({ error: err.message })
     }
     if (err instanceof Error) {
-      res.status(500).json({ error: err?.message || 'Unknown error' })
+      return res.status(500).json({ error: err?.message || 'Unknown error' })
     }
-    res.status(500).json({ error: 'Unknown error' })
+    return res.status(500).json({ error: 'Unknown error' })
   }
 }
