@@ -80,7 +80,6 @@ const CreatePollUI = ({ post, group, onSuccess }: CreatePollUIProps) => {
           description: description,
         },
         onSuccessCallback: () => {
-          toast.success('Poll created successfully')
           setLoading(false)
           setShowModal(false)
           onSuccess && onSuccess()

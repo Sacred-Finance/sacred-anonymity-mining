@@ -151,7 +151,6 @@ export function EditGroup({ group }: EditGroupProps) {
       )
         .then(async () => {
           await handleUpdateStateAfterEdit()
-          toast.success('Group details updated')
           setIsSubmitting(false)
           setConfirmModal(false)
           await router.push(`/communities/${group.groupId}`)

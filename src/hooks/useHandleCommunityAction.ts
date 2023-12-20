@@ -24,14 +24,7 @@ export const useHandleCommunityAction = () => {
         const { status, data } = response
 
         if (status === 200) {
-          toast.success(successMessage, {
-            autoClose: 7000,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            toastId: 'handleCommunity',
-          })
+        // todo: handle
           if (successCallback) {
             successCallback()
           }

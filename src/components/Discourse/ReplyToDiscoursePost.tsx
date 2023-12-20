@@ -62,7 +62,6 @@ const ReplyToDiscoursePost = ({
           category: 4,
         }
       )
-      toast.success(t('alert.postCreateSuccess'))
       if (addReplyToPosts) {
         addReplyToPosts(newPost.data.post as Topic['post_stream']['posts'][0])
       }

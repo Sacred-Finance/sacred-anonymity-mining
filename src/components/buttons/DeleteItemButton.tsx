@@ -45,7 +45,6 @@ const DeleteItemButton = ({
     setIsSubmitting(true)
     try {
       await deleteItem(itemId, itemType)
-      toast.success(t('alert.deleteSuccess'))
       setIsSubmitting(false)
 
       if (itemType === ContentType.POST || itemType === ContentType.POLL) {

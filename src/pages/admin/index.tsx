@@ -55,9 +55,7 @@ const Access: React.FC = () => {
           await data.wait()
           fetchAdmins()
           fetchIsAdmin()
-          toast.success(`${variables?.args[0]} has been removed successfully`, {
-            autoClose: 5000,
-          })
+
         } catch (error) {}
       },
       onError: (error, variables) => {
@@ -79,9 +77,7 @@ const Access: React.FC = () => {
         try {
           await data.wait()
           fetchModerators()
-          toast.success(`${variables?.args[0]} has been removed successfully`, {
-            autoClose: 5000,
-          })
+
         } catch (error) {}
       },
       onError: (error, variables) => {
@@ -104,9 +100,7 @@ const Access: React.FC = () => {
         console.log('variables', variables)
         await data.wait()
         fetchAdmins()
-        toast.success(`${variables?.args[0]} has been added successfully`, {
-          autoClose: 5000,
-        })
+
       } catch (error) {}
     },
     onError: (error, variables) => {
@@ -128,9 +122,7 @@ const Access: React.FC = () => {
         try {
           await data.wait()
           fetchModerators()
-          toast.success(`${variables?.args[0]} has been added successfully`, {
-            autoClose: 5000,
-          })
+
         } catch (error) {}
       },
       onError: (error, variables) => {
