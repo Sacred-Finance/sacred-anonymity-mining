@@ -39,7 +39,7 @@ export default async function handler(
         console.log('no post data')
         return res.status(400).json({ error: 'Text is required' })
       }
-      const url = `${process.env.NEXT_LOGOS_AI_API_URL}/analysis`
+      const url = `${process.env.NEXT_PUBLIC_LOGOS_AI_API_URL}/analysis`
       const responseData = await gptPostHandler(url, { text: text, mode: mode })
       return res.status(200).json(responseData)
     } else {
