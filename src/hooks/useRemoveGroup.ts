@@ -26,7 +26,7 @@ export const useRemoveGroup = (groupId: CommunityId) => {
       toast.error(error.message)
       setIsLoading(false)
     },
-    onSuccess: async data => {
+    onSuccess: async () => {
       dispatch({ type: ActionType.REMOVE_COMMUNITY, payload: groupId })
       setIsLoading(false)
       router.push('/')
