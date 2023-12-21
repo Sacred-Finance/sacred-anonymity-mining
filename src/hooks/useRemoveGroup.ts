@@ -1,5 +1,5 @@
 import { usePrepareContractWrite, useContractWrite } from 'wagmi'
-import { ForumContractAddress } from '../constant/const'
+import { ForumContractAddress } from '@/constant/const'
 import ForumABI from '../constant/abi/Forum.json'
 import { useState } from 'react'
 import { toast } from 'react-toastify'
