@@ -1,13 +1,13 @@
-import { usePrepareContractWrite, useContractWrite } from 'wagmi'
+import { useContractWrite, usePrepareContractWrite } from 'wagmi'
 import { ForumContractAddress } from '@/constant/const'
 import ForumABI from '../constant/abi/Forum.json'
 import { useState } from 'react'
 import { toast } from 'react-toastify'
 import { useRouter } from 'next/router'
 import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
-import type { CommunityId } from '@/contexts/CommunityProvider'
+import type { BigNumberish } from '@semaphore-protocol/group'
 
-export const useRemoveGroup = (groupId: CommunityId) => {
+export const useRemoveGroup = (groupId: BigNumberish) => {
   const { dispatch } = useCommunityContext()
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
@@ -26,10 +26,10 @@ export const useRemoveGroup = (groupId: CommunityId) => {
       toast.error(error.message)
       setIsLoading(false)
     },
-    onSuccess: async data => {
+    onSuccess: async () => {
       dispatch({ type: ActionType.REMOVE_COMMUNITY, payload: groupId })
       setIsLoading(false)
-      router.push('/')
+      await router.push('/')
     },
   })
 

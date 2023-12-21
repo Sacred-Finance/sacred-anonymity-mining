@@ -1,7 +1,6 @@
 import React from 'react'
 import {
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -30,11 +29,11 @@ export function InputGroupDescription({
       name="description"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Group Description</FormLabel>
+          <FormLabel className={'text-lg'}>Group Description</FormLabel>
           <FormControl>
             <Textarea placeholder="Group Description" {...field} />
           </FormControl>
-          <FormDescription>This is your group Description</FormDescription>
+          {/*<FormDescription>This is your group Description</FormDescription>*/}
           <FormMessage />
         </FormItem>
       )}

@@ -15,8 +15,9 @@ import { useAccount } from 'wagmi'
 import { useIdentity } from '@/hooks/useIdentity'
 import type { Group, Item } from '@/types/contract/ForumInterface'
 import { createNote, hasUserJoined } from '@/lib/utils'
+import type { BigNumberish } from '@semaphore-protocol/group'
 
-export type CommunityId = string | number | ethers.BigNumber
+export type CommunityId = string | number | ethers.BigNumber | BigNumberish
 type CommunityContextType = {
   state: State
   dispatch: Dispatch<Action>
@@ -137,6 +138,7 @@ function reducer(state: State, action: Action): State {
         communities: state.communities.filter(c => +c.id !== +action.payload),
       }
     case 'ADD_USER':
+      // todo: fix this
       const groupId =
         typeof action.payload.groupId === 'object'
           ? action.payload.groupId?.toNumber()

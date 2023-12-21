@@ -2,16 +2,16 @@ import React from 'react'
 import { Input } from '@/shad/ui/input'
 import {
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/shad/ui/form'
-import type { UseFormReturn } from 'react-hook-form'
+import type { FieldValues, UseFormReturn } from 'react-hook-form'
 
 export function InputGroupName({
   form,
+  ...props
 }: {
   form: UseFormReturn<
     {
@@ -23,18 +23,19 @@ export function InputGroupName({
     },
     undefined
   >
-}) {
+} & FieldValues) {
   return (
     <FormField
+      {...props}
       control={form.control}
       name="groupName"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Group Name</FormLabel>
+          <FormLabel className={'text-lg'}>Group Name</FormLabel>
           <FormControl>
             <Input placeholder="Group Name" {...field} />
           </FormControl>
-          <FormDescription>This is your group name</FormDescription>
+          {/*<FormDescription>This is your group name</FormDescription>*/}
           <FormMessage />
         </FormItem>
       )}

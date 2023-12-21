@@ -1,8 +1,7 @@
-import { useForm } from 'react-hook-form'
+import { Controller, useFormContext } from 'react-hook-form'
 import {
   FormControl,
   FormDescription,
-  FormField,
   FormItem,
   FormLabel,
   FormMessage,
@@ -12,113 +11,103 @@ import { Button } from '@/shad/ui/button'
 import { cn } from '@/shad/lib/utils'
 import {
   Command,
-  CommandEmpty,
-  CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
+  CommandSeparator,
 } from '@/shad/ui/command'
-import { CheckIcon } from '@heroicons/react/20/solid'
 import { TAGS } from '@/constant/tags'
 import { FaCaretRight } from 'react-icons/fa'
-import { hexToString } from 'viem'
+import { BsCheckCircle } from 'react-icons/bs'
+import React from 'react'
 
-export default function ComboboxForm({
-  form,
-}: {
-  form: ReturnType<typeof useForm>
-}) {
-  // Function to toggle a tag in the array
+export default function ComboboxForm() {
+  const { control, setValue, watch } = useFormContext()
+  const selectedTags = watch('tags')
+
   const toggleTag = (tag: string) => {
-    const currentTags = form.getValues('tags') || []
-    if (currentTags.includes(tag)) {
-      form.setValue(
+    if (selectedTags.includes(tag)) {
+      setValue(
         'tags',
-        currentTags.filter((t: `0x${string}`) => t !== tag),
-        { shouldValidate: true }
+        selectedTags.filter((t: string) => t !== tag),
+        { shouldDirty: true, shouldValidate: true, shouldTouch: true }
       )
     } else {
-      form.setValue('tags', [...currentTags, tag], { shouldValidate: true })
+      setValue('tags', [...selectedTags, tag], {
+        shouldDirty: true,
+        shouldValidate: true,
+        shouldTouch: true,
+      })
     }
   }
 
-  // Function to check if a tag is selected
-  const isTagSelected = (tag: string) => {
-    const currentTags = form.getValues('tags') || []
-    return currentTags.includes(tag)
-  }
-
   return (
-    <FormField
-      control={form.control}
-      name="tags"
-      render={({ field }) => (
-        <FormItem className="flex flex-col">
-          <div className="inline-flex h-10 items-center gap-2">
-            <FormLabel>Tags</FormLabel>
-            {field.value?.map((tag: string) => (
-              <Button
-                key={tag}
-                variant="outline"
-                className="text-muted-foreground"
-                onClick={() => toggleTag(tag)}
-              >
-                {hexToString(tag)}
-              </Button>
-            ))}
-          </div>
-          <Popover>
-            <PopoverTrigger asChild>
-              <FormControl>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  className={cn(
-                    'justify-between',
-                    !field.value && 'text-muted-foreground'
-                  )}
-                >
-                  {field.value?.length
-                    ? `${field.value.length} tag${
-                        field.value.length === 1 ? '' : 's'
-                      } selected`
-                    : 'Select tags'}
-                  <FaCaretRight className="float-right ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </FormControl>
-            </PopoverTrigger>
-            <PopoverContent className="max-h-96 overflow-y-auto p-0">
-              <Command>
-                <CommandInput
-                  placeholder="Search for tags..."
-                  className="h-9"
-                />
-                <CommandEmpty>No tags found.</CommandEmpty>
-                <CommandGroup>
-                  {TAGS.map(tag => (
-                    <CommandItem
-                      value={tag}
-                      key={tag}
-                      onSelect={() => toggleTag(tag)}
+    <FormItem>
+      <FormLabel className="text-lg">
+        Tags
+        <FormDescription>
+          Add tags to help people find your group
+        </FormDescription>
+      </FormLabel>
+      <FormControl>
+        <Controller
+          control={control}
+          name="tags"
+          render={({ field }) => (
+            <div className="flex flex-wrap gap-y-4 space-x-4">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      className={cn(
+                        'justify-between',
+                        !field.value && 'text-muted-foreground'
+                      )}
                     >
-                      {tag}
-                      <CheckIcon
-                        className={cn(
-                          'ml-auto h-4 w-4',
-                          isTagSelected(tag) ? 'opacity-100' : 'opacity-0'
-                        )}
-                      />
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </Command>
-            </PopoverContent>
-          </Popover>
-          <FormDescription>
-            These tags will help people find your group
-          </FormDescription>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
+                      {field.value?.length
+                        ? `${field.value.length} tag${
+                            field.value.length === 1 ? '' : 's'
+                          } selected`
+                        : 'Select tags'}
+                      <FaCaretRight className="float-right ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="max-h-96 overflow-y-auto">
+                  <Command>
+                    <CommandInput placeholder="Type a command or search..." />
+
+                    <CommandSeparator />
+
+                    <CommandList>
+                      {TAGS.map(tag => (
+                        <CommandItem
+                          key={tag}
+                          onSelect={() => toggleTag(tag)}
+                          className="flex items-center justify-between"
+                        >
+                          {tag}
+                          {selectedTags.includes(tag) && (
+                            <BsCheckCircle className="overflow-visible text-primary" />
+                          )}
+                        </CommandItem>
+                      ))}
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              {field.value?.map((tag: string) => (
+                <Button key={tag} onClick={() => toggleTag(tag)}>
+                  {tag}
+                </Button>
+              ))}
+            </div>
+          )}
+        />
+      </FormControl>
+      <FormMessage />
+    </FormItem>
   )
 }

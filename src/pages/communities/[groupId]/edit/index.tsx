@@ -10,6 +10,7 @@ import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminO
 export interface HandleSetImage {
   file: File | undefined | null
   imageType: 'logo' | 'banner'
+  isDefault?: boolean
 }
 
 export const isImageFile = (file: File) => {

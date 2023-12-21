@@ -1,11 +1,11 @@
 import React from 'react'
 
-import { ArrowLeftIcon, TrashIcon } from '@heroicons/react/20/solid'
+import { TrashIcon } from '@heroicons/react/20/solid'
 import { useRemoveGroup } from '@/hooks/useRemoveGroup'
 import { CircularLoader } from './buttons/JoinCommunityButton'
 import { Button } from '@/shad/ui/button'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
-import {BigNumberish} from "@semaphore-protocol/group";
+import { BigNumberish } from '@semaphore-protocol/group'
 
 interface RemoveGroupProps {
   groupId: BigNumberish
@@ -39,6 +39,7 @@ const RemoveGroup: React.FC<RemoveGroupProps> = ({ groupId, hidden }) => {
     <>
       {(isAdmin || isModerator) && (
         <Button
+          type="button"
           variant="destructive"
           id="edit-community-button"
           onClick={onClick}

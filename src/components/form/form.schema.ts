@@ -1,6 +1,7 @@
 import * as z from 'zod'
+
 const groupNameSchema = z.string().min(1, 'Group name is required')
-const groupDescriptionSchema = z.string().min(1, 'Description is required')
+const groupDescriptionSchema = z.string().min(10, 'Description is required')
 const tagsSchema = z
   .array(z.string())
   .max(5, 'Maximum of 5 tags allowed')
@@ -12,6 +13,7 @@ const ACCEPTED_IMAGE_MIME_TYPES = [
   'image/jpg',
   'image/png',
   'image/webp',
+  'image/gif',
 ]
 
 const fileSchema = z
@@ -21,18 +23,14 @@ const fileSchema = z
   }, `Max image size is 5MB.`)
   .refine(
     files => ACCEPTED_IMAGE_MIME_TYPES.includes(files?.type),
-    'Only .jpg, .jpeg, .png and .webp formats are supported.'
+    'Only .jpg, .jpeg, .png, .gif and .webp formats are supported.'
   )
   .optional()
-  .nullable()
-
-const bannerFileSchema = fileSchema
-const logoFileSchema = fileSchema
 
 export const groupSchema = z.object({
   groupName: groupNameSchema,
   description: groupDescriptionSchema,
   tags: tagsSchema,
-  bannerFile: bannerFileSchema,
-  logoFile: logoFileSchema,
+  bannerFile: fileSchema,
+  logoFile: fileSchema,
 })
