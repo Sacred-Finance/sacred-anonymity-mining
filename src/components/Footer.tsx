@@ -4,37 +4,45 @@ import { useTranslation } from 'next-i18next'
 export default function Footer(): JSX.Element {
   const { t, ready } = useTranslation()
 
-  if (!ready) return <> </>
+  if (!ready) {
+    return <> </>
+  }
 
   return (
-    <footer className="bg-gray-800 dark:bg-gray-900">
+    <footer className="justify-self-end bg-gray-800 dark:bg-gray-900">
       <div className="container mx-auto px-6 py-8 lg:px-16">
         <div className="md:flex md:justify-between">
           <div className="mb-6 flex items-center md:mb-0">
-            <Logo width={400} invertTheme={true} className="h- mr-3" />
+            <Logo width={400} invertTheme={true} className=" mr-3" />
           </div>
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
-            {/* Follow Us Section */}
             <div>
-              <h2 className="mb-6 text-xl font-semibold text-white">{t('footer.followUs')}</h2>
+              <h2 className="mb-6 text-xl font-semibold text-white">
+                {t('footer.followUs')}
+              </h2>
               <ul className="font-medium text-gray-500 dark:text-gray-400">
                 <li className="mb-4">
-                  <a href="http://discord.gg/43spxvqqmJ" className="hover:text-purple-500">
+                  <a
+                    href="http://discord.gg/43spxvqqmJ"
+                    className="hover:text-purple-500"
+                  >
                     {t('footer.discord')}
                   </a>
                 </li>
                 <li className="mb-4">
-                  <a href="https://twitter.com/SacredLogos" className="hover:text-purple-500">
+                  <a
+                    href="https://twitter.com/SacredLogos"
+                    className="hover:text-purple-500"
+                  >
                     {t('footer.twitter')}
                   </a>
                 </li>
-                <li className="mb-4">
-                  <a href="https://t.me/SacredLogosOfficial" className="hover:text-purple-500">
-                    {t('footer.telegram')}
-                  </a>
-                </li>
+
                 <li>
-                  <a href="https://sacredlogos.medium.com/" className="hover:text-purple-500">
+                  <a
+                    href="https://sacredlogos.medium.com/"
+                    className="hover:text-purple-500"
+                  >
                     {t('footer.medium')}
                   </a>
                 </li>
@@ -43,7 +51,9 @@ export default function Footer(): JSX.Element {
 
             {/* Legal Section */}
             <div>
-              <h2 className="mb-6 text-xl font-semibold text-white">{t('footer.legal')}</h2>
+              <h2 className="mb-6 text-xl font-semibold text-white">
+                {t('footer.legal')}
+              </h2>
               <ul className="font-medium text-gray-500 dark:text-gray-400">
                 <li className="mb-4">
                   <a

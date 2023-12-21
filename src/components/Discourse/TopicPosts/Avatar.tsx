@@ -1,7 +1,13 @@
-import { Topic } from '@components/Discourse/types'
+import type { Topic } from '@components/Discourse/types'
 import React from 'react'
 
-export function Avatar({ post, size }: { post: Topic['post_stream']['posts'][0]; size?: number }) {
+export function Avatar({
+  post,
+  size,
+}: {
+  post: Topic['post_stream']['posts'][0]
+  size?: number
+}) {
   return post.avatar_template ? (
     <img
       className="rounded-full"

@@ -1,6 +1,9 @@
-import React from 'react'
-import { Fragment, useEffect, useState } from 'react'
-import { MoonIcon, SunIcon, ComputerDesktopIcon } from '@heroicons/react/24/outline'
+import React, { Fragment, useEffect, useState } from 'react'
+import {
+  ComputerDesktopIcon,
+  MoonIcon,
+  SunIcon,
+} from '@heroicons/react/24/outline'
 import { useTheme } from 'next-themes'
 import { Listbox } from '@headlessui/react'
 import { usePopper } from '@/hooks/use-popper'
@@ -27,13 +30,15 @@ export const ThemeToggleList = ({ noTabIndex = false }) => {
     },
   ]
 
-  let [trigger, container] = usePopper({
+  const [trigger, container] = usePopper({
     strategy: 'fixed',
     modifiers: [{ name: 'offset', options: { offset: [0, 0] } }],
   })
 
   useEffect(() => setMounted(true), [])
-  if (!mounted) return null
+  if (!mounted) {
+    return null
+  }
 
   return (
     <span className="relative">
@@ -48,13 +53,17 @@ export const ThemeToggleList = ({ noTabIndex = false }) => {
           <SunIcon
             className={
               'inline-block h-6 w-6 dark:hidden ' +
-              (theme !== 'system' && theme === 'light' ? 'text-red-400' : 'text-slate-500')
+              (theme !== 'system' && theme === 'light'
+                ? 'text-red-400'
+                : 'text-slate-500')
             }
           />
           <MoonIcon
             className={
               'hidden h-6 w-6 dark:inline-block ' +
-              (theme !== 'system' && theme === 'dark' ? 'text-yellow-500' : 'text-slate-500')
+              (theme !== 'system' && theme === 'dark'
+                ? 'text-yellow-500'
+                : 'text-slate-500')
             }
           />
         </Listbox.Button>
@@ -65,7 +74,7 @@ export const ThemeToggleList = ({ noTabIndex = false }) => {
                 {({ active, selected }) => (
                   <li
                     className={
-                      'flex cursor-pointer items-center rounded py-1 px-2' +
+                      'flex cursor-pointer items-center rounded px-2 py-1' +
                       (active ? ' bg-slate-200 dark:bg-slate-800' : '') +
                       (selected && value === 'light' ? ' text-red-500' : '') +
                       (selected && value === 'dark' ? ' text-yellow-500' : '')

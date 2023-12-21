@@ -1,28 +1,34 @@
-import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'next-i18next'
-import { useHandleFileImageUpload } from '../utils/communityUtils'
-import { HandleSetImage } from '@pages/communities/[groupId]/edit'
+import { useHandleFileImageUpload } from '@/utils/communityUtils'
+import type { HandleSetImage } from '@pages/communities/[groupId]/edit'
+import Image from 'next/image'
 
 export const PictureUpload = (props: {
-  uploadedImageUrl:  string | null
+  uploadedImageUrl: string | undefined
   displayName: string
   name: 'banner' | 'logo'
-  setImageFileState: Dispatch<SetStateAction<HandleSetImage>>
+  setImageFileState: ({ file, imageType }: HandleSetImage) => void
 }) => {
-
-  const handleFileImageUpload = useHandleFileImageUpload(props.setImageFileState)
+  const handleFileImageUpload = useHandleFileImageUpload(
+    props.setImageFileState
+  )
 
   const { t } = useTranslation()
   const inputRef = useRef<HTMLInputElement | null>(null)
   const imageRef = useRef<HTMLImageElement | null>(null)
   const [isDeleteIconVisible, setIsDeleteIconVisible] = useState(false)
   const openFileUpload = () => {
-    if (props.uploadedImageUrl) return
+    if (props.uploadedImageUrl) {
+      return
+    }
     inputRef.current?.click()
   }
 
   useEffect(() => {
-    if (!imageRef.current) return
+    if (!imageRef.current) {
+      return
+    }
 
     // on hover show edit button
     const showDeleteIcon = () => {
@@ -41,21 +47,33 @@ export const PictureUpload = (props: {
     }
   }, [])
 
-  const [hovered, setHovered] = useState(0)
   return (
     <>
       <div
         ref={imageRef}
-        className={`relative  rounded-2xl border-2 border-dashed border-gray-300 bg-gray-100 hover:bg-primary-300  hover:text-white dark:bg-gray-900`}
+        className="relative overflow-hidden rounded-2xl border-2 border-dashed border-gray-300 bg-gray-100 hover:text-white  dark:bg-gray-900"
       >
         {props.uploadedImageUrl ? (
           <>
-            <img
-              className=" h-52 w-full  object-contain transition-opacity "
+            <Image
+              width={500}
+              height={500}
+              className="h-52 w-full object-contain transition-opacity"
               style={{ opacity: isDeleteIconVisible ? 0.5 : 1 }}
+              onFocus={() => setIsDeleteIconVisible(true)}
+              onKeyDown={e => {
+                if (e.key === 'Enter') {
+                  setIsDeleteIconVisible(true)
+                }
+              }}
               onClick={() => {
-                props.setImageFileState({ imageType: props.name, file: null })
-                if (!inputRef.current) return
+                props.setImageFileState({
+                  imageType: props.name,
+                  file: undefined,
+                })
+                if (!inputRef.current) {
+                  return
+                }
                 inputRef.current.value = ''
               }}
               src={props.uploadedImageUrl}
@@ -65,8 +83,13 @@ export const PictureUpload = (props: {
               <button
                 className="absolute inset-0 flex h-full w-full items-center justify-center"
                 onClick={() => {
-                  props.setImageFileState({ imageType: props.name, file: null })
-                  if (!inputRef.current) return
+                  props.setImageFileState({
+                    imageType: props.name,
+                    file: undefined,
+                  })
+                  if (!inputRef.current) {
+                    return
+                  }
                   inputRef.current.value = ''
                 }}
               >
@@ -76,17 +99,20 @@ export const PictureUpload = (props: {
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M6 18L18 6M6 6l12 12" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             )}
           </>
         ) : (
-          <div
-            className={`group flex h-52 w-full cursor-pointer items-center justify-center  rounded-2xl border-2 border-dashed border-gray-300 bg-gray-100 dark:bg-gray-900 px-6 hover:bg-primary-300  hover:text-white`}
+          <button
+            className="group flex h-52 w-full cursor-pointer items-center  justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-gray-100 px-6 hover:text-white  dark:bg-gray-900"
             onClick={openFileUpload}
-            onMouseOver={() => setHovered(hovered + 45)}
-            onMouseLeave={() => setHovered(hovered + 45)}
           >
             <div className="flex items-center justify-center text-lg">
               {t('upload', { displayName: props.displayName })}
@@ -113,7 +139,7 @@ export const PictureUpload = (props: {
               accept="image/jpeg, image/png, image/jpg, image/webp, image/gif, image/svg+xml, image/avif"
               onChange={handleFileImageUpload}
             />
-          </div>
+          </button>
         )}
       </div>
     </>

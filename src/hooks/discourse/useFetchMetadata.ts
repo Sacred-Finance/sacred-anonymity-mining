@@ -1,11 +1,11 @@
-import { use, useEffect, useState } from "react"
-import axios from "axios";
+import { useEffect, useState } from 'react'
+import axios from 'axios'
 
-export const useFetchMetadata = (groupId) => {
+export const useFetchMetadata = groupId => {
   const [community, setCommunity] = useState<{
     name: string
     description: string
-    image: string,
+    image: string
     readonly: boolean
   }>(null)
   const [loading, setLoading] = useState(false)
@@ -18,7 +18,7 @@ export const useFetchMetadata = (groupId) => {
         name: data['og:title'],
         description: data['og:description'],
         image: data['og:image'],
-        readonly: data['readonly'] ?? false
+        readonly: data['readonly'] ?? false,
       })
       setLoading(false)
     }

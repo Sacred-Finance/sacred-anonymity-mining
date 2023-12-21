@@ -1,11 +1,12 @@
 import { useTranslation } from 'react-i18next'
-import React, { Dispatch, SetStateAction, useCallback, useRef, useState } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import { PrimaryButton } from './buttons'
 import dynamic from 'next/dynamic'
 import clsx from 'clsx'
 import Dropdown from './buttons/Dropdown/Dropdown'
 import { Tab } from '@headlessui/react'
-import { OutputData } from '@editorjs/editorjs'
+import type { OutputData } from '@editorjs/editorjs'
 import { Input } from '@/shad/ui/input'
 import { Label } from '@/shad/ui/label'
 import AnonymizeButton from '@components/buttons/AIAnonymiseButton'
@@ -14,9 +15,11 @@ import { cn } from '@/shad/lib/utils'
 import { ScrollArea } from '@/shad/ui/scroll-area'
 
 export interface EditorJsType {
+  time: number
+  version: string
   blocks: {
     type: string
-    data: any
+    data: (typeof OutputData)['blocks'][0]['data']
   }[]
 }
 
@@ -29,8 +32,8 @@ const Editor = dynamic(() => import('./editor-js/Editor'), {
 export interface NewPostFormProps {
   editorId: string
   title: string | false
-  setTitle: Dispatch<SetStateAction<string | null>>
-  description: OutputData | null
+  setTitle?: Dispatch<SetStateAction<string | null>>
+  description: typeof OutputData | null
   setDescription: (value: EditorJsType) => void
   resetForm: (isEdited: boolean) => void
   isReadOnly: boolean
@@ -69,20 +72,20 @@ export interface NewPostFormProps {
 }
 
 const getClassNames = (base, customClassNames, condition) => {
-  return clsx(base, condition ? customClassNames?.true : customClassNames?.false)
+  return clsx(
+    base,
+    condition ? customClassNames?.true : customClassNames?.false
+  )
 }
 
 function ContentSection({
   data,
-  inputs,
   onChange,
   readOnly,
   placeholder,
   holder,
 }: {
-  preview: boolean
-  data: OutputData | null
-  inputs: string | undefined
+  data: typeof OutputData | null
   onChange: (value: EditorJsType) => void
   readOnly: boolean
   placeholder: string | undefined
@@ -92,7 +95,9 @@ function ContentSection({
     <ScrollArea className="h-[500px] w-full rounded-xl border bg-gray-950/10   p-4 ">
       <Editor
         divProps={{
-          className: cn('z-50 w-full form-input h-full rounded-md bg-gradient-to-r  min-h-[15vh]'),
+          className: cn(
+            'z-50 w-full form-input h-full rounded-md bg-gradient-to-r  min-h-[15vh]'
+          ),
         }}
         data={data}
         onChange={onChange}
@@ -122,12 +127,11 @@ export const NewPostForm = ({
   submitButtonText,
   openFormButtonText,
   placeholder,
+  tokenBalanceReveal,
   showButtonWhenFormOpen = false,
   classes: c,
-  tokenBalanceReveal = null,
 }: NewPostFormProps) => {
   const { t } = useTranslation()
-  const [isPreview, setIsPreview] = useState(false)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const inputRef = useRef(null)
   const [error, setError] = useState<string | null>(null)
@@ -138,10 +142,12 @@ export const NewPostForm = ({
         setError('Please enter content')
         return
       }
-      await handleSubmit()
+      handleSubmit()
       setIsFormOpen(false)
-    } catch (error) {
-      setError(error.message)
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message)
+      }
       setIsFormOpen(false)
     }
   }, [description, handleSubmit])
@@ -161,13 +167,16 @@ export const NewPostForm = ({
   }
 
   const descriptionLength = React.useMemo(() => {
-    return description?.blocks?.reduce((acc, block) => {
-      try {
-        return acc + block.data.text.length
-      } catch (error) {
-        return acc
-      }
-    }, 0)
+    return description?.blocks?.reduce(
+      (acc: never, block: { data: { text: string[] } }) => {
+        try {
+          return acc + block.data.text.length
+        } catch (error) {
+          return acc
+        }
+      },
+      0
+    )
   }, [description])
 
   const disableSubmit = React.useMemo(() => {
@@ -203,34 +212,35 @@ export const NewPostForm = ({
           )}
         >
           {itemType === 'post' && title !== false && (
-            <CardContent className={'flex flex-col gap-2'}>
-              <Label htmlFor={'title'} className="text-md">
+            <CardContent className="flex flex-col gap-2">
+              <Label htmlFor="title" className="text-base">
                 Title (Max 60)
               </Label>
 
               <Input
-                id={'title'}
-                disabled={isPreview}
+                id="title"
                 className=" w-full rounded-xl border bg-gray-950/10   p-4 "
                 ref={inputRef}
                 placeholder={
-                  t(itemType !== 'post' ? 'placeholder.enterComment' : 'placeholder.enterPostTitle') as string
+                  t(
+                    itemType !== 'post'
+                      ? 'placeholder.enterComment'
+                      : 'placeholder.enterPostTitle'
+                  ) as string
                 }
                 value={title}
-                onChange={e => setTitle(e.target.value)}
+                onChange={e => (setTitle ? setTitle(e.target.value) : null)}
               />
             </CardContent>
           )}
           <Tab.Group>
             <Tab.Panels>
-              <CardHeader className={'flex justify-between'}>
-                <Label className="text-md">Content</Label>
+              <CardHeader className="flex justify-between">
+                <Label className="text-base">Content</Label>
               </CardHeader>
               <CardContent>
                 <ContentSection
-                  preview={isPreview}
                   data={description}
-                  inputs={c?.editor}
                   onChange={(value: EditorJsType) => {
                     setDescription(value)
                     setError(null)
@@ -252,8 +262,6 @@ export const NewPostForm = ({
             isSubmitting={isSubmitting}
             submitButtonText={submitButtonText}
             t={t}
-            c={c}
-            refToUpdateOnChange={inputRef}
             tokenBalanceReveal={tokenBalanceReveal}
           >
             <AnonymizeButton
@@ -284,27 +292,46 @@ const FormButtons = ({
   isSubmitting,
   submitButtonText,
   t,
-  c,
   disableSubmit,
   tokenBalanceReveal,
   children,
+}: {
+  handleClose: () => void
+  handleSubmitAction: () => void
+  isSubmitting?: boolean
+  submitButtonText?: string
+  t: (key: string) => string
+  disableSubmit: boolean
+  tokenBalanceReveal: NewPostFormProps['tokenBalanceReveal']
+  children: React.ReactNode
 }) => (
   <CardFooter className="flex justify-between">
-    <PrimaryButton onClick={handleClose} variant={'destructive'}>
+    <PrimaryButton onClick={handleClose} variant="ghost">
       {t('button.closeForm')}
     </PrimaryButton>
     <div className="flex flex-row items-center gap-2">
       {tokenBalanceReveal && (
         <Dropdown
-          options={percentageToReveal.map(percentage => ({ key: `${percentage}%`, value: percentage }))}
-          selected={{ key: `${tokenBalanceReveal.selectedValue}% Reveal`, value: tokenBalanceReveal?.selectedValue }}
-          onSelect={value => tokenBalanceReveal?.onSelected(value)}
+          options={percentageToReveal.map(percentage => ({
+            key: `${percentage}%`,
+            value: percentage,
+          }))}
+          selected={{
+            key: `${tokenBalanceReveal.selectedValue}% Reveal`,
+            value: tokenBalanceReveal?.selectedValue,
+          }}
+          onSelect={value => tokenBalanceReveal?.onSelected(value as number)}
           disabled={false}
         />
       )}
       {children}
 
-      <PrimaryButton onClick={handleSubmitAction} isLoading={isSubmitting} disabled={isSubmitting || disableSubmit}>
+      <PrimaryButton
+        onClick={handleSubmitAction}
+        isLoading={isSubmitting}
+        loadingPosition="start"
+        disabled={isSubmitting || disableSubmit}
+      >
         {submitButtonText}
       </PrimaryButton>
     </div>

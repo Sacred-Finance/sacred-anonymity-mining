@@ -13,9 +13,19 @@ import type {
   Signer,
   utils,
 } from 'ethers'
-import type { EventFragment, FunctionFragment, Result } from '@ethersproject/abi'
+import type {
+  EventFragment,
+  FunctionFragment,
+  Result,
+} from '@ethersproject/abi'
 import { JsonRpcProvider, Listener } from '@ethersproject/providers'
-import type { OnEvent, PromiseOrValue, TypedEvent, TypedEventFilter, TypedListener } from '../common'
+import type {
+  OnEvent,
+  PromiseOrValue,
+  TypedEvent,
+  TypedEventFilter,
+  TypedListener,
+} from '../common'
 
 export interface ForumInterface extends utils.Interface {
   functions: {
@@ -57,7 +67,7 @@ export interface ForumInterface extends utils.Interface {
       PromiseOrValue<BytesLike>,
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>[]
+      PromiseOrValue<BigNumberish>[],
     ]
   ): string
   encodeFunctionData(
@@ -67,30 +77,52 @@ export interface ForumInterface extends utils.Interface {
       PromiseOrValue<BytesLike>,
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>[]
+      PromiseOrValue<BigNumberish>[],
     ]
   ): string
   encodeFunctionData(
     functionFragment: 'createGroup',
     values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
   ): string
-  encodeFunctionData(functionFragment: 'getCommentIdList', values: [PromiseOrValue<BigNumberish>]): string
-  encodeFunctionData(functionFragment: 'getPostIdList', values: [PromiseOrValue<BigNumberish>]): string
+  encodeFunctionData(
+    functionFragment: 'getCommentIdList',
+    values: [PromiseOrValue<BigNumberish>]
+  ): string
+  encodeFunctionData(
+    functionFragment: 'getPostIdList',
+    values: [PromiseOrValue<BigNumberish>]
+  ): string
   encodeFunctionData(functionFragment: 'groupCount', values?: undefined): string
-  encodeFunctionData(functionFragment: 'groups', values: [PromiseOrValue<BigNumberish>]): string
+  encodeFunctionData(
+    functionFragment: 'groups',
+    values: [PromiseOrValue<BigNumberish>]
+  ): string
   encodeFunctionData(functionFragment: 'itemCount', values?: undefined): string
-  encodeFunctionData(functionFragment: 'items', values: [PromiseOrValue<BigNumberish>]): string
+  encodeFunctionData(
+    functionFragment: 'items',
+    values: [PromiseOrValue<BigNumberish>]
+  ): string
   encodeFunctionData(
     functionFragment: 'joinGroup',
-    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>, PromiseOrValue<BytesLike>]
+    values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BytesLike>,
+    ]
   ): string
   encodeFunctionData(functionFragment: 'semaphore', values?: undefined): string
 
   decodeFunctionResult(functionFragment: 'addComment', data: BytesLike): Result
   decodeFunctionResult(functionFragment: 'addPost', data: BytesLike): Result
   decodeFunctionResult(functionFragment: 'createGroup', data: BytesLike): Result
-  decodeFunctionResult(functionFragment: 'getCommentIdList', data: BytesLike): Result
-  decodeFunctionResult(functionFragment: 'getPostIdList', data: BytesLike): Result
+  decodeFunctionResult(
+    functionFragment: 'getCommentIdList',
+    data: BytesLike
+  ): Result
+  decodeFunctionResult(
+    functionFragment: 'getPostIdList',
+    data: BytesLike
+  ): Result
   decodeFunctionResult(functionFragment: 'groupCount', data: BytesLike): Result
   decodeFunctionResult(functionFragment: 'groups', data: BytesLike): Result
   decodeFunctionResult(functionFragment: 'itemCount', data: BytesLike): Result
@@ -115,7 +147,10 @@ export interface NewGroupCreatedEventObject {
   name: string
   creatorIdentityCommitment: BigNumber
 }
-export type NewGroupCreatedEvent = TypedEvent<[BigNumber, string, BigNumber], NewGroupCreatedEventObject>
+export type NewGroupCreatedEvent = TypedEvent<
+  [BigNumber, string, BigNumber],
+  NewGroupCreatedEventObject
+>
 
 export type NewGroupCreatedEventFilter = TypedEventFilter<NewGroupCreatedEvent>
 
@@ -126,7 +161,10 @@ export interface NewItemEventObject {
   parentId: BigNumber
   contentCID: string
 }
-export type NewItemEvent = TypedEvent<[number, BigNumber, BigNumber, BigNumber, string], NewItemEventObject>
+export type NewItemEvent = TypedEvent<
+  [number, BigNumber, BigNumber, BigNumber, string],
+  NewItemEventObject
+>
 
 export type NewItemEventFilter = TypedEventFilter<NewItemEvent>
 
@@ -135,7 +173,10 @@ export interface NewUserEventObject {
   identityCommitment: BigNumber
   username: string
 }
-export type NewUserEvent = TypedEvent<[BigNumber, BigNumber, string], NewUserEventObject>
+export type NewUserEvent = TypedEvent<
+  [BigNumber, BigNumber, string],
+  NewUserEventObject
+>
 
 export type NewUserEventFilter = TypedEventFilter<NewUserEvent>
 
@@ -153,9 +194,13 @@ export interface Forum extends BaseContract {
     toBlock?: string | number | undefined
   ): Promise<Array<TEvent>>
 
-  listeners<TEvent extends TypedEvent>(eventFilter?: TypedEventFilter<TEvent>): Array<TypedListener<TEvent>>
+  listeners<TEvent extends TypedEvent>(
+    eventFilter?: TypedEventFilter<TEvent>
+  ): Array<TypedListener<TEvent>>
   listeners(eventName?: string): Array<Listener>
-  removeAllListeners<TEvent extends TypedEvent>(eventFilter: TypedEventFilter<TEvent>): this
+  removeAllListeners<TEvent extends TypedEvent>(
+    eventFilter: TypedEventFilter<TEvent>
+  ): this
   removeAllListeners(eventName?: string): this
   off: OnEvent<this>
   on: OnEvent<this>
@@ -188,9 +233,15 @@ export interface Forum extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>
 
-    getCommentIdList(postId: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<[BigNumber[]]>
+    getCommentIdList(
+      postId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber[]]>
 
-    getPostIdList(groupId: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<[BigNumber[]]>
+    getPostIdList(
+      groupId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber[]]>
 
     groupCount(overrides?: CallOverrides): Promise<[BigNumber]>
 
@@ -221,8 +272,6 @@ export interface Forum extends BaseContract {
         createdAtBlock: BigNumber
         contentCID: string
         removed: boolean
-        ownerEpoch: BigNumber
-        ownerEpochKey: BigNumber
         note: BigNumber
         downvote: BigNumber
         upvote: BigNumber
@@ -278,9 +327,15 @@ export interface Forum extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>
 
-  getCommentIdList(postId: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<BigNumber[]>
+  getCommentIdList(
+    postId: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<BigNumber[]>
 
-  getPostIdList(groupId: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<BigNumber[]>
+  getPostIdList(
+    groupId: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<BigNumber[]>
 
   groupCount(overrides?: CallOverrides): Promise<BigNumber>
 
@@ -347,9 +402,15 @@ export interface Forum extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>
 
-    getCommentIdList(postId: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<BigNumber[]>
+    getCommentIdList(
+      postId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber[]>
 
-    getPostIdList(groupId: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<BigNumber[]>
+    getPostIdList(
+      groupId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber[]>
 
     groupCount(overrides?: CallOverrides): Promise<BigNumber>
 
@@ -397,7 +458,11 @@ export interface Forum extends BaseContract {
       name?: null,
       creatorIdentityCommitment?: null
     ): NewGroupCreatedEventFilter
-    NewGroupCreated(groupId?: null, name?: null, creatorIdentityCommitment?: null): NewGroupCreatedEventFilter
+    NewGroupCreated(
+      groupId?: null,
+      name?: null,
+      creatorIdentityCommitment?: null
+    ): NewGroupCreatedEventFilter
 
     'NewItem(uint8,uint256,uint256,uint256,bytes32)'(
       itemType?: null,
@@ -406,10 +471,24 @@ export interface Forum extends BaseContract {
       parentId?: null,
       contentCID?: null
     ): NewItemEventFilter
-    NewItem(itemType?: null, groupId?: null, id?: null, parentId?: null, contentCID?: null): NewItemEventFilter
+    NewItem(
+      itemType?: null,
+      groupId?: null,
+      id?: null,
+      parentId?: null,
+      contentCID?: null
+    ): NewItemEventFilter
 
-    'NewUser(uint256,uint256,bytes32)'(groupId?: null, identityCommitment?: null, username?: null): NewUserEventFilter
-    NewUser(groupId?: null, identityCommitment?: null, username?: null): NewUserEventFilter
+    'NewUser(uint256,uint256,bytes32)'(
+      groupId?: null,
+      identityCommitment?: null,
+      username?: null
+    ): NewUserEventFilter
+    NewUser(
+      groupId?: null,
+      identityCommitment?: null,
+      username?: null
+    ): NewUserEventFilter
   }
 
   estimateGas: {
@@ -438,17 +517,29 @@ export interface Forum extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>
 
-    getCommentIdList(postId: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<BigNumber>
+    getCommentIdList(
+      postId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>
 
-    getPostIdList(groupId: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<BigNumber>
+    getPostIdList(
+      groupId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>
 
     groupCount(overrides?: CallOverrides): Promise<BigNumber>
 
-    groups(arg0: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<BigNumber>
+    groups(
+      arg0: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>
 
     itemCount(overrides?: CallOverrides): Promise<BigNumber>
 
-    items(arg0: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<BigNumber>
+    items(
+      arg0: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>
 
     joinGroup(
       groupId: PromiseOrValue<BigNumberish>,
@@ -486,17 +577,29 @@ export interface Forum extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>
 
-    getCommentIdList(postId: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<PopulatedTransaction>
+    getCommentIdList(
+      postId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>
 
-    getPostIdList(groupId: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<PopulatedTransaction>
+    getPostIdList(
+      groupId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>
 
     groupCount(overrides?: CallOverrides): Promise<PopulatedTransaction>
 
-    groups(arg0: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<PopulatedTransaction>
+    groups(
+      arg0: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>
 
     itemCount(overrides?: CallOverrides): Promise<PopulatedTransaction>
 
-    items(arg0: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<PopulatedTransaction>
+    items(
+      arg0: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>
 
     joinGroup(
       groupId: PromiseOrValue<BigNumberish>,

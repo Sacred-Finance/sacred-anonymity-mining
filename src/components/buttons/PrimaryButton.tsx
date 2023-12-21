@@ -1,4 +1,5 @@
-import React, { ButtonHTMLAttributes } from 'react'
+import type { ButtonHTMLAttributes } from 'react'
+import React from 'react'
 import { CircularLoader } from '@components/buttons/JoinCommunityButton'
 import { toast } from 'react-toastify'
 import { useTranslation } from 'next-i18next'
@@ -16,9 +17,15 @@ export type PrimaryButtonProps = {
   resetClasses?: boolean
   endIcon?: React.ReactNode
   startIcon?: React.ReactNode
-  loadingPosition?: 'start' | 'end'
+  loadingPosition?: 'start' | 'end' | 'replace'
   toolTip?: string | boolean
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
+  variant?:
+    | 'default'
+    | 'destructive'
+    | 'outline'
+    | 'secondary'
+    | 'ghost'
+    | 'link'
 } & ButtonHTMLAttributes<HTMLButtonElement>
 export function PrimaryButton({
   children,
@@ -26,13 +33,14 @@ export function PrimaryButton({
   requirements,
   isConnected,
   isJoined,
-  resetClasses,
   loadingPosition = 'end',
   variant = 'default',
   ...rest
 }: PrimaryButtonProps & ButtonHTMLAttributes<HTMLButtonElement>): JSX.Element {
   const { t } = useTranslation()
-  const wrappedOnClick = e => {
+  const wrappedOnClick = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
     if (requirements?.needsConnected && !isConnected) {
       return toast.error(t('alert.connectWallet'), { toastId: 'connectWallet' })
     }
@@ -42,6 +50,7 @@ export function PrimaryButton({
     if (rest.onClick) {
       rest.onClick(e)
     }
+    return null
   }
 
   // filter out props that are spreadable to the button
@@ -62,10 +71,23 @@ export function PrimaryButton({
   )
 
   return (
-    <Button variant={variant} {...buttonProps} disabled={rest.disabled || isLoading} onClick={wrappedOnClick}>
+    <Button
+      variant={variant}
+      {...buttonProps}
+      disabled={rest.disabled || isLoading}
+      onClick={wrappedOnClick}
+    >
       {isLoading && loadingPosition === 'start' && <CircularLoader />}
-      {rest.startIcon && !isLoading && loadingPosition === 'start' && rest.startIcon}
-      {children}
+      {rest.startIcon &&
+        !isLoading &&
+        loadingPosition === 'start' &&
+        rest.startIcon}
+      {isLoading && loadingPosition === 'replace' ? (
+        <CircularLoader />
+      ) : (
+        children
+      )}
+
       {rest.endIcon && !isLoading && loadingPosition === 'end' && rest.endIcon}
       {isLoading && loadingPosition === 'end' && <CircularLoader />}
     </Button>

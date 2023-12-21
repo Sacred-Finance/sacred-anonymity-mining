@@ -13,23 +13,22 @@ module.exports = {
       },
       {
         protocol: 'https',
-        hostname: 'raw.githubusercontent.com'
+        hostname: 'raw.githubusercontent.com',
       },
       {
         protocol: 'https',
-        hostname: 'assets.coingecko.com'
+        hostname: 'assets.coingecko.com',
       },
       {
         protocol: 'https',
-        hostname: 'cloudflare-ipfs.com'
+        hostname: 'cloudflare-ipfs.com',
       },
       {
         protocol: 'https',
-        hostname: 'arweave.net'
-      }
+        hostname: 'arweave.net',
+      },
     ],
     minimumCacheTTL: 60,
-
   },
   typescript: {
     // Dangerously allow production builds to successfully complete even if your project has type errors.
@@ -40,23 +39,6 @@ module.exports = {
   i18n: {
     locales: ['en-US', 'es', 'fr'],
     defaultLocale: 'en-US',
-
-    domains: [
-      {
-        // Note: subdomains must be included in the domain value to be matched
-        // e.g. www.example.com should be used if that is the expected hostname
-        domain: 'example.com',
-        defaultLocale: 'en-US',
-      },
-      {
-        domain: 'example.fr',
-        defaultLocale: 'fr',
-      },
-      {
-        domain: 'example.es',
-        defaultLocale: 'es',
-      },
-    ],
   },
 
   webpack: (config, { isServer }) => {

@@ -1,60 +1,66 @@
 import React, { useEffect } from 'react'
-import { Post } from '@/lib/post'
-import { useCommunityContext } from '@/contexts/CommunityProvider'
+import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
 import { PostPage } from '@components/Post/PostPage'
-import { ethers } from 'ethers'
 import useSWR from 'swr'
-import fetcher, { getGroupWithPostAndCommentData } from '@/lib/fetcher'
+import fetcher, { GroupPostCommentAPI } from '@/lib/fetcher'
 import { useRouter } from 'next/router'
 import LoadingComponent from '@components/LoadingComponent'
-import { CommentClass } from '@/lib/comment'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
+import { NextApiResponse } from 'next/types'
+import { Group, Item } from '@/types/contract/ForumInterface'
 
 function PostIndex() {
-  const { dispatch } = useCommunityContext()
+  const { dispatch, state } = useCommunityContext()
   const router = useRouter()
   const { groupId, postId } = router.query
 
-  const { data, error, isLoading } = useSWR(getGroupWithPostAndCommentData(groupId, postId), fetcher);
+  const { data, error, isLoading, mutate } = useSWR(
+    GroupPostCommentAPI(groupId, postId),
+    fetcher
+  ) as unknown as NextApiResponse<{
+    data: { group: Group; post: Item; comments: Item[] } | { error: string }
+  }>
   useCheckIfUserIsAdminOrModerator(true)
 
   useEffect(() => {
     const { group, post, comments } = data || {}
-    if (!group || !post || !comments) return
+    if (!group) {
+      return
+    }
     dispatch({
-      type: 'SET_ACTIVE_COMMUNITY',
+      type: ActionType.SET_ACTIVE_COMMUNITY,
       payload: {
         community: group,
         postList: [post],
       },
     })
     dispatch({
-      type: 'SET_ACTIVE_POST',
+      type: ActionType.SET_ACTIVE_POST,
       payload: {
         community: group,
         post: post,
         comments: comments,
       },
     })
-  }, [data])
+  }, [data?.group, data?.post, data?.comments])
 
-  if (error) return <div>Error: {error.message}</div>
-  if (!data || isLoading) return <LoadingComponent />
+  if (error) {
+    return <div>Error: {error.message}</div>
+  }
+  const { group, post, comments } = data || {}
 
-  const { group, post, comments } = data
-  const postInstance = new Post(post.id, group.groupId)
-  const commentInstance = new CommentClass(group.groupId, post.id, null)
-  group.id = ethers.BigNumber.from(group.id)
+  if (!data || isLoading) {
+    return <LoadingComponent />
+  }
 
   return (
     <PostPage
-      postInstance={postInstance}
       post={post}
       community={group}
       comments={comments}
-      commentInstance={commentInstance}
+      refreshData={mutate}
     />
   )
 }
 
-export default (PostIndex)
+export default PostIndex

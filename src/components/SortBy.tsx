@@ -2,18 +2,23 @@ import React, { useState } from 'react'
 import { useTranslation } from 'next-i18next'
 import { CogIcon } from '@heroicons/react/20/solid'
 
-export type SortByOption = 'highest' | 'lowest' | 'controversial' | 'newest' | 'oldest'
+export type SortByOption =
+  | 'highest'
+  | 'lowest'
+  | 'controversial'
+  | 'newest'
+  | 'oldest'
 
 interface SortByProps {
   onSortChange: (sortBy: SortByOption) => void
   targetType: 'comments' | 'posts' | 'polls'
 }
 
-const SortBy: React.FC<SortByProps> = ({ onSortChange, targetType }) => {
+const SortBy: React.FC<SortByProps> = ({ onSortChange }) => {
   const [selectedOption, setSelectedOption] = useState<SortByOption>('highest')
   const { t } = useTranslation()
 
-  const handleChange = e => {
+  const handleChange = (e: { target: { value: string } }) => {
     const newOption = e.target.value as SortByOption
     setSelectedOption(newOption)
     onSortChange(newOption)

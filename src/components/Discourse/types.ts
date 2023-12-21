@@ -191,7 +191,12 @@ interface SpecificTopic {
     posters: {
       extras: string
       description: string
-      user: { name: string; id: number; avatar_template: string; username: string }
+      user: {
+        name: string
+        id: number
+        avatar_template: string
+        username: string
+      }
     }[]
     reply_count: number
     has_accepted_answer: boolean
@@ -242,7 +247,12 @@ interface SpecificTopic {
   last_read_post_id: number
   deleted_by: null
   has_deleted: boolean
-  actions_summary: { hidden: boolean; count: number; can_act: boolean; id: number }[]
+  actions_summary: {
+    hidden: boolean
+    count: number
+    can_act: boolean
+    id: number
+  }[]
   chunk_size: number
   bookmarked: boolean
   bookmarks: any[]
@@ -254,13 +264,23 @@ interface SpecificTopic {
   slow_mode_enabled_until: null
   summarizable: boolean
   details: {
-    last_poster: { name: string; id: number; avatar_template: string; username: string }
+    last_poster: {
+      name: string
+      id: number
+      avatar_template: string
+      username: string
+    }
     can_reply_as_new_topic: boolean
     can_edit: boolean
     can_invite_via_email: boolean
     can_pin_unpin_topic: boolean
     can_flag_topic: boolean
-    created_by: { name: string; id: number; avatar_template: string; username: string }
+    created_by: {
+      name: string
+      id: number
+      avatar_template: string
+      username: string
+    }
     can_remove_allowed_users: boolean
     can_split_merge_topic: boolean
     can_moderate_category: boolean
