@@ -376,6 +376,8 @@ export type Item = {
   title?: string
   description?: typeof OutputData | undefined
   // blocks?: OutputBlockData[] | undefined
+
+  isMutating?: boolean
 }
 
 export type VoteKind = number

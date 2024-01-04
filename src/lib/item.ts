@@ -118,7 +118,6 @@ export async function create(
         asPoll: false,
         pollRequest: emptyPollRequest,
       }).then(async res => {
-        await mutate(GroupPostAPI(this.groupId))
         return res
       })
     } else if (type === 'comment') {
@@ -130,7 +129,6 @@ export async function create(
         asPoll: false,
         pollRequest: emptyPollRequest,
       }).then(async res => {
-        await mutate(GroupPostCommentAPI(this.groupId, this.postId))
         return res
       })
     }
