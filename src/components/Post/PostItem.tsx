@@ -1,14 +1,11 @@
-import {
-  useCommunityContext,
-  useUserIfJoined,
-} from '@/contexts/CommunityProvider'
+import { useCommunityContext } from '@/contexts/CommunityProvider'
 import React, { useEffect, useState } from 'react'
 import { useAccount } from 'wagmi'
 import { Identity } from '@semaphore-protocol/identity'
 import { commentIsConfirmed, createNote } from '@/lib/utils'
 import { BigNumber } from 'ethers'
 import { PollUI } from '@components/PollIUI'
-import { ContentActions } from '@components/Post/ContentActions'
+import { CancelAction, ContentActions, DeleteAction, EditAction, SaveAction } from '@components/Post/ContentActions'
 import { PostTitle } from '@components/Post/PostTitle'
 import type { User } from '@/lib/model'
 import { ContentType } from '@/lib/model'
@@ -24,6 +21,7 @@ import AnimalAvatar from '@components/AnimalAvatar'
 import { VoteForItemUI } from '@components/Post/PostPage'
 import { formatDistanceToNow } from 'date-fns'
 import { DropdownCommunityCard } from '@components/CommunityCard/DropdownCommunityCard'
+import { useUserIfJoined } from "@/contexts/UseUserIfJoined";
 
 const Editor = dynamic(() => import('../editor-js/Editor'), {
   ssr: false,
@@ -36,12 +34,7 @@ interface PostItemProps {
   refreshData?: () => void
 }
 
-export const PostItem = ({
-  post,
-  group,
-  showAvatar = true,
-  refreshData,
-}: PostItemProps) => {
+export const PostItem = ({ post, group, showAvatar = true, refreshData }: PostItemProps) => {
   const { groupId, parentId, id } = post
 
   const postId = parentId && +parentId > 0 ? parentId : id
@@ -79,11 +72,7 @@ export const PostItem = ({
         if (!contentDescription || !contentDescription.blocks?.length) {
           toast.error(t('alert.emptyContent'))
         }
-        if (
-          !contentTitle ||
-          !contentDescription ||
-          !contentDescription.blocks?.length
-        ) {
+        if (!contentTitle || !contentDescription || !contentDescription.blocks?.length) {
           return toast.error(t('alert.emptyContent'))
         }
       }
@@ -99,7 +88,6 @@ export const PostItem = ({
         refreshData && refreshData()
         setIsContentEditing(false)
       })
-
     } catch (error) {
       console.log(error)
       toast.error(t('alert.editFailed'))
@@ -153,12 +141,7 @@ export const PostItem = ({
             )}
 
             {!isContentEditing && post.title && (
-              <PostTitle
-                title={post.title}
-                id={post.id}
-                onPostPage={isPostPage}
-                post={post}
-              />
+              <PostTitle title={post.title} id={post.id} onPostPage={isPostPage} post={post} />
             )}
           </div>
         )}
@@ -167,9 +150,7 @@ export const PostItem = ({
           {!isContentEditing ? (
             <EditorJsRenderer
               data={
-                isTypeOfPost || isTypeOfPoll
-                  ? post.description
-                  : { blocks: post.blocks || post?.description?.blocks }
+                isTypeOfPost || isTypeOfPoll ? post.description : { blocks: post.blocks || post?.description?.blocks }
               }
             />
           ) : (
@@ -195,46 +176,46 @@ export const PostItem = ({
               visibility: commentIsConfirmed(post.id) ? 'visible' : 'hidden',
             }}
           >
-            <AnimalAvatar
-              seed={`${post.note}_${Number(post.groupId)}`}
-              options={{ size: 30 }}
-            />
+            <AnimalAvatar seed={`${post.note}_${Number(post.groupId)}`} options={{ size: 30 }} />
 
             <VoteForItemUI post={post} group={group} onSuccess={refreshData} />
 
             <p className="inline-block text-sm">
               🕛{' '}
               {post?.description?.time || post?.time
-                ? formatDistanceToNow(
-                    new Date(post?.description?.time || post?.time).getTime()
-                  )
+                ? formatDistanceToNow(new Date(post?.description?.time || post?.time).getTime())
                 : '-'}
             </p>
           </div>
           <DropdownCommunityCard
             actions={[
-              <ContentActions
-                group={group}
-                item={post}
-                refreshData={refreshData}
-                contentId={post.id}
-                isContentEditable={isContentEditable}
-                isEditing={isContentEditing}
-                onContentPage={isPostPage}
-                save={() => saveEditedPost()}
-                groupId={groupId}
-                isAdminOrModerator={isAdminOrModerator}
-                setIsContentEditing={value => {
-                  setIsContentEditing(value)
-                  if (value) {
-                    setContentDescription(post.description)
-                    setContentTitle && setContentTitle(post.title)
-                  }
-                }}
-                onClickCancel={() => setIsContentEditing(false)}
-                isLoading={isLoading}
-                hidden={false}
-              />,
+              isContentEditable && !isContentEditing && (
+                <EditAction
+                  setIsEditing={value => {
+                    setIsContentEditing(value)
+                    if (value) {
+                      setContentDescription(post.description)
+                      setContentTitle && setContentTitle(post.title)
+                    }
+                  }}
+                  isEditing={isContentEditing}
+                  isLoading={isLoading}
+                />
+              ),
+              isContentEditable && isContentEditing && (
+                <SaveAction onSave={() => saveEditedPost()} isLoading={isLoading} item={post} />
+              ),
+              isContentEditing && <CancelAction onCancel={() => setIsContentEditing(false)} />,
+              // Assuming the DeleteAction should also be conditionally shown
+              isContentEditable && !isContentEditing && (
+                <DeleteAction
+                  isAdminOrModerator={isAdminOrModerator}
+                  itemId={post.id}
+                  itemType={post.kind} // Make sure this matches the expected prop
+                  groupId={groupId}
+                />
+              ),
+              // ... other actions if needed
             ]}
           />
         </div>

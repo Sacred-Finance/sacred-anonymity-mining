@@ -1,12 +1,6 @@
 import React from 'react'
 import { Input } from '@/shad/ui/input'
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/shad/ui/form'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shad/ui/form'
 import type { FieldValues, UseFormReturn } from 'react-hook-form'
 
 export function InputGroupName({
@@ -31,7 +25,7 @@ export function InputGroupName({
       name="groupName"
       render={({ field }) => (
         <FormItem>
-          <FormLabel className={'text-lg'}>Group Name</FormLabel>
+          <FormLabel className="text-lg">Group Name</FormLabel>
           <FormControl>
             <Input placeholder="Group Name" {...field} />
           </FormControl>

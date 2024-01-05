@@ -1,40 +1,42 @@
-import { useRouter } from 'next/router'
-import { useAccount } from 'wagmi'
-import { useTranslation } from 'next-i18next'
-import { useFetchCommunitiesByIds } from '@/hooks/useFetchCommunities'
-import React, { useCallback, useEffect, useState } from 'react'
-import { constants } from 'ethers'
-import { Identity } from '@semaphore-protocol/identity'
-import {
-  createInputNote,
-  generateGroth16Proof,
-  getBytes32FromIpfsHash,
-  getBytes32FromString,
-} from '@/lib/utils'
-import { uploadImages } from '@/utils/communityUtils'
-import { setGroupDetails } from '@/lib/api'
-import { toast } from 'react-toastify'
-import type { HandleSetImage } from '@pages/communities/[groupId]/edit'
-import type { Group } from '@/types/contract/ForumInterface'
-import RemoveGroup from '@components/RemoveGroup'
-import TagInput from '../TagInput/TagInput'
-import { ArrowLeftIcon } from '@heroicons/react/20/solid'
-import Link from 'next/link'
-import { InputGroupName } from '@components/form/InputGroupName'
-import type { FieldValues } from 'react-hook-form'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { CircularLoader } from '@components/CircularLoader'
 import { groupSchema } from '@components/form/form.schema'
-import { Form } from '@/shad/ui/form'
-import type { z } from 'zod'
-import { Button, buttonVariants } from '@/shad/ui/button'
 import ImageUploader from '@components/form/ImageUploader'
 import { InputGroupDescription } from '@components/form/InputGroupDescription'
+import { InputGroupName } from '@components/form/InputGroupName'
+import RemoveGroup from '@components/RemoveGroup'
+import { ArrowLeftIcon } from '@heroicons/react/20/solid'
+import { zodResolver } from '@hookform/resolvers/zod'
+import type { HandleSetImage } from '@pages/communities/[groupId]/edit'
+import type { BigNumberish } from '@semaphore-protocol/group'
+import { Identity } from '@semaphore-protocol/identity'
+import { constants } from 'ethers'
+import _ from 'lodash'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
+import { useTranslation } from 'next-i18next'
+import React, { useCallback, useEffect, useState } from 'react'
+import type { FieldValues } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
+import { toast } from 'react-toastify'
 import type { Hex } from 'viem'
 import { hexToString } from 'viem'
-import { CircularLoader } from '@components/CircularLoader'
+import { useAccount } from 'wagmi'
+import type { z } from 'zod'
+
+import { useCommunityContext } from '@/contexts/CommunityProvider'
+import { useAdminEditGroupDetails } from '@/hooks/useAdminEditGroupDetails'
+import { useFetchCommunitiesByIds } from '@/hooks/useFetchCommunities'
+import { setGroupDetails } from '@/lib/api'
+import { createInputNote, generateGroth16Proof, getBytes32FromIpfsHash, getBytes32FromString } from '@/lib/utils'
 import { cn } from '@/shad/lib/utils'
-import type { BigNumberish } from '@semaphore-protocol/group'
+import { Button, buttonVariants } from '@/shad/ui/button'
+import { Form } from '@/shad/ui/form'
+import { Label } from '@/shad/ui/label'
+import type { Group } from '@/types/contract/ForumInterface'
+
+import TagInput from '../TagInput/TagInput'
+import { useCheckIsOwner } from '@components/EditGroupNavigationButton'
+import { uploadImages } from '@/utils/communityUtils'
 
 interface EditGroupProps {
   group: Group
@@ -45,28 +47,34 @@ export function EditGroup({ group }: EditGroupProps) {
   const { address } = useAccount()
   const { t } = useTranslation()
 
-  const handleUpdateStateAfterEdit = useFetchCommunitiesByIds(
-    [Number(group.groupId)],
-    false
-  )
+  const handleUpdateStateAfterEdit = useFetchCommunitiesByIds([Number(group.groupId)], false)
 
+  const {
+    state: { isAdmin },
+  } = useCommunityContext()
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const [bannerFile, setBannerFile] = useState<File | undefined>(undefined)
   const [logoFile, setLogoFile] = useState<File | undefined>(undefined)
 
   // Helper function to fetch and handle the image
-  const fetchImage = (
-    imagePath: string,
-    imageType: HandleSetImage['imageType']
-  ) => {
-    fetch('https://ipfs.io/ipfs/' + imagePath)
-      .then(res => res.blob())
-      .then(blob => {
-        const file = new File([blob], imageType, { type: blob.type })
-        handleSetImage({ file, imageType })
-      })
+  const handleSetImage = ({ file, imageType }: HandleSetImage): void => {
+    const setImage = imageType === 'logo' ? setLogoFile : setBannerFile
+    setImage(file as File)
   }
-
+  const fetchImage = async (imagePath: string, imageType: HandleSetImage['imageType']) => {
+    try {
+      console.log('fetching image', 'https://ipfs.io/ipfs/' + imagePath)
+      const result = await fetch('https://ipfs.io/ipfs/' + imagePath)
+      console.log('result', result)
+      const blob = await result.blob()
+      console.log('blob', blob)
+      const file = new File([blob], imageType, { type: blob.type })
+      console.log('file', file)
+      handleSetImage({ file, imageType })
+    } catch (error) {
+      console.log('error fetching image', error)
+    }
+  }
   useEffect(() => {
     if (group.groupDetails.bannerCID) {
       fetchImage(group.groupDetails.bannerCID, 'banner')
@@ -76,92 +84,90 @@ export function EditGroup({ group }: EditGroupProps) {
     }
   }, [])
 
-  const handleSetImage = ({ file, imageType }: HandleSetImage): void => {
-    const setImage = imageType === 'logo' ? setLogoFile : setBannerFile
-    setImage(file as File)
-  }
-
   const form = useForm<z.infer<typeof groupSchema>>({
     resolver: zodResolver(groupSchema),
+    defaultValues: {
+      groupName: group.name,
+      description: group.groupDetails.description,
+      tags: group.groupDetails.tags?.map(tag => hexToString(tag as Hex, { size: 32 })) || [],
+      bannerFile: bannerFile,
+      logoFile: logoFile,
+    },
     values: {
       groupName: group.name,
       description: group.groupDetails.description,
-      tags:
-        group.groupDetails.tags?.map(tag =>
-          hexToString(tag as Hex, { size: 32 })
-        ) || [],
+      tags: group.groupDetails.tags?.map(tag => hexToString(tag as Hex, { size: 32 })) || [],
       bannerFile: bannerFile,
       logoFile: logoFile,
     },
   })
 
+  const { editGroupDetails } = useAdminEditGroupDetails(group.groupId, isAdmin)
+  const { isOwner } = useCheckIsOwner(group, address)
+
   const submitAllGroupDetails = useCallback(
     async (data: FieldValues) => {
-      const hasImageChanged = {
-        logo: data.logoFile.size !== logoFile?.size,
-        banner: data.bannerFile.size !== bannerFile?.size,
-      }
       try {
         setIsSubmitting(true)
-        const user = new Identity(address)
-        const input = await createInputNote(user)
-        const { a, b, c } = await generateGroth16Proof({ input })
+        const hasImageChanged = {
+          logo: data?.logoFile?.size !== logoFile?.size,
+          banner: data?.bannerFile?.size !== bannerFile?.size,
+        }
 
         const images = {
           bannerFile: hasImageChanged.banner && data.bannerFile,
           logoFile: hasImageChanged.logo && data.logoFile,
         }
 
-        let { bannerCID, logoCID } = await uploadImages(images)
-        if (!bannerCID) bannerCID = group.groupDetails.bannerCID
-        if (!logoCID) logoCID = group.groupDetails.logoCID
+        const { bannerCID, logoCID } = await uploadImages(images)
+
+        if (hasImageChanged.banner && bannerCID) await fetchImage(bannerCID, 'banner')
+        if (hasImageChanged.logo && logoCID) await fetchImage(logoCID, 'logo')
 
         const mergedGroupDetails = {
           description: data.description,
           groupName: data.groupName,
-          bannerCID: bannerCID
-            ? getBytes32FromIpfsHash(bannerCID)
-            : constants.HashZero,
-          logoCID: logoCID
-            ? getBytes32FromIpfsHash(logoCID)
-            : constants.HashZero,
-          tags: data.tags.map((tag: string) => {
-            return getBytes32FromString(tag)
-          }),
+          bannerCID: bannerCID ? getBytes32FromIpfsHash(bannerCID) : constants.HashZero,
+          logoCID: logoCID ? getBytes32FromIpfsHash(logoCID) : constants.HashZero,
+          tags: data.tags.map((tag: string) => getBytes32FromString(tag)),
         }
 
-        setGroupDetails(
-          group.groupId as string,
-          a,
-          b,
-          c,
-          mergedGroupDetails,
-          false
-        )
-          .then(async () => {
-            await handleUpdateStateAfterEdit()
-            await router.push(`/communities/${group.groupId}`)
+        if (isAdmin && !isOwner) {
+          await editGroupDetails(mergedGroupDetails)
+          // toast.success('Group details updated')
+        } else {
+          const input = await createInputNote(new Identity(address))
+          const proof = await generateGroth16Proof({ input })
+
+          await setGroupDetails({
+            groupId: group.groupId as string,
+            a: proof.a,
+            b: proof.b,
+            c: proof.c,
+            details: mergedGroupDetails,
+            isAdmin: false,
           })
-          .catch(error => {
-            toast.error(`Something went wrong ${error.message}`)
-            setIsSubmitting(false)
-          })
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          toast.error(error.message)
         }
-        // setIsSubmitting(false)
+
+        // await handleUpdateStateAfterEdit()
+        // await router.push(`/communities/${group.groupId}`)
+      } catch (error) {
+        if (error instanceof Error) {
+          toast.error(`Something went wrong: ${error.message}`)
+        }
+      } finally {
+        setIsSubmitting(false)
       }
     },
     [
       address,
       bannerFile?.size,
-      group.groupDetails.bannerCID,
-      group.groupDetails.logoCID,
-      group.groupId,
+      group,
       handleUpdateStateAfterEdit,
+      isAdmin,
       logoFile?.size,
       router,
+      editGroupDetails, // Don't forget to include editGroupDetails in the dependency array
     ]
   )
 
@@ -169,48 +175,46 @@ export function EditGroup({ group }: EditGroupProps) {
 
   return (
     <div className="relative z-50 max-w-screen-2xl ">
+      {isOwner ? 'owner!' : 'admin?'}
+
       <Form {...form}>
         <form
-          className="space-y-3 bg-white/5 p-6"
+          className="space-y-12 bg-white/5 p-6"
           onSubmit={form.handleSubmit(async data => {
             await submitAllGroupDetails(data)
           })}
         >
           <div className="flex w-full justify-between">
-            <h1 className="text-2xl font-semibold text-gray-700 dark:text-gray-300">
-              {t('editCommunity')}
-            </h1>
+            <Link
+              className={cn(
+                'flex items-center ',
+                buttonVariants({
+                  variant: 'link',
+                  className: 'ps-0 ',
+                })
+              )}
+              href={previousPageUrl ? previousPageUrl : `/communities/${group.id}`}
+            >
+              <Label className="flex items-center gap-2 text-2xl font-semibold text-gray-700 dark:text-gray-300">
+                <ArrowLeftIcon className="w-10" />
+                <span> {_.startCase(group.name)}</span>
+              </Label>
+            </Link>
             <div className="flex items-center justify-end gap-2">
-              <Link
-                className={cn(
-                  buttonVariants({
-                    variant: 'ghost',
-                    className: '',
-                    size: 'sm',
-                  }),
-                  'mr-2'
-                )}
-                href={
-                  previousPageUrl ? previousPageUrl : `/communities/${group.id}`
-                }
-              >
-                <ArrowLeftIcon className="h-6 w-6" />
-                Back
-              </Link>
-
-              <RemoveGroup
-                groupId={group.groupId as BigNumberish}
-                hidden={false}
-              />
+              <RemoveGroup groupId={group.groupId as BigNumberish} hidden={false} />
             </div>
           </div>
 
           <InputGroupName form={form} />
           <InputGroupDescription form={form} />
 
-          <div className="flex w-full flex-wrap gap-4">
-            <ImageUploader form={form} name="logoFile" />
-            <ImageUploader form={form} name="bannerFile" />
+          <div className="flex flex-col flex-wrap items-start justify-center md:flex-row ">
+            <div className="flex shrink-0 basis-1/3 items-center justify-center">
+              <ImageUploader form={form} name="logoFile" />
+            </div>
+            <div className="flex shrink-0 basis-2/3 items-center justify-center">
+              <ImageUploader form={form} name="bannerFile" />
+            </div>
           </div>
 
           <TagInput />
@@ -226,9 +230,7 @@ export function EditGroup({ group }: EditGroupProps) {
                 form.formState.isValidating
               }
             >
-              {isSubmitting ||
-              form.formState.isLoading ||
-              form.formState.isValidating ? (
+              {isSubmitting || form.formState.isLoading || form.formState.isValidating ? (
                 <CircularLoader />
               ) : (
                 t('button.save')

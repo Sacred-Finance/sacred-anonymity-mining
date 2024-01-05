@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
+import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { PostPage } from '@components/Post/PostPage'
 import useSWR from 'swr'
 import fetcher, { GroupPostCommentAPI } from '@/lib/fetcher'
@@ -8,6 +8,7 @@ import LoadingComponent from '@components/LoadingComponent'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
 import { NextApiResponse } from 'next/types'
 import { Group, Item } from '@/types/contract/ForumInterface'
+import { ActionType } from "@/contexts/CommunityTypes";
 
 function PostIndex() {
   const { dispatch, state } = useCommunityContext()

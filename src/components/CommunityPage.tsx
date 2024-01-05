@@ -1,12 +1,7 @@
 import type { Dispatch, SetStateAction } from 'react'
 import React, { useState } from 'react'
 import { Post } from '@/lib/post'
-import {
-  useActiveUser,
-  useCommunityContext,
-  useUserIfJoined,
-  useUsers,
-} from '@/contexts/CommunityProvider'
+import { useActiveUser, useCommunityContext, useUsers } from '@/contexts/CommunityProvider'
 import { useAccount } from 'wagmi'
 import { useTranslation } from 'react-i18next'
 import type { SortByOption } from '@components/SortBy'
@@ -24,6 +19,7 @@ import LoadingComponent from '@components/LoadingComponent'
 import { CommunityCard } from './CommunityCard/CommunityCard'
 import type { User } from '@/lib/model'
 import { ShowConnectIfNotConnected } from '@components/Connect/ConnectWallet'
+import { useUserIfJoined } from '@/contexts/UseUserIfJoined'
 
 export function CommunityPage({
   community,
@@ -49,11 +45,7 @@ export function CommunityPage({
     <div>
       <div className="relative flex min-h-screen gap-6 rounded-lg  p-6 transition-colors ">
         <div className="sticky top-0 flex w-full flex-col gap-6">
-          <CommunityCard
-            variant="banner"
-            community={community}
-            isAdmin={isAdmin}
-          />
+          <CommunityCard variant="banner" community={community} isAdmin={isAdmin} />
 
           <div className="flex w-fit gap-4 rounded-lg ">
             <ShowConnectIfNotConnected>
@@ -61,27 +53,17 @@ export function CommunityPage({
               <CreatePostUI group={community} onSuccess={refreshData} />
             </ShowConnectIfNotConnected>
           </div>
-          <PostList
-            posts={sortedData}
-            group={community}
-            refreshData={refreshData}
-          />
+          <PostList posts={sortedData} group={community} refreshData={refreshData} />
         </div>
       </div>
     </div>
   )
 }
 
-const CreatePostUI = ({
-  group,
-  onSuccess,
-}: {
-  group: Group
-  onSuccess?: () => void
-}) => {
+const CreatePostUI = ({ group, onSuccess }: { group: Group; onSuccess?: () => void }) => {
   const groupId = group.groupId
   const user = useUserIfJoined(group.id.toString())
-  const activeUser = useActiveUser({ groupId: group.id.toString() })
+  const activeUser = useActiveUser()
   const { t } = useTranslation()
   const { address } = useAccount()
   const { checkUserBalance } = useValidateUserBalance(group, address)
@@ -104,17 +86,12 @@ const CreatePostUI = ({
     return true
   }
 
-  const {
-    contentDescription,
-    setContentDescription,
-    contentTitle,
-    setContentTitle,
-    clearContent,
-  } = useContentManagement({
-    isPostOrPoll: true,
-    defaultContentDescription: undefined,
-    defaultContentTitle: undefined,
-  })
+  const { contentDescription, setContentDescription, contentTitle, setContentTitle, clearContent } =
+    useContentManagement({
+      isPostOrPoll: true,
+      defaultContentDescription: undefined,
+      defaultContentTitle: undefined,
+    })
 
   const addPost: () => Promise<void> = async () => {
     if (validateRequirements() !== true) {

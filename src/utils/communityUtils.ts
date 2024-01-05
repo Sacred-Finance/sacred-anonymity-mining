@@ -113,6 +113,9 @@ export const uploadImages = async ({
     logoFile ? uploadImageToIPFS(logoFile) : Promise.resolve(null),
   ])
 
+  console.log('bannerResult', bannerResult)
+  console.log('logoResult', logoResult)
+
   let bannerCID: string | null = null
   let logoCID: string | null = null
 

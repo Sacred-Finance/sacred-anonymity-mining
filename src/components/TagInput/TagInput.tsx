@@ -1,24 +1,12 @@
 import { Controller, useFormContext } from 'react-hook-form'
-import {
-  FormControl,
-  FormDescription,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/shad/ui/form'
+import { FormControl, FormDescription, FormItem, FormLabel, FormMessage } from '@/shad/ui/form'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shad/ui/popover'
 import { Button } from '@/shad/ui/button'
 import { cn } from '@/shad/lib/utils'
-import {
-  Command,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-} from '@/shad/ui/command'
+import { Command, CommandInput, CommandItem, CommandList, CommandSeparator } from '@/shad/ui/command'
 import { TAGS } from '@/constant/tags'
 import { FaCaretRight } from 'react-icons/fa'
-import { BsCheckCircle } from 'react-icons/bs'
+import { BsCheckCircleFill } from 'react-icons/bs'
 import React from 'react'
 
 export default function ComboboxForm() {
@@ -45,9 +33,7 @@ export default function ComboboxForm() {
     <FormItem>
       <FormLabel className="text-lg">
         Tags
-        <FormDescription>
-          Add tags to help people find your group
-        </FormDescription>
+        <FormDescription>Add tags to help people find your group</FormDescription>
       </FormLabel>
       <FormControl>
         <Controller
@@ -61,21 +47,16 @@ export default function ComboboxForm() {
                     <Button
                       variant="outline"
                       role="combobox"
-                      className={cn(
-                        'justify-between',
-                        !field.value && 'text-muted-foreground'
-                      )}
+                      className={cn('justify-between', !field.value && 'text-muted-foreground')}
                     >
                       {field.value?.length
-                        ? `${field.value.length} tag${
-                            field.value.length === 1 ? '' : 's'
-                          } selected`
+                        ? `${field.value.length} tag${field.value.length === 1 ? '' : 's'} selected`
                         : 'Select tags'}
                       <FaCaretRight className="float-right ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent className="max-h-96 overflow-y-auto">
+                <PopoverContent className="mx-24  h-80 p-0 ">
                   <Command>
                     <CommandInput placeholder="Type a command or search..." />
 
@@ -86,11 +67,14 @@ export default function ComboboxForm() {
                         <CommandItem
                           key={tag}
                           onSelect={() => toggleTag(tag)}
-                          className="flex items-center justify-between"
+                          className={cn(
+                            'flex items-center justify-between',
+                            selectedTags.includes(tag) && 'font-bold text-primary'
+                          )}
                         >
                           {tag}
                           {selectedTags.includes(tag) && (
-                            <BsCheckCircle className="overflow-visible text-primary" />
+                            <BsCheckCircleFill className="h-5 w-5 shrink-0 overflow-visible text-primary" />
                           )}
                         </CommandItem>
                       ))}

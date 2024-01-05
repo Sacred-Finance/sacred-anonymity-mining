@@ -1,8 +1,6 @@
 import { CommunityCard } from '@/components/CommunityCard/CommunityCard'
 import { PostItem } from '@/components/Post/PostItem'
 import {
-  useCommunitiesCreatedByUser,
-  useCommunitiesJoinedByUser,
   useCommunityContext,
 } from '@/contexts/CommunityProvider'
 import { useFetchItemsCreatedByUser } from '@/hooks/useFetchItemsCreatedByUser'
@@ -10,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shad/ui/tabs'
 import { BigNumber } from 'ethers'
 import React, { useEffect } from 'react'
 import useSWR from 'swr'
+import { useCommunitiesCreatedByUser } from "@/contexts/UseCommunitiesCreatedByUser";
+import { useCommunitiesJoinedByUser } from "@/contexts/UseCommunitiesJoinedByUser";
 
 const Account = () => {
   const { dispatch } = useCommunityContext()

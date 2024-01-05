@@ -3,11 +3,11 @@ import { useAccount } from 'wagmi'
 
 import React, { memo } from 'react'
 import { useTranslation } from 'next-i18next'
-import { useUserIfJoined } from '@/contexts/CommunityProvider'
 import { toast } from 'react-toastify'
 import type { Group } from '@/types/contract/ForumInterface'
 import { PrimaryButton } from './index'
 import { useLeaveCommunity } from '@/hooks/useLeaveCommunity'
+import { useUserIfJoined } from "@/contexts/UseUserIfJoined";
 
 interface JoinButtonProps {
   community: Group

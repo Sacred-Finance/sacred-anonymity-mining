@@ -6,12 +6,12 @@ import React, { memo } from 'react'
 import { TosConfirmationWrapper } from '../TermsOfService/TosConfirmationWrapper'
 import { useValidateUserBalance } from '@/utils/useValidateUserBalance'
 import { useTranslation } from 'next-i18next'
-import { useUserIfJoined } from '@/contexts/CommunityProvider'
 import { toast } from 'react-toastify'
 import type { Group } from '@/types/contract/ForumInterface'
 import clsx from 'clsx'
 import { PrimaryButton } from './index'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
+import { useUserIfJoined } from "@/contexts/UseUserIfJoined";
 
 interface JoinButtonProps {
   community: Group

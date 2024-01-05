@@ -8,8 +8,6 @@ import {
 } from '@/lib/utils'
 import { toast } from 'react-toastify'
 import { useTranslation } from 'react-i18next'
-import type { CommunityId } from '@/contexts/CommunityProvider'
-import { useUserIfJoined } from '@/contexts/CommunityProvider'
 import { Post } from '@/lib/post'
 import { CommentClass } from '@/lib/comment'
 import type { PostContent, User } from '@/lib/model'
@@ -20,6 +18,8 @@ import { GroupPostCommentAPI } from '@/lib/fetcher'
 import type { Address } from '@/types/common'
 import type { Item } from '@/types/contract/ForumInterface'
 import type { BigNumberish } from '@semaphore-protocol/group'
+import { CommunityId } from "@/contexts/CommunityTypes";
+import { useUserIfJoined } from "@/contexts/UseUserIfJoined";
 
 interface UseEditItemParams {
   item: Item

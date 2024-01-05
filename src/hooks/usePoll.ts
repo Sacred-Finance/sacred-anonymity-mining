@@ -62,7 +62,6 @@ interface SubmitPollParams {
 
 export const usePoll = ({ group }: { group: Group }) => {
   const { address } = useAccount()
-  useActiveUser({ groupId: group?.id })
 
   const createPoll = async ({
     content,

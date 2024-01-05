@@ -1,7 +1,7 @@
 import {
   useActiveUser,
   useCommunityContext,
-  useUserIfJoined,
+
 } from '@/contexts/CommunityProvider'
 import { useAccount } from 'wagmi'
 import { useTranslation } from 'next-i18next'
@@ -46,6 +46,7 @@ import { analysisLabelsAndTypes } from '@components/Post/AiAccordionConfig'
 import { AnalysisCheckboxComponent } from '@components/Post/AiAnalysisCheckboxComponent'
 import { Button } from '@/shad/ui/button'
 import { ShowConnectIfNotConnected } from '@components/Connect/ConnectWallet'
+import { useUserIfJoined } from "@/contexts/UseUserIfJoined";
 
 export const AIDigestContext = React.createContext<{
   enabled: { [key: string]: boolean }
@@ -261,7 +262,6 @@ const CreateCommentUI = ({
 }) => {
   const groupId = group.groupId
   const user = useUserIfJoined(group.id.toString())
-  useActiveUser({ groupId: group.id })
   const { t } = useTranslation()
   const { address } = useAccount()
   const { checkUserBalance } = useValidateUserBalance(group, address)

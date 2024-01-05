@@ -17,13 +17,10 @@ import { abi } from '@/constant/abi'
 
 export const mumbaiTestnetMaticContractAddress = `0x0000000000000000000000000000000000001010`
 
-export const SemaphoreContractAddress = process.env
-  .NEXT_PUBLIC_SEMAPHORE_CONTRACT_ADDRESS as `0x${string}`
-export const ForumContractAddress: Address = process.env
-  .NEXT_PUBLIC_CONTRACT_ADDRESS as Address
+export const SemaphoreContractAddress = process.env.NEXT_PUBLIC_SEMAPHORE_CONTRACT_ADDRESS as `0x${string}`
+export const ForumContractAddress: Address = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as Address
 
-export const RELAYER_URL =
-  process.env.NEXT_PUBLIC_RELAYER_URL ?? 'http://127.0.0.1:3000'
+export const RELAYER_URL = process.env.NEXT_PUBLIC_RELAYER_URL ?? 'http://127.0.0.1:3000'
 
 export const supportedChains: { [key: string]: Chain } = {
   [polygonMumbai.id]: polygonMumbai,
@@ -47,9 +44,7 @@ export const chainLogos: { [key: string]: string } = {
   [arbitrumGoerli.id]: '/arbitrum.png',
 }
 
-export const supportedChainsArray = Object.keys(supportedChains).map(
-  k => supportedChains[k]
-)
+export const supportedChainsArray = Object.keys(supportedChains).map(k => supportedChains[k])
 
 /** PROVIDERS */
 
@@ -113,9 +108,6 @@ export const forumContract = getContract({
   publicClient: jsonRPCProvider,
 }) as ForumContract
 
-export const semaphoreContract = new SemaphoreEthers(
-  process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL,
-  {
-    address: SemaphoreContractAddress,
-  }
-)
+export const semaphoreContract = new SemaphoreEthers(process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL, {
+  address: SemaphoreContractAddress,
+})

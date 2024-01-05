@@ -1,7 +1,8 @@
 import { forumContract } from '@/constant/const'
 import { fetchCommunitiesData } from '@/utils/communityUtils'
-import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
+import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { useEffect, useRef } from 'react'
+import { ActionType } from "@/contexts/CommunityTypes";
 
 type GroupId = number // Define GroupId type or replace it with your actual type
 export const useFetchCommunitiesByIds = (

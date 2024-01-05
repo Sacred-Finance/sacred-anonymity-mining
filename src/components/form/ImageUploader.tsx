@@ -1,79 +1,93 @@
-import React from 'react'
+import clsx from 'clsx'
 import Image from 'next/image'
+import React, { useEffect } from 'react'
+import { FileUploader } from 'react-drag-drop-files'
 import type { UseFormReturn } from 'react-hook-form'
 import { BsImages } from 'react-icons/bs'
-import { FileUploader } from 'react-drag-drop-files'
-import clsx from 'clsx'
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/shad/ui/form'
+
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shad/ui/form'
+
+type ImageFile = File & {
+  preview?: string
+}
+
+type FormState = {
+  groupName: string
+  description: string
+  tags?: string[]
+  bannerFile?: ImageFile
+  logoFile?: ImageFile
+}
 
 interface ImageUploaderProps {
-  name: 'bannerFile' | 'logoFile'
-  initialImageUrl?: URL | null
-  form: UseFormReturn<
-    {
-      groupName: string
-      description: string
-      tags?: string[] | undefined
-      bannerFile?: { type: string; size: number } | undefined
-      logoFile?: { type: string; size: number } | undefined
-    },
-    undefined
-  >
+  name: keyof Pick<FormState, 'bannerFile' | 'logoFile'>
+  form: UseFormReturn<FormState>
 }
 
 const ImageUploader: React.FC<ImageUploaderProps> = ({ name, form }) => {
+  useEffect(() => {
+    const file = form.getValues(name)
+    if (file && 'size' in file) {
+      const previewUrl = URL.createObjectURL(file)
+
+      // Clean up the preview URL
+      return () => URL.revokeObjectURL(previewUrl)
+    }
+  }, [form, name])
+
   const handleChange = (file: File) => {
-    form.setValue(name, file, {
+    const imageFile: ImageFile = file as ImageFile
+    form.setValue(name, imageFile, {
       shouldValidate: true,
       shouldDirty: true,
       shouldTouch: true,
     })
   }
+
   const isLogo = name === 'logoFile'
+
   return (
     <FormField
       control={form.control}
       name={name}
       render={({ field }) => (
-        <FormItem className="flex flex-col space-y-2 ">
-          <FormLabel className="text-lg ">
-            {name === 'logoFile' ? 'Group Logo' : 'Group Banner'}
-          </FormLabel>
+        <FormItem className="flex flex-col space-y-2">
+          <FormLabel className="text-lg">{isLogo ? 'Group Logo' : 'Group Banner'}</FormLabel>
           <FormControl>
             <FileUploader
-              {...field}
-              handleChange={(file: File) => handleChange(file)}
+              classes="flex justify-center flex-col
+              items-center gap-3  p-2 rounded group cursor-pointer duration-150 transition-all"
+              handleChange={handleChange}
               types={['JPG', 'PNG', 'JPEG', 'WEBP', 'GIF']}
+              {...field}
             >
-              {field?.value?.size ? (
+              {field.value ? (
                 <Image
                   height={240}
                   width={240}
-                  src={
-                    field?.value?.size
-                      ? URL.createObjectURL(field?.value)
-                      : undefined
-                  }
-                  alt="Selected"
+                  src={URL.createObjectURL(field.value)}
+                  alt={isLogo ? 'Group Logo' : 'Group Banner'}
                   className={clsx(
-                    'rounded',
-                    isLogo ? 'h-60 w-60' : 'w-full h-60'
+                    'rounded object-cover group-hover:scale-105',
+                    isLogo ? 'aspect-[1] h-60 w-60 min-w-60 shrink-0' : 'h-60 w-full'
                   )}
                 />
               ) : (
-                <div className="flex h-60 w-full cursor-pointer flex-col items-center justify-center  hover:scale-105 md:flex-row">
+                <div className="flex h-60 w-full cursor-pointer flex-col items-center justify-center group-hover:scale-105  md:flex-row">
                   <BsImages size={240} />
+                </div>
+              )}
+
+              {field.value && 'size' in field.value && (
+                <div className=" flex w-full flex-col items-end justify-center gap-2">
+                  <span className="line-clamp-3 text-end text-sm text-foreground transition-all  duration-150 group-hover:line-clamp-none">
+                    {field.value.name}
+                  </span>
+                  <span className="text-xs text-foreground/50">{field.value.size} bytes</span>
                 </div>
               )}
             </FileUploader>
           </FormControl>
-
           <FormMessage />
         </FormItem>
       )}

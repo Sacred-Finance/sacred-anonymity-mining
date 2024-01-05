@@ -84,10 +84,6 @@ export interface GroupIdBannerCID {
   bannerCID: string
 }
 
-export interface GroupIdDescription {
-  groupId: number
-  description: string
-}
 
 export interface GroupDetails {
   description: string
@@ -111,45 +107,6 @@ export interface GroupIdTags {
   tags: string[]
 }
 
-export interface RemoveAdmin {
-  (args: Address): void
-}
-
-export interface RemoveGroup {
-  (args: GroupId): void
-}
-
-export interface RemoveItem {
-  (args: ItemId): void
-}
-
-export interface RemoveModerators {
-  (args: Moderators): void
-}
-
-export interface RevokeMyAdminRole {
-  (): void
-}
-
-export interface SetGroupBanner {
-  (args: GroupIdBannerCID): void
-}
-
-export interface SetGroupDescription {
-  (args: GroupIdDescription): void
-}
-
-export interface SetGroupDetails {
-  (args: GroupIdDetails): void
-}
-
-export interface SetGroupLogo {
-  (args: GroupIdLogoCID): void
-}
-
-export interface SetGroupTags {
-  (args: GroupIdTags): void
-}
 
 export interface NewGroupCreated {
   groupId: number

@@ -1,5 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
+import { cn } from '@/shad/lib/utils'
 
 export function NavBarButton({
   href,
@@ -15,8 +16,11 @@ export function NavBarButton({
   return (
     <Link
       href={href}
-      className="flex flex-col items-center justify-center hover:text-primary"
       {...rest}
+      className={cn(
+        'flex items-center  justify-center gap-4  self-center hover:text-primary md:flex-col md:gap-0',
+        rest.className
+      )}
     >
       {children}
     </Link>

@@ -3,7 +3,7 @@ import { useAccount, useContractWrite } from 'wagmi' // import from the right lo
 import ForumABI from '@/constant/abi/Forum.json'
 import { forumContract, ForumContractAddress } from '@/constant/const'
 import { toast } from 'react-toastify'
-import { useUserIfJoined, useUsers } from '@/contexts/CommunityProvider'
+import { useUsers } from '@/contexts/CommunityProvider'
 import { Post } from '@/lib/post'
 import { CommentClass } from '@/lib/comment'
 import { useTranslation } from 'react-i18next'
@@ -12,6 +12,7 @@ import { ContentType } from '@/lib/model'
 import { GroupPostCommentAPI } from '@/lib/fetcher'
 import type { Address } from '@/types/common'
 import { useCallback } from 'react'
+import { useUserIfJoined } from "@/contexts/UseUserIfJoined";
 
 interface UseRemoveItemFromForumContractParams {
   groupId: any

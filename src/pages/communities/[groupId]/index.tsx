@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react'
 import { CommunityPage } from '@components/CommunityPage'
-import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
+import { useCommunityContext } from '@/contexts/CommunityProvider'
 import useSWR from 'swr'
 import { useRouter } from 'next/router'
 import fetcher, { GroupPostAPI } from '@/lib/fetcher'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
 import type { GroupWithPostDataResponse } from '@pages/api/groupWithPostData'
+import { ActionType } from "@/contexts/CommunityTypes";
 
 export default function Page() {
   const router = useRouter()

@@ -5,15 +5,12 @@ import { createGroup } from '@/lib/api'
 import { useHandleCommunityAction } from './useHandleCommunityAction'
 import { uploadImages } from '@/utils/communityUtils'
 import { useAccount } from 'wagmi'
-import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
+import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { constants } from 'ethers'
-import {
-  createNote,
-  getBytes32FromIpfsHash,
-  getBytes32FromString,
-} from '@/lib/utils'
+import { createNote, getBytes32FromIpfsHash, getBytes32FromString } from '@/lib/utils'
 import type { CommunityDetails, Requirement } from '@/lib/model'
 import type { Group } from '@/types/contract/ForumInterface'
+import { ActionType } from "@/contexts/CommunityTypes";
 
 export interface ICreateCommunityArgs extends Partial<Group> {
   name: string
@@ -31,15 +28,7 @@ export const useCreateCommunity = (onCreateGroupClose: () => void) => {
   const { dispatch } = useCommunityContext()
 
   return useCallback(
-    async ({
-      name,
-      requirements,
-      bannerFile,
-      logoFile,
-      chainId,
-      tags,
-      description,
-    }: ICreateCommunityArgs) => {
+    async ({ name, requirements, bannerFile, logoFile, chainId, tags, description }: ICreateCommunityArgs) => {
       if (!isConnected || !address) {
         throw new Error('Not connected')
       }
@@ -54,20 +43,10 @@ export const useCreateCommunity = (onCreateGroupClose: () => void) => {
         const communityDetails: CommunityDetails = {
           description: description,
           tags: tags?.map(tag => getBytes32FromString(tag)) || [],
-          bannerCID: bannerCID
-            ? getBytes32FromIpfsHash(bannerCID)
-            : constants.HashZero,
-          logoCID: logoCID
-            ? getBytes32FromIpfsHash(logoCID)
-            : constants.HashZero,
+          bannerCID: bannerCID ? getBytes32FromIpfsHash(bannerCID) : constants.HashZero,
+          logoCID: logoCID ? getBytes32FromIpfsHash(logoCID) : constants.HashZero,
         }
-        const response = await createGroup(
-          requirements,
-          name,
-          chainId,
-          communityDetails,
-          note.toString()
-        )
+        const response = await createGroup(requirements, name, chainId, communityDetails, note.toString())
         const { status, data } = response
 
         if (status === 200) {
@@ -87,7 +66,7 @@ export const useCreateCommunity = (onCreateGroupClose: () => void) => {
                   userCount: 0,
                   requirements,
                   chainId,
-                },
+                }
               })
             } else {
               console.log('no id', response, data)
@@ -99,17 +78,10 @@ export const useCreateCommunity = (onCreateGroupClose: () => void) => {
         } else {
           console.error('Unexpected response:', response)
         }
-
         return response
       }
-
-      await handleCommunityAction(
-        actionFn,
-        [],
-        `${name} created successfully`,
-        onCreateGroupClose
-      )
+      await handleCommunityAction(actionFn, [], `${name} created successfully`, onCreateGroupClose)
     },
-    [isConnected, address, onCreateGroupClose]
+    [isConnected, address, handleCommunityAction, onCreateGroupClose, dispatch]
   )
 }

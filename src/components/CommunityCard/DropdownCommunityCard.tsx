@@ -10,10 +10,7 @@ interface CardDropDownProps {
   onOpen?: () => void
 }
 
-export const DropdownCommunityCard: React.FC<CardDropDownProps> = ({
-  actions,
-  onOpen,
-}) => {
+export const DropdownCommunityCard: React.FC<CardDropDownProps> = ({ actions, onOpen }) => {
   const [isOpen, setIsOpen] = useState(false)
 
   const filteredActions = actions.filter(Boolean) as ActionItem[]
@@ -28,16 +25,8 @@ export const DropdownCommunityCard: React.FC<CardDropDownProps> = ({
 
   return (
     <Popover>
-      <PopoverTrigger
-        asChild
-        className="!p-0 text-white  hover:scale-105 hover:text-white/90"
-        onClick={handleButtonClick}
-      >
-        {isOpen ? (
-          <XMarkIcon className="h-6 w-6" />
-        ) : (
-          <Bars3Icon className="h-6 w-6" />
-        )}
+      <PopoverTrigger asChild onClick={handleButtonClick}>
+        {isOpen ? <XMarkIcon className="h-6 w-6" /> : <Bars3Icon className="h-6 w-6" />}
       </PopoverTrigger>
       <PopoverContent
         className="w-full !p-1"
@@ -62,8 +51,7 @@ interface ActionButtonProps {
   action: ActionItem
 }
 
-const className =
-  'text-white hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium flex items-center gap-4'
+const className = 'px-3 py-2 rounded-md text-sm font-medium flex items-center gap-4 bg-card hover:bg-card-foreground/10'
 const ActionButton: React.FC<ActionButtonProps> = ({ action }) => {
   if ('onClick' in action) {
     return (

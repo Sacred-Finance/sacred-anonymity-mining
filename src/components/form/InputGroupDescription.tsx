@@ -1,11 +1,5 @@
 import React from 'react'
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/shad/ui/form'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shad/ui/form'
 import type { UseFormReturn } from 'react-hook-form'
 import { Textarea } from '@/shad/ui/textarea'
 
@@ -29,7 +23,7 @@ export function InputGroupDescription({
       name="description"
       render={({ field }) => (
         <FormItem>
-          <FormLabel className={'text-lg'}>Group Description</FormLabel>
+          <FormLabel className="text-lg">Group Description</FormLabel>
           <FormControl>
             <Textarea placeholder="Group Description" {...field} />
           </FormControl>
