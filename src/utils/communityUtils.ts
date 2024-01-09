@@ -1,27 +1,17 @@
 import { forumContract } from '@/constant/const'
-import {
-  getContent,
-  getIpfsHashFromBytes32,
-  parseComment,
-  parsePost,
-  uploadImageToIPFS,
-} from '@/lib/utils'
+import { getContent, getIpfsHashFromBytes32, parseComment, parsePost } from '@/lib/utils'
 import type { Requirement } from '@/lib/model'
 import { ContentType } from '@/lib/model'
 import pica from 'pica'
 import { useCallback } from 'react'
-import type {
-  Group,
-  Item,
-  RawGroupData,
-  RawItemData,
-} from '@/types/contract/ForumInterface'
+import type { Group, Item, RawGroupData, RawItemData } from '@/types/contract/ForumInterface'
 import type { Event } from '@ethersproject/contracts'
 import { toNumber } from 'lodash'
 import type { FetchTokenResult } from '@wagmi/core'
 import { fetchToken } from '@wagmi/core'
 import type { Unit } from 'wagmi'
 import type { HandleSetImage } from '@/pages/communities/[groupId]/edit'
+import axios from 'axios'
 
 type GroupId = number
 
@@ -29,23 +19,14 @@ interface FetchCommunitiesDataParams {
   groups: Array<Event | GroupId>
 }
 
-export const fetchCommunitiesData = async ({
-  groups,
-}: FetchCommunitiesDataParams): Promise<Awaited<Group>[]> => {
+export const fetchCommunitiesData = async ({ groups }: FetchCommunitiesDataParams): Promise<Awaited<Group>[]> => {
   // ensure the event has the right name
   try {
-    const groupIds = groups.map(group =>
-      typeof group === 'number' ? group : group?.args?.['groupId']?.toNumber()
-    )
+    const groupIds = groups.map(group => (typeof group === 'number' ? group : group?.args?.['groupId']?.toNumber()))
 
-    const checkEvent = groups.filter(
-      group => typeof group !== 'number' && group.event === 'NewGroupCreated'
-    )
+    const checkEvent = groups.filter(group => typeof group !== 'number' && group.event === 'NewGroupCreated')
 
-    if (
-      checkEvent.length !==
-      groups.filter(group => typeof group !== 'number').length
-    ) {
+    if (checkEvent.length !== groups.filter(group => typeof group !== 'number').length) {
       console.error('Event name is not NewGroupCreated')
       throw new Error('Event name is not NewGroupCreated')
     }
@@ -54,9 +35,7 @@ export const fetchCommunitiesData = async ({
       let groupData: Group
       try {
         console.log('fetching group', groupId)
-        groupData = (await forumContract.read.groupAt([
-          groupId,
-        ])) as unknown as Group
+        groupData = (await forumContract.read.groupAt([groupId])) as unknown as Group
         if (groupData?.removed) {
           return undefined
         }
@@ -80,9 +59,7 @@ export const fetchCommunitiesData = async ({
         banner: groupData?.groupDetails.bannerCID
           ? getIpfsHashFromBytes32(groupData.groupDetails.bannerCID)
           : undefined,
-        logo: groupData?.groupDetails.logoCID
-          ? getIpfsHashFromBytes32(groupData.groupDetails.logoCID)
-          : undefined,
+        logo: groupData?.groupDetails.logoCID ? getIpfsHashFromBytes32(groupData.groupDetails.logoCID) : undefined,
         groupDetails: groupData.groupDetails,
       } as unknown as Group
     })
@@ -107,29 +84,28 @@ export const uploadImages = async ({
   bannerCID: string | null
   logoCID: string | null
 }> => {
-  // avoid uploading images if they are not provided or haven't changed
-  const [bannerResult, logoResult] = await Promise.allSettled([
-    bannerFile ? uploadImageToIPFS(bannerFile) : Promise.resolve(null),
-    logoFile ? uploadImageToIPFS(logoFile) : Promise.resolve(null),
-  ])
+  const pinataUpload = async file => {
+    if (!file) return null
 
-  console.log('bannerResult', bannerResult)
-  console.log('logoResult', logoResult)
+    const formData = new FormData()
+    formData.append('file', file)
 
-  let bannerCID: string | null = null
-  let logoCID: string | null = null
-
-  if (bannerResult.status === 'fulfilled' && bannerResult.value) {
-    bannerCID = bannerResult.value
-  } else if (bannerResult.status === 'rejected' && bannerFile) {
-    console.error('Error uploading banner image:', bannerResult.reason)
+    try {
+      const response = await axios.post('https://api.pinata.cloud/pinning/pinFileToIPFS', formData, {
+        headers: {
+          'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
+          'pinata_api_key': process.env.NEXT_PUBLIC_PINATA_API_KEY,
+          'pinata_secret_api_key': process.env.NEXT_PUBLIC_PINATA_API_SECRET,
+        },
+      })
+      return response.data.IpfsHash
+    } catch (error) {
+      console.error('Error uploading to Pinata:', error)
+      return null
+    }
   }
 
-  if (logoResult.status === 'fulfilled' && logoResult.value) {
-    logoCID = logoResult.value
-  } else if (logoResult.status === 'rejected' && logoFile) {
-    console.error('Error uploading logo image:', logoResult.reason)
-  }
+  const [bannerCID, logoCID] = await Promise.all([pinataUpload(bannerFile), pinataUpload(logoFile)])
 
   return { bannerCID, logoCID }
 }
@@ -148,10 +124,7 @@ export const useHandleFileImageUpload = (setImageFileState: {
 
 export const handleFileImageUpload = (
   e: { target: { files: File[]; name: string } },
-  setImageFileState: (arg0: {
-    file: File
-    imageType: 'banner' | 'logo'
-  }) => void
+  setImageFileState: (arg0: { file: File; imageType: 'banner' | 'logo' }) => void
 ) => {
   const file = e?.target?.files?.[0]
   const imageType = e?.target?.name as 'banner' | 'logo'
@@ -211,11 +184,7 @@ export const handleFileImageUpload = (
   }
 }
 
-export const addRequirementDetails = async ({
-  community,
-}: {
-  community: Group
-}): Promise<Requirement[]> => {
+export const addRequirementDetails = async ({ community }: { community: Group }): Promise<Requirement[]> => {
   if (!community?.requirements?.length) {
     return []
   }
@@ -270,17 +239,14 @@ export const addRequirementDetails = async ({
 
 // Normalization function
 function serializeGroupData(rawGroupData: RawGroupData): Group {
+  console.log('rawGroupData', rawGroupData)
   return {
     id: Number(rawGroupData.id.toString()),
     name: rawGroupData.name,
     groupId: rawGroupData.id.toString(),
     groupDetails: {
-      bannerCID: getIpfsHashFromBytes32(
-        rawGroupData.groupDetails.bannerCID.toString()
-      ),
-      logoCID: getIpfsHashFromBytes32(
-        rawGroupData.groupDetails.logoCID.toString()
-      ),
+      bannerCID: getIpfsHashFromBytes32(rawGroupData.groupDetails.bannerCID.toString()),
+      logoCID: getIpfsHashFromBytes32(rawGroupData.groupDetails.logoCID.toString()),
       description: rawGroupData.groupDetails.description.toString(),
       tags: rawGroupData.groupDetails.tags.map(t => t.toString()),
     },
@@ -296,10 +262,7 @@ function serializeGroupData(rawGroupData: RawGroupData): Group {
   }
 }
 
-export async function augmentGroupData(
-  rawGroupData: RawGroupData,
-  forPaths = false
-): Promise<Group> {
+export async function augmentGroupData(rawGroupData: RawGroupData, forPaths = false): Promise<Group> {
   const normalizedGroupData = serializeGroupData(rawGroupData)
 
   if (forPaths) {
@@ -322,6 +285,7 @@ export async function augmentGroupData(
 }
 
 function serializeRawItemData(rawItemData: RawItemData): Item {
+  console.log('rawItemData', rawItemData)
   return {
     kind: toNumber(rawItemData?.kind?.toString()),
     id: rawItemData?.id?.toString(),

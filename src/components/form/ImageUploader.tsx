@@ -2,26 +2,15 @@ import clsx from 'clsx'
 import Image from 'next/image'
 import React, { useEffect } from 'react'
 import { FileUploader } from 'react-drag-drop-files'
-import type { UseFormReturn } from 'react-hook-form'
 import { BsImages } from 'react-icons/bs'
 
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shad/ui/form'
-
-type ImageFile = File & {
-  preview?: string
-}
-
-type FormState = {
-  groupName: string
-  description: string
-  tags?: string[]
-  bannerFile?: ImageFile
-  logoFile?: ImageFile
-}
+import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/shad/ui/form'
+import _ from 'lodash'
+import type { FormReturnType, ImageFile } from './form.schema'
 
 interface ImageUploaderProps {
-  name: keyof Pick<FormState, 'bannerFile' | 'logoFile'>
-  form: UseFormReturn<FormState>
+  name: 'bannerFile' | 'logoFile'
+  form: FormReturnType
 }
 
 const ImageUploader: React.FC<ImageUploaderProps> = ({ name, form }) => {
@@ -53,6 +42,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ name, form }) => {
       render={({ field }) => (
         <FormItem className="flex flex-col space-y-2">
           <FormLabel className="text-lg">{isLogo ? 'Group Logo' : 'Group Banner'}</FormLabel>
+          <FormDescription>Add a {_.startCase(name)}</FormDescription>
+
           <FormControl>
             <FileUploader
               classes="flex justify-center flex-col
@@ -65,7 +56,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ name, form }) => {
                 <Image
                   height={240}
                   width={240}
-                  src={URL.createObjectURL(field.value)}
+                  src={URL.createObjectURL(field?.value)}
                   alt={isLogo ? 'Group Logo' : 'Group Banner'}
                   className={clsx(
                     'rounded object-cover group-hover:scale-105',

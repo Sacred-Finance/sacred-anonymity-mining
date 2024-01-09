@@ -2,13 +2,10 @@ import { forumContract } from '@/constant/const'
 import { fetchCommunitiesData } from '@/utils/communityUtils'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { useEffect, useRef } from 'react'
-import { ActionType } from "@/contexts/CommunityTypes";
+import { ActionType } from '@/contexts/CommunityTypes'
 
 type GroupId = number // Define GroupId type or replace it with your actual type
-export const useFetchCommunitiesByIds = (
-  groupIds: GroupId[],
-  loadOnInit = true
-) => {
+export const useFetchCommunitiesByIds = (groupIds: GroupId[], loadOnInit = true) => {
   const { dispatch, state } = useCommunityContext()
 
   const fetchCommunities = async () => {
@@ -22,15 +19,9 @@ export const useFetchCommunitiesByIds = (
       }
       const communitiesData = await fetchCommunitiesData({ groups: groupIds })
 
-      console.log('communitiesData', communitiesData)
-
       // Merge new and existing communities, and remove duplicates
-      const existingGroupIds = new Set(
-        state.communities.map(community => community.groupId)
-      )
-      const uniqueCommunities = communitiesData.filter(
-        community => !existingGroupIds.has(community.groupId)
-      )
+      const existingGroupIds = new Set(state.communities.map(community => community.groupId))
+      const uniqueCommunities = communitiesData.filter(community => !existingGroupIds.has(community.groupId))
       const mergedCommunities = [...state.communities, ...uniqueCommunities]
 
       dispatch({
