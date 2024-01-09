@@ -11,7 +11,7 @@ import type { Group } from '@/types/contract/ForumInterface'
 import clsx from 'clsx'
 import { PrimaryButton } from './index'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
-import { useUserIfJoined } from "@/contexts/UseUserIfJoined";
+import { useUserIfJoined } from '@/contexts/UseUserIfJoined'
 
 interface JoinButtonProps {
   community: Group
@@ -19,18 +19,8 @@ interface JoinButtonProps {
 
 export function CircularLoader({ className }: { className?: string }) {
   return (
-    <svg
-      className={clsx('h-5 w-5 animate-spin', className)}
-      viewBox="0 0 24 24"
-    >
-      <circle
-        className="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="4"
-      ></circle>
+    <svg className={clsx('h-5 w-5 animate-spin', className)} viewBox="0 0 24 24">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
       <path
         className="opacity-75"
         fill="currentColor"
@@ -48,9 +38,7 @@ export const JoinCommunityButton = memo(({ community }: JoinButtonProps) => {
   const [isLoading, setIsLoading] = React.useState(false)
   const { t } = useTranslation()
   const { address } = useAccount()
-  const hasUserJoined: User | undefined | false = useUserIfJoined(
-    groupId as string | number
-  )
+  const hasUserJoined: User | undefined | false = useUserIfJoined(groupId as string | number)
 
   const { checkUserBalance } = useValidateUserBalance(community, address)
 
@@ -82,11 +70,7 @@ export const JoinCommunityButton = memo(({ community }: JoinButtonProps) => {
     setIsLoading(false)
   }
   const joinButton = (
-    <PrimaryButton
-      isLoading={isLoading}
-      onClick={join}
-      variant={hasUserJoined ? 'secondary' : 'default'}
-    >
+    <PrimaryButton isLoading={isLoading} onClick={join} variant={hasUserJoined ? 'secondary' : 'default'}>
       {hasUserJoined ? (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -95,12 +79,7 @@ export const JoinCommunityButton = memo(({ community }: JoinButtonProps) => {
           stroke="currentColor"
           className="h-5 w-5"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M5 13l4 4L19 7"
-          />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
         </svg>
       ) : null}
       {t('button.join', { count: hasUserJoined ? 0 : 1 })}

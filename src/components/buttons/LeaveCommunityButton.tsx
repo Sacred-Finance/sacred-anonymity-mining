@@ -7,7 +7,7 @@ import { toast } from 'react-toastify'
 import type { Group } from '@/types/contract/ForumInterface'
 import { PrimaryButton } from './index'
 import { useLeaveCommunity } from '@/hooks/useLeaveCommunity'
-import { useUserIfJoined } from "@/contexts/UseUserIfJoined";
+import { useUserIfJoined } from '@/contexts/UseUserIfJoined'
 
 interface JoinButtonProps {
   community: Group
@@ -19,9 +19,7 @@ export const LeaveCommunityButton = memo(({ community }: JoinButtonProps) => {
   const [isLoading, setIsLoading] = React.useState(false)
   const { t } = useTranslation()
   const { address } = useAccount()
-  const hasUserJoined: User | undefined | false = useUserIfJoined(
-    groupId as string
-  )
+  const hasUserJoined: User | undefined | false = useUserIfJoined(groupId as string)
 
   const { leaveCommunity } = useLeaveCommunity({
     id: BigInt(groupId as string),

@@ -5,7 +5,7 @@ import { Identity } from '@semaphore-protocol/identity'
 import { commentIsConfirmed, createNote } from '@/lib/utils'
 import { BigNumber } from 'ethers'
 import { PollUI } from '@components/PollIUI'
-import { CancelAction, ContentActions, DeleteAction, EditAction, SaveAction } from '@components/Post/ContentActions'
+import { CancelAction, DeleteAction, EditAction, SaveAction } from '@components/Post/ContentActions'
 import { PostTitle } from '@components/Post/PostTitle'
 import type { User } from '@/lib/model'
 import { ContentType } from '@/lib/model'
@@ -21,7 +21,7 @@ import AnimalAvatar from '@components/AnimalAvatar'
 import { VoteForItemUI } from '@components/Post/PostPage'
 import { formatDistanceToNow } from 'date-fns'
 import { DropdownCommunityCard } from '@components/CommunityCard/DropdownCommunityCard'
-import { useUserIfJoined } from "@/contexts/UseUserIfJoined";
+import { useUserIfJoined } from '@/contexts/UseUserIfJoined'
 
 const Editor = dynamic(() => import('../editor-js/Editor'), {
   ssr: false,

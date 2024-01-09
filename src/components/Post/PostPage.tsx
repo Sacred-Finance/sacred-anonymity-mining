@@ -1,8 +1,4 @@
-import {
-  useActiveUser,
-  useCommunityContext,
-
-} from '@/contexts/CommunityProvider'
+import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { useAccount } from 'wagmi'
 import { useTranslation } from 'next-i18next'
 import type { Dispatch, SetStateAction } from 'react'
@@ -46,7 +42,7 @@ import { analysisLabelsAndTypes } from '@components/Post/AiAccordionConfig'
 import { AnalysisCheckboxComponent } from '@components/Post/AiAnalysisCheckboxComponent'
 import { Button } from '@/shad/ui/button'
 import { ShowConnectIfNotConnected } from '@components/Connect/ConnectWallet'
-import { useUserIfJoined } from "@/contexts/UseUserIfJoined";
+import { useUserIfJoined } from '@/contexts/UseUserIfJoined'
 
 export const AIDigestContext = React.createContext<{
   enabled: { [key: string]: boolean }
@@ -115,21 +111,13 @@ export function PostPage({
                   {/*  onSuccess={refreshData}*/}
                   {/*/>*/}
                   <ScrollArea className="col-span-12 flex max-h-[80vh] w-full flex-col gap-2 rounded bg-white p-3 dark:border-gray-950/80 dark:bg-gray-950/20">
-                    <PostItem
-                      post={post}
-                      group={community}
-                      refreshData={refreshData}
-                    />
+                    <PostItem post={post} group={community} refreshData={refreshData} />
                   </ScrollArea>
                 </div>
               </div>
             </div>
             <div className=" flex h-full grow flex-col gap-4 overflow-y-auto p-3 md:w-1/2">
-              <Tab.Group
-                onChange={handleTabChange}
-                defaultIndex={selectedTab}
-                selectedIndex={selectedTab}
-              >
+              <Tab.Group onChange={handleTabChange} defaultIndex={selectedTab} selectedIndex={selectedTab}>
                 <Tab.List className="sticky top-0 z-10 flex flex-wrap gap-4 rounded-xl border  bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
                   {Object.entries(tabData).map(([name, Icon], index) => (
                     <TooltipTab key={index} name={name} Icon={Icon} />
@@ -142,18 +130,10 @@ export function PostPage({
                       <ShowConnectIfNotConnected>
                         <div className="flex gap-4">
                           {selectedTab === 0 && (
-                            <CreateCommentUI
-                              post={post}
-                              group={community}
-                              onSuccess={refreshData}
-                            />
+                            <CreateCommentUI post={post} group={community} onSuccess={refreshData} />
                           )}
                           {(selectedTab === 1 || selectedTab === 0) && (
-                            <CreatePollUI
-                              post={post}
-                              group={community}
-                              onSuccess={refreshData}
-                            />
+                            <CreatePollUI post={post} group={community} onSuccess={refreshData} />
                           )}
                         </div>
                       </ShowConnectIfNotConnected>
@@ -163,11 +143,7 @@ export function PostPage({
                         key={`comment_${comment.id}`}
                         className="mb-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900"
                       >
-                        <PostComment
-                          comment={comment}
-                          key={comment.id}
-                          onSuccess={refreshData}
-                        />
+                        <PostComment comment={comment} key={comment.id} onSuccess={refreshData} />
                       </div>
                     ))}
                     {!comments.length && (
@@ -191,11 +167,7 @@ export function PostPage({
                           key={`comment_as_poll_${comment.id}`}
                           className="mb-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900"
                         >
-                          <PostComment
-                            comment={comment}
-                            key={comment.id}
-                            onSuccess={refreshData}
-                          />
+                          <PostComment comment={comment} key={comment.id} onSuccess={refreshData} />
                         </div>
                       ))}
                   </Tab.Panel>
@@ -204,9 +176,7 @@ export function PostPage({
                     <div className="mb-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
                       <div className="grid grid-cols-2 gap-4 md:grid-cols-2 xl:grid-cols-3">
                         <AnalysisCheckboxComponent />
-                        <AIDigestButton
-                          postData={OutputDataToHTML(post?.description)}
-                        />
+                        <AIDigestButton postData={OutputDataToHTML(post?.description)} />
                       </div>
                     </div>
                     <DynamicAccordion />
@@ -214,11 +184,7 @@ export function PostPage({
 
                   {/* Community Tab */}
                   <Tab.Panel className="mb-2 flex flex-col gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
-                    <CommunityCard
-                      variant="banner"
-                      community={community}
-                      isAdmin={isAdmin || false}
-                    />
+                    <CommunityCard variant="banner" community={community} isAdmin={isAdmin || false} />
                   </Tab.Panel>
                 </Tab.Panels>
               </Tab.Group>
@@ -240,7 +206,7 @@ const TooltipTab = ({ name, Icon }: { name: string; Icon: unknown }) => (
   <Tab
     className={({ selected }) =>
       ` bg-secondary text-secondary-foreground dark:bg-gray-950/50 ${
-        selected ? 'ring-[1px] ring-primary bg-black/10' : ''
+        selected ? 'bg-black/10 ring-[1px] ring-primary' : ''
       }`
     }
   >
@@ -251,15 +217,7 @@ const TooltipTab = ({ name, Icon }: { name: string; Icon: unknown }) => (
   </Tab>
 )
 
-const CreateCommentUI = ({
-  group,
-  post,
-  onSuccess,
-}: {
-  group: Group
-  post: Item
-  onSuccess?: () => void
-}) => {
+const CreateCommentUI = ({ group, post, onSuccess }: { group: Group; post: Item; onSuccess?: () => void }) => {
   const groupId = group.groupId
   const user = useUserIfJoined(group.id.toString())
   const { t } = useTranslation()
@@ -282,12 +240,7 @@ const CreateCommentUI = ({
     return true
   }
 
-  const {
-    contentDescription,
-    setContentDescription,
-    setContentTitle,
-    clearContent,
-  } = useContentManagement({
+  const { contentDescription, setContentDescription, setContentTitle, clearContent } = useContentManagement({
     isPostOrPoll: false,
     defaultContentDescription: undefined,
     defaultContentTitle: undefined,
@@ -310,8 +263,7 @@ const CreateCommentUI = ({
 
     setIsLoading(true)
     const currentDate = new Date()
-    const _message =
-      currentDate.getTime() + '#' + JSON.stringify(contentDescription)
+    const _message = currentDate.getTime() + '#' + JSON.stringify(contentDescription)
 
     const cid = await uploadIPFS(_message)
     if (!cid) {
@@ -330,12 +282,7 @@ const CreateCommentUI = ({
 
       const note = await createNote(userIdentity)
 
-      const fullProof = await generateProof(
-        userIdentity,
-        semaphoreGroup,
-        extraNullifier,
-        hashBytes(signal)
-      )
+      const fullProof = await generateProof(userIdentity, semaphoreGroup, extraNullifier, hashBytes(signal))
 
       const request: ItemCreationRequest = {
         contentCID: signal,
@@ -385,15 +332,7 @@ const CreateCommentUI = ({
   return <NewPostForm {...propsForNewPost} />
 }
 
-export const VoteForItemUI = ({
-  post,
-  group,
-  onSuccess,
-}: {
-  post: Item
-  group: Group
-  onSuccess?: () => void
-}) => {
+export const VoteForItemUI = ({ post, group, onSuccess }: { post: Item; group: Group; onSuccess?: () => void }) => {
   const groupId = group?.id?.toString()
   const user = useUserIfJoined(groupId)
   const { t } = useTranslation()
@@ -443,14 +382,7 @@ export const VoteForItemUI = ({
         signal
       )
 
-      return vote(
-        itemId.toString(),
-        groupId,
-        voteType,
-        merkleTreeRoot.toString(),
-        nullifierHash.toString(),
-        proof
-      )
+      return vote(itemId.toString(), groupId, voteType, merkleTreeRoot.toString(), nullifierHash.toString(), proof)
         .then(async res => {
           onSuccess && onSuccess()
           setIsLoading(false)

@@ -9,7 +9,7 @@ import { Button } from '@/shad/ui/button'
 import { CommunityCardBody } from '@components/CommunityCard/CommunityCardBody'
 import { LeaveJoinCommunityButton } from '@components/buttons/LeaveJoinCommunityButton'
 import { FaCircleInfo } from 'react-icons/fa6'
-import { useUserIfJoined } from "@/contexts/UseUserIfJoined";
+import { useUserIfJoined } from '@/contexts/UseUserIfJoined'
 
 export const CommunityCardFooter = () => {
   const community = useLocalCommunity()

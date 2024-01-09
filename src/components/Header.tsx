@@ -11,44 +11,6 @@ import { NavigationMenu } from '@/shad/ui/navigation-menu'
 import { Button } from '@/shad/ui/button'
 import { ExternalLinkIcon } from 'lucide-react'
 
-function Gradients() {
-  return (
-    <>
-      <svg
-        style={{
-          height: 0,
-          width: 0,
-          position: 'absolute',
-        }}
-        aria-hidden="true"
-        focusable="false"
-      >
-        <linearGradient id="icon-gradient" x1="1" y1="1">
-          <stop offset="10%" stopColor="currentColor" />
-          <stop offset="60%" stopColor="#6D28D9" />
-          <stop offset="80%" stopColor="#6D28D9" />
-        </linearGradient>
-      </svg>
-
-      <svg
-        style={{
-          height: 0,
-          width: 0,
-          position: 'absolute',
-        }}
-        aria-hidden="true"
-        focusable="false"
-      >
-        <linearGradient id="icon-gradient-discord" x1="1" y1="1">
-          <stop offset="10%" stopColor="currentColor" />
-          <stop offset="60%" stopColor="#6D28D9" />
-          <stop offset="80%" stopColor="#7289DA" />
-        </linearGradient>
-      </svg>
-    </>
-  )
-}
-
 const Header = () => {
   const [menuOpen, setMenuOpen] = React.useState(false)
   const {
