@@ -2,6 +2,7 @@ import React from 'react'
 import { CreateGroup } from '@components/form/CreateGroup'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { ActionType } from '@/contexts/CommunityTypes'
+import WithConnectionCheck from '@components/HOC/WithConnectionCheck'
 
 function CreateGroupForm() {
   const { dispatch } = useCommunityContext()
@@ -16,7 +17,11 @@ function CreateGroupForm() {
     }
   }, [])
 
-  return <CreateGroup />
+  return (
+    <WithConnectionCheck>
+      <CreateGroup />
+    </WithConnectionCheck>
+  )
 }
 
 export default CreateGroupForm
