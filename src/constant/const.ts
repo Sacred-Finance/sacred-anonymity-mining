@@ -28,9 +28,9 @@ export const supportedChains: { [key: string]: Chain } = {
   [sepolia.id]: sepolia,
   [mainnet.id]: mainnet,
   [avalanche.id]: avalanche,
-  [arbitrum.id]: arbitrum,
+  // [arbitrum.id]: arbitrum,
   [avalancheFuji.id]: avalancheFuji,
-  [arbitrumGoerli.id]: arbitrumGoerli,
+  // [arbitrumGoerli.id]: arbitrumGoerli,
 }
 
 export const chainLogos: { [key: string]: string } = {
@@ -40,8 +40,8 @@ export const chainLogos: { [key: string]: string } = {
   [avalancheFuji.id]: '/avax.png',
   [mainnet.id]: '/eth.png',
   [avalanche.id]: '/avax.png',
-  [arbitrum.id]: '/arbitrum.png',
-  [arbitrumGoerli.id]: '/arbitrum.png',
+  // [arbitrum.id]: '/arbitrum.png',
+  // [arbitrumGoerli.id]: '/arbitrum.png',
 }
 
 export const supportedChainsArray = Object.keys(supportedChains).map(k => supportedChains[k])

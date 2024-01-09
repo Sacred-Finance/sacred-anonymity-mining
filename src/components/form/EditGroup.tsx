@@ -1,5 +1,5 @@
 import { CircularLoader } from '@components/CircularLoader'
-import { groupSchema } from '@components/form/form.schema'
+import { EditGroupSchema } from '@components/form/form.schema'
 import ImageUploader from '@components/form/ImageUploader'
 import { InputGroupDescription } from '@components/form/InputGroupDescription'
 import { InputGroupName } from '@components/form/InputGroupName'
@@ -56,26 +56,32 @@ export function EditGroup({ group }: EditGroupProps) {
   const [bannerFile, setBannerFile] = useState<File | undefined>(undefined)
   const [logoFile, setLogoFile] = useState<File | undefined>(undefined)
 
-  // Helper function to fetch and handle the image
   const handleSetImage = ({ file, imageType }: HandleSetImage): void => {
     const setImage = imageType === 'logo' ? setLogoFile : setBannerFile
     setImage(file as File)
   }
   const fetchImage = async (imagePath: string, imageType: HandleSetImage['imageType']) => {
     try {
-      console.log('fetching image', 'https://ipfs.io/ipfs/' + imagePath)
-      const result = await fetch('https://ipfs.io/ipfs/' + imagePath)
-      console.log('result', result)
+      const url = 'https://ipfs.io/ipfs/' + imagePath
+      const result = await fetch(url)
+
+      if (!result.ok) {
+        throw new Error(`HTTP error! status: ${result.status}`)
+      }
       const blob = await result.blob()
-      console.log('blob', blob)
+      if (!blob.type.startsWith('image/')) {
+        throw new Error('Fetched file is not an image')
+      }
+
       const file = new File([blob], imageType, { type: blob.type })
-      console.log('file', file)
       handleSetImage({ file, imageType })
     } catch (error) {
-      console.log('error fetching image', error)
+      console.error('error fetching image', error)
     }
   }
+
   useEffect(() => {
+    console.log('group.groupDetails', group.groupDetails)
     if (group.groupDetails.bannerCID) {
       fetchImage(group.groupDetails.bannerCID, 'banner')
     }
@@ -84,8 +90,8 @@ export function EditGroup({ group }: EditGroupProps) {
     }
   }, [])
 
-  const form = useForm<z.infer<typeof groupSchema>>({
-    resolver: zodResolver(groupSchema),
+  const form = useForm<z.infer<typeof EditGroupSchema>>({
+    resolver: zodResolver(EditGroupSchema),
     defaultValues: {
       groupName: group.name,
       description: group.groupDetails.description,
@@ -113,16 +119,10 @@ export function EditGroup({ group }: EditGroupProps) {
           logo: data?.logoFile?.size !== logoFile?.size,
           banner: data?.bannerFile?.size !== bannerFile?.size,
         }
-
-        const images = {
+        const { bannerCID, logoCID } = await uploadImages({
           bannerFile: hasImageChanged.banner && data.bannerFile,
           logoFile: hasImageChanged.logo && data.logoFile,
-        }
-
-        const { bannerCID, logoCID } = await uploadImages(images)
-
-        if (hasImageChanged.banner && bannerCID) await fetchImage(bannerCID, 'banner')
-        if (hasImageChanged.logo && logoCID) await fetchImage(logoCID, 'logo')
+        })
 
         const mergedGroupDetails = {
           description: data.description,
@@ -149,8 +149,8 @@ export function EditGroup({ group }: EditGroupProps) {
           })
         }
 
-        // await handleUpdateStateAfterEdit()
-        // await router.push(`/communities/${group.groupId}`)
+        await handleUpdateStateAfterEdit()
+        await router.push(`/communities/${group.groupId}`)
       } catch (error) {
         if (error instanceof Error) {
           toast.error(`Something went wrong: ${error.message}`)
@@ -175,8 +175,6 @@ export function EditGroup({ group }: EditGroupProps) {
 
   return (
     <div className="relative z-50 max-w-screen-2xl ">
-      {isOwner ? 'owner!' : 'admin?'}
-
       <Form {...form}>
         <form
           className="space-y-12 bg-white/5 p-6"
@@ -187,7 +185,7 @@ export function EditGroup({ group }: EditGroupProps) {
           <div className="flex w-full justify-between">
             <Link
               className={cn(
-                'flex items-center ',
+                'group flex items-center',
                 buttonVariants({
                   variant: 'link',
                   className: 'ps-0 ',
@@ -195,7 +193,7 @@ export function EditGroup({ group }: EditGroupProps) {
               )}
               href={previousPageUrl ? previousPageUrl : `/communities/${group.id}`}
             >
-              <Label className="flex items-center gap-2 text-2xl font-semibold text-gray-700 dark:text-gray-300">
+              <Label className="flex cursor-pointer items-center gap-2 text-2xl font-semibold text-gray-700 group-hover:text-primary/90  dark:text-gray-300">
                 <ArrowLeftIcon className="w-10" />
                 <span> {_.startCase(group.name)}</span>
               </Label>
@@ -205,7 +203,7 @@ export function EditGroup({ group }: EditGroupProps) {
             </div>
           </div>
 
-          <InputGroupName form={form} />
+          <InputGroupName form={form} disabled />
           <InputGroupDescription form={form} />
 
           <div className="flex flex-col flex-wrap items-start justify-center md:flex-row ">
@@ -220,16 +218,7 @@ export function EditGroup({ group }: EditGroupProps) {
           <TagInput />
 
           <div className="flex w-full justify-end">
-            <Button
-              type="submit"
-              disabled={
-                !form.formState.isDirty ||
-                !form.formState.isValid ||
-                isSubmitting ||
-                form.formState.isLoading ||
-                form.formState.isValidating
-              }
-            >
+            <Button type="submit" disabled={!form.formState.isDirty || isSubmitting}>
               {isSubmitting || form.formState.isLoading || form.formState.isValidating ? (
                 <CircularLoader />
               ) : (

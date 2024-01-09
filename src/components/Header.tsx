@@ -2,10 +2,9 @@ import React from 'react'
 import { Logo } from './Logo'
 import { NavBarButton } from '../components/buttons/NavBarButton'
 import { ThemeToggleButton } from './Theme'
-import { ArrowsPointingInIcon, ArrowsPointingOutIcon, UserCircleIcon } from '@heroicons/react/20/solid'
+import { UserCircleIcon } from '@heroicons/react/20/solid'
 import ConnectWallet from './Connect/ConnectWallet'
-import { clsx } from 'clsx'
-import { FaDiscord, FaHamburger } from 'react-icons/fa'
+import { FaDiscord, FaGripLines } from 'react-icons/fa'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { RiShieldUserFill } from 'react-icons/ri'
 import { NavigationMenu } from '@/shad/ui/navigation-menu'
@@ -60,22 +59,22 @@ const Header = () => {
     <NavigationMenu
       id="header"
       className={`w-full min-w-full overflow-x-hidden bg-white p-4 text-gray-800 dark:bg-gray-900 dark:text-white ${
-        menuOpen ? 'fixed inset-0 z-[41] flex-col justify-between gap-4' : 'relative flex justify-between'
+        menuOpen ? 'fixed inset-0 z-[500] flex-col justify-between gap-4' : 'relative flex justify-between'
       }`}
     >
-      <div className={`flex w-full justify-between justify-self-start md:w-fit`}>
+      <div className="flex w-full justify-between justify-self-start md:w-fit">
         <NavBarButton href="/">
           <Logo className="h-10 w-auto" />
         </NavBarButton>
 
         <Button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden">
-          {menuOpen ? <FaHamburger className="h-8 w-8" /> : <FaHamburger className="h-8 w-8" />}
+          {menuOpen ? <FaGripLines className="h-8 w-8" /> : <FaGripLines className="h-8 w-8" />}
         </Button>
       </div>
 
       <div
         className={`gap-4 ${
-          menuOpen ? 'flex flex-col items-center justify-center' : 'hidden md:flex md:items-center md:justify-between'
+          menuOpen ? ' flex flex-col items-center justify-center' : 'hidden md:flex md:items-center md:justify-between'
         }`}
       >
         <div className="h-10 shrink-0 grow md:flex md:items-center">

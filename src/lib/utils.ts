@@ -9,32 +9,78 @@ import type { AvatarOptions } from 'animal-avatar-generator'
 import type { BabyJub, PedersenHash } from 'circomlibjs/index'
 import type { BigNumberish } from '@semaphore-protocol/group'
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { groth16 } = require('snarkjs')
 
 let ipfs: IPFSHTTPClient
 let babyJub: BabyJub
 let pedersen: PedersenHash
 
-export const uploadImageToIPFS = async (message: File): Promise<string | null> => {
+export const uploadImageToIPFS = async (file: File): Promise<string | null> => {
   if (!ipfs) {
     console.log('ipfs not started')
     await startIPFS()
   }
-  if (!message) {
-    console.error('no message')
+  if (!file) {
+    console.error('no file provided')
     return null
   }
+
+  // Check if the file type is correct
+  if (!file.type.startsWith('image/')) {
+    console.error('File is not an image:', file.type)
+    return null
+  }
+
   try {
-    const result = await ipfs.add(message)
-    console.log('ipfs image upload result', result)
+    const result = await ipfs.add(file)
+    console.info('Image uploaded to IPFS:', result)
+    return result.path
+  } catch (err) {
+    console.error('Error uploading file to IPFS', err)
+    return null
+  }
+}
+
+export const startIPFS = async () => {
+  if (ipfs) {
+    return ipfs
+  }
+
+  try {
+    const projectId = process.env.NEXT_PUBLIC_INFURA_IPFS_PROJECT_ID
+    const projectSecret = process.env.NEXT_PUBLIC_INFURA_IPFS_PROJECT_SECRET
+
+    if (!projectId || !projectSecret) {
+      throw new Error('IPFS project ID and secret must be provided.')
+    }
+
+    const auth = 'Basic ' + Buffer.from(`${projectId}:${projectSecret}`).toString('base64')
+    const endpoint = `https://ipfs.infura.io:5001/api/v0`
+    ipfs = create({ url: endpoint, headers: { authorization: auth } })
+    console.info('IPFS client started.')
+    return ipfs
+  } catch (error) {
+    console.error('Error starting IPFS:', error)
+    throw error // Rethrow or handle the error as required
+  }
+}
+
+export const uploadIPFS = async (message: string) => {
+  if (!ipfs) {
+    console.log('ipfs not started')
+    await startIPFS()
+  }
+  try {
+    const result = await ipfs.add(new TextEncoder().encode(message))
+    console.info('File uploaded to IPFS:', result)
     return result.path
   } catch (err) {
     console.error('Error pinning file to IPFS', err)
     return null
   }
 }
-
-export const getContent = async CID => {
+export const getContent = async (CID: string) => {
   if (!ipfs) {
     console.info('IPFS not started. Starting IPFS...')
     await startIPFS()
@@ -67,52 +113,9 @@ export const getContent = async CID => {
 
   return content
 }
-
-export const uploadIPFS = async (message: string) => {
-  if (!ipfs) {
-    console.log('ipfs not started')
-    await startIPFS()
-  }
-  try {
-    const result = await ipfs.add(new TextEncoder().encode(message))
-    return result.path
-  } catch (err) {
-    console.error('Error pinning file to IPFS', err)
-    return null
-  }
-}
-export const startIPFS = async () => {
-  if (ipfs) {
-    return ipfs
-  }
-
-  try {
-    const projectId = process.env.NEXT_PUBLIC_INFURA_IPFS_PROJECT_ID
-    const projectSecret = process.env.NEXT_PUBLIC_INFURA_IPFS_PROJECT_SECRET
-
-    if (!projectId || !projectSecret) {
-      throw new Error('IPFS project ID and secret must be provided.')
-    }
-
-    const auth = 'Basic ' + Buffer.from(`${projectId}:${projectSecret}`).toString('base64')
-
-    ipfs = create({
-      host: 'ipfs.infura.io',
-      port: 5001,
-      protocol: 'https',
-      headers: {
-        authorization: auth,
-      },
-    })
-  } catch (error) {
-    console.error('Error starting IPFS:', error)
-    throw error // Rethrow or handle the error as required
-  }
-}
-
 const pedersenHash = (data: Uint8Array) => BigInt(babyJub.F.toString(babyJub.unpackPoint(pedersen.hash(data))[0]))
 
-function unstringifyBigInts(o) {
+function unstringifyBigInts(o: string | number | bigint | boolean | null) {
   if (typeof o == 'string' && /^[0-9]+$/.test(o)) {
     return BigInt(o)
   } else if (typeof o == 'string' && /^0x[0-9a-fA-F]+$/.test(o)) {
@@ -134,7 +137,10 @@ function unstringifyBigInts(o) {
   }
 }
 
-async function convertProofToSolidityInput(proof, publicSignals) {
+async function convertProofToSolidityInput(
+  proof: string | number | bigint | boolean | null,
+  publicSignals: string | number | bigint | boolean | null
+) {
   const editedPublicSignals = unstringifyBigInts(publicSignals)
   const editedProof = unstringifyBigInts(proof)
   const calldata = await groth16.exportSolidityCallData(editedProof, editedPublicSignals)
@@ -195,7 +201,7 @@ export const hashBytes = (signal: string): bigint => {
   return BigInt(utils.keccak256(signal)) >> BigInt(8)
 }
 
-export const numToBuffer = (number, size, endianess): Buffer => {
+export const numToBuffer = (number: bigint, size: number, endianess: string): Buffer => {
   if (endianess === 'le') {
     return toBufferLE(number, size)
   } else if (endianess === 'be') {

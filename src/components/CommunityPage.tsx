@@ -76,6 +76,7 @@ const CreatePostUI = ({ group, onSuccess }: { group: Group; onSuccess?: () => vo
     if (!address) {
       return toast.error(t('alert.connectWallet'), { toastId: 'connectWallet' })
     }
+
     if (!user) {
       return toast.error(t('toast.error.notJoined'), {
         type: 'error',
@@ -107,9 +108,7 @@ const CreatePostUI = ({ group, onSuccess }: { group: Group; onSuccess?: () => vo
     }
 
     const hasSufficientBalance = await checkUserBalance()
-    if (!hasSufficientBalance) {
-      return
-    }
+    if (!hasSufficientBalance) return
 
     setIsLoading(true)
 

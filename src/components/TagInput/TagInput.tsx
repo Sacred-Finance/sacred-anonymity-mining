@@ -9,7 +9,7 @@ import { FaCaretRight } from 'react-icons/fa'
 import { BsCheckCircleFill } from 'react-icons/bs'
 import React from 'react'
 
-export default function ComboboxForm() {
+export default function TagInput() {
   const { control, setValue, watch } = useFormContext()
   const selectedTags = watch('tags')
 

@@ -2,7 +2,9 @@ import type { Proof } from '@semaphore-protocol/proof'
 import axios from 'axios'
 import type { BigNumberish } from 'ethers'
 import { RELAYER_URL } from '@/constant/const'
-import type { CommunityDetails, ItemCreationRequest, PollRequestStruct, Requirement } from './model'
+import type { CommunityDetails, ItemCreationRequest, PollRequestStruct } from './model'
+import type { CreateGroupSchema } from '@components/form/form.schema'
+import type { z } from 'zod'
 
 export async function joinGroup(groupId: string, identityCommitment: string, username: string, note: string) {
   return axios.post(`${RELAYER_URL}/join-group`, {
@@ -35,11 +37,11 @@ export const leaveGroup = async ({ groupId, identityCommitment, a, b, c, sibling
   })
 
 export async function createGroup(
-  requirements: Requirement[],
   groupName: string,
   chainId: number,
   details: CommunityDetails,
-  note: string
+  note: string,
+  requirements?: z.infer<typeof CreateGroupSchema>['tokenRequirements']
 ) {
   return axios.post(`${RELAYER_URL}/create-group`, {
     groupName,
