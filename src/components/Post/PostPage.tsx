@@ -1,17 +1,11 @@
-import {
-  useActiveUser,
-  useCommunityContext,
-  useUserIfJoined,
-} from '@/contexts/CommunityProvider'
+import { useActiveUser, useCommunityContext, useUserIfJoined } from '@/contexts/CommunityProvider'
 import { useAccount } from 'wagmi'
 import { useTranslation } from 'next-i18next'
 import type { Dispatch, SetStateAction } from 'react'
 import React, { useContext, useEffect, useState } from 'react'
 import { useValidateUserBalance } from '@/utils/useValidateUserBalance'
-import { utils } from 'ethers'
 import { toast } from 'react-toastify'
 import { CommunityCard } from '@components/CommunityCard/CommunityCard'
-import { VoteDownButton, VoteUpButton } from '@components/buttons'
 import { OutputDataToHTML } from '@components/Discourse/OutputDataToMarkDown'
 import { PostItem } from '@components/Post/PostItem'
 import { NewPostModal, PostComment } from '@components/Post/PostComments'
@@ -21,23 +15,11 @@ import { ChatIcon, InfoIcon, PollIcon } from '@components/CommunityActionTabs'
 import type { NewPostFormProps } from '@components/NewPostForm'
 import { NewPostForm } from '@components/NewPostForm'
 import type { Group, Item } from '@/types/contract/ForumInterface'
-import type { ItemCreationRequest } from '@/lib/model'
 import { ContentType } from '@/lib/model'
 import CreatePollUI from '@components/CreatePollUI'
-import { Group as SemaphoreGroup } from '@semaphore-protocol/group'
 import { Identity } from '@semaphore-protocol/identity'
 import { useContentManagement } from '@/hooks/useContentManagement'
-import { createComment, vote } from '@/lib/api'
-import { generateProof } from '@semaphore-protocol/proof'
-import {
-  createNote,
-  fetchUsersFromSemaphoreContract,
-  getBytes32FromIpfsHash,
-  hashBytes,
-  hashBytes2,
-  uploadIPFS,
-} from '@/lib/utils'
-import { emptyPollRequest } from '@/lib/item'
+import { createNote, uploadIPFS } from '@/lib/utils'
 import { ScrollArea } from '@/shad/ui/scroll-area'
 import AIDigestButton from '@components/buttons/AIPostDigestButton'
 import { Card } from '@/shad/ui/card'
@@ -46,6 +28,9 @@ import { analysisLabelsAndTypes } from '@components/Post/AiAccordionConfig'
 import { AnalysisCheckboxComponent } from '@components/Post/AiAnalysisCheckboxComponent'
 import { Button } from '@/shad/ui/button'
 import { ShowConnectIfNotConnected } from '@components/Connect/ConnectWallet'
+import { useSWRConfig } from 'swr'
+import { GroupPostCommentAPI } from '@/lib/fetcher'
+import { CommentClass } from '@/lib/comment'
 
 export const AIDigestContext = React.createContext<{
   enabled: { [key: string]: boolean }
@@ -114,21 +99,13 @@ export function PostPage({
                   {/*  onSuccess={refreshData}*/}
                   {/*/>*/}
                   <ScrollArea className="col-span-12 flex max-h-[80vh] w-full flex-col gap-2 rounded bg-white p-3 dark:border-gray-950/80 dark:bg-gray-950/20">
-                    <PostItem
-                      post={post}
-                      group={community}
-                      refreshData={refreshData}
-                    />
+                    <PostItem post={post} group={community} refreshData={refreshData} />
                   </ScrollArea>
                 </div>
               </div>
             </div>
             <div className=" flex h-full grow flex-col gap-4 overflow-y-auto p-3 md:w-1/2">
-              <Tab.Group
-                onChange={handleTabChange}
-                defaultIndex={selectedTab}
-                selectedIndex={selectedTab}
-              >
+              <Tab.Group onChange={handleTabChange} defaultIndex={selectedTab} selectedIndex={selectedTab}>
                 <Tab.List className="sticky top-0 z-10 flex flex-wrap gap-4 rounded-xl border  bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
                   {Object.entries(tabData).map(([name, Icon], index) => (
                     <TooltipTab key={index} name={name} Icon={Icon} />
@@ -141,18 +118,10 @@ export function PostPage({
                       <ShowConnectIfNotConnected>
                         <div className="flex gap-4">
                           {selectedTab === 0 && (
-                            <CreateCommentUI
-                              post={post}
-                              group={community}
-                              onSuccess={refreshData}
-                            />
+                            <CreateCommentUI post={post} group={community} onSuccess={refreshData} />
                           )}
                           {(selectedTab === 1 || selectedTab === 0) && (
-                            <CreatePollUI
-                              post={post}
-                              group={community}
-                              onSuccess={refreshData}
-                            />
+                            <CreatePollUI post={post} group={community} onSuccess={refreshData} />
                           )}
                         </div>
                       </ShowConnectIfNotConnected>
@@ -162,11 +131,7 @@ export function PostPage({
                         key={`comment_${comment.id}`}
                         className="mb-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900"
                       >
-                        <PostComment
-                          comment={comment}
-                          key={comment.id}
-                          onSuccess={refreshData}
-                        />
+                        <PostComment comment={comment} key={comment.id} />
                       </div>
                     ))}
                     {!comments.length && (
@@ -190,11 +155,7 @@ export function PostPage({
                           key={`comment_as_poll_${comment.id}`}
                           className="mb-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900"
                         >
-                          <PostComment
-                            comment={comment}
-                            key={comment.id}
-                            onSuccess={refreshData}
-                          />
+                          <PostComment comment={comment} key={comment.id} />
                         </div>
                       ))}
                   </Tab.Panel>
@@ -203,9 +164,7 @@ export function PostPage({
                     <div className="mb-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
                       <div className="grid grid-cols-2 gap-4 md:grid-cols-2 xl:grid-cols-3">
                         <AnalysisCheckboxComponent />
-                        <AIDigestButton
-                          postData={OutputDataToHTML(post?.description)}
-                        />
+                        <AIDigestButton postData={OutputDataToHTML(post?.description)} />
                       </div>
                     </div>
                     <DynamicAccordion />
@@ -213,11 +172,7 @@ export function PostPage({
 
                   {/* Community Tab */}
                   <Tab.Panel className="mb-2 flex flex-col gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
-                    <CommunityCard
-                      variant="banner"
-                      community={community}
-                      isAdmin={isAdmin || false}
-                    />
+                    <CommunityCard variant="banner" community={community} isAdmin={isAdmin || false} />
                   </Tab.Panel>
                 </Tab.Panels>
               </Tab.Group>
@@ -239,7 +194,7 @@ const TooltipTab = ({ name, Icon }: { name: string; Icon: unknown }) => (
   <Tab
     className={({ selected }) =>
       ` bg-secondary text-secondary-foreground dark:bg-gray-950/50 ${
-        selected ? 'ring-[1px] ring-primary bg-black/10' : ''
+        selected ? 'bg-black/10 ring-[1px] ring-primary' : ''
       }`
     }
   >
@@ -250,15 +205,7 @@ const TooltipTab = ({ name, Icon }: { name: string; Icon: unknown }) => (
   </Tab>
 )
 
-const CreateCommentUI = ({
-  group,
-  post,
-  onSuccess,
-}: {
-  group: Group
-  post: Item
-  onSuccess?: () => void
-}) => {
+const CreateCommentUI = ({ group, post }: { group: Group; post: Item; onSuccess?: () => void }) => {
   const groupId = group.groupId
   const user = useUserIfJoined(group.id.toString())
   useActiveUser({ groupId: group.id })
@@ -267,6 +214,10 @@ const CreateCommentUI = ({
   const { checkUserBalance } = useValidateUserBalance(group, address)
 
   const [isLoading, setIsLoading] = useState(false)
+
+  const { mutate } = useSWRConfig()
+
+  const commentInstance = new CommentClass(group.id.toString(), post.id.toString())
 
   const validateRequirements = () => {
     if (!address) {
@@ -282,12 +233,7 @@ const CreateCommentUI = ({
     return true
   }
 
-  const {
-    contentDescription,
-    setContentDescription,
-    setContentTitle,
-    clearContent,
-  } = useContentManagement({
+  const { contentDescription, setContentDescription, setContentTitle, clearContent } = useContentManagement({
     isPostOrPoll: false,
     defaultContentDescription: undefined,
     defaultContentTitle: undefined,
@@ -310,53 +256,81 @@ const CreateCommentUI = ({
 
     setIsLoading(true)
     const currentDate = new Date()
-    const _message =
-      currentDate.getTime() + '#' + JSON.stringify(contentDescription)
+    const _message = currentDate.getTime() + '#' + JSON.stringify(contentDescription)
 
     const cid = await uploadIPFS(_message)
     if (!cid) {
       throw 'Upload to IPFS failed'
     }
 
-    const signal = getBytes32FromIpfsHash(cid)
-    const extraNullifier = hashBytes(signal).toString()
-    const semaphoreGroup = new SemaphoreGroup(group.id)
-
-    const users = await fetchUsersFromSemaphoreContract(groupId)
-    users.forEach(u => semaphoreGroup.addMember(BigInt(u)))
-
     try {
       const userIdentity = new Identity(address)
 
       const note = await createNote(userIdentity)
 
-      const fullProof = await generateProof(
-        userIdentity,
-        semaphoreGroup,
-        extraNullifier,
-        hashBytes(signal)
-      )
-
-      const request: ItemCreationRequest = {
-        contentCID: signal,
-        merkleTreeRoot: fullProof.merkleTreeRoot.toString(),
-        nullifierHash: fullProof.nullifierHash.toString(),
+      const tempCache: Item = {
+        description: contentDescription,
+        kind: ContentType.COMMENT,
+        parentId: post.id.toString(),
+        groupId: groupId as string,
+        childIds: [],
+        upvote: 0,
+        downvote: 0,
+        isMutating: true,
         note: note.toString(),
       }
-
-      await createComment({
-        groupId: groupId as string,
-        parentId: post.id.toString(),
-        request: request,
-        solidityProof: fullProof.proof,
-        asPoll: false,
-        pollRequest: emptyPollRequest,
-      }).then(async res => {
-        onSuccess && onSuccess()
-        clearContent()
-        return res
-      })
-      setIsLoading(false)
+      mutate(
+        GroupPostCommentAPI(groupId as string, post.id.toString()),
+        async (data: any) => {
+          try {
+            const response = await commentInstance?.create({
+              commentContent: {
+                description: contentDescription,
+              },
+              address,
+              postedByUser: user,
+              groupId: groupId?.toString(),
+              setWaiting: setIsLoading,
+              onIPFSUploadSuccess() {
+                const element = document.getElementById(`new_item`)
+                element?.scrollIntoView({ behavior: 'smooth' })
+              },
+            })
+            if (response?.status === 200) {
+              setIsLoading(false)
+              clearContent()
+              console.log('response', response)
+              const { args } = response.data
+              const lastPost = {
+                ...tempCache,
+                id: +args[2]?.hex,
+                isMutating: false,
+              }
+              return { ...data, comments: [...data.comments, lastPost] }
+            } else {
+              console.log('error', response)
+              setIsLoading(false)
+            }
+            return data
+          } catch (error) {
+            setIsLoading(false)
+            toast.error('Failed to create comment')
+            return data
+          }
+        },
+        {
+          optimisticData: (data: any) => {
+            if (data) {
+              return {
+                ...data,
+                comments: [...data.comments, tempCache],
+              }
+            }
+          },
+          rollbackOnError: true,
+          revalidate: false,
+        }
+      )
     } catch (error) {
       setIsLoading(false)
       toast.error('Failed to create comment')
@@ -383,113 +357,4 @@ const CreateCommentUI = ({
   }
 
   return <NewPostForm {...propsForNewPost} />
-}
-
-export const VoteForItemUI = ({
-  post,
-  group,
-  onSuccess,
-}: {
-  post: Item
-  group: Group
-  onSuccess?: () => void
-}) => {
-  const groupId = group?.id?.toString()
-  const user = useUserIfJoined(groupId)
-  const { t } = useTranslation()
-  const { address } = useAccount()
-  const { checkUserBalance } = useValidateUserBalance(group, address)
-
-  const [isLoading, setIsLoading] = useState(false)
-
-  const validateRequirements = () => {
-    if (!address) {
-      return toast.error(t('alert.connectWallet'), { toastId: 'connectWallet' })
-    }
-    if (!user) {
-      return toast.error(t('toast.error.notJoined'), {
-        type: 'error',
-        toastId: 'min',
-      })
-    }
-
-    return true
-  }
-
-  const voteForPost = async (itemId: number, voteType: 0 | 1) => {
-    if (validateRequirements() !== true) {
-      return
-    }
-
-    const hasSufficientBalance = await checkUserBalance()
-    if (!hasSufficientBalance) {
-      return
-    }
-
-    setIsLoading(true)
-    try {
-      const voteCmdNum = hashBytes2(+itemId, 'vote')
-      const signal = utils.hexZeroPad('0x' + voteCmdNum.toString(16), 32)
-      const extraNullifier = voteCmdNum.toString()
-      const semaphoreGroup = new SemaphoreGroup(BigInt(groupId))
-      const users = await fetchUsersFromSemaphoreContract(groupId)
-      users.forEach(u => semaphoreGroup.addMember(BigInt(u)))
-      const userIdentity = new Identity(address)
-
-      const { proof, nullifierHash, merkleTreeRoot } = await generateProof(
-        userIdentity,
-        semaphoreGroup,
-        extraNullifier,
-        signal
-      )
-
-      return vote(
-        itemId.toString(),
-        groupId,
-        voteType,
-        merkleTreeRoot.toString(),
-        nullifierHash.toString(),
-        proof
-      )
-        .then(async res => {
-          onSuccess && onSuccess()
-          setIsLoading(false)
-          return res
-        })
-        .catch(err => {
-          console.log(err)
-          toast.error('Failed to create vote')
-          setIsLoading(false)
-        })
-    } catch (error) {
-      console.log(error)
-      toast(t('alert.voteFailed'))
-      setIsLoading(false)
-    }
-  }
-
-  return (
-    <>
-      <VoteUpButton
-        className="p-0 text-sm text-white"
-        isConnected={!!address}
-        isJoined={!!user}
-        isLoading={isLoading}
-        onClick={() => voteForPost(Number(post.id), 0)}
-        disabled={isLoading || !address}
-      >
-        {post.upvote}
-      </VoteUpButton>
-      <VoteDownButton
-        className="p-0 text-sm  text-white"
-        isConnected={!!address}
-        isJoined={!!user}
-        isLoading={isLoading}
-        onClick={() => voteForPost(Number(post.id), 1)}
-        disabled={isLoading || !address}
-      >
-        {post.downvote}
-      </VoteDownButton>
-    </>
-  )
 }
