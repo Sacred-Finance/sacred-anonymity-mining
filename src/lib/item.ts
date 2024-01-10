@@ -77,8 +77,7 @@ export async function create(
   onIPFSUploadSuccess: (arg0: any, arg1: string) => void
 ) {
   const currentDate = new Date()
-  const message =
-    currentDate.getTime().toString() + '#' + JSON.stringify(content)
+  const message = currentDate.getTime().toString() + '#' + JSON.stringify(content)
 
   try {
     const cid = await uploadIPFS(message)
@@ -118,7 +117,6 @@ export async function create(
         asPoll: false,
         pollRequest: emptyPollRequest,
       }).then(async res => {
-        await mutate(GroupPostAPI(this.groupId))
         return res
       })
     } else if (type === 'comment') {
@@ -130,7 +128,6 @@ export async function create(
         asPoll: false,
         pollRequest: emptyPollRequest,
       }).then(async res => {
-        await mutate(GroupPostCommentAPI(this.groupId, this.postId))
         return res
       })
     }
@@ -152,8 +149,7 @@ export async function editContent(
   postedByUser: User
 ) {
   const currentDate = new Date()
-  const message =
-    currentDate.getTime().toString() + '#' + JSON.stringify(content)
+  const message = currentDate.getTime().toString() + '#' + JSON.stringify(content)
   console.log(`Editing your anonymous ${type}...`)
   const cid = await uploadIPFS(message)
   if (!cid) {

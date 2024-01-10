@@ -47,12 +47,10 @@ export interface ActionItem {
   href?: string
 }
 
-interface ActionButtonProps {
-  action: ActionItem
-}
-
 const className = 'px-3 py-2 rounded-md text-sm font-medium flex items-center gap-4 bg-card hover:bg-card-foreground/10'
-const ActionButton: React.FC<ActionButtonProps> = ({ action }) => {
+const ActionButton: ({ action }: { action: ActionItem | false | ReactNode }) => React.JSX.Element = ({ action }) => {
+  if (!action) return null
+  if (React.isValidElement(action)) return action
   if ('onClick' in action) {
     return (
       <Button onClick={action.onClick} className={className}>

@@ -84,7 +84,6 @@ export interface GroupIdBannerCID {
   bannerCID: string
 }
 
-
 export interface GroupDetails {
   description: string
   tags: string[]
@@ -106,7 +105,6 @@ export interface GroupIdTags {
   groupId: number
   tags: string[]
 }
-
 
 export interface NewGroupCreated {
   groupId: number
@@ -200,53 +198,23 @@ export interface PostsInGroup {
 }
 
 export interface SetGroupBannerByOwner {
-  (
-    a: number[],
-    b: number[][],
-    c: number[],
-    groupId: number,
-    bannerCID: string
-  ): Promise<void> // The function that doesn't return a value, hence Promise<void>
+  (a: number[], b: number[][], c: number[], groupId: number, bannerCID: string): Promise<void> // The function that doesn't return a value, hence Promise<void>
 }
 
 export interface SetGroupDescriptionByOwner {
-  (
-    a: number[],
-    b: number[][],
-    c: number[],
-    groupId: number,
-    description: string
-  ): Promise<void> // The function that doesn't return a value, hence Promise<void>
+  (a: number[], b: number[][], c: number[], groupId: number, description: string): Promise<void> // The function that doesn't return a value, hence Promise<void>
 }
 
 export interface SetGroupDetailsByOwner {
-  (
-    a: number[],
-    b: number[][],
-    c: number[],
-    groupId: number,
-    details: GroupDetails
-  ): Promise<void> // The function that doesn't return a value, hence Promise<void>
+  (a: number[], b: number[][], c: number[], groupId: number, details: GroupDetails): Promise<void> // The function that doesn't return a value, hence Promise<void>
 }
 
 export interface SetGroupLogoByOwner {
-  (
-    a: number[],
-    b: number[][],
-    c: number[],
-    groupId: number,
-    logoCID: string
-  ): Promise<void> // The function that doesn't return a value, hence Promise<void>
+  (a: number[], b: number[][], c: number[], groupId: number, logoCID: string): Promise<void> // The function that doesn't return a value, hence Promise<void>
 }
 
 export interface SetGroupTagsByOwner {
-  (
-    a: number[],
-    b: number[][],
-    c: number[],
-    groupId: number,
-    tags: string[]
-  ): Promise<void> // The function that doesn't return a value, hence Promise<void>
+  (a: number[], b: number[][], c: number[], groupId: number, tags: string[]): Promise<void> // The function that doesn't return a value, hence Promise<void>
 }
 
 // Events
@@ -333,6 +301,8 @@ export type Item = {
   title?: string
   description?: typeof OutputData | undefined
   // blocks?: OutputBlockData[] | undefined
+
+  isMutating?: boolean
 }
 
 export type VoteKind = number

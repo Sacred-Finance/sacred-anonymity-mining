@@ -11,7 +11,7 @@ export function InputGroupDescription({ form }: { form: FormReturnType }) {
       render={({ field }) => (
         <FormItem>
           <FormLabel className="text-lg">Group Description</FormLabel>
-          <FormDescription>This is your group Description</FormDescription>
+          <FormDescription>It should be a short description of your group.</FormDescription>
 
           <FormControl>
             <Textarea placeholder="Group Description" {...field} />

@@ -14,8 +14,7 @@ export const NewPostModal: {
   openFormButtonOpen: string
 } = {
   rootClosed: '!w-fit !p-0',
-  rootOpen:
-    'fixed z-50 inset-0 p-12 bg-gray-900/50 flex justify-center items-center ',
+  rootOpen: 'fixed z-50 inset-0 p-12 bg-gray-900/50 flex justify-center items-center ',
   formBody: 'w-full h-full flex flex-col gap-4 min-h-[400px] justify-between ',
   editor:
     'border rounded-md py-2 px-3 min-h-[300px] transition-shadow focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 dark:text-dark-100 ',
@@ -30,18 +29,10 @@ export const NewPostModal: {
 
 export const PostComment = ({
   comment,
-  onSuccess,
 }: {
   comment: Item & { time?: Date } // where is time added!?
-  onSuccess?: () => void
 }) => {
   const { state } = useCommunityContext()
   const community = state?.activeCommunity?.community as Group
-  return (
-    <>
-      {comment && (
-        <PostItem post={comment} group={community} showAvatar={false} />
-      )}
-    </>
-  )
+  return <>{comment && <PostItem post={comment} group={community} showAvatar={false} />}</>
 }

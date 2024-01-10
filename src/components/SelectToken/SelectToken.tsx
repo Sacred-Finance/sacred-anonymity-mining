@@ -1,19 +1,20 @@
 import React from 'react'
 import { Controller, useFormContext } from 'react-hook-form'
 import { useFetchTokensList } from '@/hooks/useFetchTokensList'
-import uriToHttp from '@/utils/uriToHttp'
 import Image from 'next/image'
 import { chainLogos, supportedChainsArray } from '@/constant/const'
 import { polygonMumbai } from 'wagmi/chains'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shad/ui/select'
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from '@/shad/ui/select'
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/shad/ui/dropdown-menu'
+import uriToHttp from '@/utils/uriToHttp'
+import { FaCaretRight } from 'react-icons/fa'
 
 const ChainSelector = ({ chainId, setChainId }) => {
   return (
@@ -23,7 +24,7 @@ const ChainSelector = ({ chainId, setChainId }) => {
       }}
       value={chainId.toString()}
     >
-      <SelectTrigger>
+      <SelectTrigger className="sticky top-0 z-50 w-full">
         <SelectValue placeholder="Select Chain" />
       </SelectTrigger>
       <SelectContent>
@@ -52,40 +53,42 @@ const SelectToken = ({ fieldName, fieldIndex }) => {
   }
 
   return (
-    <div>
-      <Controller
-        control={control}
-        name={formSelector}
-        render={({ field }) => (
-          <Select
-            {...field}
-            onValueChange={value => appendToken(filteredTokensList.find(token => token.address === value))}
-            value={field.value?.address || ''}
-          >
-            <SelectTrigger className="flex w-[200px]">
-              <SelectValue placeholder="Select token" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Chain</SelectLabel>
-                <ChainSelector chainId={chainId} setChainId={setChainId} />
-              </SelectGroup>
-              <SelectGroup>
-                <SelectLabel>Token</SelectLabel>
-                {filteredTokensList.map(token => (
-                  <SelectItem key={token.address} value={token.address}>
-                    <div className="flex items-center gap-2">
-                      <Image src={uriToHttp(token.logoURI)} alt={token.name} height={24} width={24} />
-                      <span>{token.name}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        )}
-      />
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        type={'button'}
+        className={
+          'flex h-full min-w-[200px] items-center justify-between gap-2 rounded border bg-background p-2 text-foreground'
+        }
+      >
+        <Image hidden={!token?.logoURI} src={uriToHttp(token?.logoURI)} alt={token?.name} height={24} width={24} />
+        {token?.name ? token?.name : 'Select Token'}
+        <FaCaretRight className={'transform transition-transform duration-150 ' + (token?.name ? 'rotate-90' : '')} />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="max-h-[400px] overflow-y-auto">
+        <ChainSelector chainId={chainId} setChainId={setChainId} />
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel>Token</DropdownMenuLabel>
+        <Controller
+          control={control}
+          name={formSelector}
+          render={({ field }) =>
+            filteredTokensList.map(token => (
+              <DropdownMenuItem
+                key={token.address}
+                onSelect={() => {
+                  appendToken(filteredTokensList.find(tokenItem => tokenItem.address === token.address))
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <Image src={uriToHttp(token.logoURI)} alt={token.name} height={24} width={24} />
+                  <span>{token.name}</span>
+                </div>
+              </DropdownMenuItem>
+            ))
+          }
+        />
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 

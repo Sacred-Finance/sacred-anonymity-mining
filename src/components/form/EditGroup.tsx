@@ -37,6 +37,7 @@ import type { Group } from '@/types/contract/ForumInterface'
 import TagInput from '../TagInput/TagInput'
 import { useCheckIsOwner } from '@components/EditGroupNavigationButton'
 import { uploadImages } from '@/utils/communityUtils'
+import TokenRequirementsForm from '@components/tokenRequirement/tokenRequirements'
 
 interface EditGroupProps {
   group: Group
@@ -174,10 +175,10 @@ export function EditGroup({ group }: EditGroupProps) {
   const previousPageUrl = router.query.previousPageUrl as string
 
   return (
-    <div className="relative z-50 max-w-screen-2xl ">
+    <div className="relative z-50 max-w-screen-xl">
       <Form {...form}>
         <form
-          className="space-y-12 bg-white/5 p-6"
+          className="space-y-12 bg-foreground/5 p-6"
           onSubmit={form.handleSubmit(async data => {
             await submitAllGroupDetails(data)
           })}
@@ -206,16 +207,17 @@ export function EditGroup({ group }: EditGroupProps) {
           <InputGroupName form={form} disabled />
           <InputGroupDescription form={form} />
 
-          <div className="flex flex-col flex-wrap items-start justify-center md:flex-row ">
-            <div className="flex shrink-0 basis-1/3 items-center justify-center">
+          <div className="flex flex-col gap-12 md:flex-row ">
+            <div className="flex  basis-[33%] items-center justify-center ">
               <ImageUploader form={form} name="logoFile" />
             </div>
-            <div className="flex shrink-0 basis-2/3 items-center justify-center">
+            <div className="flex h-full basis-[50%] items-start justify-center">
               <ImageUploader form={form} name="bannerFile" />
             </div>
           </div>
 
           <TagInput />
+          <TokenRequirementsForm form={form} disabled />
 
           <div className="flex w-full justify-end">
             <Button type="submit" disabled={!form.formState.isDirty || isSubmitting}>

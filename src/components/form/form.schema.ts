@@ -16,7 +16,7 @@ const fileSchema = z
   .optional()
 
 export const CreateGroupSchema = z.object({
-  groupName: z.string().min(5, 'Group name is required'),
+  groupName: z.string().min(5, 'Group name should be at least 5 characters long'),
   description: z.string().min(10, 'Description should be at least 10 characters long'),
   tags: z.array(z.string()).max(5, 'Maximum of 5 tags allowed').optional(),
   tokenRequirements: z

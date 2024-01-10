@@ -28,21 +28,13 @@ export class CommentClass {
     return this.postId + '_comments'
   }
 
-  async create({
-    commentContent,
-    address,
-    users,
-    postedByUser,
-    groupId,
-    setWaiting,
-    onIPFSUploadSuccess,
-  }: CreateParams) {
+  async create({ commentContent, address, postedByUser, groupId, setWaiting, onIPFSUploadSuccess }: CreateParams) {
     return await create.call(
       this,
       commentContent,
       'comment',
       address,
-      users,
+      [],
       postedByUser,
       groupId,
       setWaiting,
@@ -58,16 +50,7 @@ export class CommentClass {
     groupId: string,
     setWaiting: (waiting: boolean) => void
   ) {
-    return await editContent.call(
-      this,
-      'comment',
-      commentContent,
-      address,
-      itemId,
-      postedByUser,
-      groupId,
-      setWaiting
-    )
+    return await editContent.call(this, 'comment', commentContent, address, itemId, postedByUser, groupId, setWaiting)
   }
 
   async delete(address: Address, itemId, postedByUser: User) {

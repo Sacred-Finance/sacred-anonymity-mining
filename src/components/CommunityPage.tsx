@@ -5,6 +5,9 @@ import { useActiveUser, useCommunityContext, useUsers } from '@/contexts/Communi
 import { useAccount } from 'wagmi'
 import { useTranslation } from 'react-i18next'
 import type { SortByOption } from '@components/SortBy'
+import SortBy from '@components/SortBy'
+import type { User } from '@/lib/model'
+import { ContentType } from '@/lib/model'
 import { useValidateUserBalance } from '@/utils/useValidateUserBalance'
 import { toast } from 'react-toastify'
 import { useItemsSortedByVote } from '@/hooks/useItemsSortedByVote'
@@ -17,7 +20,8 @@ import { useContentManagement } from '@/hooks/useContentManagement'
 import { NewPostModal } from '@components/Post/PostComments'
 import LoadingComponent from '@components/LoadingComponent'
 import { CommunityCard } from './CommunityCard/CommunityCard'
-import type { User } from '@/lib/model'
+import { GroupPostAPI } from '@/lib/fetcher'
+import { useSWRConfig } from 'swr'
 import { ShowConnectIfNotConnected } from '@components/Connect/ConnectWallet'
 import { useUserIfJoined } from '@/contexts/UseUserIfJoined'
 
@@ -31,7 +35,6 @@ export function CommunityPage({
   refreshData?: () => void
 }) {
   const [sortBy, setSortBy] = useState<SortByOption>('highest')
-
   const sortedData = useItemsSortedByVote([], posts, sortBy)
   const {
     state: { isAdmin },
@@ -50,9 +53,10 @@ export function CommunityPage({
           <div className="flex w-fit gap-4 rounded-lg ">
             <ShowConnectIfNotConnected>
               <CreatePollUI group={community} onSuccess={refreshData} />
-              <CreatePostUI group={community} onSuccess={refreshData} />
+              <CreatePostUI group={community} />
             </ShowConnectIfNotConnected>
           </div>
+          <SortBy onSortChange={setSortBy} />
           <PostList posts={sortedData} group={community} refreshData={refreshData} />
         </div>
       </div>
@@ -60,7 +64,7 @@ export function CommunityPage({
   )
 }
 
-const CreatePostUI = ({ group, onSuccess }: { group: Group; onSuccess?: () => void }) => {
+const CreatePostUI = ({ group }: { group: Group }) => {
   const groupId = group.groupId
   const user = useUserIfJoined(group.id.toString())
   const activeUser = useActiveUser()
@@ -68,6 +72,7 @@ const CreatePostUI = ({ group, onSuccess }: { group: Group; onSuccess?: () => vo
   const { address } = useAccount()
   const { checkUserBalance } = useValidateUserBalance(group, address)
   const users = useUsers()
+  const { mutate } = useSWRConfig()
   const postInstance = group && new Post(undefined, group.id.toString())
 
   const [isLoading, setIsLoading] = useState(false)
@@ -76,7 +81,6 @@ const CreatePostUI = ({ group, onSuccess }: { group: Group; onSuccess?: () => vo
     if (!address) {
       return toast.error(t('alert.connectWallet'), { toastId: 'connectWallet' })
     }
-
     if (!user) {
       return toast.error(t('toast.error.notJoined'), {
         type: 'error',
@@ -108,7 +112,9 @@ const CreatePostUI = ({ group, onSuccess }: { group: Group; onSuccess?: () => vo
     }
 
     const hasSufficientBalance = await checkUserBalance()
-    if (!hasSufficientBalance) return
+    if (!hasSufficientBalance) {
+      return
+    }
 
     setIsLoading(true)
 
@@ -116,34 +122,79 @@ const CreatePostUI = ({ group, onSuccess }: { group: Group; onSuccess?: () => vo
       if (postInstance === undefined) {
         return
       }
-      const response = await postInstance?.create({
-        postContent: {
-          title: contentTitle,
-          description: contentDescription,
-        },
-        address: address,
-        users: users,
-        postedByUser: activeUser as User,
+
+      const tempCache: Item = {
+        title: contentTitle,
+        description: contentDescription,
+        kind: ContentType.POST,
+        parentId: '0',
         groupId: groupId as string,
-        setWaiting: setIsLoading,
-        onIPFSUploadSuccess: post => {
-          console.log('post', post)
-        },
-      })
-      try {
-        if (response?.status === 200) {
-          setIsLoading(false)
-          clearContent()
-          onSuccess && onSuccess()
-          console.log('post created successfully')
-        } else {
-          console.log('error', response)
-          setIsLoading(false)
-        }
-      } catch (error) {
-        console.log('error', error)
-        setIsLoading(false)
+        childIds: [],
+        upvote: 0,
+        downvote: 0,
+        isMutating: true,
       }
+
+      mutate(
+        GroupPostAPI(groupId as string),
+        async (data: any) => {
+          try {
+            const response = await postInstance?.create({
+              postContent: {
+                title: contentTitle as string,
+                description: contentDescription,
+              },
+              address: address,
+              users: users,
+              postedByUser: activeUser as User,
+              groupId: groupId as string,
+              setWaiting: setIsLoading,
+              onIPFSUploadSuccess: post => {
+                console.log('post', post)
+                const element = document.getElementById(`new_post`)
+                element?.scrollIntoView({ behavior: 'smooth' })
+              },
+            })
+            if (response?.status === 200) {
+              setIsLoading(false)
+              clearContent()
+              console.log('post created successfully')
+              console.log('response', response)
+              const { args } = response.data
+              const lastPost = {
+                ...tempCache,
+                id: +args[2]?.hex,
+                note: args[5]?.hex?.toString(),
+                isMutating: false,
+              }
+
+              /** Must mutate the posts to notify useEffect in parent */
+              return { ...data, posts: [...data.posts, lastPost] }
+            } else {
+              console.log('error', response)
+              setIsLoading(false)
+            }
+            return data
+          } catch (error) {
+            console.log('error', error)
+            toast.error('Failed to create post')
+            setIsLoading(false)
+            return data
+          }
+        },
+        {
+          optimisticData: (data: any) => {
+            if (data) {
+              return {
+                ...data,
+                posts: [...data.posts, tempCache],
+              }
+            }
+          },
+          rollbackOnError: true,
+          revalidate: false,
+        }
+      )
     } catch (error) {
       console.log('error', error)
       setIsLoading(false)

@@ -9,7 +9,6 @@ import React from 'react'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/shad/ui/button'
 import { Form, FormMessage } from '@/shad/ui/form'
-import { Label } from '@/shad/ui/label'
 
 import TagInput from '../TagInput/TagInput'
 import { useCreateCommunity } from '@/hooks/useCreateCommunity'
@@ -84,23 +83,23 @@ export function CreateGroup() {
   }
 
   return (
-    <div className="relative z-50 max-w-screen-2xl">
+    <div className="relative z-50 max-w-screen-xl">
       <Form {...form}>
-        <form className="space-y-12 bg-white/5 p-6" onSubmit={handleSubmit(onSubmit)}>
-          <div className="flex w-full justify-between">
-            <Label className="flex items-center gap-2 text-2xl font-semibold text-gray-700 dark:text-gray-300">
-              <span> Create Group</span>
-            </Label>
+        <form className="space-y-12 bg-foreground/5 p-2 md:p-6" onSubmit={handleSubmit(onSubmit)}>
+          <div className="flex items-center justify-between">
+            <div className="space-y-3">
+              <h2 className="text-4xl font-semibold tracking-tight">Create a Community</h2>
+              <p className="pl-1 text-sm text-muted-foreground">Tailor your community to your needs.</p>
+            </div>
           </div>
 
           <InputGroupName form={form} />
           <InputGroupDescription form={form} />
-
-          <div className="flex flex-col flex-wrap items-start justify-center md:flex-row ">
-            <div className="flex shrink-0 basis-1/3 items-center justify-center">
+          <div className="flex flex-col gap-12 md:flex-row ">
+            <div className="flex  basis-[33%] items-center justify-center ">
               <ImageUploader form={form} name="logoFile" />
             </div>
-            <div className="flex shrink-0 basis-2/3 items-center justify-center">
+            <div className="flex h-full basis-[50%] items-start justify-center">
               <ImageUploader form={form} name="bannerFile" />
             </div>
           </div>
@@ -126,7 +125,6 @@ function renderErrors(errors) {
       return (
         <div key={index} className="text-red-500">
           {errors[key].message} - {_.startCase(errors[key].type)}
-          {errors[key].nestedErrors ? renderErrors(errors[key].nestedErrors) : null}
         </div>
       )
     } else if (errors[key] && typeof errors[key] === 'string') {

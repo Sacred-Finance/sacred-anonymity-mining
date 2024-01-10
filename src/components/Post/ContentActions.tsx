@@ -18,8 +18,9 @@ export const EditAction: React.FC<EditActionProps> = ({ setIsEditing, isEditing,
   return (
     <PrimaryButton
       isLoading={isLoading}
-      className="w-fit bg-blue-500 text-sm text-white hover:bg-blue-600"
+      className="w-full bg-muted text-sm text-foreground hover:bg-muted/80"
       onClick={() => setIsEditing(!isEditing)}
+      loadingPosition="start"
       startIcon={<PencilIcon className="mr-1 h-4 w-4" />}
     >
       {t('button.edit')}

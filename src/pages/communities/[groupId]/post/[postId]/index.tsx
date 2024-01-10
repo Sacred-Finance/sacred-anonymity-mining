@@ -6,9 +6,9 @@ import fetcher, { GroupPostCommentAPI } from '@/lib/fetcher'
 import { useRouter } from 'next/router'
 import LoadingComponent from '@components/LoadingComponent'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
-import { NextApiResponse } from 'next/types'
-import { Group, Item } from '@/types/contract/ForumInterface'
-import { ActionType } from "@/contexts/CommunityTypes";
+import type { NextApiResponse } from 'next/types'
+import type { Group, Item } from '@/types/contract/ForumInterface'
+import { ActionType } from '@/contexts/CommunityTypes'
 
 function PostIndex() {
   const { dispatch, state } = useCommunityContext()
@@ -54,14 +54,7 @@ function PostIndex() {
     return <LoadingComponent />
   }
 
-  return (
-    <PostPage
-      post={post}
-      community={group}
-      comments={comments}
-      refreshData={mutate}
-    />
-  )
+  return <PostPage post={post} community={group} comments={comments} refreshData={mutate} />
 }
 
 export default PostIndex
