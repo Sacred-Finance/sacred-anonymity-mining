@@ -1,6 +1,5 @@
 import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { useUserIfJoined } from '@/contexts/UseUserIfJoined'
-
 import React, { useEffect, useState } from 'react'
 import { useAccount } from 'wagmi'
 import { Identity } from '@semaphore-protocol/identity'
@@ -175,7 +174,10 @@ export const PostItem = ({ post, group, showAvatar = true, refreshData }: PostIt
 
         {isTypeOfPoll && <PollUI group={group} post={post} />}
         <div className="flex items-center justify-between border-t pt-2">
-          <div className="flex items-center justify-between gap-4">
+          <div
+            className="flex items-center justify-between gap-4"
+
+          >
             <AnimalAvatar seed={`${post.note}_${Number(post.groupId)}`} options={{ size: 30 }} />
 
             <VoteUI post={post} group={group} />

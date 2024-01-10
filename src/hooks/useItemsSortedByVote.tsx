@@ -42,6 +42,9 @@ export const useItemsSortedByVote = (
   sortBy: 'highest' | 'lowest' | 'controversial' | 'newest' | 'oldest' | 'activity' | 'contentLength' | 'engagement'
 ): Item[] => {
   return useMemo(() => {
+    if (!data) {
+      return []
+    }
     const sorted = [...tempData, ...data].filter(item => item !== undefined && item !== null)
 
     switch (sortBy) {

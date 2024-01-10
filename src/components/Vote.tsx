@@ -23,8 +23,6 @@ export const VoteUI = ({ post, group }: { post: Item; group: Group }) => {
 
   const [currentVoteType, setCurrentVoteType] = useState<VoteKind | null>(null)
 
-  console.log(post.id, post.title, post.upvote, post.downvote, post)
-
   const [votes, setVotes] = useState<{ upvote: number; downvote: number }>({
     upvote: post.upvote ?? 0,
     downvote: post.downvote ?? 0,

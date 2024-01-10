@@ -14,7 +14,6 @@ export type SortByOption =
 
 interface SortByProps {
   onSortChange: (sortBy: SortByOption) => void
-  targetType: 'comments' | 'posts' | 'polls'
 }
 
 const SortBy: React.FC<SortByProps> = ({ onSortChange }) => {

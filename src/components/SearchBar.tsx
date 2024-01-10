@@ -1,13 +1,12 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { GiCancel } from 'react-icons/gi'
 import { FaMagnifyingGlass } from 'react-icons/fa6'
 import React from 'react'
+import { FaWindowClose } from 'react-icons/fa'
 
 const animationVariants = {
   initial: {
     opacity: 0,
     scale: 0.8,
-    y: '-100%',
     transition: { duration: 0.2 },
   },
   animate: { opacity: 1, scale: 1, y: '0%', transition: { duration: 0.2 } },
@@ -30,6 +29,8 @@ export const SearchBar = ({
         <AnimatePresence mode="popLayout">
           {searchTerm ? (
             <motion.button
+              layout
+              layoutId="search"
               key="cancel"
               variants={animationVariants}
               initial="initial"
@@ -44,18 +45,20 @@ export const SearchBar = ({
                 debouncedResults({ target: { value: '' } })
               }}
             >
-              <GiCancel className="h-4 w-6 text-black dark:text-inherit" />
+              <FaWindowClose className="h-6 text-foreground" />
             </motion.button>
           ) : (
             <motion.div
+              layout
+              layoutId="search"
               key="search"
               variants={animationVariants}
-              initial="initial"
+              initial={'initial'}
               animate="animate"
               exit="exit"
               transition={transition}
             >
-              <FaMagnifyingGlass className="h-4 w-6 text-black dark:text-inherit" />
+              <FaMagnifyingGlass className="h-6 text-foreground" />
             </motion.div>
           )}
         </AnimatePresence>

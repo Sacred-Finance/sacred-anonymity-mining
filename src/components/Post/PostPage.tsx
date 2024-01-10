@@ -1,5 +1,4 @@
-import { useActiveUser, useCommunityContext } from '@/contexts/CommunityProvider'
-
+import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { useAccount } from 'wagmi'
 import { useTranslation } from 'next-i18next'
 import type { Dispatch, SetStateAction } from 'react'
@@ -30,8 +29,8 @@ import { AnalysisCheckboxComponent } from '@components/Post/AiAnalysisCheckboxCo
 import { Button } from '@/shad/ui/button'
 import { ShowConnectIfNotConnected } from '@components/Connect/ConnectWallet'
 import { useSWRConfig } from 'swr'
-import { GroupPostCommentAPI } from '@/lib/fetcher'
 import { CommentClass } from '@/lib/comment'
+import { GroupPostCommentAPI } from '@/lib/fetcher'
 import { useUserIfJoined } from '@/contexts/UseUserIfJoined'
 
 export const AIDigestContext = React.createContext<{
@@ -204,7 +203,7 @@ const TooltipTab = ({ name, Icon }: { name: string; Icon: unknown }) => (
 const CreateCommentUI = ({ group, post }: { group: Group; post: Item; onSuccess?: () => void }) => {
   const groupId = group.groupId
   const user = useUserIfJoined(group.id.toString())
-  useActiveUser()
+
   const { t } = useTranslation()
   const { address } = useAccount()
   const { checkUserBalance } = useValidateUserBalance(group, address)

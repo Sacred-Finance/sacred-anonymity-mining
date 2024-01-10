@@ -135,9 +135,9 @@ const CreatePostUI = ({ group }: { group: Group }) => {
         isMutating: true,
       }
 
-      mutate(
+      await mutate(
         GroupPostAPI(groupId as string),
-        async (data: any) => {
+        async data => {
           try {
             const response = await postInstance?.create({
               postContent: {
@@ -183,7 +183,7 @@ const CreatePostUI = ({ group }: { group: Group }) => {
           }
         },
         {
-          optimisticData: (data: any) => {
+          optimisticData: data => {
             if (data) {
               return {
                 ...data,
