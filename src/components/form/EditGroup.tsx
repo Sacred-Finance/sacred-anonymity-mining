@@ -9,7 +9,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import type { HandleSetImage } from '@pages/communities/[groupId]/edit'
 import type { BigNumberish } from '@semaphore-protocol/group'
 import { Identity } from '@semaphore-protocol/identity'
-import { constants } from 'ethers'
 import _ from 'lodash'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -38,6 +37,7 @@ import TagInput from '../TagInput/TagInput'
 import { useCheckIsOwner } from '@components/EditGroupNavigationButton'
 import { uploadImages } from '@/utils/communityUtils'
 import TokenRequirementsForm from '@components/tokenRequirement/tokenRequirements'
+import { constants } from 'ethers'
 
 interface EditGroupProps {
   group: Group
@@ -125,11 +125,25 @@ export function EditGroup({ group }: EditGroupProps) {
           logoFile: hasImageChanged.logo && data.logoFile,
         })
 
+        let bannerCIDString = bannerCID ? bannerCID : group.groupDetails.bannerCID
+        if (bannerCIDString) {
+          bannerCIDString = getBytes32FromIpfsHash(bannerCIDString)
+        } else {
+          bannerCIDString = constants.HashZero
+        }
+
+        let logoCIDString = logoCID ? logoCID : group.groupDetails.logoCID
+        if (logoCIDString) {
+          logoCIDString = getBytes32FromIpfsHash(logoCIDString)
+        } else {
+          logoCIDString = constants.HashZero
+        }
+
         const mergedGroupDetails = {
           description: data.description,
           groupName: data.groupName,
-          bannerCID: bannerCID ? getBytes32FromIpfsHash(bannerCID) : constants.HashZero,
-          logoCID: logoCID ? getBytes32FromIpfsHash(logoCID) : constants.HashZero,
+          bannerCID: bannerCIDString,
+          logoCID: logoCIDString,
           tags: data.tags.map((tag: string) => getBytes32FromString(tag)),
         }
 

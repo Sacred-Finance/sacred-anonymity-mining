@@ -193,7 +193,7 @@ export const getStringFromBytes32 = (bytes32Hex: string): string => {
   return ethers.utils.parseBytes32String(bytes32Hex)
 }
 
-export const hashBytes2 = (itemId: number, type: string): bigint => {
+export const hashBytes2 = (itemId: BigNumberish, type: string): bigint => {
   return BigInt(utils.keccak256(utils.solidityPack(['uint256', 'string'], [itemId, type]))) >> BigInt(8)
 }
 

@@ -6,14 +6,13 @@ import { useRouter } from 'next/router'
 import fetcher, { GroupPostAPI } from '@/lib/fetcher'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
 import type { GroupWithPostDataResponse } from '@pages/api/groupWithPostData'
-import { ActionType } from "@/contexts/CommunityTypes";
+import { ActionType } from '@/contexts/CommunityTypes'
 
 export default function Page() {
   const router = useRouter()
   const { groupId } = router.query
 
-  const { data, error, isValidating, isLoading, mutate } =
-    useSWR<GroupWithPostDataResponse>(GroupPostAPI(groupId), fetcher)
+  const { data, mutate } = useSWR<GroupWithPostDataResponse>(GroupPostAPI(groupId), fetcher)
 
   const { dispatch } = useCommunityContext()
   useCheckIfUserIsAdminOrModerator(true)
@@ -45,11 +44,9 @@ export default function Page() {
     }
   }, [data?.group])
 
-  return (
-    <CommunityPage
-      community={data?.group}
-      posts={data?.posts}
-      refreshData={mutate}
-    />
-  )
+  if (!data?.group) {
+    return null
+  }
+
+  return <CommunityPage community={data.group} posts={data?.posts} mutate={mutate} />
 }

@@ -1,6 +1,6 @@
-import { createComment, createPost, votePoll } from '@/lib/api'
 import { GroupPostAPI, GroupPostCommentAPI } from '@/lib/fetcher'
-import type { ItemCreationRequest, NewPostContent, PollRequestStruct } from '@/lib/model'
+import type { ItemCreationRequest, NewPostContent } from '@/lib/model'
+import { ContentType } from '@/lib/model'
 
 import {
   createNote,
@@ -17,14 +17,11 @@ import { Identity } from '@semaphore-protocol/identity'
 import { generateProof } from '@semaphore-protocol/proof'
 import { mutate } from 'swr'
 import { useAccount } from 'wagmi'
+import { createComment, createPost, vote } from '@/lib/api'
+import { emptyPollRequest } from '@/lib/item'
 
-interface Poll {
+interface Post {
   content: NewPostContent
-  pollType: number
-  duration: number
-  answers: string[]
-  rateScaleFrom: number
-  rateScaleTo: number
   post?: Item // if post is undefined, it means it's a post, otherwise it's a comment
   onSuccessCallback: () => void
   onErrorCallback: (
@@ -36,9 +33,9 @@ interface Poll {
   ) => void
 }
 
-interface SubmitPollParams {
+interface SubmitPostParams {
   id: BigNumberish
-  pollData: number[]
+  postData: number[]
   onSuccessCallback?: (
     data:
       | {
@@ -55,20 +52,15 @@ interface SubmitPollParams {
   ) => void
 }
 
-export const usePoll = ({ group }: { group: Group }) => {
+export const usePost = ({ group }: { group: Group }) => {
   const { address } = useAccount()
 
-  const createPoll = async ({
+  const createNewPost = async ({
     content,
-    pollType,
-    duration,
-    answers,
-    rateScaleFrom,
-    rateScaleTo,
     post,
     onSuccessCallback,
     onErrorCallback,
-  }: Poll): Promise<{
+  }: Post): Promise<{
     message: string
   } | void> => {
     try {
@@ -89,35 +81,12 @@ export const usePoll = ({ group }: { group: Group }) => {
 
       const note = await createNote(userIdentity)
 
-      const answerCIDs = []
-      for (let i = 0; i < answers.length; i++) {
-        const cid = await uploadIPFS(answers[i])
-        if (!cid) {
-          throw 'Upload to IPFS failed'
-        }
-        const answerCID = getBytes32FromIpfsHash(cid)
-        answerCIDs.push(answerCID)
-      }
-
       const fullProof = await generateProof(userIdentity, semaphoreGroup, extraNullifier, hashBytes(signal))
       const request: ItemCreationRequest = {
         contentCID: signal,
         merkleTreeRoot: fullProof.merkleTreeRoot.toString(),
         nullifierHash: fullProof.nullifierHash.toString(),
         note: note.toString(),
-      }
-
-      const pollRequest: PollRequestStruct = {
-        pollType,
-        duration,
-        answerCount: answers.length,
-        rateScaleFrom,
-        rateScaleTo,
-        answerCIDs,
-      }
-      const tempCache = {
-        id: 'temp',
-        content: content,
       }
 
       const { status } =
@@ -127,31 +96,20 @@ export const usePoll = ({ group }: { group: Group }) => {
               parentId: post.id.toString(),
               request: request,
               solidityProof: fullProof.proof,
-              asPoll: true,
-              pollRequest: pollRequest,
+              asPoll: false,
+              pollRequest: emptyPollRequest,
             })
           : await createPost({
               groupId: group.id.toString(),
               request: request,
               solidityProof: fullProof.proof,
-              asPoll: true,
-              pollRequest: pollRequest,
+              asPoll: false,
+              pollRequest: emptyPollRequest,
             })
-
       if (status === 200) {
         console.log(`A post posted by user ${address}`)
         if (post !== undefined) {
-          await mutate(GroupPostCommentAPI(group.id.toString(), post.id.toString()), undefined, {
-            optimisticData: data => {
-              console.log('optimisticData', data)
-              if (data) {
-                return {
-                  ...data,
-                  posts: [...data.posts, tempCache],
-                }
-              }
-            },
-          })
+          await mutate(GroupPostCommentAPI(group.id.toString(), post.id.toString()))
         } else {
           await mutate(GroupPostAPI(group.id.toString()))
         }
@@ -168,9 +126,9 @@ export const usePoll = ({ group }: { group: Group }) => {
     }
   }
 
-  const submitPoll = async ({ id, pollData, onSuccessCallback, onErrorCallback }: SubmitPollParams) => {
+  const submitPost = async ({ id, onSuccessCallback, onErrorCallback }: SubmitPostParams) => {
     try {
-      const signal = hashBytes2(id, 'votePoll')
+      const signal = hashBytes2(id, 'votePost')
       const extraNullifier = signal.toString()
       const semaphoreGroup = new SemaphoreGroup(group.id)
       const users = await fetchUsersFromSemaphoreContract(group.id)
@@ -178,10 +136,10 @@ export const usePoll = ({ group }: { group: Group }) => {
       const userIdentity = new Identity(address)
 
       const fullProof = await generateProof(userIdentity, semaphoreGroup, extraNullifier, signal)
-      const { status, data } = await votePoll(
+      const { status, data } = await vote(
         id.toString(),
         group.id.toString(),
-        pollData,
+        ContentType.POST,
         fullProof.merkleTreeRoot,
         fullProof.nullifierHash,
         fullProof.proof
@@ -192,7 +150,7 @@ export const usePoll = ({ group }: { group: Group }) => {
         }
       } else {
         if (onErrorCallback) {
-          onErrorCallback('Voting Poll failed!')
+          onErrorCallback('Voting Post failed!')
         }
       }
     } catch (error) {
@@ -203,5 +161,7 @@ export const usePoll = ({ group }: { group: Group }) => {
     }
   }
 
-  return { createPoll, submitPoll }
+  return { createPost: createNewPost, submitPost }
 }
+
+export default usePost
