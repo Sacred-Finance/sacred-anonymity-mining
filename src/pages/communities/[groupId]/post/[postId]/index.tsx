@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
+import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { PostPage } from '@components/Post/PostPage'
 import useSWR from 'swr'
 import fetcher, { GroupPostCommentAPI } from '@/lib/fetcher'
@@ -8,18 +8,18 @@ import LoadingComponent from '@components/LoadingComponent'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
 import type { NextApiResponse } from 'next/types'
 import type { Group, Item } from '@/types/contract/ForumInterface'
+import { ActionType } from '@/contexts/CommunityTypes'
+import type { GroupWithPostAndCommentDataResponse } from '@pages/api/groupWithPostAndCommentData'
 
 function PostIndex() {
   const { dispatch, state } = useCommunityContext()
   const router = useRouter()
   const { groupId, postId } = router.query
 
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, error, isLoading, mutate } = useSWR<GroupWithPostAndCommentDataResponse>(
     GroupPostCommentAPI(groupId, postId),
     fetcher
-  ) as unknown as NextApiResponse<{
-    data: { group: Group; post: Item; comments: Item[] } | { error: string }
-  }>
+  )
   useCheckIfUserIsAdminOrModerator(true)
 
   useEffect(() => {
@@ -53,7 +53,10 @@ function PostIndex() {
     return <LoadingComponent />
   }
 
-  return <PostPage post={post} community={group} comments={comments} refreshData={mutate} />
+  if (!group || !post) {
+    return null
+  }
+  return <PostPage post={post} community={group} comments={comments} mutate={mutate} />
 }
 
 export default PostIndex

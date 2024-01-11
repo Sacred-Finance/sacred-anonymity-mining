@@ -3,7 +3,7 @@ import { useAccount, useContractWrite } from 'wagmi' // import from the right lo
 import ForumABI from '@/constant/abi/Forum.json'
 import { forumContract, ForumContractAddress } from '@/constant/const'
 import { toast } from 'react-toastify'
-import { useUserIfJoined, useUsers } from '@/contexts/CommunityProvider'
+import { useUsers } from '@/contexts/CommunityProvider'
 import { Post } from '@/lib/post'
 import { CommentClass } from '@/lib/comment'
 import { useTranslation } from 'react-i18next'
@@ -12,6 +12,7 @@ import { ContentType } from '@/lib/model'
 import { GroupPostCommentAPI } from '@/lib/fetcher'
 import type { Address } from '@/types/common'
 import { useCallback } from 'react'
+import { useUserIfJoined } from '@/contexts/UseUserIfJoined'
 
 interface UseRemoveItemFromForumContractParams {
   groupId: any
@@ -55,11 +56,7 @@ export const useRemoveItemFromForumContract = ({
   }, [address, member])
 
   const deleteItem = async (itemId: string | number, itemType: ContentType) => {
-    if (
-      Number(itemType) != ContentType.POST &&
-      itemType != ContentType.POLL &&
-      itemType != ContentType.COMMENT
-    ) {
+    if (Number(itemType) != ContentType.POST && itemType != ContentType.POLL && itemType != ContentType.COMMENT) {
       return toast.error(t('toast.error.invalidItemType'), {
         type: 'error',
         toastId: 'min',
@@ -82,22 +79,8 @@ export const useRemoveItemFromForumContract = ({
         : null
     } else {
       return itemType == ContentType.POST ?? itemType == ContentType.POLL
-        ? postInstance?.delete(
-            address as string,
-            itemId,
-            users,
-            member as User,
-            groupId,
-            setIsLoading
-          )
-        : commentInstance?.delete(
-            address,
-            itemId,
-            users,
-            member as User,
-            groupId,
-            setIsLoading
-          )
+        ? postInstance?.delete(address as string, itemId, users, member as User, groupId, setIsLoading)
+        : commentInstance?.delete(address, itemId, users, member as User, groupId, setIsLoading)
     }
   }
 

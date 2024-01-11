@@ -133,7 +133,10 @@
     "newest": "Newest",
     "oldest": "Oldest",
     "highestDownVotes": "Highest Down Votes",
-    "controversial": "Controversial"
+    "controversial": "Controversial",
+    "mostActive": "Most Active",
+    "longestContent": "Longest Content",
+    "mostEngaged": "Most Engaged"
   },
   "toolTip": {
     "switchToLightMode": "Switch to light mode",

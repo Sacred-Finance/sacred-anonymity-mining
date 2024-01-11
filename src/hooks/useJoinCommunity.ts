@@ -2,11 +2,12 @@ import { useCallback } from 'react'
 import { Identity } from '@semaphore-protocol/identity'
 import { joinGroup } from '@/lib/api'
 import { useHandleCommunityAction } from './useHandleCommunityAction'
-import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
+import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { useAccount } from 'wagmi'
 import type { ethers } from 'ethers'
 import { createNote } from '@/lib/utils'
 import type { User } from '@/lib/model'
+import { ActionType } from "@/contexts/CommunityTypes";
 
 export const useJoinCommunity = () => {
   const { address, isConnected } = useAccount()

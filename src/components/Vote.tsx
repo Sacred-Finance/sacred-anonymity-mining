@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useUserIfJoined } from '@/contexts/CommunityProvider'
+import { useUserIfJoined } from '@/contexts/UseUserIfJoined'
 import { useAccount } from 'wagmi'
 import { useTranslation } from 'next-i18next'
 import { useValidateUserBalance } from '@/utils/useValidateUserBalance'
@@ -22,8 +22,6 @@ export const VoteUI = ({ post, group }: { post: Item; group: Group }) => {
   const { checkUserBalance } = useValidateUserBalance(group, address)
 
   const [currentVoteType, setCurrentVoteType] = useState<VoteKind | null>(null)
-
-  console.log(post.id, post.title, post.upvote, post.downvote, post)
 
   const [votes, setVotes] = useState<{ upvote: number; downvote: number }>({
     upvote: post.upvote ?? 0,

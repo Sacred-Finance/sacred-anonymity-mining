@@ -12,7 +12,7 @@ import AnimalAvatar from '../AnimalAvatar'
 import clsx from 'clsx'
 import { VoteUI } from '../Vote'
 
-export const PostList = ({ posts, group, refreshData }: { posts: Item[]; group: Group; refreshData?: () => void }) => {
+export const PostList = ({ posts, group, mutate }: { posts: Item[]; group: Group; mutate?: () => void }) => {
   if (!posts) {
     return null
   }

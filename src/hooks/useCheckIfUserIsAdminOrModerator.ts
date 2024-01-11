@@ -3,7 +3,8 @@ import { ForumContractAddress } from '@/constant/const'
 import ForumABI from '../constant/abi/Forum.json'
 import { useEffect, useState } from 'react'
 import type { Address } from '@/types/common'
-import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
+import { useCommunityContext } from '@/contexts/CommunityProvider'
+import { ActionType } from "@/contexts/CommunityTypes";
 
 export const useCheckIfUserIsAdminOrModerator = (checkOnInit = false) => {
   const [isAdmin, setisAdmin] = useState<boolean | null>(null)

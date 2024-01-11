@@ -59,17 +59,12 @@ function NoCommunities({ searchTerm }: { searchTerm: string }) {
   )
 }
 
-function HomePage({
-  isLoading = false,
-  isAdmin = false,
-  isValidating = false,
-}: HomeProps) {
+function HomePage({ isLoading = false, isAdmin = false, isValidating = false }: HomeProps) {
   const { state } = useCommunityContext()
   const { communities } = state
 
   // state
-  const [filteredCommunities, setFilteredCommunities] =
-    useState<Group[]>(communities)
+  const [filteredCommunities, setFilteredCommunities] = useState<Group[]>(communities)
   const [searchTerm, setSearchTerm] = useState('')
 
   useEffect(() => {
@@ -110,7 +105,23 @@ function HomePage({
   return (
     <>
       <Tabs defaultValue="logos" className="h-full space-y-6">
-        <div className="flex w-full items-center justify-between gap-2">
+        <TabsContent value="logos" className="border-none p-0 outline-none">
+          <div className="flex items-center justify-between">
+            <div className="space-y-3">
+              <h2 className="text-4xl font-semibold tracking-tight">Logos Communities</h2>
+              <p className="pl-1 text-sm text-muted-foreground">Create your own community or join an existing one.</p>
+            </div>
+          </div>
+        </TabsContent>
+        <TabsContent value="discourse" className="h-full flex-col border-none p-0 data-[state=active]:flex">
+          <div className="flex items-center justify-between">
+            <div className="space-y-3">
+              <h2 className="text-4xl font-semibold tracking-tight">Discourse</h2>
+              <p className="pl-1 text-sm text-muted-foreground">Your favorite communities. From Discourse.</p>
+            </div>
+          </div>
+        </TabsContent>
+        <div className="flex w-full flex-wrap items-center justify-center gap-2 md:flex-nowrap md:justify-between">
           <div className="flex w-full basis-1/4 items-center justify-between">
             <TabsList>
               <TabsTrigger value="logos" className="relative">
@@ -120,66 +131,33 @@ function HomePage({
             </TabsList>
           </div>
 
-          <div className="flex w-full basis-3/4 items-center justify-between gap-4">
-            <div className="flex w-full max-w-[600px] basis-3/4 items-center justify-between  gap-2">
-              <SearchBar
-                debouncedResults={debouncedResults}
-                searchTerm={searchTerm}
-              />
-            </div>
-            <div className="flex basis-1/4 items-center">
-              <Link href="/create-group">
-                <Button variant="default">
-                  <IoAddCircle className="h-6 w-6" />
-                  New Community
-                </Button>
-              </Link>
-            </div>
+          <div className="flex w-full min-w-fit  basis-3/4 items-center justify-center  gap-2">
+            <SearchBar debouncedResults={debouncedResults} searchTerm={searchTerm} />
+          </div>
+          <div className="flex basis-1/4 items-center justify-end">
+            <Link href="/create-group">
+              <Button variant="default">
+                <IoAddCircle className="h-6 w-6" />
+                New Community
+              </Button>
+            </Link>
           </div>
         </div>
         <TabsContent value="logos" className="border-none p-0 outline-none">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <h2 className="text-2xl font-semibold tracking-tight">
-                Communities
-              </h2>
-            </div>
-          </div>
           <Separator className="my-4" />
           <div className="relative">
             <ScrollArea className="h-full">
               <div className="grid-cols-auto flex grow flex-col  gap-6 rounded-lg p-0 md:grid  md:py-8 lg:grid-cols-2 xl:grid-cols-3">
-                {(searchTerm ? filteredCommunities : communities).map(
-                  community => (
-                    <CommunityCard
-                      key={`$community_${community.id}`}
-                      community={community}
-                      isAdmin={isAdmin || false}
-                    />
-                  )
-                )}
-                {!filteredCommunities.length && searchTerm && (
-                  <NoCommunities searchTerm={searchTerm} />
-                )}
+                {(searchTerm ? filteredCommunities : communities).map(community => (
+                  <CommunityCard key={`$community_${community.id}`} community={community} isAdmin={isAdmin || false} />
+                ))}
+                {!filteredCommunities.length && searchTerm && <NoCommunities searchTerm={searchTerm} />}
               </div>
               <ScrollBar orientation="vertical" />
             </ScrollArea>
           </div>
         </TabsContent>
-        <TabsContent
-          value="discourse"
-          className="h-full flex-col border-none p-0 data-[state=active]:flex"
-        >
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <h2 className="text-2xl font-semibold tracking-tight">
-                Discourse
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                Your favorite communities. From Discourse.
-              </p>
-            </div>
-          </div>
+        <TabsContent value="discourse" className="h-full flex-col border-none p-0 data-[state=active]:flex">
           <Separator className="my-4" />
           <motion.div
             initial="initial"

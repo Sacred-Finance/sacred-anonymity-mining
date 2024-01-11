@@ -1,11 +1,12 @@
-import { useCommunityContext, useUserIfJoined } from '@/contexts/CommunityProvider'
+import { useCommunityContext } from '@/contexts/CommunityProvider'
+import { useUserIfJoined } from '@/contexts/UseUserIfJoined'
 import React, { useEffect, useState } from 'react'
 import { useAccount } from 'wagmi'
 import { Identity } from '@semaphore-protocol/identity'
 import { createNote } from '@/lib/utils'
 import { BigNumber } from 'ethers'
 import { PollUI } from '@components/PollIUI'
-import { ContentActions } from '@components/Post/ContentActions'
+import { CancelAction, DeleteAction, EditAction, SaveAction } from '@components/Post/ContentActions'
 import { PostTitle } from '@components/Post/PostTitle'
 import type { User } from '@/lib/model'
 import { ContentType } from '@/lib/model'
@@ -139,7 +140,7 @@ export const PostItem = ({ post, group, showAvatar = true, refreshData }: PostIt
                 placeholder={t('placeholder.enterPostTitle') as string}
                 type="text"
                 value={contentTitle}
-                onChange={e => setContentTitle(e.target.value)}
+                onChange={e => (setContentTitle ? setContentTitle(e.target.value) : null)}
               />
             )}
 
@@ -175,9 +176,7 @@ export const PostItem = ({ post, group, showAvatar = true, refreshData }: PostIt
         <div className="flex items-center justify-between border-t pt-2">
           <div
             className="flex items-center justify-between gap-4"
-            // style={{
-            //   visibility: commentIsConfirmed(post.id) ? 'visible' : 'hidden',
-            // }}
+
           >
             <AnimalAvatar seed={`${post.note}_${Number(post.groupId)}`} options={{ size: 30 }} />
 
@@ -190,31 +189,37 @@ export const PostItem = ({ post, group, showAvatar = true, refreshData }: PostIt
                 : '-'}
             </p>
           </div>
+
+          <div className="flex items-center  gap-2">
+            {isContentEditing && <CancelAction onCancel={() => setIsContentEditing(false)} />}
+            {isContentEditable && isContentEditing && (
+              <SaveAction onSave={() => saveEditedPost()} isLoading={isLoading} item={post} />
+            )}
+          </div>
           <DropdownCommunityCard
             actions={[
-              <ContentActions
-                key={`content_actions_${post.id}`}
-                group={group}
-                item={post}
-                refreshData={refreshData}
-                contentId={post.id}
-                isContentEditable={isContentEditable}
-                isEditing={isContentEditing}
-                onContentPage={isPostPage}
-                save={() => saveEditedPost()}
-                groupId={groupId}
-                isAdminOrModerator={isAdminOrModerator}
-                setIsContentEditing={value => {
-                  setIsContentEditing(value)
-                  if (value) {
-                    setContentDescription(post.description)
-                    setContentTitle && setContentTitle(post.title)
-                  }
-                }}
-                onClickCancel={() => setIsContentEditing(false)}
-                isLoading={isLoading}
-                hidden={false}
-              />,
+              isContentEditable && !isContentEditing && (
+                <EditAction
+                  setIsEditing={value => {
+                    setIsContentEditing(value)
+                    if (value) {
+                      setContentDescription(post.description)
+                      setContentTitle && setContentTitle(post.title)
+                    }
+                  }}
+                  isEditing={isContentEditing}
+                  isLoading={isLoading}
+                />
+              ),
+              // Assuming the DeleteAction should also be conditionally shown
+              isAdminOrModerator && isContentEditable && !isContentEditing && (
+                <DeleteAction
+                  isAdminOrModerator={isAdminOrModerator}
+                  itemId={post.id}
+                  itemType={post.kind} // Make sure this matches the expected prop
+                  groupId={groupId}
+                />
+              ),
             ]}
           />
         </div>

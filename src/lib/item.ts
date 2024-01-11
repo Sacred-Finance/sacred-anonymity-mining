@@ -77,8 +77,7 @@ export async function create(
   onIPFSUploadSuccess: (arg0: any, arg1: string) => void
 ) {
   const currentDate = new Date()
-  const message =
-    currentDate.getTime().toString() + '#' + JSON.stringify(content)
+  const message = currentDate.getTime().toString() + '#' + JSON.stringify(content)
 
   try {
     const cid = await uploadIPFS(message)
@@ -150,8 +149,7 @@ export async function editContent(
   postedByUser: User
 ) {
   const currentDate = new Date()
-  const message =
-    currentDate.getTime().toString() + '#' + JSON.stringify(content)
+  const message = currentDate.getTime().toString() + '#' + JSON.stringify(content)
   console.log(`Editing your anonymous ${type}...`)
   const cid = await uploadIPFS(message)
   if (!cid) {

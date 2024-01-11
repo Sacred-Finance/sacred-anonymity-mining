@@ -81,7 +81,7 @@ const PostToTopic = ({
         isReadOnly={readonly}
         classes={{
           rootOpen:
-            'fixed z-50 inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center',
+            'fixed z-50 inset-0 bg-gray-900/50 flex justify-center items-center',
           formBody: 'w-full h-full flex flex-col gap-4',
           editor: 'border rounded py-1 px-2 bg-white dark:bg-gray-800',
           submitButton:

@@ -3,11 +3,12 @@ import HomePage from '../components/HomePage'
 import { useRouter } from 'next/router'
 import React, { useEffect } from 'react'
 import useSWR from 'swr'
-import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
+import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
 import Head from 'next/head'
 import { Syncing } from '@/components/Syncing'
 import type { Group } from '@/types/contract/ForumInterface'
+import { ActionType } from "@/contexts/CommunityTypes";
 
 function Home() {
   const router = useRouter()

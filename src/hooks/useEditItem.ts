@@ -1,15 +1,9 @@
 import { useAccount, useContractWrite } from 'wagmi'
 import { ForumContractAddress } from '@/constant/const'
 import ForumABI from '../constant/abi/Forum.json'
-import {
-  generateGroth16Proof,
-  getBytes32FromIpfsHash,
-  uploadIPFS,
-} from '@/lib/utils'
+import { generateGroth16Proof, getBytes32FromIpfsHash, uploadIPFS } from '@/lib/utils'
 import { toast } from 'react-toastify'
 import { useTranslation } from 'react-i18next'
-import type { CommunityId } from '@/contexts/CommunityProvider'
-import { useUserIfJoined } from '@/contexts/CommunityProvider'
 import { Post } from '@/lib/post'
 import { CommentClass } from '@/lib/comment'
 import type { PostContent, User } from '@/lib/model'
@@ -20,6 +14,8 @@ import { GroupPostCommentAPI } from '@/lib/fetcher'
 import type { Address } from '@/types/common'
 import type { Item } from '@/types/contract/ForumInterface'
 import type { BigNumberish } from '@semaphore-protocol/group'
+import type { CommunityId } from '@/contexts/CommunityTypes'
+import { useUserIfJoined } from '@/contexts/UseUserIfJoined'
 
 interface UseEditItemParams {
   item: Item
@@ -55,9 +51,7 @@ export const useEditItem = ({
   const { address } = useAccount()
   const member = useUserIfJoined(groupId)
   const postInstance = new Post(postId, groupId)
-  const commentInstance = commentId
-    ? new CommentClass(groupId, postId, commentId)
-    : null
+  const commentInstance = commentId ? new CommentClass(groupId, postId, commentId) : null
 
   const { writeAsync } = useContractWrite({
     address: ForumContractAddress as Address,
@@ -83,12 +77,7 @@ export const useEditItem = ({
     return true
   }
 
-  const editItem = async ({
-    content,
-    itemId,
-    itemType,
-    note,
-  }: EditItemParams) => {
+  const editItem = async ({ content, itemId, itemType, note }: EditItemParams) => {
     if (!ContentType[itemType]) {
       return toast.error(t('alert.deleteFailed'))
     }
@@ -129,22 +118,8 @@ export const useEditItem = ({
         : null
     } else {
       return itemType == 0 || itemType == 2
-        ? postInstance?.edit(
-            content,
-            address,
-            itemId,
-            member as User,
-            groupId,
-            setIsLoading
-          )
-        : commentInstance?.edit(
-            content,
-            address,
-            itemId,
-            member as User,
-            groupId,
-            setIsLoading
-          )
+        ? postInstance?.edit(content, address, itemId, member as User, groupId, setIsLoading)
+        : commentInstance?.edit(content, address, itemId, member as User, groupId, setIsLoading)
     }
   }
   return { editItem }

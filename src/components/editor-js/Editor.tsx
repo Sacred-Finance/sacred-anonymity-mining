@@ -55,19 +55,18 @@ const EditorBlock = ({
           const inputs = el?.getElementsByTagName('input') || []
           const textareas = el?.getElementsByTagName('textarea') || []
 
-          ;[...inputs, ...textareas].forEach(input =>
-            input.setAttribute('readonly', 'readonly')
-          )
+          ;[...inputs, ...textareas].forEach(input => input.setAttribute('readonly', 'readonly'))
         }
+
         setIsReady(true)
       },
     })
-
     ref.current = editor
-
     // Cleanup function for the effect.
     return () => {
-      editor.destroy()
+      ref.current?.destroy()
+      ref.current = null
+      // editor.destroy()
     }
     // just holder
   }, [holder])
@@ -77,9 +76,7 @@ const EditorBlock = ({
       <div
         {...divProps}
         className={clsx(
-          isReady
-            ? 'prose-lg h-full w-full text-black dark:text-white'
-            : 'hidden',
+          isReady ? 'prose-lg h-full w-full !bg-background/90 text-foreground' : 'hidden',
           divProps.className
         )}
         id={holder}
