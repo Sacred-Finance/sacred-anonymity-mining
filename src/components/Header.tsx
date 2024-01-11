@@ -4,12 +4,14 @@ import { NavBarButton } from '../components/buttons/NavBarButton'
 import { ThemeToggleButton } from './Theme'
 import { UserCircleIcon } from '@heroicons/react/20/solid'
 import ConnectWallet from './Connect/ConnectWallet'
-import { FaDiscord, FaGripLines } from 'react-icons/fa'
+import { FaDiscord } from 'react-icons/fa'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { RiShieldUserFill } from 'react-icons/ri'
 import { NavigationMenu } from '@/shad/ui/navigation-menu'
 import { Button } from '@/shad/ui/button'
 import { ExternalLinkIcon } from 'lucide-react'
+import { BiMenu, BiX } from 'react-icons/bi'
+import { cx } from 'class-variance-authority'
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = React.useState(false)
@@ -29,8 +31,12 @@ const Header = () => {
           <Logo className="h-10 w-auto" />
         </NavBarButton>
 
-        <Button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden">
-          {menuOpen ? <FaGripLines className="h-8 w-8" /> : <FaGripLines className="h-8 w-8" />}
+        <Button
+          variant={'ghost'}
+          onClick={() => setMenuOpen(!menuOpen)}
+          className={cx('aspect-square', menuOpen ? '' : 'md:hidden')}
+        >
+          {menuOpen ? <BiX className="h-8 w-8 shrink-0" /> : <BiMenu className="h-8 w-8 shrink-0" />}
         </Button>
       </div>
 

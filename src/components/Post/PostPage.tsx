@@ -32,6 +32,9 @@ import { useSWRConfig } from 'swr'
 import { CommentClass } from '@/lib/comment'
 import { GroupPostCommentAPI } from '@/lib/fetcher'
 import { useUserIfJoined } from '@/contexts/UseUserIfJoined'
+import { DrawerDialog } from '@components/DrawerDialog'
+import PostCreateForm from '@components/form/post/post.createForm'
+import PollCreateForm from '@components/form/poll/poll.createForm'
 
 export const AIDigestContext = React.createContext<{
   enabled: { [key: string]: boolean }
@@ -51,12 +54,12 @@ export function PostPage({
   comments,
   post,
   community,
-  refreshData,
+  mutate,
 }: {
   comments: Item[]
   post: Item
   community: Group
-  refreshData?: () => void
+  mutate?: () => void
 }) {
   const {
     state: { isAdmin },
@@ -94,7 +97,7 @@ export function PostPage({
               <div className="sticky top-0">
                 <div className="rounded-xl border p-2 dark:border-gray-700 dark:bg-gray-900 ">
                   <ScrollArea className="col-span-12 flex max-h-[80vh] w-full flex-col gap-2 rounded bg-white p-3 dark:border-gray-950/80 dark:bg-gray-950/20">
-                    <PostItem post={post} group={community} refreshData={refreshData} />
+                    <PostItem post={post} group={community} refreshData={mutate} />
                   </ScrollArea>
                 </div>
               </div>
@@ -110,16 +113,30 @@ export function PostPage({
                   {/* Comments / Replies */}
                   <Tab.Panel className="flex flex-col gap-4 ">
                     <div className="sticky top-0 z-10 flex gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
-                      <ShowConnectIfNotConnected>
-                        <div className="flex gap-4">
-                          {selectedTab === 0 && (
-                            <CreateCommentUI post={post} group={community} onSuccess={refreshData} />
-                          )}
-                          {(selectedTab === 1 || selectedTab === 0) && (
-                            <CreatePollUI post={post} group={community} onSuccess={refreshData} />
-                          )}
-                        </div>
-                      </ShowConnectIfNotConnected>
+                      <div className="flex w-fit gap-4 rounded-lg ">
+                        <ShowConnectIfNotConnected>
+                          <DrawerDialog
+                            label={
+                              <div className="flex items-center gap-2">
+                                <ChatIcon className="h-5 w-5" />
+                                <span className="text-sm">New Post</span>
+                              </div>
+                            }
+                          >
+                            <PostCreateForm group={community} post={post} mutate={mutate} />
+                          </DrawerDialog>
+                          <DrawerDialog
+                            label={
+                              <div className="flex items-center gap-2">
+                                <PollIcon className="h-5 w-5" />
+                                <span className="text-sm">New Poll</span>
+                              </div>
+                            }
+                          >
+                            <PollCreateForm group={community} post={post} mutate={mutate} />
+                          </DrawerDialog>
+                        </ShowConnectIfNotConnected>
+                      </div>
                     </div>
                     {comments.map(comment => (
                       <div
