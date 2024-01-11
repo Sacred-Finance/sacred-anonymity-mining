@@ -20,7 +20,7 @@ export interface User {
   name: string
   identityCommitment: Identity['_commitment']
   id: number | string
-  groupId: number
+  groupId: BigNumberish
 }
 
 export enum ContentType {

@@ -14,7 +14,7 @@ export type GroupWithPostDataResponse = {
 // get group details
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<{ group: Group; posts: Item[]; users: User[] } | { error: string }>
+  res: NextApiResponse<GroupWithPostDataResponse | { error: string }>
 ) {
   try {
     const { groupId } = req.query
@@ -28,7 +28,7 @@ export default async function handler(
     const group = await augmentGroupData(rawGroupData)
 
     const rawPostResults = (await Promise.all(
-      rawGroupData.posts.map(async (postId, i) => {
+      rawGroupData.posts.map(async postId => {
         try {
           return await forumContract.read.itemAt([postId])
         } catch (err) {

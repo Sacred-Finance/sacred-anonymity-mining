@@ -1,11 +1,6 @@
-import { useActiveUser } from '@/contexts/CommunityProvider'
 import { createComment, createPost, votePoll } from '@/lib/api'
 import { GroupPostAPI, GroupPostCommentAPI } from '@/lib/fetcher'
-import type {
-  ItemCreationRequest,
-  NewPostContent,
-  PollRequestStruct,
-} from '@/lib/model'
+import type { ItemCreationRequest, NewPostContent, PollRequestStruct } from '@/lib/model'
 
 import {
   createNote,
@@ -62,7 +57,6 @@ interface SubmitPollParams {
 
 export const usePoll = ({ group }: { group: Group }) => {
   const { address } = useAccount()
-  useActiveUser({ groupId: group?.id })
 
   const createPoll = async ({
     content,
@@ -89,11 +83,7 @@ export const usePoll = ({ group }: { group: Group }) => {
       const signal = getBytes32FromIpfsHash(cid)
       const extraNullifier = hashBytes(signal).toString()
       const users = await fetchUsersFromSemaphoreContract(group.groupId)
-      const semaphoreGroup = new SemaphoreGroup(
-        group.id,
-        20,
-        users?.map(u => BigInt(u)) ?? []
-      )
+      const semaphoreGroup = new SemaphoreGroup(group.id, 20, users?.map(u => BigInt(u)) ?? [])
 
       const userIdentity = new Identity(address)
 
@@ -109,12 +99,7 @@ export const usePoll = ({ group }: { group: Group }) => {
         answerCIDs.push(answerCID)
       }
 
-      const fullProof = await generateProof(
-        userIdentity,
-        semaphoreGroup,
-        extraNullifier,
-        hashBytes(signal)
-      )
+      const fullProof = await generateProof(userIdentity, semaphoreGroup, extraNullifier, hashBytes(signal))
       const request: ItemCreationRequest = {
         contentCID: signal,
         merkleTreeRoot: fullProof.merkleTreeRoot.toString(),
@@ -129,6 +114,10 @@ export const usePoll = ({ group }: { group: Group }) => {
         rateScaleFrom,
         rateScaleTo,
         answerCIDs,
+      }
+      const tempCache = {
+        id: 'temp',
+        content: content,
       }
 
       const { status } =
@@ -148,12 +137,21 @@ export const usePoll = ({ group }: { group: Group }) => {
               asPoll: true,
               pollRequest: pollRequest,
             })
+
       if (status === 200) {
         console.log(`A post posted by user ${address}`)
         if (post !== undefined) {
-          await mutate(
-            GroupPostCommentAPI(group.id.toString(), post.id.toString())
-          )
+          await mutate(GroupPostCommentAPI(group.id.toString(), post.id.toString()), undefined, {
+            optimisticData: data => {
+              console.log('optimisticData', data)
+              if (data) {
+                return {
+                  ...data,
+                  posts: [...data.posts, tempCache],
+                }
+              }
+            },
+          })
         } else {
           await mutate(GroupPostAPI(group.id.toString()))
         }
@@ -170,12 +168,7 @@ export const usePoll = ({ group }: { group: Group }) => {
     }
   }
 
-  const submitPoll = async ({
-    id,
-    pollData,
-    onSuccessCallback,
-    onErrorCallback,
-  }: SubmitPollParams) => {
+  const submitPoll = async ({ id, pollData, onSuccessCallback, onErrorCallback }: SubmitPollParams) => {
     try {
       const signal = hashBytes2(id, 'votePoll')
       const extraNullifier = signal.toString()
@@ -184,12 +177,7 @@ export const usePoll = ({ group }: { group: Group }) => {
       users.forEach(u => semaphoreGroup.addMember(BigInt(u)))
       const userIdentity = new Identity(address)
 
-      const fullProof = await generateProof(
-        userIdentity,
-        semaphoreGroup,
-        extraNullifier,
-        signal
-      )
+      const fullProof = await generateProof(userIdentity, semaphoreGroup, extraNullifier, signal)
       const { status, data } = await votePoll(
         id.toString(),
         group.id.toString(),
@@ -199,12 +187,19 @@ export const usePoll = ({ group }: { group: Group }) => {
         fullProof.proof
       )
       if (status === 200) {
-        onSuccessCallback(data)
+        if (onSuccessCallback) {
+          onSuccessCallback(data)
+        }
       } else {
-        onErrorCallback('Voting Poll failed!')
+        if (onErrorCallback) {
+          onErrorCallback('Voting Poll failed!')
+        }
       }
     } catch (error) {
-      onErrorCallback(error)
+      console.error(error)
+      if (onErrorCallback && error instanceof Error) {
+        onErrorCallback(error)
+      }
     }
   }
 

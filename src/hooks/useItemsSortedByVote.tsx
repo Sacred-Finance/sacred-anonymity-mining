@@ -1,50 +1,69 @@
 import { useMemo } from 'react'
 import type { Item } from '@/types/contract/ForumInterface'
 
+const sortByVoteDifference =
+  (inverse = false) =>
+  (a, b) => {
+    const voteDiff = item => item.upvote - item.downvote
+    return inverse ? voteDiff(a) - voteDiff(b) : voteDiff(b) - voteDiff(a)
+  }
+
+const sortByControversial = (a, b) => {
+  const totalVotes = item => item.upvote + item.downvote
+  const controversyRatio = item => {
+    const votes = totalVotes(item)
+    return votes > 0 ? Math.abs(item.upvote - item.downvote) / votes : 1
+  }
+  const aRatio = controversyRatio(a)
+  const bRatio = controversyRatio(b)
+  const votesComparison = totalVotes(b) - totalVotes(a)
+  return votesComparison === 0 ? aRatio - bRatio : votesComparison
+}
+
+const sortByDate =
+  (inverse = false) =>
+  (a, b) => {
+    const dateDiff = item => new Date(item?.description?.time).getTime()
+    return inverse ? dateDiff(a) - dateDiff(b) : dateDiff(b) - dateDiff(a)
+  }
+
+const sortByActivity = (a, b) => b.childIds.length - a.childIds.length
+
+const sortByContentLength = (a, b) => b.note.length - a.note.length
+
+const sortByEngagementScore = (a, b) => {
+  const engagementScore = item => item.upvote + item.childIds.length - item.downvote
+  return engagementScore(b) - engagementScore(a)
+}
+
 export const useItemsSortedByVote = (
   tempData: Item[],
   data: Item[],
-  sortBy: 'highest' | 'lowest' | 'controversial' | 'newest' | 'oldest'
-) => {
+  sortBy: 'highest' | 'lowest' | 'controversial' | 'newest' | 'oldest' | 'activity' | 'contentLength' | 'engagement'
+): Item[] => {
   return useMemo(() => {
-    const sorted = [
-      ...tempData.filter(data => data),
-      ...(data?.filter(data => data) ?? []),
-    ]
+    if (!data) {
+      return []
+    }
+    const sorted = [...tempData, ...data].filter(item => item !== undefined && item !== null)
 
     switch (sortBy) {
       case 'highest':
-        return sorted.sort(
-          (a, b) => b.upvote - b.downvote - (a.upvote - a.downvote)
-        )
+        return sorted.sort(sortByVoteDifference())
       case 'lowest':
-        return sorted.sort(
-          (a, b) => a.upvote - a.downvote - (b.upvote - b.downvote)
-        )
+        return sorted.sort(sortByVoteDifference(true))
       case 'controversial':
-        return sorted.sort((a, b) => {
-          const aVotes = a.upvote + a.downvote
-          const bVotes = b.upvote + b.downvote
-          const aDiff = Math.abs(a.upvote - a.downvote)
-          const bDiff = Math.abs(b.upvote - b.downvote)
-          const aRatio = aVotes > 0 ? aDiff / aVotes : 1
-          const bRatio = bVotes > 0 ? bDiff / bVotes : 1
-          if (aVotes === bVotes) {
-            return aRatio - bRatio
-          } else {
-            return bVotes - aVotes
-          }
-        })
+        return sorted.sort(sortByControversial)
       case 'newest':
-        return sorted.sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        )
+        return sorted.sort(sortByDate())
       case 'oldest':
-        return sorted.sort(
-          (a, b) =>
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        )
+        return sorted.sort(sortByDate(true))
+      case 'activity':
+        return sorted.sort(sortByActivity)
+      case 'contentLength':
+        return sorted.sort(sortByContentLength)
+      case 'engagement':
+        return sorted.sort(sortByEngagementScore)
       default:
         return sorted
     }

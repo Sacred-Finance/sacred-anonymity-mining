@@ -2,19 +2,11 @@ import type { Proof } from '@semaphore-protocol/proof'
 import axios from 'axios'
 import type { BigNumberish } from 'ethers'
 import { RELAYER_URL } from '@/constant/const'
-import type {
-  CommunityDetails,
-  ItemCreationRequest,
-  PollRequestStruct,
-  Requirement,
-} from './model'
+import type { CommunityDetails, ItemCreationRequest, PollRequestStruct } from './model'
+import type { CreateGroupSchema } from '@components/form/form.schema'
+import type { z } from 'zod'
 
-export async function joinGroup(
-  groupId: string,
-  identityCommitment: string,
-  username: string,
-  note: string
-) {
+export async function joinGroup(groupId: string, identityCommitment: string, username: string, note: string) {
   return axios.post(`${RELAYER_URL}/join-group`, {
     identityCommitment,
     groupId,
@@ -33,15 +25,7 @@ interface LeaveGroupParams {
   pathIndices: number[]
 }
 
-export const leaveGroup = async ({
-  groupId,
-  identityCommitment,
-  a,
-  b,
-  c,
-  siblings,
-  pathIndices,
-}: LeaveGroupParams) =>
+export const leaveGroup = async ({ groupId, identityCommitment, a, b, c, siblings, pathIndices }: LeaveGroupParams) =>
   axios.post(`${RELAYER_URL}/leave-group`, {
     identityCommitment,
     groupId,
@@ -53,11 +37,11 @@ export const leaveGroup = async ({
   })
 
 export async function createGroup(
-  requirements: Requirement[],
   groupName: string,
   chainId: number,
   details: CommunityDetails,
-  note: string
+  note: string,
+  requirements?: z.infer<typeof CreateGroupSchema>['tokenRequirements']
 ) {
   return axios.post(`${RELAYER_URL}/create-group`, {
     groupName,
@@ -76,13 +60,7 @@ interface Post {
   pollRequest: PollRequestStruct
 }
 
-export async function createPost({
-  groupId,
-  request,
-  solidityProof,
-  asPoll,
-  pollRequest,
-}: Post) {
+export async function createPost({ groupId, request, solidityProof, asPoll, pollRequest }: Post) {
   return axios.post(`${RELAYER_URL}/post`, {
     groupId,
     request,
@@ -101,14 +79,7 @@ interface Comment {
   pollRequest: PollRequestStruct
 }
 
-export async function createComment({
-  groupId,
-  parentId,
-  request,
-  solidityProof,
-  asPoll,
-  pollRequest,
-}: Comment) {
+export async function createComment({ groupId, parentId, request, solidityProof, asPoll, pollRequest }: Comment) {
   return axios.post(`${RELAYER_URL}/comment`, {
     groupId,
     parentId,
@@ -119,14 +90,7 @@ export async function createComment({
   })
 }
 
-export async function edit(
-  itemId: string,
-  contentCID: string,
-  note: bigint,
-  a,
-  b,
-  c
-) {
+export async function edit(itemId: string, contentCID: string, note: bigint, a, b, c) {
   return axios.post(`${RELAYER_URL}/edit`, {
     a,
     b,
@@ -154,31 +118,26 @@ export async function vote(
   })
 }
 
-export async function setGroupDetails(
-  groupId: string,
-  a: any,
-  b: any,
-  c: any,
-  details: any,
-  isAdmin: boolean = false
-) {
-  return axios.post(`${RELAYER_URL}/set-group-details`, {
-    groupId,
-    a,
-    b,
-    c,
-    details,
-    isAdmin,
-  })
+interface AdminGroupDetailsOptions {
+  groupId: string
+  details: any
+  isAdmin: true
 }
 
-export async function setGroupDescription(
-  groupId: string,
-  a: any,
-  b: any,
-  c: any,
-  description: string
-) {
+interface RegularGroupDetailsOptions {
+  groupId: string
+  a: any
+  b: any
+  c: any
+  details: any
+  isAdmin: false
+}
+
+export async function setGroupDetails(options: AdminGroupDetailsOptions | RegularGroupDetailsOptions) {
+  return axios.post(`${RELAYER_URL}/set-group-details`, options)
+}
+
+export async function setGroupDescription(groupId: string, a: any, b: any, c: any, description: string) {
   return axios.post(`${RELAYER_URL}/set-group-description`, {
     groupId,
     a,
@@ -188,13 +147,7 @@ export async function setGroupDescription(
   })
 }
 
-export async function setGroupTags(
-  groupId: string,
-  a: any,
-  b: any,
-  c: any,
-  tags: string[]
-) {
+export async function setGroupTags(groupId: string, a: any, b: any, c: any, tags: string[]) {
   return axios.post(`${RELAYER_URL}/set-group-tags`, {
     groupId,
     a,
@@ -204,13 +157,7 @@ export async function setGroupTags(
   })
 }
 
-export async function setGroupBanner(
-  groupId: string,
-  a: any,
-  b: any,
-  c: any,
-  bannerCID: string
-) {
+export async function setGroupBanner(groupId: string, a: any, b: any, c: any, bannerCID: string) {
   return axios.post(`${RELAYER_URL}/set-group-banner`, {
     groupId,
     a,
@@ -220,13 +167,7 @@ export async function setGroupBanner(
   })
 }
 
-export async function setGroupLogo(
-  groupId: string,
-  a: any,
-  b: any,
-  c: any,
-  logoCID: string
-) {
+export async function setGroupLogo(groupId: string, a: any, b: any, c: any, logoCID: string) {
   return axios.post(`${RELAYER_URL}/set-group-logo`, {
     groupId,
     a,

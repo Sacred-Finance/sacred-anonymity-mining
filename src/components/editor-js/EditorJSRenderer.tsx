@@ -20,12 +20,7 @@ const EditorJsRenderer = ({ data, isHtml = false, className }: Props) => {
 
   if (isHtml && typeof data === 'string') {
     html = [data]
-  } else if (
-    data &&
-    'blocks' in data &&
-    Array.isArray(data.blocks) &&
-    data.blocks.length
-  ) {
+  } else if (data && Array.isArray(data.blocks) && 'blocks' in data && data.blocks.length) {
     html = EditorJsToHtml?.parse(data) as (string | JSX.Element)[]
   }
 
@@ -38,9 +33,7 @@ const EditorJsRenderer = ({ data, isHtml = false, className }: Props) => {
     <div className={clsx('prose-lg overflow-y-hidden', className)}>
       {html.map((item, index) => {
         if (typeof item === 'string') {
-          return (
-            <div dangerouslySetInnerHTML={{ __html: item }} key={index}></div>
-          )
+          return <div dangerouslySetInnerHTML={{ __html: item }} key={index}></div>
         }
         // Assuming the object can be represented by its keys. Adjust if needed.
         return <div key={index}>{Object.keys(item).join(', ')}</div>

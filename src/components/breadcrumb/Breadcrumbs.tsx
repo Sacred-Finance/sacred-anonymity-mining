@@ -42,10 +42,7 @@ export const Breadcrumbs = (): JSX.Element => {
   const breadcrumbItems = useBreadcrumbs()
 
   return (
-    <nav
-      className="flex h-10 justify-between gap-4 rounded-t px-5 py-3 text-gray-700"
-      aria-label="Breadcrumb"
-    >
+    <nav className="flex h-10 justify-between gap-4 rounded-t px-5 py-3 text-gray-700" aria-label="Breadcrumb">
       <ol className="flex items-center gap-4 dark:text-white">
         {breadcrumbItems.map((item, index) => (
           <li key={index} className="inline-flex items-center gap-4">
@@ -67,9 +64,7 @@ const BreadcrumbLink = ({ item }: { item: BreadCrumbItem }) => {
           e.preventDefault()
         }
       }}
-      className={clsx(
-        item.isCurrentPage ? 'text-primary' : 'hover:text-primary/90'
-      )}
+      className={clsx(item.isCurrentPage ? 'text-primary' : 'hover:text-primary/90')}
     >
       {item.label}
     </Link>

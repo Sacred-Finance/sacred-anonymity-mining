@@ -9,6 +9,15 @@ module.exports = {
     remotePatterns: [
       {
         protocol: 'https',
+        hostname: 'arbitrum.foundation',
+      },
+      {
+        protocol: 'https',
+        hostname: 's2.coinmarketcap.com',
+      },
+
+      {
+        protocol: 'https',
         hostname: 'ipfs.io',
       },
       {

@@ -1,4 +1,4 @@
-import { ActionType, useCommunityContext } from '@/contexts/CommunityProvider'
+import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { leaveGroup } from '@/lib/api'
 import type { User } from '@/lib/model'
 import {
@@ -9,6 +9,7 @@ import {
 import { Group } from '@semaphore-protocol/group'
 import { Identity } from '@semaphore-protocol/identity'
 import { useAccount } from 'wagmi'
+import { ActionType } from "@/contexts/CommunityTypes";
 
 const username = 'anon'
 

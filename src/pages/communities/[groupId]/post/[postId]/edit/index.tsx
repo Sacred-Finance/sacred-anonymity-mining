@@ -1,7 +1,7 @@
 import React from 'react'
 import { useCommunityById } from '@/contexts/CommunityProvider'
 import { useRouter } from 'next/router'
-import { EditGroup } from '@components/EditGroup'
+import { EditGroup } from '@components/form/EditGroup'
 
 // todo: figure out when/if it's beneficial to make calls to individual contract updates vs editing the entire group at once
 

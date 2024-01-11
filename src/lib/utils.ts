@@ -9,16 +9,113 @@ import type { AvatarOptions } from 'animal-avatar-generator'
 import type { BabyJub, PedersenHash } from 'circomlibjs/index'
 import type { BigNumberish } from '@semaphore-protocol/group'
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { groth16 } = require('snarkjs')
 
 let ipfs: IPFSHTTPClient
 let babyJub: BabyJub
 let pedersen: PedersenHash
 
-const pedersenHash = (data: Uint8Array) =>
-  BigInt(babyJub.F.toString(babyJub.unpackPoint(pedersen.hash(data))[0]))
+export const uploadImageToIPFS = async (file: File): Promise<string | null> => {
+  if (!ipfs) {
+    console.log('ipfs not started')
+    await startIPFS()
+  }
+  if (!file) {
+    console.error('no file provided')
+    return null
+  }
 
-function unstringifyBigInts(o) {
+  // Check if the file type is correct
+  if (!file.type.startsWith('image/')) {
+    console.error('File is not an image:', file.type)
+    return null
+  }
+
+  try {
+    const result = await ipfs.add(file)
+    console.info('Image uploaded to IPFS:', result)
+    return result.path
+  } catch (err) {
+    console.error('Error uploading file to IPFS', err)
+    return null
+  }
+}
+
+export const startIPFS = async () => {
+  if (ipfs) {
+    return ipfs
+  }
+
+  try {
+    const projectId = process.env.NEXT_PUBLIC_INFURA_IPFS_PROJECT_ID
+    const projectSecret = process.env.NEXT_PUBLIC_INFURA_IPFS_PROJECT_SECRET
+
+    if (!projectId || !projectSecret) {
+      throw new Error('IPFS project ID and secret must be provided.')
+    }
+
+    const auth = 'Basic ' + Buffer.from(`${projectId}:${projectSecret}`).toString('base64')
+    const endpoint = `https://ipfs.infura.io:5001/api/v0`
+    ipfs = create({ url: endpoint, headers: { authorization: auth } })
+    console.info('IPFS client started.')
+    return ipfs
+  } catch (error) {
+    console.error('Error starting IPFS:', error)
+    throw error // Rethrow or handle the error as required
+  }
+}
+
+export const uploadIPFS = async (message: string) => {
+  if (!ipfs) {
+    console.log('ipfs not started')
+    await startIPFS()
+  }
+  try {
+    const result = await ipfs.add(new TextEncoder().encode(message))
+    console.info('File uploaded to IPFS:', result)
+    return result.path
+  } catch (err) {
+    console.error('Error pinning file to IPFS', err)
+    return null
+  }
+}
+export const getContent = async (CID: string) => {
+  if (!ipfs) {
+    console.info('IPFS not started. Starting IPFS...')
+    await startIPFS()
+  }
+
+  if (!CID) {
+    console.error('No CID provided.')
+    return ''
+  }
+
+  const decoder = new TextDecoder()
+  let content = ''
+
+  try {
+    for await (const chunk of ipfs.cat(CID)) {
+      content += decoder.decode(chunk, { stream: true })
+    }
+    console.info(`Content loaded for CID: ${CID}`)
+  } catch (error) {
+    console.error(`Error fetching content for CID ${CID}:`, error)
+    return ''
+  }
+
+  // Handle index marker if needed
+  const indexMark = content.indexOf('#')
+  console.info('Index mark found at position:', indexMark)
+  if (indexMark >= 0) {
+    return content.substring(indexMark + 1)
+  }
+
+  return content
+}
+const pedersenHash = (data: Uint8Array) => BigInt(babyJub.F.toString(babyJub.unpackPoint(pedersen.hash(data))[0]))
+
+function unstringifyBigInts(o: string | number | bigint | boolean | null) {
   if (typeof o == 'string' && /^[0-9]+$/.test(o)) {
     return BigInt(o)
   } else if (typeof o == 'string' && /^0x[0-9a-fA-F]+$/.test(o)) {
@@ -40,13 +137,13 @@ function unstringifyBigInts(o) {
   }
 }
 
-async function convertProofToSolidityInput(proof, publicSignals) {
+async function convertProofToSolidityInput(
+  proof: string | number | bigint | boolean | null,
+  publicSignals: string | number | bigint | boolean | null
+) {
   const editedPublicSignals = unstringifyBigInts(publicSignals)
   const editedProof = unstringifyBigInts(proof)
-  const calldata = await groth16.exportSolidityCallData(
-    editedProof,
-    editedPublicSignals
-  )
+  const calldata = await groth16.exportSolidityCallData(editedProof, editedPublicSignals)
   const argv = calldata
     .replace(/["[\]\s]/g, '')
     .split(',')
@@ -71,77 +168,21 @@ export const generateGroth16Proof = async ({
   wasmFile = '/circuits/VerifyOwner__prod.wasm',
   zkeyFileName = '/circuits/VerifyOwner__prod.0.zkey',
 }: GenerateGroth16ProofParams) => {
-  const { proof: _proof, publicSignals: _publicSignals } =
-    await groth16.fullProve(input, wasmFile, zkeyFileName)
+  const { proof: _proof, publicSignals: _publicSignals } = await groth16.fullProve(input, wasmFile, zkeyFileName)
   return await convertProofToSolidityInput(_proof, _publicSignals)
-}
-
-export const getContent = async (CID: string) => {
-  if (!ipfs) {
-    console.log('ipfs not started')
-    await startIPFS()
-  }
-  if (!CID) {
-    console.error('no CID')
-    return ''
-  }
-  const decoder = new TextDecoder()
-  let content = ''
-  console.log(CID + ' loading')
-
-  try {
-    for await (const chunk of ipfs.cat(CID)) {
-      // chunks of data are returned as a Uint8Array, convert it back to a string
-      content += decoder.decode(chunk, { stream: true })
-    }
-  } catch (error) {
-    console.error('error', error)
-  }
-
-  console.log(CID + ' loaded')
-
-  const indexMark = content.indexOf('#')
-  console.log('indexMark', indexMark)
-  if (indexMark >= 0) {
-    return content.substring(indexMark + 1)
-  }
-
-  console.log('content', content)
-  return content
 }
 
 export const getIpfsHashFromBytes32 = (bytes32Hex: string): string => {
   if (bytes32Hex === ethers.constants.HashZero) {
     return ''
   }
-
-  console.log('bytes32Hex', bytes32Hex)
-  // Add our default ipfs values for first 2 bytes:
-  // function:0x12=sha2, size:0x20=256 bits
-  // and cut off leading "0x"
   const hashHex = '1220' + bytes32Hex.slice(2)
   const hashBytes = Buffer.from(hashHex, 'hex')
   return utils.base58.encode(hashBytes)
 }
 
 export const getBytes32FromIpfsHash = (ipfsListing: string): string => {
-  return (
-    '0x' +
-    Buffer.from(utils.base58.decode(ipfsListing).slice(2)).toString('hex')
-  )
-}
-
-export const uploadIPFS = async (message: string) => {
-  if (!ipfs) {
-    return null
-  }
-  try {
-    const result = await ipfs.add(new TextEncoder().encode(message))
-    return result.path
-  } catch (err) {
-    console.error('Error pinning file to IPFS', err)
-    return null
-  }
+  return '0x' + Buffer.from(utils.base58.decode(ipfsListing).slice(2)).toString('hex')
 }
 
 export const getBytes32FromString = (str: string): string => {
@@ -152,35 +193,15 @@ export const getStringFromBytes32 = (bytes32Hex: string): string => {
   return ethers.utils.parseBytes32String(bytes32Hex)
 }
 
-export const uploadImageToIPFS = async (
-  message: File
-): Promise<string | null> => {
-  if (!ipfs || !message) {
-    return null
-  }
-  try {
-    const result = await ipfs.add(message)
-    console.log('ipfs image upload result', result)
-    return result.path
-  } catch (err) {
-    console.error('Error pinning file to IPFS', err)
-    return null
-  }
-}
-
-export const hashBytes2 = (itemId: number, type: string): bigint => {
-  return (
-    BigInt(
-      utils.keccak256(utils.solidityPack(['uint256', 'string'], [itemId, type]))
-    ) >> BigInt(8)
-  )
+export const hashBytes2 = (itemId: BigNumberish, type: string): bigint => {
+  return BigInt(utils.keccak256(utils.solidityPack(['uint256', 'string'], [itemId, type]))) >> BigInt(8)
 }
 
 export const hashBytes = (signal: string): bigint => {
   return BigInt(utils.keccak256(signal)) >> BigInt(8)
 }
 
-export const numToBuffer = (number, size, endianess): Buffer => {
+export const numToBuffer = (number: bigint, size: number, endianess: string): Buffer => {
   if (endianess === 'le') {
     return toBufferLE(number, size)
   } else if (endianess === 'be') {
@@ -195,10 +216,7 @@ export const createNote = async (identity: Identity): Promise<bigint> => {
   const trapdoor: bigint = identity.getTrapdoor()
   const nullifier: bigint = identity.getNullifier()
   const trapdoorBuffer: Buffer = numToBuffer(trapdoor, 32, 'le')
-  const image: Buffer = Buffer.concat([
-    trapdoorBuffer,
-    numToBuffer(nullifier, 32, 'le'),
-  ])
+  const image: Buffer = Buffer.concat([trapdoorBuffer, numToBuffer(nullifier, 32, 'le')])
 
   if (!babyJub) {
     babyJub = await buildBabyjub()
@@ -216,34 +234,6 @@ export const createInputNote = async (identity: Identity) => {
   const trapdoor = identity.getTrapdoor()
   const nullifier = identity.getNullifier()
   return { note, trapdoor, nullifier }
-}
-
-export const startIPFS = async () => {
-  if (ipfs) {
-    return ipfs
-  }
-
-  try {
-    const auth =
-      'Basic ' +
-      Buffer.from(
-        process.env.NEXT_PUBLIC_INFURA_IPFS_PROJECT_ID +
-          ':' +
-          process.env.NEXT_PUBLIC_INFURA_IPFS_PROJECT_SECRET
-      ).toString('base64')
-
-    ipfs = create({
-      host: 'ipfs.infura.io',
-      port: 5001,
-      protocol: 'https',
-      headers: {
-        authorization: auth,
-      },
-    })
-  } catch (error) {
-    console.error('Error starting IPFS:', error)
-    throw error // Or handle the error as you see fit
-  }
 }
 
 export const commentIsConfirmed = (id: string) => {
@@ -290,24 +280,16 @@ interface UserJoined {
   identityCommitment: bigint
 }
 
-export const hasUserJoined = async ({
-  groupId,
-  identityCommitment,
-}: UserJoined) => {
+export const hasUserJoined = async ({ groupId, identityCommitment }: UserJoined) => {
   try {
-    return await forumContract.read.isMemberJoined([
-      groupId,
-      identityCommitment,
-    ])
+    return await forumContract.read.isMemberJoined([groupId, identityCommitment])
   } catch (error) {
     console.log(error)
     return false
   }
 }
 
-export const fetchUsersFromSemaphoreContract = async (
-  groupId?: BigNumberish
-) => {
+export const fetchUsersFromSemaphoreContract = async (groupId?: BigNumberish) => {
   if (!groupId) {
     return []
   }
@@ -318,5 +300,4 @@ export const generateAvatar = async (seed: string, options: AvatarOptions) => {
   const avatar = (await import('animal-avatar-generator')).default
   return avatar(seed, { size: 200, ...options })
 }
-export const HashZero =
-  '0x0000000000000000000000000000000000000000000000000000000000000000'
+export const HashZero = '0x0000000000000000000000000000000000000000000000000000000000000000'

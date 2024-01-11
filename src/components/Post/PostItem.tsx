@@ -1,14 +1,12 @@
-import {
-  useCommunityContext,
-  useUserIfJoined,
-} from '@/contexts/CommunityProvider'
+import { useCommunityContext } from '@/contexts/CommunityProvider'
+import { useUserIfJoined } from '@/contexts/UseUserIfJoined'
 import React, { useEffect, useState } from 'react'
 import { useAccount } from 'wagmi'
 import { Identity } from '@semaphore-protocol/identity'
-import { commentIsConfirmed, createNote } from '@/lib/utils'
+import { createNote } from '@/lib/utils'
 import { BigNumber } from 'ethers'
 import { PollUI } from '@components/PollIUI'
-import { ContentActions } from '@components/Post/ContentActions'
+import { CancelAction, DeleteAction, EditAction, SaveAction } from '@components/Post/ContentActions'
 import { PostTitle } from '@components/Post/PostTitle'
 import type { User } from '@/lib/model'
 import { ContentType } from '@/lib/model'
@@ -21,9 +19,10 @@ import type { Group, Item } from '@/types/contract/ForumInterface'
 import EditorJsRenderer from '@components/editor-js/EditorJSRenderer'
 import type { Address } from '@/types/common'
 import AnimalAvatar from '@components/AnimalAvatar'
-import { VoteForItemUI } from '@components/Post/PostPage'
 import { formatDistanceToNow } from 'date-fns'
 import { DropdownCommunityCard } from '@components/CommunityCard/DropdownCommunityCard'
+import clsx from 'clsx'
+import { VoteUI } from '../Vote'
 
 const Editor = dynamic(() => import('../editor-js/Editor'), {
   ssr: false,
@@ -36,12 +35,7 @@ interface PostItemProps {
   refreshData?: () => void
 }
 
-export const PostItem = ({
-  post,
-  group,
-  showAvatar = true,
-  refreshData,
-}: PostItemProps) => {
+export const PostItem = ({ post, group, showAvatar = true, refreshData }: PostItemProps) => {
   const { groupId, parentId, id } = post
 
   const postId = parentId && +parentId > 0 ? parentId : id
@@ -79,11 +73,7 @@ export const PostItem = ({
         if (!contentDescription || !contentDescription.blocks?.length) {
           toast.error(t('alert.emptyContent'))
         }
-        if (
-          !contentTitle ||
-          !contentDescription ||
-          !contentDescription.blocks?.length
-        ) {
+        if (!contentTitle || !contentDescription || !contentDescription.blocks?.length) {
           return toast.error(t('alert.emptyContent'))
         }
       }
@@ -99,7 +89,6 @@ export const PostItem = ({
         refreshData && refreshData()
         setIsContentEditing(false)
       })
-
     } catch (error) {
       console.log(error)
       toast.error(t('alert.editFailed'))
@@ -138,7 +127,10 @@ export const PostItem = ({
 
   return (
     <div>
-      <div className="flex flex-col gap-2">
+      <div
+        id={post?.isMutating ? `new_item` : `item_${post.id}`}
+        className={clsx(['flex flex-col gap-2', post?.isMutating ? 'animate-pulse' : ''])}
+      >
         {(isTypeOfPost || isTypeOfPoll) && (
           <div className="flex flex-col gap-4">
             {isContentEditing && (
@@ -148,17 +140,12 @@ export const PostItem = ({
                 placeholder={t('placeholder.enterPostTitle') as string}
                 type="text"
                 value={contentTitle}
-                onChange={e => setContentTitle(e.target.value)}
+                onChange={e => (setContentTitle ? setContentTitle(e.target.value) : null)}
               />
             )}
 
             {!isContentEditing && post.title && (
-              <PostTitle
-                title={post.title}
-                id={post.id}
-                onPostPage={isPostPage}
-                post={post}
-              />
+              <PostTitle title={post.title} id={post.id} onPostPage={isPostPage} post={post} />
             )}
           </div>
         )}
@@ -167,9 +154,7 @@ export const PostItem = ({
           {!isContentEditing ? (
             <EditorJsRenderer
               data={
-                isTypeOfPost || isTypeOfPoll
-                  ? post.description
-                  : { blocks: post.blocks || post?.description?.blocks }
+                isTypeOfPost || isTypeOfPoll ? post.description : { blocks: post.blocks || post?.description?.blocks }
               }
             />
           ) : (
@@ -191,50 +176,50 @@ export const PostItem = ({
         <div className="flex items-center justify-between border-t pt-2">
           <div
             className="flex items-center justify-between gap-4"
-            style={{
-              visibility: commentIsConfirmed(post.id) ? 'visible' : 'hidden',
-            }}
-          >
-            <AnimalAvatar
-              seed={`${post.note}_${Number(post.groupId)}`}
-              options={{ size: 30 }}
-            />
 
-            <VoteForItemUI post={post} group={group} onSuccess={refreshData} />
+          >
+            <AnimalAvatar seed={`${post.note}_${Number(post.groupId)}`} options={{ size: 30 }} />
+
+            <VoteUI post={post} group={group} />
 
             <p className="inline-block text-sm">
               🕛{' '}
               {post?.description?.time || post?.time
-                ? formatDistanceToNow(
-                    new Date(post?.description?.time || post?.time).getTime()
-                  )
+                ? formatDistanceToNow(new Date(post?.description?.time || post?.time).getTime())
                 : '-'}
             </p>
           </div>
+
+          <div className="flex items-center  gap-2">
+            {isContentEditing && <CancelAction onCancel={() => setIsContentEditing(false)} />}
+            {isContentEditable && isContentEditing && (
+              <SaveAction onSave={() => saveEditedPost()} isLoading={isLoading} item={post} />
+            )}
+          </div>
           <DropdownCommunityCard
             actions={[
-              <ContentActions
-                group={group}
-                item={post}
-                refreshData={refreshData}
-                contentId={post.id}
-                isContentEditable={isContentEditable}
-                isEditing={isContentEditing}
-                onContentPage={isPostPage}
-                save={() => saveEditedPost()}
-                groupId={groupId}
-                isAdminOrModerator={isAdminOrModerator}
-                setIsContentEditing={value => {
-                  setIsContentEditing(value)
-                  if (value) {
-                    setContentDescription(post.description)
-                    setContentTitle && setContentTitle(post.title)
-                  }
-                }}
-                onClickCancel={() => setIsContentEditing(false)}
-                isLoading={isLoading}
-                hidden={false}
-              />,
+              isContentEditable && !isContentEditing && (
+                <EditAction
+                  setIsEditing={value => {
+                    setIsContentEditing(value)
+                    if (value) {
+                      setContentDescription(post.description)
+                      setContentTitle && setContentTitle(post.title)
+                    }
+                  }}
+                  isEditing={isContentEditing}
+                  isLoading={isLoading}
+                />
+              ),
+              // Assuming the DeleteAction should also be conditionally shown
+              isAdminOrModerator && isContentEditable && !isContentEditing && (
+                <DeleteAction
+                  isAdminOrModerator={isAdminOrModerator}
+                  itemId={post.id}
+                  itemType={post.kind} // Make sure this matches the expected prop
+                  groupId={groupId}
+                />
+              ),
             ]}
           />
         </div>

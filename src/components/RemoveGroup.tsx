@@ -1,26 +1,34 @@
 import React from 'react'
 
+// Assuming '@heroicons/react/20/solid' is the correct path
 import { TrashIcon } from '@heroicons/react/20/solid'
+
+// Aliased imports
 import { useRemoveGroup } from '@/hooks/useRemoveGroup'
-import { CircularLoader } from './buttons/JoinCommunityButton'
-import { Button } from '@/shad/ui/button'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
 
+// Adjusted import path for CircularLoader based on your project structure
+import { CircularLoader } from '@/components/buttons/JoinCommunityButton'
+
+// Adjusted import path for Button component
+import { Button } from '@/shad/ui/button'
+
+import type { BigNumberish } from '@semaphore-protocol/group'
+
 interface RemoveGroupProps {
-  groupId: number
+  groupId: BigNumberish
   hidden: boolean
 }
 
 const RemoveGroup: React.FC<RemoveGroupProps> = ({ groupId, hidden }) => {
-  const { write } = useRemoveGroup(groupId)
+  const { write, isLoading } = useRemoveGroup(groupId)
 
   const {
     state: { isAdmin, isModerator },
   } = useCommunityContext()
-  const [isLoading, setIsLoading] = React.useState(false)
 
-  const onClick = () => {
-    setIsLoading(true)
+  const onClick = async () => {
+    console.log('write', write)
     if (write) {
       write()
     }
@@ -38,13 +46,13 @@ const RemoveGroup: React.FC<RemoveGroupProps> = ({ groupId, hidden }) => {
     <>
       {(isAdmin || isModerator) && (
         <Button
+          type="button"
           variant="destructive"
-          id="edit-community-button"
-          className="w-full"
+          id="remove-group-button"
           onClick={onClick}
-          aria-label="edit community"
+          aria-label="delete group"
         >
-          Delete Group <TrashIcon className="h-6 w-6" />
+          <TrashIcon className="h-6 w-6" /> <span> Delete Group</span>
         </Button>
       )}
     </>

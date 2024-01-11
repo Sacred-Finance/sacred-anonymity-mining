@@ -1,121 +1,97 @@
-import type { SyntheticEvent } from 'react'
-import React, { useState } from 'react'
-import clsx from 'clsx'
-import {
-  ChevronDownIcon,
-  ChevronUpIcon,
-  XMarkIcon,
-} from '@heroicons/react/24/outline'
-import { difference } from 'lodash'
+import { Controller, useFormContext } from 'react-hook-form'
+import { FormControl, FormDescription, FormItem, FormLabel, FormMessage } from '@/shad/ui/form'
+import { Popover, PopoverContent, PopoverTrigger } from '@/shad/ui/popover'
+import { Button } from '@/shad/ui/button'
+import { cn } from '@/shad/lib/utils'
+import { Command, CommandInput, CommandItem, CommandList, CommandSeparator } from '@/shad/ui/command'
 import { TAGS } from '@/constant/tags'
-import { useOutsideClickHandler } from '@/hooks/useOutsideClickHandler'
+import { FaCaretRight } from 'react-icons/fa'
+import { BsCheckCircleFill } from 'react-icons/bs'
+import React from 'react'
 
-interface TagInputProps {
-  onChange: (tags: string[]) => void
-  selected: string[]
-}
+export default function TagInput() {
+  const { control, setValue, watch } = useFormContext()
+  const selectedTags = watch('tags')
 
-const TagInput = ({ onChange, selected }: TagInputProps) => {
-  const [options, setOptions] = useState(TAGS)
-  const [optionsVisible, setOptionsVisible] = useState(false)
-  // on click outside of modal, close modal
-  const ref = React.useRef<HTMLDivElement>(null)
-  useOutsideClickHandler(ref.current, () => setOptionsVisible(false))
-
-  const filterTags = e => {
-    const value = e.target.value.toLowerCase()
-    if (!value) {
-      setOptions(difference(TAGS, selected))
-      return
+  const toggleTag = (tag: string) => {
+    if (selectedTags.includes(tag)) {
+      setValue(
+        'tags',
+        selectedTags.filter((t: string) => t !== tag),
+        { shouldDirty: true, shouldValidate: true, shouldTouch: true }
+      )
+    } else {
+      setValue('tags', [...selectedTags, tag], {
+        shouldDirty: true,
+        shouldValidate: true,
+        shouldTouch: true,
+      })
     }
-    const filtered = options.filter(tag => tag.toLowerCase().includes(value))
-    setOptions(filtered)
-    return
-  }
-
-  const onTagSelect = (event: SyntheticEvent, t: string, index) => {
-    onChange([...selected, t])
-    setOptions(options.filter(tag => tag !== t))
-  }
-
-  const removeTag = (t: string, index) => {
-    onChange(selected.filter(tag => tag !== t))
-    setOptions([...options, t])
   }
 
   return (
-    <div className="flex h-auto w-full flex-col items-center">
-      <div className="relative flex w-full flex-col items-center pb-4">
-        <div className="w-full">
-          <div className="my-2 flex w-full rounded border border-gray-400 bg-white p-1 dark:border-gray-600 dark:bg-gray-700">
-            <div className="flex w-full flex-col gap-2">
-              <div className="flex flex-row">
-                {selected?.map((tag, index) => (
-                  <div
-                    key={`${tag}_${index}`}
-                    className="m-1 flex items-center justify-center rounded-full border border-slate-500 bg-slate-300 px-2 py-1 font-medium text-black"
-                  >
-                    <div className="max-w-full flex-initial text-xs font-normal leading-none">
-                      {tag}
-                    </div>
-                    <div className="flex flex-auto flex-row-reverse">
-                      <div className="cursor-pointer">
-                        <XMarkIcon
-                          className="ml-1 h-4 w-4"
-                          onClick={() => removeTag(tag, index)}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="mx-1 mb-1 flex-1">
-                <input
-                  placeholder="Search Tags"
-                  onChange={filterTags}
-                  onFocus={() => setOptionsVisible(true)}
-                  className="h-full w-full appearance-none rounded-[10px] border-solid border-slate-300 bg-transparent p-1 px-2 text-gray-800 outline-none focus:border-primary dark:text-gray-200"
-                />
-              </div>
-            </div>
-            <div
-              className="flex w-8 cursor-pointer items-center border-l border-gray-200 py-1 pl-2 pr-1 text-gray-300"
-              onClick={() => setOptionsVisible(!optionsVisible)}
-            >
-              {!optionsVisible ? <ChevronDownIcon /> : <ChevronUpIcon />}
-            </div>
-          </div>
-          {optionsVisible && (
-            <div
-              ref={ref}
-              className="max-h-select absolute left-0 z-40 w-full overflow-y-auto rounded border border-gray-300 bg-white shadow"
-            >
-              <div className="flex max-h-[300px] w-full flex-col">
-                {options.map((o, i) => (
-                  <div
-                    key={`${o}_${i + 1}`}
-                    onClick={e => onTagSelect(e, o, i)}
-                    className="w-full cursor-pointer border-b border-gray-200 hover:bg-slate-200 dark:bg-gray-700 dark:hover:bg-gray-600"
-                  >
-                    <div
-                      className={clsx(
-                        true && 'border-primary-600',
-                        'relative flex w-full items-center border-l-2 border-transparent p-2'
-                      )}
+    <FormItem>
+      <FormLabel className="text-lg">
+        Tags
+        <FormDescription>Add tags to help people find your group</FormDescription>
+      </FormLabel>
+      <FormControl>
+        <Controller
+          control={control}
+          name="tags"
+          render={({ field }) => (
+            <div className="flex flex-wrap gap-y-4 space-x-4">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      className={cn('justify-between', !field.value && 'text-muted-foreground')}
                     >
-                      <div className="flex w-full items-center">
-                        <div className="mx-2 leading-6"> {o} </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                      {field.value?.length
+                        ? `${field.value.length} tag${field.value.length === 1 ? '' : 's'} selected`
+                        : 'Select tags'}
+                      <FaCaretRight className="float-right ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="mx-24  h-80 p-0 ">
+                  <Command>
+                    <CommandInput placeholder="Type a command or search..." />
+
+                    <CommandSeparator />
+
+                    <CommandList>
+                      {TAGS.map(tag => (
+                        <CommandItem
+                          key={tag}
+                          onSelect={() => toggleTag(tag)}
+                          className={cn(
+                            'flex items-center justify-between',
+                            selectedTags.includes(tag) && 'font-bold text-primary'
+                          )}
+                        >
+                          {tag}
+                          {selectedTags.includes(tag) && (
+                            <BsCheckCircleFill className="h-5 w-5 shrink-0 overflow-visible text-primary" />
+                          )}
+                        </CommandItem>
+                      ))}
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              {field.value?.map((tag: string) => (
+                <Button key={tag} onClick={() => toggleTag(tag)}>
+                  {tag}
+                </Button>
+              ))}
             </div>
           )}
-        </div>
-      </div>
-    </div>
+        />
+      </FormControl>
+      <FormMessage />
+    </FormItem>
   )
 }
-
-export default TagInput
