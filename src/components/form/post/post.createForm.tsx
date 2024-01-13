@@ -2,32 +2,21 @@ import React from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { PostContentTextarea, PostTitleInput } from './post.components'
-import type { PostCreationType } from '@components/form/post/post.schema'
-import { CommentCreationSchema, CommentCreationType, PostCreationSchema } from '@components/form/post/post.schema'
+import type { CommentCreationType, PostCreationType } from '@components/form/post/post.schema'
+import { CommentCreationSchema, PostCreationSchema } from '@components/form/post/post.schema'
 import { toast } from 'react-toastify'
 import { useAccount } from 'wagmi'
 import { PrimaryButton } from '@components/buttons'
 import usePost from '@/hooks/usePost'
+import type { Item } from '@/types/contract/ForumInterface'
 
-export default function PostCreateForm({ post, group, mutate }) {
+export default function PostCreateForm({ post, group, mutate, handleClose }) {
   const methods = useForm<PostCreationType | CommentCreationType>({
     resolver: zodResolver(post ? CommentCreationSchema : PostCreationSchema),
     defaultValues: {
       ...(!post && {
         title: 'Awesome Post',
       }),
-      content: {
-        version: '2.22.2',
-        time: Date.now(),
-        blocks: [
-          {
-            type: 'paragraph',
-            data: {
-              text: 'Hello!',
-            },
-          },
-        ],
-      },
     },
   })
   const { address } = useAccount()
@@ -37,7 +26,6 @@ export default function PostCreateForm({ post, group, mutate }) {
   })
 
   const onSubmit = async data => {
-    console.log(data)
     if (!address) {
       toast.error('Please connect your wallet')
       return
@@ -57,18 +45,19 @@ export default function PostCreateForm({ post, group, mutate }) {
       isMutating: true,
       description: data.content,
     }
+    handleClose()
 
     // Optimistic UI update
-    mutate(data => {
+    mutate((data: { posts: Item[]; comments: Item[] }) => {
       if (data.posts) {
         return {
           ...data,
-          posts: [...data?.posts, optimisticPost],
+          posts: [optimisticPost, ...data.posts],
         }
       } else {
         return {
           ...data,
-          comments: [...data?.comments, optimisticPost],
+          comments: [optimisticPost, ...data.comments],
         }
       }
     }, false)
@@ -84,10 +73,26 @@ export default function PostCreateForm({ post, group, mutate }) {
         },
         onErrorCallback: err => {
           console.error(err)
-          toast.error(err?.message ?? 'An error occurred while creating the post')
+          mutate((data: { posts: Item[]; comments: Item[] }) => {
+            if (data.posts) {
+              return {
+                ...data,
+                posts: data?.posts.filter((post: Item) => post.id !== optimisticPost.id),
+              }
+            } else {
+              return {
+                ...data,
+                comments: data?.comments.filter((post: Item) => post.id !== optimisticPost.id),
+              }
+            }
+          }, false)
+          if (err instanceof Error) {
+            toast.error(err?.message ?? 'An error occurred while creating the post')
+          }
         },
       })
     } catch (error) {
+      // roll back
       console.error(error)
       if (error instanceof Error) {
         methods.setError('root', {
