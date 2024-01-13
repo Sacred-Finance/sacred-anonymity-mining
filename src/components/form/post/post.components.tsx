@@ -45,7 +45,6 @@ export function PostContentTextarea({ form }: PostFormProps) {
           <FormDescription>Describe the purpose of the post.</FormDescription>
           <FormControl>
             <div>
-              <FormMessage />
               <ErrorBoundary>
                 <Editor
                   holder="content"
@@ -63,6 +62,7 @@ export function PostContentTextarea({ form }: PostFormProps) {
               </ErrorBoundary>
             </div>
           </FormControl>
+          <FormMessage/>
         </FormItem>
       )}
     />

@@ -16,6 +16,8 @@ import { ChatIcon, PollIcon } from '@components/CommunityActionTabs'
 export function CommunityPage({ community, posts, mutate }: { community: Group; posts?: Item[]; mutate?: () => void }) {
   const [sortBy, setSortBy] = useState<SortByOption>('highest')
   const sortedData = useItemsSortedByVote([], posts, sortBy)
+  const [open, setOpen] = React.useState<'post' | 'poll' | undefined>(undefined)
+
   const {
     state: { isAdmin },
   } = useCommunityContext()
@@ -32,6 +34,8 @@ export function CommunityPage({ community, posts, mutate }: { community: Group; 
           <div className="flex w-fit gap-4 rounded-lg ">
             <ShowConnectIfNotConnected>
               <DrawerDialog
+                setOpen={boolean => setOpen(boolean ? 'post' : undefined)}
+                open={open === 'post'}
                 label={
                   <div className="flex items-center gap-2">
                     <ChatIcon className="h-5 w-5" />
@@ -39,9 +43,16 @@ export function CommunityPage({ community, posts, mutate }: { community: Group; 
                   </div>
                 }
               >
-                <PostCreateForm group={community} post={undefined} mutate={mutate} />
+                <PostCreateForm
+                  group={community}
+                  post={undefined}
+                  mutate={mutate}
+                  handleClose={() => setOpen(undefined)}
+                />
               </DrawerDialog>
               <DrawerDialog
+                setOpen={boolean => setOpen(boolean ? 'poll' : undefined)}
+                open={open === 'poll'}
                 label={
                   <div className="flex items-center gap-2">
                     <PollIcon className="h-5 w-5" />
@@ -49,7 +60,12 @@ export function CommunityPage({ community, posts, mutate }: { community: Group; 
                   </div>
                 }
               >
-                <PollCreateForm group={community} post={undefined} mutate={mutate} />
+                <PollCreateForm
+                  group={community}
+                  post={undefined}
+                  mutate={mutate}
+                  handleClose={() => setOpen(undefined)}
+                />
               </DrawerDialog>
             </ShowConnectIfNotConnected>
           </div>

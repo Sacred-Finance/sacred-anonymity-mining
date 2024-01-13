@@ -28,10 +28,10 @@ const EditorBlock = ({
   readOnly = false,
 }: Props) => {
   const [isReady, setIsReady] = useState(false)
-  const ref = useRef<EditorJS | null>(null)
+  const ref = useRef<typeof EditorJS | null>(null)
 
   useEffect(() => {
-    if (ref.current || !holder) {
+    if (!ref.current && !holder) {
       return
     }
 
@@ -41,11 +41,12 @@ const EditorBlock = ({
       hideToolbar: false,
       tools: EDITOR_TOOLS,
       readOnly,
+      autofocus: false,
       placeholder,
       data,
       async onChange(api) {
         if (!readOnly) {
-          const savedData = await api.saver.save()
+          const savedData = await api?.saver?.save?.()
           onChange(savedData)
         }
       },
@@ -64,9 +65,7 @@ const EditorBlock = ({
     ref.current = editor
     // Cleanup function for the effect.
     return () => {
-      ref.current?.destroy()
-      ref.current = null
-      // editor.destroy()
+      ref?.current?.destroy()
     }
     // just holder
   }, [holder])

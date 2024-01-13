@@ -16,7 +16,9 @@ import { usePoll } from '@/hooks/usePoll'
 import { useAccount } from 'wagmi'
 import { PrimaryButton } from '@components/buttons'
 import { getRandomPoll } from '@components/form/poll/randomPolls' // Assuming the components are exported from this file
+import type { Item } from '@/types/contract/ForumInterface' // Assuming the components are exported from this file
 
+export default function PollCreateForm({ post, group, mutate, handleClose }) {
 export default function PollCreateForm({ post, group, mutate }) {
   const randomPoll = getRandomPoll()
   const methods = useForm<PollCreationType>({
@@ -57,18 +59,19 @@ export default function PollCreateForm({ post, group, mutate }) {
       isMutating: true,
       description: data.content,
     }
+    handleClose()
 
     try {
-      mutate(data => {
+      mutate((data: { posts: Item[]; comments: Item[] }) => {
         if (data.posts) {
           return {
             ...data,
-            posts: [optimisticPost, ...data?.posts],
+            posts: [optimisticPost, ...data.posts],
           }
         } else {
           return {
             ...data,
-            comments: [optimisticPost, ...data?.comments],
+            comments: [optimisticPost, ...data.comments],
           }
         }
       }, false)
@@ -88,8 +91,24 @@ export default function PollCreateForm({ post, group, mutate }) {
           mutate && mutate()
         },
         onErrorCallback: err => {
+          //rollback
+          mutate((data: { posts: Item[]; comments: Item[] }) => {
+            if (data.posts) {
+              return {
+                ...data,
+                posts: data?.posts.filter(post => post.id !== optimisticPost.id),
+              }
+            } else {
+              return {
+                ...data,
+                comments: data?.comments.filter(post => post.id !== optimisticPost.id),
+              }
+            }
+          }, false)
           console.error(err)
-          toast.error(err?.message ?? 'An error occurred while creating the poll')
+          if (err instanceof Error) {
+            toast.error(err?.message ?? 'An error occurred while creating the poll')
+          }
         },
       })
     } catch (error) {

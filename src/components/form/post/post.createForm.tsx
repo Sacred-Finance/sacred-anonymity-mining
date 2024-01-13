@@ -1,17 +1,18 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { PostContentTextarea, PostTitleInput } from './post.components'
-import type { PostCreationType } from '@components/form/post/post.schema'
-import { CommentCreationSchema, CommentCreationType, PostCreationSchema } from '@components/form/post/post.schema'
+import type { CommentCreationType, PostCreationType } from '@components/form/post/post.schema'
+import { CommentCreationSchema, PostCreationSchema } from '@components/form/post/post.schema'
 import { toast } from 'react-toastify'
 import { useAccount } from 'wagmi'
 import { PrimaryButton } from '@components/buttons'
 import usePost from '@/hooks/usePost'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/shad/ui/accordion'
 import { Textarea } from '@/shad/ui/textarea'
+import type { Item } from '@/types/contract/ForumInterface'
 
-export default function PostCreateForm({ post, group, mutate }) {
+export default function PostCreateForm({ post, group, mutate, handleClose }) {
   const methods = useForm<PostCreationType | CommentCreationType>({
     resolver: zodResolver(post ? CommentCreationSchema : PostCreationSchema),
     mode: 'onChange',
@@ -28,7 +29,6 @@ export default function PostCreateForm({ post, group, mutate }) {
   })
 
   const onSubmit = async data => {
-    console.log(data)
     if (!address) {
       toast.error('Please connect your wallet')
       return
@@ -48,18 +48,19 @@ export default function PostCreateForm({ post, group, mutate }) {
       isMutating: true,
       description: data.content,
     }
+    handleClose()
 
     // Optimistic UI update
-    mutate(data => {
+    mutate((data: { posts: Item[]; comments: Item[] }) => {
       if (data.posts) {
         return {
           ...data,
-          posts: [...data?.posts, optimisticPost],
+          posts: [optimisticPost, ...data.posts],
         }
       } else {
         return {
           ...data,
-          comments: [...data?.comments, optimisticPost],
+          comments: [optimisticPost, ...data.comments],
         }
       }
     }, false)
@@ -75,7 +76,22 @@ export default function PostCreateForm({ post, group, mutate }) {
         },
         onErrorCallback: err => {
           console.error(err)
-          toast.error(err?.message ?? 'An error occurred while creating the post')
+          mutate((data: { posts: Item[]; comments: Item[] }) => {
+            if (data.posts) {
+              return {
+                ...data,
+                posts: data?.posts.filter((post: Item) => post.id !== optimisticPost.id),
+              }
+            } else {
+              return {
+                ...data,
+                comments: data?.comments.filter((post: Item) => post.id !== optimisticPost.id),
+              }
+            }
+          }, false)
+          if (err instanceof Error) {
+            toast.error(err?.message ?? 'An error occurred while creating the post')
+          }
         },
       })
     } catch (error) {
@@ -89,18 +105,11 @@ export default function PostCreateForm({ post, group, mutate }) {
       }
     }
   }
-  useEffect(() => {
-    console.log(methods.formState.errors)
-  }, [methods.formState.errors])
 
-  useEffect(() => {
-    methods.trigger()
-  }, [methods])
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onSubmit)} className="flex flex-col space-y-4">
         {!post && <PostTitleInput form={methods} />}
-
         <PostContentTextarea form={methods} />
         <Accordion type="single" className="mt-4">
           <AccordionItem value="content">

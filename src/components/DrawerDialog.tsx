@@ -5,8 +5,17 @@ import { Button, buttonVariants } from '@/shad/ui/button'
 import { Drawer, DrawerClose, DrawerContent, DrawerTrigger } from '@/shad/ui/drawer'
 import { ScrollArea } from '@/shad/ui/scroll-area'
 
-export function DrawerDialog({ children, label }: { children: React.ReactNode; label: string | React.ReactNode }) {
-  const [open, setOpen] = React.useState(false)
+export function DrawerDialog({
+  children,
+  label,
+  open,
+  setOpen,
+}: {
+  children: React.ReactNode
+  label: string | React.ReactNode
+  open: boolean
+  setOpen: (open: boolean) => void
+}) {
   const isDesktop = useMediaQuery({ query: '(min-width: 768px)' })
 
   if (isDesktop) {
