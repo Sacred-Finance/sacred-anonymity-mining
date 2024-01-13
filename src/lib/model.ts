@@ -51,8 +51,8 @@ export type PollRequestStruct = {
   pollType: BigNumberish
   duration: BigNumberish //hours
   answerCount: BigNumberish
-  rateScaleFrom: BigNumberish
-  rateScaleTo: BigNumberish
+  rateScaleFrom?: BigNumberish
+  rateScaleTo?: BigNumberish
   answerCIDs: string[]
 }
 

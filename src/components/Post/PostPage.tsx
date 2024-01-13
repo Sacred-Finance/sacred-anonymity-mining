@@ -16,7 +16,6 @@ import type { NewPostFormProps } from '@components/NewPostForm'
 import { NewPostForm } from '@components/NewPostForm'
 import type { Group, Item } from '@/types/contract/ForumInterface'
 import { ContentType } from '@/lib/model'
-import CreatePollUI from '@components/CreatePollUI'
 import { Identity } from '@semaphore-protocol/identity'
 import { useContentManagement } from '@/hooks/useContentManagement'
 import { createNote, uploadIPFS } from '@/lib/utils'
@@ -28,6 +27,7 @@ import { analysisLabelsAndTypes } from '@components/Post/AiAccordionConfig'
 import { AnalysisCheckboxComponent } from '@components/Post/AiAnalysisCheckboxComponent'
 import { Button } from '@/shad/ui/button'
 import { ShowConnectIfNotConnected } from '@components/Connect/ConnectWallet'
+import type { KeyedMutator } from 'swr'
 import { useSWRConfig } from 'swr'
 import { CommentClass } from '@/lib/comment'
 import { GroupPostCommentAPI } from '@/lib/fetcher'
@@ -35,6 +35,7 @@ import { useUserIfJoined } from '@/contexts/UseUserIfJoined'
 import { DrawerDialog } from '@components/DrawerDialog'
 import PostCreateForm from '@components/form/post/post.createForm'
 import PollCreateForm from '@components/form/poll/poll.createForm'
+import type { GroupWithPostAndCommentDataResponse } from '@pages/api/groupWithPostAndCommentData'
 
 export const AIDigestContext = React.createContext<{
   enabled: { [key: string]: boolean }
@@ -59,7 +60,7 @@ export function PostPage({
   comments: Item[]
   post: Item
   community: Group
-  mutate?: () => void
+  mutate?: KeyedMutator<GroupWithPostAndCommentDataResponse>
 }) {
   const {
     state: { isAdmin },
@@ -217,156 +218,156 @@ const TooltipTab = ({ name, Icon }: { name: string; Icon: unknown }) => (
   </Tab>
 )
 
-const CreateCommentUI = ({ group, post }: { group: Group; post: Item; onSuccess?: () => void }) => {
-  const groupId = group.groupId
-  const user = useUserIfJoined(group.id.toString())
-
-  const { t } = useTranslation()
-  const { address } = useAccount()
-  const { checkUserBalance } = useValidateUserBalance(group, address)
-
-  const [isLoading, setIsLoading] = useState(false)
-
-  const { mutate } = useSWRConfig()
-
-  const commentInstance = new CommentClass(group.id.toString(), post.id.toString())
-
-  const validateRequirements = () => {
-    if (!address) {
-      return toast.error(t('alert.connectWallet'), { toastId: 'connectWallet' })
-    }
-    if (!user) {
-      return toast.error(t('toast.error.notJoined'), {
-        type: 'error',
-        toastId: 'min',
-      })
-    }
-
-    return true
-  }
-
-  const { contentDescription, setContentDescription, setContentTitle, clearContent } = useContentManagement({
-    isPostOrPoll: false,
-    defaultContentDescription: undefined,
-    defaultContentTitle: undefined,
-  })
-
-  const addComment: () => Promise<void> = async () => {
-    if (validateRequirements() !== true) {
-      return
-    }
-    if (!contentDescription) {
-      toast.error('Please enter a title and description', {
-        toastId: 'missingTitleOrDesc',
-      })
-      return
-    }
-    const hasSufficientBalance = await checkUserBalance()
-    if (!hasSufficientBalance) {
-      return
-    }
-
-    setIsLoading(true)
-    const currentDate = new Date()
-    const _message = currentDate.getTime() + '#' + JSON.stringify(contentDescription)
-
-    const cid = await uploadIPFS(_message)
-    if (!cid) {
-      throw 'Upload to IPFS failed'
-    }
-
-    try {
-      const userIdentity = new Identity(address)
-
-      const note = await createNote(userIdentity)
-
-      const tempCache: Item = {
-        description: contentDescription,
-        kind: ContentType.COMMENT,
-        parentId: post.id.toString(),
-        groupId: groupId as string,
-        childIds: [],
-        upvote: 0,
-        downvote: 0,
-        isMutating: true,
-        note: note.toString(),
-      }
-      mutate(
-        GroupPostCommentAPI(groupId as string, post.id.toString()),
-        async (data: any) => {
-          try {
-            const response = await commentInstance?.create({
-              commentContent: {
-                description: contentDescription,
-              },
-              address,
-              postedByUser: user,
-              groupId: groupId?.toString(),
-              setWaiting: setIsLoading,
-              onIPFSUploadSuccess() {
-                const element = document.getElementById(`new_item`)
-                element?.scrollIntoView({ behavior: 'smooth' })
-              },
-            })
-            if (response?.status === 200) {
-              setIsLoading(false)
-              clearContent()
-              console.log('response', response)
-              const { args } = response.data
-              const lastPost = {
-                ...tempCache,
-                id: +args[2]?.hex,
-                isMutating: false,
-              }
-              return { ...data, comments: [...data.comments, lastPost] }
-            } else {
-              console.log('error', response)
-              setIsLoading(false)
-            }
-            return data
-          } catch (error) {
-            setIsLoading(false)
-            toast.error('Failed to create comment')
-            return data
-          }
-        },
-        {
-          optimisticData: (data: any) => {
-            if (data) {
-              return {
-                ...data,
-                comments: [...data.comments, tempCache],
-              }
-            }
-          },
-          rollbackOnError: true,
-          revalidate: false,
-        }
-      )
-    } catch (error) {
-      setIsLoading(false)
-      toast.error('Failed to create comment')
-    }
-  }
-
-  const propsForNewPost: NewPostFormProps = {
-    editorId: `${groupId}_comment`,
-    submitButtonText: t('button.submit') as string,
-    openFormButtonText: t('button.newComment') as string,
-    description: contentDescription,
-    setDescription: setContentDescription,
-    handleSubmit: addComment,
-    showButtonWhenFormOpen: false,
-    setTitle: setContentTitle as Dispatch<SetStateAction<string | null>>,
-    resetForm: () => {},
-    isReadOnly: false,
-    isSubmitting: isLoading,
-    title: '',
-    isEditable: true,
-    itemType: 'comment',
-    actionType: 'new',
-    classes: NewPostModal,
-  }
-
-  return <NewPostForm {...propsForNewPost} />
-}
+// const CreateCommentUI = ({ group, post }: { group: Group; post: Item; onSuccess?: () => void }) => {
+//   const groupId = group.groupId
+//   const user = useUserIfJoined(group.id.toString())
+//
+//   const { t } = useTranslation()
+//   const { address } = useAccount()
+//   const { checkUserBalance } = useValidateUserBalance(group, address)
+//
+//   const [isLoading, setIsLoading] = useState(false)
+//
+//   const { mutate } = useSWRConfig()
+//
+//   const commentInstance = new CommentClass(group.id.toString(), post.id.toString())
+//
+//   const validateRequirements = () => {
+//     if (!address) {
+//       return toast.error(t('alert.connectWallet'), { toastId: 'connectWallet' })
+//     }
+//     if (!user) {
+//       return toast.error(t('toast.error.notJoined'), {
+//         type: 'error',
+//         toastId: 'min',
+//       })
+//     }
+//
+//     return true
+//   }
+//
+//   const { contentDescription, setContentDescription, setContentTitle, clearContent } = useContentManagement({
+//     isPostOrPoll: false,
+//     defaultContentDescription: undefined,
+//     defaultContentTitle: undefined,
+//   })
+//
+//   const addComment: () => Promise<void> = async () => {
+//     if (validateRequirements() !== true) {
+//       return
+//     }
+//     if (!contentDescription) {
+//       toast.error('Please enter a title and description', {
+//         toastId: 'missingTitleOrDesc',
+//       })
+//       return
+//     }
+//     const hasSufficientBalance = await checkUserBalance()
+//     if (!hasSufficientBalance) {
+//       return
+//     }
+//
+//     setIsLoading(true)
+//     const currentDate = new Date()
+//     const _message = currentDate.getTime() + '#' + JSON.stringify(contentDescription)
+//
+//     const cid = await uploadIPFS(_message)
+//     if (!cid) {
+//       throw 'Upload to IPFS failed'
+//     }
+//
+//     try {
+//       const userIdentity = new Identity(address)
+//
+//       const note = await createNote(userIdentity)
+//
+//       const tempCache: Item = {
+//         description: contentDescription,
+//         kind: ContentType.COMMENT,
+//         parentId: post.id.toString(),
+//         groupId: groupId as string,
+//         childIds: [],
+//         upvote: 0,
+//         downvote: 0,
+//         isMutating: true,
+//         note: note.toString(),
+//       }
+//       mutate(
+//         GroupPostCommentAPI(groupId as string, post.id.toString()),
+//         async (data: any) => {
+//           try {
+//             const response = await commentInstance?.create({
+//               commentContent: {
+//                 description: contentDescription,
+//               },
+//               address,
+//               postedByUser: user,
+//               groupId: groupId?.toString(),
+//               setWaiting: setIsLoading,
+//               onIPFSUploadSuccess() {
+//                 const element = document.getElementById(`new_item`)
+//                 element?.scrollIntoView({ behavior: 'smooth' })
+//               },
+//             })
+//             if (response?.status === 200) {
+//               setIsLoading(false)
+//               clearContent()
+//               console.log('response', response)
+//               const { args } = response.data
+//               const lastPost = {
+//                 ...tempCache,
+//                 id: +args[2]?.hex,
+//                 isMutating: false,
+//               }
+//               return { ...data, comments: [...data.comments, lastPost] }
+//             } else {
+//               console.log('error', response)
+//               setIsLoading(false)
+//             }
+//             return data
+//           } catch (error) {
+//             setIsLoading(false)
+//             toast.error('Failed to create comment')
+//             return data
+//           }
+//         },
+//         {
+//           optimisticData: (data: any) => {
+//             if (data) {
+//               return {
+//                 ...data,
+//                 comments: [...data.comments, tempCache],
+//               }
+//             }
+//           },
+//           rollbackOnError: true,
+//           revalidate: false,
+//         }
+//       )
+//     } catch (error) {
+//       setIsLoading(false)
+//       toast.error('Failed to create comment')
+//     }
+//   }
+//
+//   const propsForNewPost: NewPostFormProps = {
+//     editorId: `${groupId}_comment`,
+//     submitButtonText: t('button.submit') as string,
+//     openFormButtonText: t('button.newComment') as string,
+//     description: contentDescription,
+//     setDescription: setContentDescription,
+//     handleSubmit: addComment,
+//     showButtonWhenFormOpen: false,
+//     setTitle: setContentTitle as Dispatch<SetStateAction<string | null>>,
+//     resetForm: () => {},
+//     isReadOnly: false,
+//     isSubmitting: isLoading,
+//     title: '',
+//     isEditable: true,
+//     itemType: 'comment',
+//     actionType: 'new',
+//     classes: NewPostModal,
+//   }
+//
+//   return <NewPostForm {...propsForNewPost} />
+// }

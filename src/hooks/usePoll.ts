@@ -1,4 +1,4 @@
-import { createComment, createPost, votePoll } from '@/lib/api'
+import { createPostItem, votePoll } from '@/lib/api'
 import { GroupPostAPI, GroupPostCommentAPI } from '@/lib/fetcher'
 import type { ItemCreationRequest, NewPostContent, PollRequestStruct } from '@/lib/model'
 
@@ -23,8 +23,8 @@ interface Poll {
   pollType: number
   duration: number
   answers: string[]
-  rateScaleFrom: number
-  rateScaleTo: number
+  rateScaleFrom?: number
+  rateScaleTo?: number
   post?: Item // if post is undefined, it means it's a post, otherwise it's a comment
   onSuccessCallback: () => void
   onErrorCallback: (
@@ -120,23 +120,14 @@ export const usePoll = ({ group }: { group: Group }) => {
         content: content,
       }
 
-      const { status } =
-        post !== undefined
-          ? await createComment({
-              groupId: group.id.toString(),
-              parentId: post.id.toString(),
-              request: request,
-              solidityProof: fullProof.proof,
-              asPoll: true,
-              pollRequest: pollRequest,
-            })
-          : await createPost({
-              groupId: group.id.toString(),
-              request: request,
-              solidityProof: fullProof.proof,
-              asPoll: true,
-              pollRequest: pollRequest,
-            })
+      const { status } = await createPostItem({
+        groupId: group.id.toString(),
+        parentId: post?.id?.toString() ?? undefined,
+        request: request,
+        solidityProof: fullProof.proof,
+        asPoll: true,
+        pollRequest,
+      })
 
       if (status === 200) {
         console.log(`A post posted by user ${address}`)

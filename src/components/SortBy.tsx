@@ -17,7 +17,7 @@ interface SortByProps {
 }
 
 const SortBy: React.FC<SortByProps> = ({ onSortChange }) => {
-  const [selectedOption, setSelectedOption] = useState<SortByOption>('lowest')
+  const [selectedOption, setSelectedOption] = useState<SortByOption>('highest')
   const { t } = useTranslation()
 
   const handleChange = (value: SortByOption) => {

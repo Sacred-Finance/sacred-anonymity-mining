@@ -1,15 +1,11 @@
 import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { leaveGroup } from '@/lib/api'
 import type { User } from '@/lib/model'
-import {
-  createNote,
-  fetchUsersFromSemaphoreContract,
-  generateGroth16Proof,
-} from '@/lib/utils'
+import { createNote, fetchUsersFromSemaphoreContract, generateGroth16Proof } from '@/lib/utils'
 import { Group } from '@semaphore-protocol/group'
 import { Identity } from '@semaphore-protocol/identity'
 import { useAccount } from 'wagmi'
-import { ActionType } from "@/contexts/CommunityTypes";
+import { ActionType } from '@/contexts/CommunityTypes'
 
 const username = 'anon'
 
@@ -23,7 +19,8 @@ export const useLeaveCommunity = ({ id }: UseLeaveCommunityParams) => {
 
   const prepareGroupAndProof = async (
     userIdentity: Identity,
-    groupId: string
+    groupId: string,
+    treeDepth: number = 20 // Default tree depth, can be adjusted or fetched as needed
   ): Promise<{
     proof: {
       a: string[]
@@ -33,10 +30,18 @@ export const useLeaveCommunity = ({ id }: UseLeaveCommunityParams) => {
     siblings: bigint[]
     pathIndices: number[]
   }> => {
-    const group = new Group(groupId)
     const users = await fetchUsersFromSemaphoreContract(groupId)
-    users.forEach(u => group.addMember(BigInt(u)))
+    const group = new Group(
+      groupId,
+      treeDepth,
+      users.map(u => BigInt(u))
+    )
+
     const index = group.indexOf(BigInt(userIdentity.commitment))
+
+    if (index === -1) {
+      throw new Error('User not found in the group')
+    }
 
     const { siblings, pathIndices } = group.generateMerkleProof(index)
 
@@ -63,10 +68,7 @@ export const useLeaveCommunity = ({ id }: UseLeaveCommunityParams) => {
     const userIdentity = new Identity(address)
     try {
       console.log('Leaving group...')
-      const { proof, siblings, pathIndices } = await prepareGroupAndProof(
-        userIdentity,
-        id.toString()
-      )
+      const { proof, siblings, pathIndices } = await prepareGroupAndProof(userIdentity, id.toString())
 
       await leaveGroup({
         groupId: id.toString(),

@@ -12,7 +12,7 @@ import AnimalAvatar from '../AnimalAvatar'
 import clsx from 'clsx'
 import { VoteUI } from '../Vote'
 
-export const PostList = ({ posts, group, mutate }: { posts: Item[]; group: Group; mutate?: () => void }) => {
+export const PostList = ({ posts, group }: { posts: Item[]; group: Group; mutate?: () => void }) => {
   if (!posts) {
     return null
   }
@@ -34,7 +34,7 @@ export const PostList = ({ posts, group, mutate }: { posts: Item[]; group: Group
         <CardHeader className="relative z-10   flex w-full flex-col px-3  py-1">
           <CardTitle className="flex w-full items-center justify-between gap-4">
             <PostTitle post={p} title={p.title} onPostPage={false} id="" />
-            <span className="flex basis-1/4 gap-2">
+            <span className="flex basis-1/4 justify-end gap-2">
               <VoteUI post={p} group={group} />
             </span>
           </CardTitle>
@@ -58,8 +58,8 @@ export const PostList = ({ posts, group, mutate }: { posts: Item[]; group: Group
     <div className="flex flex-wrap gap-2">
       {renderedPosts?.length === 0 && <NoPosts />}
 
-      <ScrollArea className="h-full">
-        <div className="grid-cols-auto flex grow flex-col  gap-6 rounded-lg p-0 md:grid  md:py-8 lg:grid-cols-2 xl:grid-cols-3">
+      <ScrollArea className="h-full w-full">
+        <div className="flex grow flex-col gap-6 rounded-lg p-0 md:grid  md:py-8 lg:grid-cols-2 xl:grid-cols-3">
           {renderedPosts === undefined ? <CircularLoader /> : <>{renderedPosts}</>}
         </div>
         <ScrollBar orientation="vertical" />

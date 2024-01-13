@@ -2,7 +2,7 @@ import React from 'react'
 import { CreateGroup } from '@components/form/CreateGroup'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { ActionType } from '@/contexts/CommunityTypes'
-import WithConnectionCheck from '@components/HOC/WithConnectionCheck'
+import EnforceConnectionOverlay from '@components/HOC/EnforceConnectionOverlay'
 
 function CreateGroupForm() {
   const { dispatch } = useCommunityContext()
@@ -18,9 +18,9 @@ function CreateGroupForm() {
   }, [])
 
   return (
-    <WithConnectionCheck>
+    <EnforceConnectionOverlay>
       <CreateGroup />
-    </WithConnectionCheck>
+    </EnforceConnectionOverlay>
   )
 }
 

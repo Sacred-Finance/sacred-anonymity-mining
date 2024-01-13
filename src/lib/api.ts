@@ -70,6 +70,34 @@ export async function createPost({ groupId, request, solidityProof, asPoll, poll
   })
 }
 
+export async function createPostItem({
+  groupId,
+  request,
+  parentId,
+  solidityProof,
+  asPoll,
+  pollRequest,
+}: Post & { parentId?: string }) {
+  if (parentId) {
+    return axios.post(`${RELAYER_URL}/comment`, {
+      groupId,
+      parentId,
+      request,
+      solidityProof,
+      asPoll,
+      pollRequest,
+    })
+  } else {
+    return axios.post(`${RELAYER_URL}/post`, {
+      groupId,
+      request,
+      solidityProof,
+      asPoll,
+      pollRequest,
+    })
+  }
+}
+
 interface Comment {
   groupId: string
   parentId: string

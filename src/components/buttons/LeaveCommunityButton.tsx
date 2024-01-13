@@ -19,7 +19,7 @@ export const LeaveCommunityButton = memo(({ community }: JoinButtonProps) => {
   const [isLoading, setIsLoading] = React.useState(false)
   const { t } = useTranslation()
   const { address } = useAccount()
-  const hasUserJoined: User | undefined | false = useUserIfJoined(groupId as string)
+  const hasUserJoined = useUserIfJoined(groupId as string)
 
   const { leaveCommunity } = useLeaveCommunity({
     id: BigInt(groupId as string),

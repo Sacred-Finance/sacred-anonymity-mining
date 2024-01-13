@@ -1,14 +1,23 @@
-import React from 'react'
-import { Controller, UseFormReturn } from 'react-hook-form'
+import React, { useState } from 'react'
+import { Controller, useForm, useFormContext, UseFormReturn } from 'react-hook-form'
 import { Textarea } from '@/shad/ui/textarea'
 
-import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/shad/ui/form'
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/shad/ui/form'
 import { Input } from '@/shad/ui/input'
 import { RadioGroup, RadioGroupItem } from '@/shad/ui/radio-group'
 import { Label } from '@/shad/ui/label'
 import type { PollCreationType } from '@components/form/poll/poll.schema'
 import { Button } from '@/shad/ui/button'
 import { PlusIcon } from '@heroicons/react/20/solid'
+import { z } from 'zod'
+import { toast } from 'react-toastify'
+import { Popover, PopoverContent, PopoverTrigger } from '@/shad/ui/popover'
+import { Calendar } from '@/shad/ui/calendar'
+import { CalendarIcon } from 'lucide-react'
+import { differenceInHours, format, parseISO, startOfDay } from 'date-fns'
+import { cn } from '@/shad/lib/utils'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { now } from 'lodash'
 
 type PollFormProps = {
   form: UseFormReturn<PollCreationType>
@@ -153,7 +162,7 @@ export function PollDurationInput({ form }: PollFormProps) {
           <FormLabel className="text-xl">Duration (In Hours)</FormLabel>
           <FormDescription>Set the duration for how long the poll should last.</FormDescription>
           <FormControl>
-            <Input type="number" placeholder="Duration in hours" {...field} />
+            <Input type="number" placeholder="Duration in hours" {...field} readOnly />
           </FormControl>
           <FormMessage>{fieldState.error?.message}</FormMessage>
         </FormItem>
@@ -191,5 +200,63 @@ export function PollNumericRatingInput({ form }: PollFormProps) {
         )}
       />
     </>
+  )
+}
+
+export function DurationPickerForm() {
+  const form = useFormContext()
+  const today = startOfDay(new Date())
+  const [dateRange, setDateRange] = useState({ from: today, to: null })
+
+  const calculateAndSetDuration = () => {
+    if (dateRange.from && dateRange.to) {
+      if (dateRange.from === dateRange.to) {
+        return
+      }
+      const durationInHours = differenceInHours(dateRange.to, dateRange.from)
+      form.setValue('duration', durationInHours)
+    }
+  }
+
+  const onDateRangeSelect = selectedRange => {
+    setDateRange({ ...selectedRange, from: today })
+    calculateAndSetDuration()
+    form.setValue('startDateTime', today)
+    form.setValue('endDateTime', selectedRange.to)
+  }
+
+  return (
+    <FormField
+      control={form.control}
+      name="dateRange"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>Duration:</FormLabel>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline">
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {dateRange.to ? (
+                  `${format(today, 'LLL dd, y')} - ${format(dateRange.to, 'LLL dd, y')}`
+                ) : (
+                  <span>Select end date</span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                initialFocus
+                mode="range"
+                selected={dateRange}
+                onSelect={onDateRangeSelect}
+                numberOfMonths={2}
+                disabled={date => date < today}
+              />
+            </PopoverContent>
+          </Popover>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
   )
 }

@@ -2,34 +2,36 @@ import React from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { PostContentTextarea, PostTitleInput } from './post.components'
-import type { PostCreationType } from '@components/form/post/post.schema'
-import { CommentCreationSchema, CommentCreationType, PostCreationSchema } from '@components/form/post/post.schema'
+import { CommentCreationSchema, PostCreationSchema } from '@components/form/post/post.schema'
 import { toast } from 'react-toastify'
 import { useAccount } from 'wagmi'
+import { usePost } from '@/hooks/usePost'
 import { PrimaryButton } from '@components/buttons'
-import usePost from '@/hooks/usePost'
+import type { Group, Item } from '@/types/contract/ForumInterface'
+import type { KeyedMutator } from 'swr'
+import type { GroupWithPostAndCommentDataResponse } from '@pages/api/groupWithPostAndCommentData'
+import type { GroupWithPostDataResponse } from '@pages/api/groupWithPostData'
 
-export default function PostCreateForm({ post, group, mutate }) {
-  const methods = useForm<PostCreationType | CommentCreationType>({
-    resolver: zodResolver(post ? CommentCreationSchema : PostCreationSchema),
+type MutateType<T> = T extends undefined
+  ? KeyedMutator<GroupWithPostDataResponse>
+  : KeyedMutator<GroupWithPostAndCommentDataResponse>
+
+type PostCreateFormProps<T> = {
+  post?: T
+  group: Group
+  mutate: MutateType<T>
+}
+
+export default function PostCreateForm<T extends Item | undefined>({ post, group, mutate }: PostCreateFormProps<T>) {
+  const schema = post ? CommentCreationSchema : PostCreationSchema
+  const methods = useForm({
+    resolver: zodResolver(schema),
     defaultValues: {
-      ...(!post && {
-        title: 'Awesome Post',
-      }),
-      content: {
-        version: '2.22.2',
-        time: Date.now(),
-        blocks: [
-          {
-            type: 'paragraph',
-            data: {
-              text: 'Hello!',
-            },
-          },
-        ],
-      },
+      title: post?.title ?? '',
     },
   })
+
+  console.log('post.createform', post)
   const { address } = useAccount()
 
   const { createPost } = usePost({
@@ -37,11 +39,20 @@ export default function PostCreateForm({ post, group, mutate }) {
   })
 
   const onSubmit = async data => {
-    console.log(data)
     if (!address) {
       toast.error('Please connect your wallet')
       return
     }
+    // validate the data
+    if (methods.formState.isSubmitting) {
+      return
+    }
+
+    if (methods.formState.errors.root) {
+      toast.error('Please fix the errors in the form')
+      return
+    }
+
     const optimisticPost = {
       kind: 0,
       id: '0',
@@ -58,20 +69,21 @@ export default function PostCreateForm({ post, group, mutate }) {
       description: data.content,
     }
 
-    // Optimistic UI update
-    mutate(data => {
-      if (data.posts) {
+    await mutate(data => {
+      console.log('post.createform mutate', data)
+      if (post) {
         return {
           ...data,
-          posts: [...data?.posts, optimisticPost],
+          comments: [...data.comments, optimisticPost],
         }
       } else {
         return {
           ...data,
-          comments: [...data?.comments, optimisticPost],
+          posts: [...data.posts, optimisticPost],
         }
       }
     }, false)
+
     try {
       await createPost({
         post: post,
@@ -84,7 +96,9 @@ export default function PostCreateForm({ post, group, mutate }) {
         },
         onErrorCallback: err => {
           console.error(err)
-          toast.error(err?.message ?? 'An error occurred while creating the post')
+          if (err instanceof Error) {
+            toast.error(err?.message ?? 'An error occurred while creating the post')
+          }
         },
       })
     } catch (error) {

@@ -37,15 +37,15 @@ const sortByEngagementScore = (a, b) => {
 }
 
 export const useItemsSortedByVote = (
-  tempData: Item[],
-  data: Item[],
+  tempPosts: Item[],
+  posts: Item[],
   sortBy: 'highest' | 'lowest' | 'controversial' | 'newest' | 'oldest' | 'activity' | 'contentLength' | 'engagement'
 ): Item[] => {
   return useMemo(() => {
-    if (!data) {
+    if (!posts?.length && !tempPosts?.length) {
       return []
     }
-    const sorted = [...tempData, ...data].filter(item => item !== undefined && item !== null)
+    const sorted = [...tempPosts, ...posts].filter(item => item !== undefined && item !== null)
 
     switch (sortBy) {
       case 'highest':
@@ -67,5 +67,5 @@ export const useItemsSortedByVote = (
       default:
         return sorted
     }
-  }, [tempData, data, sortBy])
+  }, [tempPosts, posts, sortBy])
 }

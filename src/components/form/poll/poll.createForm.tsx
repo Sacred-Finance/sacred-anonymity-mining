@@ -2,6 +2,7 @@ import React from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
+  DurationPickerForm,
   PollContentTextarea,
   PollDurationInput,
   PollNumericRatingInput,
@@ -14,9 +15,23 @@ import { PollCreationSchema, transformStringToOutputData } from '@components/for
 import { toast } from 'react-toastify'
 import { usePoll } from '@/hooks/usePoll'
 import { useAccount } from 'wagmi'
-import { PrimaryButton } from '@components/buttons' // Assuming the components are exported from this file
+import { PrimaryButton } from '@components/buttons'
+import { Group, Item } from '@/types/contract/ForumInterface'
+import { KeyedMutator } from 'swr'
+import { GroupWithPostDataResponse } from '@pages/api/groupWithPostData'
+import { GroupWithPostAndCommentDataResponse } from '@pages/api/groupWithPostAndCommentData' // Assuming the components are exported from this file
 
-export default function PollCreateForm({ post, group, mutate }) {
+type MutateType<T> = T extends undefined
+  ? KeyedMutator<GroupWithPostDataResponse>
+  : KeyedMutator<GroupWithPostAndCommentDataResponse>
+
+type PostCreateFormProps<T> = {
+  post?: T
+  group: Group
+  mutate: MutateType<T>
+}
+
+export default function PollCreateForm<T extends Item | undefined>({ post, group, mutate }: PostCreateFormProps<T>) {
   const methods = useForm<PollCreationType>({
     resolver: zodResolver(PollCreationSchema),
     defaultValues: {
@@ -32,8 +47,7 @@ export default function PollCreateForm({ post, group, mutate }) {
 
   const { createPoll } = usePoll({ group })
 
-  const onSubmit = async data => {
-    console.log(data)
+  const onSubmit = async (data: PollCreationType) => {
     if (!address) {
       toast.error('Please connect your wallet')
       return
@@ -53,6 +67,13 @@ export default function PollCreateForm({ post, group, mutate }) {
       title: data.title,
       isMutating: true,
       description: data.content,
+      // poll stuff
+
+      pollType: data.pollType,
+      duration: data.duration,
+      options: data.options,
+      rateScaleFrom: Number(data?.numericRating?.rateScaleFrom),
+      rateScaleTo: Number(data?.numericRating?.rateScaleTo),
     }
 
     try {
@@ -60,12 +81,12 @@ export default function PollCreateForm({ post, group, mutate }) {
         if (data.posts) {
           return {
             ...data,
-            posts: [optimisticPost, ...data?.posts],
+            posts: [optimisticPost, ...data.posts],
           }
         } else {
           return {
             ...data,
-            comments: [optimisticPost, ...data?.comments],
+            comments: [optimisticPost, ...data.comments],
           }
         }
       }, false)
@@ -75,8 +96,8 @@ export default function PollCreateForm({ post, group, mutate }) {
         pollType: data.pollType,
         duration: data.duration,
         answers: data.options,
-        rateScaleFrom: data.numericRating?.rateScaleFrom,
-        rateScaleTo: data.numericRating?.rateScaleTo,
+        rateScaleFrom: Number(data?.numericRating?.rateScaleFrom),
+        rateScaleTo: Number(data?.numericRating?.rateScaleTo),
         content: {
           title: data.title,
           description: transformStringToOutputData(data.content),
@@ -86,7 +107,9 @@ export default function PollCreateForm({ post, group, mutate }) {
         },
         onErrorCallback: err => {
           console.error(err)
-          toast.error(err?.message ?? 'An error occurred while creating the poll')
+          if (err instanceof Error) {
+            toast.error(err?.message ?? 'An error occurred while creating the poll')
+          }
         },
       })
     } catch (error) {
@@ -100,6 +123,7 @@ export default function PollCreateForm({ post, group, mutate }) {
       }
     }
   }
+
   const pollType = methods.watch('pollType')
 
   return (
@@ -109,6 +133,7 @@ export default function PollCreateForm({ post, group, mutate }) {
         <PollContentTextarea form={methods} />
         <PollTypeSelect form={methods} />
         <PollOptionsInput form={methods} />
+        <DurationPickerForm />
         <PollDurationInput form={methods} />
         {Number(pollType) === 2 && <PollNumericRatingInput form={methods} />}
         <PrimaryButton type="submit" isLoading={methods.formState.isSubmitting}>

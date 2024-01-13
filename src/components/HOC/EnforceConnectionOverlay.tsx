@@ -3,7 +3,7 @@ import { useAccount } from 'wagmi'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/shad/ui/card'
 
-const WithConnectionCheck = ({ children }: { children: React.ReactNode }) => {
+const EnforceConnectionOverlay = ({ children }: { children: React.ReactNode }) => {
   const { isConnected } = useAccount()
 
   return (
@@ -28,4 +28,4 @@ const WithConnectionCheck = ({ children }: { children: React.ReactNode }) => {
   )
 }
 
-export default WithConnectionCheck
+export default EnforceConnectionOverlay

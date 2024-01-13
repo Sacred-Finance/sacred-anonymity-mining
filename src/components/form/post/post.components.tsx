@@ -8,6 +8,7 @@ import { Label } from '@/shad/ui/label'
 import type { PostCreationType } from '@components/form/post/post.schema'
 import dynamic from 'next/dynamic'
 import { CommentCreationType } from '@components/form/post/post.schema'
+import { Textarea } from '@/shad/ui/textarea'
 
 const Editor = dynamic(() => import('@components/editor-js/Editor'), {
   ssr: false,
@@ -36,23 +37,19 @@ export function PostTitleInput({ form, ...props }: PostFormProps) {
   )
 }
 
-export function PostContentTextarea({ form }: PostFormProps) {
+export function PostContentTextarea({ form }) {
   return (
     <FormField
       control={form.control}
       name="content"
       render={({ field, fieldState }) => (
         <FormItem>
-          <FormLabel className="text-xl">Content</FormLabel>
+          <FormLabel className="text-xl">{field.name}</FormLabel>
           <FormDescription>Describe the purpose of the post.</FormDescription>
           <FormControl>
-            <Editor
-              holder="post-content"
+            <Textarea
               readOnly={false}
-              divProps={{
-                className:
-                  'rounded-md bg-gray-100 dark:bg-gray-800 dark:!text-white p-4 focus:outline-none focus:ring-2 focus:ring-primary-dark',
-              }}
+              className="focus:ring-primary-dark rounded-md bg-gray-100 p-4 focus:outline-none focus:ring-2 dark:bg-gray-800 dark:!text-white"
               {...field}
             />
           </FormControl>

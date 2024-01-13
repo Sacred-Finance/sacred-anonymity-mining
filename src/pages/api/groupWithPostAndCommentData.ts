@@ -5,7 +5,7 @@ import type { Group, Item, RawGroupData, RawItemData } from '@/types/contract/Fo
 
 export type GroupWithPostAndCommentDataResponse = {
   group: Group
-  post: Item
+  posts: Item
   comments: Item[] | []
 }
 // get group details

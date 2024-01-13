@@ -1,14 +1,12 @@
-import React, { memo, useEffect, useRef, useState } from 'react'
+import React, { memo, useEffect, useRef } from 'react'
 import type { OutputData } from '@editorjs/editorjs'
 import EditorJS from '@editorjs/editorjs'
 import clsx from 'clsx'
-import { CircularLoader } from '@components/buttons/JoinCommunityButton' // Consider renaming or reorganizing this if `CircularLoader` doesn't belong to a button component.
+import { CircularLoader } from '@components/buttons/JoinCommunityButton'
 import { EDITOR_TOOLS } from './editor-tool'
+import { Input } from '@/shad/ui/input'
 
-type DivProps = {
-  className?: string
-  [key: string]: any
-}
+type DivProps = { className?: string; [key: string]: any }
 
 type Props = {
   data?: typeof OutputData
@@ -26,62 +24,55 @@ const EditorBlock = ({
   divProps = {},
   placeholder = 'Start writing your post...',
   readOnly = false,
+  ...props
 }: Props) => {
-  const [isReady, setIsReady] = useState(false)
-  const ref = useRef<EditorJS | null>(null)
+  const editorInstance = useRef<typeof EditorJS | null>(null)
 
   useEffect(() => {
-    if (ref.current || !holder) {
-      return
-    }
-
     const editor = new EditorJS({
       holder,
       inlineToolbar: true,
       hideToolbar: false,
-      tools: { ...EDITOR_TOOLS },
+      tools: EDITOR_TOOLS,
       readOnly,
       placeholder,
       data,
-      async onChange(api) {
+      async onContentChange(api) {
         if (!readOnly) {
           const savedData = await api.saver.save()
           onChange(savedData)
         }
       },
       onReady() {
-        if (readOnly) {
-          const el = document.getElementById(holder)
-          const inputs = el?.getElementsByTagName('input') || []
-          const textareas = el?.getElementsByTagName('textarea') || []
-
-          ;[...inputs, ...textareas].forEach(input => input.setAttribute('readonly', 'readonly'))
-        }
-
-        setIsReady(true)
+        editorInstance.current = editor
       },
     })
-    ref.current = editor
-    // Cleanup function for the effect.
+
     return () => {
-      ref.current?.destroy()
-      ref.current = null
-      // editor.destroy()
+      editorInstance.current?.destroy()
     }
-    // just holder
-  }, [holder])
+  }, [holder, onChange, readOnly])
+
+  useEffect(() => {
+    const handleDataUpdate = async () => {
+      if (data && editorInstance.current) {
+        await editorInstance.current.isReady
+        editorInstance.current.clear()
+        editorInstance.current.render(data)
+      }
+    }
+    handleDataUpdate()
+  }, [data])
 
   return (
     <>
       <div
-        {...divProps}
-        className={clsx(
-          isReady ? 'prose-lg h-full w-full !bg-background/90 text-foreground' : 'hidden',
-          divProps.className
-        )}
         id={holder}
+        {...divProps}
+        className={clsx('prose-lg h-full w-full !bg-background/90 text-foreground', divProps.className)}
       />
-      {!isReady && <CircularLoader className="h-12" />}
+      <Input type={'hidden'} {...props} />
+      {!editorInstance.current && <CircularLoader className="h-12" />}
     </>
   )
 }
