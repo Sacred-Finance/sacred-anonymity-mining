@@ -22,7 +22,11 @@ import type { EditorConfig } from '@editorjs/editorjs'
 // Image: requires backend or 3rd party integration
 
 export const EDITOR_TOOLS: EditorConfig['tools'] = {
-  code: Code,
+  code: {
+    class: Code,
+    shortcut: 'CMD+SHIFT+C',
+    placeholder: 'Enter code',
+  },
   header: {
     class: Header,
     inlineToolbar: true,

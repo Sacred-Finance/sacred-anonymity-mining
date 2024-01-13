@@ -111,7 +111,7 @@ export function PollOptionsInput({ form }: PollFormProps) {
           <FormItem>
             <div className="flex items-center justify-between gap-2">
               <Input placeholder={`Option ${index + 1}`} {...field} />
-              <Button variant="outline" onClick={() => handleRemoveOption(index)}>
+              <Button type="button" variant="outline" onClick={() => handleRemoveOption(index)}>
                 -
               </Button>
             </div>
@@ -131,7 +131,7 @@ export function PollOptionsInput({ form }: PollFormProps) {
       <FormItem>
         <FormLabel className="flex items-center justify-between text-xl">
           Poll Options
-          <Button variant="ghost" onClick={handleAddOption}>
+          <Button type="button" variant="ghost" onClick={handleAddOption}>
             <PlusIcon width={24} height={24} /> Add Option
           </Button>
         </FormLabel>

@@ -14,20 +14,23 @@ import { PollCreationSchema, transformStringToOutputData } from '@components/for
 import { toast } from 'react-toastify'
 import { usePoll } from '@/hooks/usePoll'
 import { useAccount } from 'wagmi'
-import { PrimaryButton } from '@components/buttons' // Assuming the components are exported from this file
+import { PrimaryButton } from '@components/buttons'
+import { getRandomPoll } from '@components/form/poll/randomPolls' // Assuming the components are exported from this file
 
 export default function PollCreateForm({ post, group, mutate }) {
+  const randomPoll = getRandomPoll()
   const methods = useForm<PollCreationType>({
     resolver: zodResolver(PollCreationSchema),
     defaultValues: {
-      title: 'Awesome Poll',
-      content: 'Do you Like this poll?',
+      title: randomPoll.title,
+      content: randomPoll.content,
       pollType: 0,
-      options: ['Yes', 'No'], // Default for two options
+      options: randomPoll.options, // Default for two options
       duration: 1,
       numericRating: { rateScaleFrom: '0', rateScaleTo: '5' },
     },
   })
+
   const { address } = useAccount()
 
   const { createPoll } = usePoll({ group })

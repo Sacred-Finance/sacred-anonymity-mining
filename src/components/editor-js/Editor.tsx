@@ -39,7 +39,7 @@ const EditorBlock = ({
       holder,
       inlineToolbar: true,
       hideToolbar: false,
-      tools: { ...EDITOR_TOOLS },
+      tools: EDITOR_TOOLS,
       readOnly,
       placeholder,
       data,

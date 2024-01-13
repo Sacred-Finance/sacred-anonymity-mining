@@ -43,28 +43,26 @@ export function PostContentTextarea({ form }: PostFormProps) {
         <FormItem>
           <FormLabel className="text-xl">Content</FormLabel>
           <FormDescription>Describe the purpose of the post.</FormDescription>
-          <FormControl
-            onChange={() => {
-              console.log('change')
-            }}
-          >
-            <>
+          <FormControl>
+            <div>
+              <FormMessage />
               <ErrorBoundary>
                 <Editor
-                  {...field}
                   holder="content"
+                  data={form.watch('content')}
                   readOnly={false}
+                  onChange={data => {
+                    console.log(data)
+                    form.setValue('content', data, { shouldValidate: true })
+                  }}
                   divProps={{
                     className:
                       'rounded-md bg-gray-100 dark:bg-gray-800 dark:!text-white p-4 focus:outline-none focus:ring-2 focus:ring-primary-dark',
                   }}
                 />
               </ErrorBoundary>
-              {/*@ts-expect-error: we need this for react-hook-forms to work with editor*/}
-              <Input type="hidden" hidden {...field} />
-            </>
+            </div>
           </FormControl>
-          <FormMessage></FormMessage>
         </FormItem>
       )}
     />

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { PostContentTextarea, PostTitleInput } from './post.components'
@@ -8,26 +8,17 @@ import { toast } from 'react-toastify'
 import { useAccount } from 'wagmi'
 import { PrimaryButton } from '@components/buttons'
 import usePost from '@/hooks/usePost'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/shad/ui/accordion'
+import { Textarea } from '@/shad/ui/textarea'
 
 export default function PostCreateForm({ post, group, mutate }) {
   const methods = useForm<PostCreationType | CommentCreationType>({
     resolver: zodResolver(post ? CommentCreationSchema : PostCreationSchema),
+    mode: 'onChange',
     defaultValues: {
       ...(!post && {
         title: 'Awesome Post',
       }),
-      content: {
-        version: '2.22.2',
-        time: Date.now(),
-        blocks: [
-          {
-            type: 'paragraph',
-            data: {
-              text: 'Hello!',
-            },
-          },
-        ],
-      },
     },
   })
   const { address } = useAccount()
@@ -98,12 +89,32 @@ export default function PostCreateForm({ post, group, mutate }) {
       }
     }
   }
+  useEffect(() => {
+    console.log(methods.formState.errors)
+  }, [methods.formState.errors])
 
+  useEffect(() => {
+    methods.trigger()
+  }, [methods])
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onSubmit)} className="flex flex-col space-y-4">
         {!post && <PostTitleInput form={methods} />}
+
         <PostContentTextarea form={methods} />
+        <Accordion type="single" className="mt-4">
+          <AccordionItem value="content">
+            <AccordionTrigger>Content</AccordionTrigger>
+            <AccordionContent>
+              <Textarea
+                className={'bg-black/50'}
+                readOnly={true}
+                hidden
+                value={JSON.stringify(methods.watch('content'))}
+              />
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
         <PrimaryButton
           type="submit"
           disabled={methods.formState.isSubmitting || !methods.formState.isValid}

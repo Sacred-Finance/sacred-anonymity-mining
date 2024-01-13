@@ -1,74 +1,122 @@
 import { z } from 'zod'
 
-export const transformStringToOutputData = (str: string) => {
-  // todo this needs more work
-  return {
-    time: Date.now(),
-    blocks: [
-      {
-        type: 'paragraph',
-        data: {
-          text: str,
-        },
-      },
-    ],
-    version: '2.22.2',
-  }
-}
+const nonEmptyTextBlock = z.object({
+  text: z.string().min(1), // Ensure text is not empty
+})
 
-// Combine the schemas for post creation
-export const PostCreationSchema = z
-  .object({
-    title: z.string().min(1, 'Title is required').max(60, 'Title must be 60 characters or less').optional(),
-    content: z.object({
-      time: z.number(),
-      blocks: z.array(
+const textBlock = z.object({
+  text: z.string(),
+})
+
+const headerBlock = textBlock.extend({
+  level: z.number(),
+})
+
+const paragraphBlock = nonEmptyTextBlock.extend({
+  tunes: z.boolean().optional(),
+})
+
+const checklistBlock = z.object({
+  items: z.array(
+    z.object({
+      text: z.string(),
+      checked: z.boolean(),
+    })
+  ),
+})
+
+const delimiterBlock = z.object({})
+
+const embedBlock = z.object({
+  service: z.string(),
+  source: z.string(),
+  embed: z.string(),
+  width: z.number().optional(),
+  height: z.number().optional(),
+})
+
+const inlineCodeBlock = z.object({
+  code: z.string(),
+})
+
+const listBlock = z.object({
+  style: z.string(),
+  items: z.array(z.string()),
+})
+
+const markerBlock = textBlock
+
+const quoteBlock = textBlock.extend({
+  caption: z.string().optional(),
+  alignment: z.enum(['left', 'center', 'right']).optional(),
+})
+
+const rawBlock = z.object({
+  html: z.string(),
+})
+
+const tableBlock = z.object({
+  content: z.array(z.array(z.string())),
+})
+
+const warningBlock = z.object({
+  title: z.string(),
+  message: z.string(),
+})
+
+const underlineBlock = textBlock
+
+const imageBlock = z.object({
+  url: z.string(),
+  // Add additional properties for the image data if needed
+})
+
+const blockUnion = z.union([
+  headerBlock,
+  paragraphBlock,
+  checklistBlock,
+  delimiterBlock,
+  embedBlock,
+  inlineCodeBlock,
+  listBlock,
+  markerBlock,
+  quoteBlock,
+  rawBlock,
+  tableBlock,
+  warningBlock,
+  underlineBlock,
+  imageBlock,
+])
+
+export const PostCreationSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(60, 'Title must be 60 characters or less').optional(),
+  content: z.object({
+    time: z.number(),
+    blocks: z
+      .array(
         z.object({
           type: z.string(),
-          data: z.object({
-            text: z.string(),
-          }),
+          data: blockUnion,
         })
-      ),
-      version: z.string(),
-    }),
-  })
-  .refine(
-    data => {
-      if (data.content) {
-        try {
-          // Attempt to transform the string into an OutputData object
-          const outputData = transformStringToOutputData(data.content)
-          // Perform additional validation if necessary
-          // For example, check if outputData has the required blocks property
-          return !!outputData
-        } catch {
-          // If transformation fails, return false to indicate invalid content
-          return false
-        }
-      }
-      // If content is not provided, it's valid (because it's optional)
-      return true
-    },
-    {
-      message: 'Content must be a valid JSON string that conforms to the OutputData structure',
-      path: ['content'],
-    }
-  )
+      )
+      .nonempty(),
+    version: z.string(),
+  }),
+})
 
 export type PostCreationType = z.infer<typeof PostCreationSchema>
 
 export const CommentCreationSchema = z.object({
   content: z.object({
     time: z.number(),
-    blocks: z.array(
-      z.object({
-        type: z.string(),
-        data: z.object({
-          text: z.string(),
-        }),
-      })
-    ),
+    blocks: z
+      .array(
+        z.object({
+          type: z.string(),
+          data: blockUnion, // This now uses nonEmptyTextBlock to ensure that text is not empty
+        })
+      )
+      .nonempty(), // Ensure there's at least one block
     version: z.string(),
   }),
 })
