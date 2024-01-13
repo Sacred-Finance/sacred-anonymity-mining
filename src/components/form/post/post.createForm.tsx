@@ -104,7 +104,11 @@ export default function PostCreateForm({ post, group, mutate }) {
       <form onSubmit={methods.handleSubmit(onSubmit)} className="flex flex-col space-y-4">
         {!post && <PostTitleInput form={methods} />}
         <PostContentTextarea form={methods} />
-        <PrimaryButton type="submit" isLoading={methods.formState.isSubmitting}>
+        <PrimaryButton
+          type="submit"
+          disabled={methods.formState.isSubmitting || !methods.formState.isValid}
+          isLoading={methods.formState.isSubmitting}
+        >
           Create
         </PrimaryButton>
       </form>
