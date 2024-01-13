@@ -16,7 +16,6 @@ import type { NewPostFormProps } from '@components/NewPostForm'
 import { NewPostForm } from '@components/NewPostForm'
 import type { Group, Item } from '@/types/contract/ForumInterface'
 import { ContentType } from '@/lib/model'
-import CreatePollUI from '@components/CreatePollUI'
 import { Identity } from '@semaphore-protocol/identity'
 import { useContentManagement } from '@/hooks/useContentManagement'
 import { createNote, uploadIPFS } from '@/lib/utils'
@@ -67,6 +66,7 @@ export function PostPage({
 
   const [enabled, setEnabled] = useState<{ [key: string]: boolean }>({})
   const [responses, setResponses] = useState<{ [key: string]: string }>({})
+  const [open, setOpen] = React.useState<'post' | 'poll' | undefined>(undefined)
 
   useEffect(() => {
     const initialEnabled = {}
@@ -116,6 +116,8 @@ export function PostPage({
                       <div className="flex w-fit gap-4 rounded-lg ">
                         <ShowConnectIfNotConnected>
                           <DrawerDialog
+                            open={open === 'post'}
+                            setOpen={boolean => setOpen(boolean ? 'post' : undefined)}
                             label={
                               <div className="flex items-center gap-2">
                                 <ChatIcon className="h-5 w-5" />
@@ -123,9 +125,16 @@ export function PostPage({
                               </div>
                             }
                           >
-                            <PostCreateForm group={community} post={post} mutate={mutate} />
+                            <PostCreateForm
+                              group={community}
+                              post={post}
+                              mutate={mutate}
+                              handleClose={() => setOpen(undefined)}
+                            />
                           </DrawerDialog>
                           <DrawerDialog
+                            setOpen={boolean => setOpen(boolean ? 'poll' : undefined)}
+                            open={open === 'poll'}
                             label={
                               <div className="flex items-center gap-2">
                                 <PollIcon className="h-5 w-5" />
@@ -133,7 +142,12 @@ export function PostPage({
                               </div>
                             }
                           >
-                            <PollCreateForm group={community} post={post} mutate={mutate} />
+                            <PollCreateForm
+                              group={community}
+                              post={post}
+                              mutate={mutate}
+                              handleClose={() => setOpen(undefined)}
+                            />
                           </DrawerDialog>
                         </ShowConnectIfNotConnected>
                       </div>
