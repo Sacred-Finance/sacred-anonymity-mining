@@ -13,15 +13,11 @@ const TopicPosts = ({
   mutate: (newPost: Post) => void
   readonly: boolean
 }) => {
-  const postRefs = useRef<{ [key: number]: React.RefObject<HTMLDivElement> }>(
-    {}
-  )
+  const postRefs = useRef<{ [key: number]: React.RefObject<HTMLDivElement> }>({})
   const [targetPostNumber, setTargetPostNumber] = useState<number | null>(null)
   const [postsInView, setPostsInView] = useState([])
 
-  const filteredPosts = topic.post_stream.posts.filter(
-    post => !post?.hidden && !post?.deleted_at
-  )
+  const filteredPosts = topic.post_stream.posts.filter(post => !post?.hidden && !post?.deleted_at)
 
   useEffect(() => {
     if (targetPostNumber) {

@@ -6,7 +6,7 @@ import useSWR from 'swr'
 import type { GroupWithPostDataResponse } from '@pages/api/groupWithPostData'
 import fetcher, { GroupPostAPI } from '@/lib/fetcher'
 import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminOrModerator'
-import { ActionType } from "@/contexts/CommunityTypes";
+import { ActionType } from '@/contexts/CommunityTypes'
 
 export interface HandleSetImage {
   file: File | undefined | null
@@ -22,10 +22,7 @@ function EditGroupForm() {
   const router = useRouter()
   const { groupId } = router.query
 
-  const { data } = useSWR<GroupWithPostDataResponse>(
-    GroupPostAPI(groupId),
-    fetcher
-  )
+  const { data } = useSWR<GroupWithPostDataResponse>(GroupPostAPI(groupId), fetcher)
 
   const { dispatch } = useCommunityContext()
   useCheckIfUserIsAdminOrModerator(true)

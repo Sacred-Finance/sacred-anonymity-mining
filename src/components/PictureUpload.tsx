@@ -10,9 +10,7 @@ export const PictureUpload = (props: {
   name: 'banner' | 'logo'
   setImageFileState: ({ file, imageType }: HandleSetImage) => void
 }) => {
-  const handleFileImageUpload = useHandleFileImageUpload(
-    props.setImageFileState
-  )
+  const handleFileImageUpload = useHandleFileImageUpload(props.setImageFileState)
 
   const { t } = useTranslation()
   const inputRef = useRef<HTMLInputElement | null>(null)
@@ -99,12 +97,7 @@ export const PictureUpload = (props: {
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             )}

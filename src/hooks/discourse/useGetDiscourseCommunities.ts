@@ -6,9 +6,7 @@ export const useGetDiscourseCommunities = (): {
   error: Error
   isValidating: boolean
 } => {
-  const { data, error, isValidating } = useSWR(
-    process.env.NEXT_PUBLIC_DISCOURSE_GOOGLE_SHEET_API_URL as string
-  )
+  const { data, error, isValidating } = useSWR(process.env.NEXT_PUBLIC_DISCOURSE_GOOGLE_SHEET_API_URL as string)
   return {
     data: data?.communities,
     error,

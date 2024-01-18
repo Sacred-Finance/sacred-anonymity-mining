@@ -37,21 +37,18 @@ const Index = () => {
     }
   }, [initialData])
 
-  const { data, mutate, size, setSize, isValidating, isLoading, error } =
-    useSWRInfinite<PostStreamObject>(
-      index => {
-        const postIdChunks = _.chunk(postIds, PAGE_SIZE)
-        return postIds.length && postIdChunks?.[index]?.length
-          ? `/api/discourse/${groupId}/${topicId}/posts/${postIdChunks[
-              index
-            ].join(',')}&page=${index}`
-          : null
-      },
-      fetcher,
-      {
-        revalidateFirstPage: false,
-      }
-    )
+  const { data, mutate, size, setSize, isValidating, isLoading, error } = useSWRInfinite<PostStreamObject>(
+    index => {
+      const postIdChunks = _.chunk(postIds, PAGE_SIZE)
+      return postIds.length && postIdChunks?.[index]?.length
+        ? `/api/discourse/${groupId}/${topicId}/posts/${postIdChunks[index].join(',')}&page=${index}`
+        : null
+    },
+    fetcher,
+    {
+      revalidateFirstPage: false,
+    }
+  )
 
   if (error) {
     return <>error</>
@@ -68,27 +65,17 @@ const Index = () => {
     }, true)
   }
 
-  const isLoadingMore =
-    isLoading || (isValidating && data && data.length === size)
+  const isLoadingMore = isLoading || (isValidating && data && data.length === size)
   const topicData = _.uniqBy(
-    _.merge(
-      _.flatten(data?.map(d => d?.post_stream?.posts)),
-      _.flatten(initialData?.post_stream?.posts)
-    ),
+    _.merge(_.flatten(data?.map(d => d?.post_stream?.posts)), _.flatten(initialData?.post_stream?.posts)),
     'id'
   )
   return (
     <>
       {DiscourseCommunityBanner(loading, community)}
-      <div
-        className={clsx(' max-w-screen-6xl w-full space-y-6 sm:p-8 md:p-24')}
-      >
+      <div className={clsx(' max-w-screen-6xl w-full space-y-6 sm:p-8 md:p-24')}>
         {initialData && (
-          <PostToTopic
-            topic={initialData}
-            mutate={mutatePost}
-            readonly={Boolean(+community?.readonly)}
-          />
+          <PostToTopic topic={initialData} mutate={mutatePost} readonly={Boolean(+community?.readonly)} />
         )}
 
         <PostContent post={topicData[0]} />

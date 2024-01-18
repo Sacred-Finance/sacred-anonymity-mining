@@ -1,12 +1,13 @@
-import { User } from '@/lib/model'
+import type { User } from '@/lib/model'
 import { useAccount } from 'wagmi'
 import { useEffect, useState } from 'react'
 import { Identity } from '@semaphore-protocol/identity'
 import { hasUserJoined } from '@/lib/utils'
 import { ActionType } from '@/contexts/CommunityTypes'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
+import type { BigNumberish } from '@semaphore-protocol/group'
 
-export function useUserIfJoined(communityId: string | number): User | false {
+export function useUserIfJoined(communityId: BigNumberish): User | false {
   const numericCommunityId = Number(communityId)
   const { state, dispatch } = useCommunityContext()
   const { address: userAddress } = useAccount()

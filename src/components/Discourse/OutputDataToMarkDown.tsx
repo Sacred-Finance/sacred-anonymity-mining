@@ -15,10 +15,7 @@ export function OutputDataToMarkDown(description: typeof OutputData) {
         content = `# ${block.data.text}`
         break
       case 'list':
-        content = block.data.items.reduce(
-          (acc, item) => acc + `- ${item}\n`,
-          ''
-        )
+        content = block.data.items.reduce((acc, item) => acc + `- ${item}\n`, '')
         break
       case 'code':
         content = `\`\`\`${block.data.language}\n${block.data.code}\n\`\`\``
@@ -48,10 +45,7 @@ export function OutputDataToMarkDown(description: typeof OutputData) {
         content = `${block.data.html}`
         break
       case 'checklist':
-        content = block.data.items.reduce(
-          (acc, item) => acc + `- [${item.checked ? 'x' : ' '}] ${item.text}\n`,
-          ''
-        )
+        content = block.data.items.reduce((acc, item) => acc + `- [${item.checked ? 'x' : ' '}] ${item.text}\n`, '')
         break
       default:
         content = ''
@@ -62,9 +56,7 @@ export function OutputDataToMarkDown(description: typeof OutputData) {
   }, '')
 }
 
-export const OutputDataToHTML = (
-  description: typeof OutputData | undefined
-) => {
+export const OutputDataToHTML = (description: typeof OutputData | undefined) => {
   let convertedHtml = ''
   description?.blocks?.map(block => {
     switch (block.type) {

@@ -8,9 +8,7 @@ export const PostContent = ({ post }) => (
 
     {post?.link_counts?.length > 0 && (
       <div className="mt-4">
-        <h3 className="mb-2 text-lg font-semibold text-gray-700 dark:text-gray-300">
-          Links:
-        </h3>
+        <h3 className="mb-2 text-lg font-semibold text-gray-700 dark:text-gray-300">Links:</h3>
         <ul className="mt-2 list-inside list-disc space-y-1 text-blue-500 dark:text-blue-400">
           {post.link_counts.map((link, linkIndex) => (
             <li key={linkIndex} className="flex items-center">
@@ -22,9 +20,7 @@ export const PostContent = ({ post }) => (
               >
                 {link.title || link.url}
               </a>
-              <span className="ml-2 px-2 text-sm text-gray-500 dark:text-gray-400">
-                {link.clicks} clicks
-              </span>
+              <span className="ml-2 px-2 text-sm text-gray-500 dark:text-gray-400">{link.clicks} clicks</span>
             </li>
           ))}
         </ul>

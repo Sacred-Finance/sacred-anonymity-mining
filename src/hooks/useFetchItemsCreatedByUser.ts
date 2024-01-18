@@ -32,8 +32,7 @@ export const useFetchItemsCreatedByUser = () => {
           const note = await createNote(identity)
           if (
             decodedItem.contentCID &&
-            decodedItem.contentCID !==
-              '0x0000000000000000000000000000000000000000000000000000000000000000' && // Update with Viem's equivalent of ethers.constants.HashZero
+            decodedItem.contentCID !== '0x0000000000000000000000000000000000000000000000000000000000000000' && // Update with Viem's equivalent of ethers.constants.HashZero
             note.toString() === decodedItem.note.toString()
           ) {
             itemsCreatedByMe.push(decodedItem)
@@ -41,9 +40,7 @@ export const useFetchItemsCreatedByUser = () => {
         }
 
         const data = itemsCreatedByMe.map(async (decodedItem: any) => {
-          const rawItemData = await forumContract.read.itemAt([
-            Number(decodedItem.id),
-          ])
+          const rawItemData = await forumContract.read.itemAt([Number(decodedItem.id)])
           const item = await augmentItemData(rawItemData)
           return Promise.resolve(items.push(item))
         })

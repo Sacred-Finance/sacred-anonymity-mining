@@ -1665,8 +1665,4 @@ export const abi = [
 ] as const
 
 type ForumABIType = typeof abi
-export type ForumContract = GetContractReturnType<
-  ForumABIType,
-  PublicClient,
-  WalletClient
->
+export type ForumContract = GetContractReturnType<ForumABIType, PublicClient, WalletClient>

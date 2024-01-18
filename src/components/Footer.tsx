@@ -17,32 +17,21 @@ export default function Footer(): JSX.Element {
           </div>
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
             <div>
-              <h2 className="mb-6 text-xl font-semibold text-white">
-                {t('footer.followUs')}
-              </h2>
+              <h2 className="mb-6 text-xl font-semibold text-white">{t('footer.followUs')}</h2>
               <ul className="font-medium text-gray-500 dark:text-gray-400">
                 <li className="mb-4">
-                  <a
-                    href="http://discord.gg/43spxvqqmJ"
-                    className="hover:text-purple-500"
-                  >
+                  <a href="http://discord.gg/43spxvqqmJ" className="hover:text-purple-500">
                     {t('footer.discord')}
                   </a>
                 </li>
                 <li className="mb-4">
-                  <a
-                    href="https://twitter.com/SacredLogos"
-                    className="hover:text-purple-500"
-                  >
+                  <a href="https://twitter.com/SacredLogos" className="hover:text-purple-500">
                     {t('footer.twitter')}
                   </a>
                 </li>
 
                 <li>
-                  <a
-                    href="https://sacredlogos.medium.com/"
-                    className="hover:text-purple-500"
-                  >
+                  <a href="https://sacredlogos.medium.com/" className="hover:text-purple-500">
                     {t('footer.medium')}
                   </a>
                 </li>
@@ -51,9 +40,7 @@ export default function Footer(): JSX.Element {
 
             {/* Legal Section */}
             <div>
-              <h2 className="mb-6 text-xl font-semibold text-white">
-                {t('footer.legal')}
-              </h2>
+              <h2 className="mb-6 text-xl font-semibold text-white">{t('footer.legal')}</h2>
               <ul className="font-medium text-gray-500 dark:text-gray-400">
                 <li className="mb-4">
                   <a
@@ -75,9 +62,9 @@ export default function Footer(): JSX.Element {
             </div>
           </div>
         </div>
-        <hr className="my-6 border-gray-700 dark:border-gray-900 sm:mx-auto lg:my-8" />
+        <hr className="my-6 border-gray-700 sm:mx-auto lg:my-8 dark:border-gray-900" />
         <div className="sm:flex sm:items-center sm:justify-between">
-          <span className="text-sm text-gray-500 dark:text-white sm:text-center">
+          <span className="text-sm text-gray-500 sm:text-center dark:text-white">
             © 2023 SacredLogos. All Rights Reserved.
           </span>
           {/* Add additional social icons if necessary */}

@@ -8,6 +8,7 @@ import type { Group } from '@/types/contract/ForumInterface'
 import { PrimaryButton } from './index'
 import { useLeaveCommunity } from '@/hooks/useLeaveCommunity'
 import { useUserIfJoined } from '@/contexts/UseUserIfJoined'
+import type { BigNumberish } from '@semaphore-protocol/group'
 
 interface JoinButtonProps {
   community: Group
@@ -22,7 +23,7 @@ export const LeaveCommunityButton = memo(({ community }: JoinButtonProps) => {
   const hasUserJoined: User | undefined | false = useUserIfJoined(groupId as string)
 
   const { leaveCommunity } = useLeaveCommunity({
-    id: BigInt(groupId as string),
+    id: BigInt(groupId as BigNumberish),
   })
 
   const validateBeforeOpen = async (): Promise<boolean> => {

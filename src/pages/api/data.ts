@@ -16,9 +16,7 @@ export default async (req, res) => {
     groupCount = groupCount.toString()
   } catch (e) {
     console.error('Error fetching group count:', e)
-    res
-      .status(500)
-      .json({ error: 'An error occurred while fetching group count' })
+    res.status(500).json({ error: 'An error occurred while fetching group count' })
     return
   }
 
@@ -34,23 +32,17 @@ export default async (req, res) => {
     )
   } catch (e) {
     console.error('Error fetching raw communities data:', e)
-    res
-      .status(500)
-      .json({ error: 'An error occurred while fetching raw communities data' })
+    res.status(500).json({ error: 'An error occurred while fetching raw communities data' })
     return
   }
 
   try {
     communitiesData = await Promise.all(
-      rawCommunitiesData
-        .filter(r => !r.removed)
-        .map(rawGroupData => augmentGroupData(rawGroupData))
+      rawCommunitiesData.filter(r => !r.removed).map(rawGroupData => augmentGroupData(rawGroupData))
     )
   } catch (e) {
     console.error('Error processing communities data:', e)
-    res
-      .status(500)
-      .json({ error: 'An error occurred while processing communities data' })
+    res.status(500).json({ error: 'An error occurred while processing communities data' })
     return
   }
 

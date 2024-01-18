@@ -18,14 +18,9 @@ export default function HeadGlobal() {
 
   const { activeCommunity } = state
 
-  // todo - we do not have access to discourse from here. we need to change the state to include the discourse communities before we can use this
   const logoCID = activeCommunity?.community?.groupDetails?.logoCID
-  const image = inCommunity
-    ? (logoCID && `https://ipfs.io/ipfs/${logoCID}`) || app.image
-    : app.image
-  const title = inCommunity
-    ? activeCommunity?.community?.name || app.title
-    : app.title
+  const image = inCommunity ? (logoCID && `https://ipfs.io/ipfs/${logoCID}`) || app.image : app.image
+  const title = inCommunity ? activeCommunity?.community?.name || app.title : app.title
   const description = inCommunity
     ? activeCommunity?.community?.groupDetails?.description || app.description
     : app.description
@@ -45,10 +40,7 @@ export default function HeadGlobal() {
       <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
       <meta name="mobile-web-app-capable" content="yes" />
-      <meta
-        name="theme-color"
-        content={resolvedTheme === 'dark' ? app.themeColorDark : app.themeColor}
-      />
+      <meta name="theme-color" content={resolvedTheme === 'dark' ? app.themeColorDark : app.themeColor} />
 
       <link rel="apple-touch-icon" href={app.image} />
       <link rel="icon" type="image/png" sizes="512x512" href={app.image} />

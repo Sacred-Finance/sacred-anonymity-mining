@@ -10,12 +10,8 @@ interface ValidationResult {
   toastMessage: string
 }
 
-export const useValidateUserBalance = (
-  community: Group | undefined,
-  address: Address | undefined
-) => {
-  const [validationResult, setValidationResult] =
-    useState<ValidationResult | null>(null)
+export const useValidateUserBalance = (community: Group | undefined, address: Address | undefined) => {
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
   const [fetchEnabled, setFetchEnabled] = useState(false)
 
   const requirements = useMemo(() => {
@@ -31,10 +27,7 @@ export const useValidateUserBalance = (
     }))
   }, [community, address])
 
-  const isEnabled = useMemo(
-    () => fetchEnabled && requirements.length > 0,
-    [fetchEnabled, requirements]
-  )
+  const isEnabled = useMemo(() => fetchEnabled && requirements.length > 0, [fetchEnabled, requirements])
 
   const { data, isError, isLoading } = useContractReads({
     contracts: requirements.filter(Boolean),
@@ -79,9 +72,7 @@ export const useValidateUserBalance = (
       }
     })
 
-    const hasSufficientBalance = requirementsMet.every(
-      e => e.balance >= e.minAmount / 10 ** e.decimals
-    )
+    const hasSufficientBalance = requirementsMet.every(e => e.balance >= e.minAmount / 10 ** e.decimals)
 
     if (!hasSufficientBalance) {
       toast.warning(`Insufficient Balance`)

@@ -13,21 +13,12 @@ interface GPTServerAnalysisResponse {
   error: string | null
   fetchData: (setter: (data: any) => void) => Promise<void>
 }
-export const useGPTServerAnalysis = (
-  analyses: GPTServerAnalysisOptions[]
-): GPTServerAnalysisResponse[] => {
-  const [isLoading, setIsLoading] = useState<boolean[]>(
-    Array(analyses.length).fill(false)
-  )
+export const useGPTServerAnalysis = (analyses: GPTServerAnalysisOptions[]): GPTServerAnalysisResponse[] => {
+  const [isLoading, setIsLoading] = useState<boolean[]>(Array(analyses.length).fill(false))
   const [data, setData] = useState<any[]>(Array(analyses.length).fill(null))
-  const [error, setError] = useState<string | null[]>(
-    Array(analyses.length).fill(null)
-  )
+  const [error, setError] = useState<string | null[]>(Array(analyses.length).fill(null))
 
-  const fetchData = async (
-    index: number,
-    setDataFunction?: (data: any) => void
-  ) => {
+  const fetchData = async (index: number, setDataFunction?: (data: any) => void) => {
     setIsLoading(prev => {
       const newArr = [...prev]
       newArr[index] = true
@@ -76,7 +67,6 @@ export const useGPTServerAnalysis = (
     isLoading: isLoading[index],
     data: data[index],
     error: error[index],
-    fetchData: (setDataFunction?: (data: any) => void) =>
-      fetchData(index, setDataFunction),
+    fetchData: (setDataFunction?: (data: any) => void) => fetchData(index, setDataFunction),
   }))
 }

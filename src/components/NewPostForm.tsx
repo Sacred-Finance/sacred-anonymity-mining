@@ -72,10 +72,7 @@ export interface NewPostFormProps {
 }
 
 const getClassNames = (base, customClassNames, condition) => {
-  return clsx(
-    base,
-    condition ? customClassNames?.true : customClassNames?.false
-  )
+  return clsx(base, condition ? customClassNames?.true : customClassNames?.false)
 }
 
 function ContentSection({
@@ -95,9 +92,7 @@ function ContentSection({
     <ScrollArea className="h-[500px] w-full rounded-xl border bg-gray-950/10   p-4 ">
       <Editor
         divProps={{
-          className: cn(
-            'z-50 w-full form-input h-full rounded-md bg-gradient-to-r  min-h-[15vh]'
-          ),
+          className: cn('z-50 w-full form-input h-full rounded-md bg-gradient-to-r  min-h-[15vh]'),
         }}
         data={data}
         onChange={onChange}
@@ -167,16 +162,13 @@ export const NewPostForm = ({
   }
 
   const descriptionLength = React.useMemo(() => {
-    return description?.blocks?.reduce(
-      (acc: never, block: { data: { text: string[] } }) => {
-        try {
-          return acc + block.data.text.length
-        } catch (error) {
-          return acc
-        }
-      },
-      0
-    )
+    return description?.blocks?.reduce((acc: never, block: { data: { text: string[] } }) => {
+      try {
+        return acc + block.data.text.length
+      } catch (error) {
+        return acc
+      }
+    }, 0)
   }, [description])
 
   const disableSubmit = React.useMemo(() => {
@@ -222,11 +214,7 @@ export const NewPostForm = ({
                 className=" w-full rounded-xl border bg-gray-950/10   p-4 "
                 ref={inputRef}
                 placeholder={
-                  t(
-                    itemType !== 'post'
-                      ? 'placeholder.enterComment'
-                      : 'placeholder.enterPostTitle'
-                  ) as string
+                  t(itemType !== 'post' ? 'placeholder.enterComment' : 'placeholder.enterPostTitle') as string
                 }
                 value={title}
                 onChange={e => (setTitle ? setTitle(e.target.value) : null)}

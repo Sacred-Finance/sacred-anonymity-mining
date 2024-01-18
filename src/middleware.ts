@@ -25,9 +25,7 @@ export async function middleware(request: NextRequest, res: NextResponse) {
       if (!community) {
         try {
           const data = await fetchData()
-          const communityMap: Map<number, Community> = new Map(
-            data.communities.map(c => [c.id, c])
-          )
+          const communityMap: Map<number, Community> = new Map(data.communities.map(c => [c.id, c]))
           community = communityMap.get(communityId)
           if (community) {
             communityCache.set(communityId, community)

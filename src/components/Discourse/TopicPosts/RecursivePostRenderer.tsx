@@ -55,13 +55,7 @@ export const RecursivePostRenderer: React.FC<RecursivePostRendererProps> = ({
   )
 }
 
-const ResponseAccordion = ({
-  children,
-  className,
-}: {
-  children: React.ReactNode
-  className?: string
-}) => {
+const ResponseAccordion = ({ children, className }: { children: React.ReactNode; className?: string }) => {
   const [show, setShow] = useState(true)
   const toggleShow = async () => {
     setShow(!show)
@@ -77,9 +71,7 @@ const ResponseAccordion = ({
         onClick={toggleShow}
         className="flex w-full items-center justify-between gap-2 text-sm text-gray-500 transition-colors duration-200 hover:text-gray-700 focus:outline-none "
       >
-        {show ? 'Hide' : 'Show'}{' '}
-        {children &&
-          pluralize('Response', React.Children.count(children), true)}
+        {show ? 'Hide' : 'Show'} {children && pluralize('Response', React.Children.count(children), true)}
         <ChevronDownIcon width={20} className={show ? 'rotate-180' : ''} />
       </button>
       <div className={clsx(className)}>

@@ -56,10 +56,7 @@ export const TosConfirmationWrapper: React.FC<TosConfirmationWrapperProps> = ({
           <div className="z-50 inline-block w-full max-w-md overflow-hidden rounded-lg bg-white shadow-xl transition-transform dark:bg-gray-900">
             <Dialog.Title className="flex items-center justify-between border-b border-gray-300 bg-gray-200 p-6 font-semibold text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
               <span>{headerText}</span>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="focus:outline-none"
-              >
+              <button onClick={() => setIsOpen(false)} className="focus:outline-none">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -67,12 +64,7 @@ export const TosConfirmationWrapper: React.FC<TosConfirmationWrapperProps> = ({
                   stroke="currentColor"
                   className="h-6 w-6 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </Dialog.Title>

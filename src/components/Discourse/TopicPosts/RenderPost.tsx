@@ -9,13 +9,7 @@ import _ from 'lodash'
 import { PostAuthorInformation } from '@components/Discourse/TopicPosts/PostAuthorInformation'
 import clsx from 'clsx'
 
-export const RenderPost = ({
-  post,
-  controls,
-  addReplyToPosts,
-  depth,
-  readonly = false,
-}) => {
+export const RenderPost = ({ post, controls, addReplyToPosts, depth, readonly = false }) => {
   return (
     <motion.div
       id={`post-${post.post_number}`}
@@ -31,30 +25,17 @@ export const RenderPost = ({
         <StatsBadge icon={<PostAuthorInformation post={post} />} />
         <StatsBadge
           value={post.post_number}
-          icon={
-            <FingerPrintIcon
-              className="text-blue-500 dark:text-blue-400"
-              width={20}
-            />
-          }
+          icon={<FingerPrintIcon className="text-blue-500 dark:text-blue-400" width={20} />}
         />
         <StatsBadge
           label="#"
-          value={_.capitalize(
-            formatDistanceToNow(new Date(post.created_at), { addSuffix: true })
-          )}
-          icon={
-            <ClockIcon className="w-6 p-0 text-gray-600 dark:text-gray-400" />
-          }
+          value={_.capitalize(formatDistanceToNow(new Date(post.created_at), { addSuffix: true }))}
+          icon={<ClockIcon className="w-6 p-0 text-gray-600 dark:text-gray-400" />}
         />
       </div>
 
       <PostContent post={post} />
-      <PostFooter
-        post={post}
-        addReplyToPosts={addReplyToPosts}
-        readonly={readonly}
-      />
+      <PostFooter post={post} addReplyToPosts={addReplyToPosts} readonly={readonly} />
     </motion.div>
   )
 }

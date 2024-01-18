@@ -1,15 +1,13 @@
 import { CommunityCard } from '@/components/CommunityCard/CommunityCard'
 import { PostItem } from '@/components/Post/PostItem'
-import {
-  useCommunityContext,
-} from '@/contexts/CommunityProvider'
+import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { useFetchItemsCreatedByUser } from '@/hooks/useFetchItemsCreatedByUser'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shad/ui/tabs'
 import { BigNumber } from 'ethers'
 import React, { useEffect } from 'react'
 import useSWR from 'swr'
-import { useCommunitiesCreatedByUser } from "@/contexts/UseCommunitiesCreatedByUser";
-import { useCommunitiesJoinedByUser } from "@/contexts/UseCommunitiesJoinedByUser";
+import { useCommunitiesCreatedByUser } from '@/contexts/UseCommunitiesCreatedByUser'
+import { useCommunitiesJoinedByUser } from '@/contexts/UseCommunitiesJoinedByUser'
 
 const Account = () => {
   const { dispatch } = useCommunityContext()
@@ -48,20 +46,14 @@ const Account = () => {
           <TabsTrigger value="comments">Comments</TabsTrigger>
         </TabsList>
       </div>
-      <TabsContent
-        value="communities_created"
-        className="border-none p-0 outline-none"
-      >
+      <TabsContent value="communities_created" className="border-none p-0 outline-none">
         <div className="grid-cols-auto flex grow flex-col items-stretch justify-center gap-6 rounded-lg p-0 md:grid md:items-start md:p-8 lg:grid-cols-2 xl:grid-cols-3">
           {communitiesCreated.map(community => (
             <CommunityCard key={community.id} community={community} />
           ))}
         </div>
       </TabsContent>
-      <TabsContent
-        value="communities_joined"
-        className="border-none p-0 outline-none"
-      >
+      <TabsContent value="communities_joined" className="border-none p-0 outline-none">
         <div className="grid-cols-auto flex grow flex-col items-stretch justify-center gap-6 rounded-lg p-0 md:grid md:items-start md:p-8 lg:grid-cols-2 xl:grid-cols-3">
           {communitiesJoined.map(community => (
             <CommunityCard key={community.id} community={community} />
@@ -70,20 +62,14 @@ const Account = () => {
       </TabsContent>
       <TabsContent value="posts" className="border-none p-0 outline-none">
         {posts?.map(post => (
-          <div
-            key={post.id}
-            className="mb-3 flex flex-col rounded-xl border p-3 dark:border-gray-700 dark:bg-gray-900"
-          >
+          <div key={post.id} className="mb-3 flex flex-col rounded-xl border p-3 dark:border-gray-700 dark:bg-gray-900">
             <PostItem group={{ id: post?.groupId }} post={post} />
           </div>
         ))}{' '}
       </TabsContent>
       <TabsContent value="polls" className="border-none p-0 outline-none">
         {polls?.map(poll => (
-          <div
-            key={poll.id}
-            className="mb-3 flex flex-col rounded-xl border p-3 dark:border-gray-700 dark:bg-gray-900"
-          >
+          <div key={poll.id} className="mb-3 flex flex-col rounded-xl border p-3 dark:border-gray-700 dark:bg-gray-900">
             <PostItem group={{ id: poll?.groupId }} post={poll} />
           </div>
         ))}

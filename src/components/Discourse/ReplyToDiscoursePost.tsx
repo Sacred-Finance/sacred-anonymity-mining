@@ -48,27 +48,22 @@ const ReplyToDiscoursePost = ({
       }
     }
     try {
-      const newPost = await axios.post(
-        `/api/discourse/${groupId}/postToTopic`,
-        {
-          topic_id: post.topic_id,
-          reply_to_post_number: post.post_number,
-          raw: raw,
-          unlist_topic: false,
-          nested_post: true,
-          archetype: 'regular',
-          whisper: false,
-          is_warning: false,
-          category: 4,
-        }
-      )
+      const newPost = await axios.post(`/api/discourse/${groupId}/postToTopic`, {
+        topic_id: post.topic_id,
+        reply_to_post_number: post.post_number,
+        raw: raw,
+        unlist_topic: false,
+        nested_post: true,
+        archetype: 'regular',
+        whisper: false,
+        is_warning: false,
+        category: 4,
+      })
       if (addReplyToPosts) {
         addReplyToPosts(newPost.data.post as Topic['post_stream']['posts'][0])
       }
       // await mutate(`/api/discourse/${post.topic_id}`)
-      await mutate(
-        `/api/discourse/${groupId}/${post.topic_id}/posts/${newPost.data.post.post_number}`
-      ) // load in post
+      await mutate(`/api/discourse/${groupId}/${post.topic_id}/posts/${newPost.data.post.post_number}`) // load in post
     } catch (error) {
       toast.error(t('alert.postCreateFailed'))
       console.error(error)
@@ -94,16 +89,13 @@ const ReplyToDiscoursePost = ({
       submitButtonText="Submit"
       {...formProps}
       classes={{
-        rootOpen:
-          'fixed z-50 inset-0 bg-gray-900/50 flex justify-center items-center',
+        rootOpen: 'fixed z-50 inset-0 bg-gray-900/50 flex justify-center items-center',
         formBody: 'w-full h-full flex flex-col gap-4',
         editor: 'border rounded py-1 px-2 bg-white dark:bg-gray-800',
-        submitButton:
-          'bg-green-500 text-white border-none rounded hover:bg-green-600',
+        submitButton: 'bg-green-500 text-white border-none rounded hover:bg-green-600',
         formContainerOpen:
           'bg-white dark:bg-gray-800 p-4 border border-gray-300 dark:border-gray-700 rounded shadow-lg w-full max-w-3xl',
-        openFormButtonOpen:
-          'bg-primary text-white opacity-0 hover:bg-primary-600',
+        openFormButtonOpen: 'bg-primary text-white opacity-0 hover:bg-primary-600',
       }}
       tokenBalanceReveal={{
         selectedValue: selectedToReveal,

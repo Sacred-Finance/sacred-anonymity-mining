@@ -1,10 +1,5 @@
 import React from 'react'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/shad/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shad/ui/tooltip'
 import type { ButtonProps } from '@/shad/ui/button'
 import { Button } from '@/shad/ui/button'
 

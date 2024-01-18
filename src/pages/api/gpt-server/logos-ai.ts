@@ -28,10 +28,7 @@ export enum Template {
   UnbiasedCritique_ToSimpleMarkdown = 'UnbiasedCritique_ToSimpleMarkdown', //final step
 }
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     if (req.method === 'POST') {
       const { text, mode } = req.body

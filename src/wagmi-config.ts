@@ -1,29 +1,22 @@
-import { ParticleNetwork } from '@particle-network/auth';
-import { particleWallet } from '@particle-network/rainbowkit-ext';
-import { connectorsForWallets } from '@rainbow-me/rainbowkit';
+import { ParticleNetwork } from '@particle-network/auth'
+import { particleWallet } from '@particle-network/rainbowkit-ext'
+import { connectorsForWallets } from '@rainbow-me/rainbowkit'
 import {
   braveWallet,
   coinbaseWallet,
   injectedWallet,
   metaMaskWallet,
   rainbowWallet,
-} from '@rainbow-me/rainbowkit/wallets';
-import { configureChains, createConfig } from 'wagmi';
-import {
-  goerli,
-  localhost,
-  mainnet,
-  polygon,
-  polygonMumbai,
-  sepolia,
-} from 'wagmi/chains';
-import { alchemyProvider } from 'wagmi/providers/alchemy';
-import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
-import { publicProvider } from 'wagmi/providers/public';
+} from '@rainbow-me/rainbowkit/wallets'
+import { configureChains, createConfig } from 'wagmi'
+import { goerli, localhost, mainnet, polygon, polygonMumbai, sepolia } from 'wagmi/chains'
+import { alchemyProvider } from 'wagmi/providers/alchemy'
+import { jsonRpcProvider } from 'wagmi/providers/jsonRpc'
+import { publicProvider } from 'wagmi/providers/public'
 
-import { app } from '@/appConfig';
+import { app } from '@/appConfig'
 
-export const stallTimeout = 10_0000;
+export const stallTimeout = 10_0000
 
 new ParticleNetwork({
   appId: process.env.NEXT_PUBLIC_PARTICLE_APP_ID || '',
@@ -31,7 +24,7 @@ new ParticleNetwork({
   projectId: process.env.NEXT_PUBLIC_PARTICLE_PROJECT_ID || '',
   chainId: polygonMumbai.id,
   chainName: 'Polygon',
-});
+})
 
 export const { chains, publicClient, webSocketPublicClient } = configureChains(
   [polygonMumbai, goerli, mainnet, sepolia, localhost],
@@ -40,40 +33,40 @@ export const { chains, publicClient, webSocketPublicClient } = configureChains(
       apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY as string,
     }),
     jsonRpcProvider({
-      rpc: (chain) => {
+      rpc: chain => {
         if (chain.id === localhost.id) {
           return {
             http: process.env.NEXT_PUBLIC_LOCALHOST_URL ?? '',
             webSocket: process.env.NEXT_PUBLIC_LOCALHOST_URL ?? '',
-          };
+          }
         } else if (chain.id === goerli.id) {
           return {
             http: process.env.NEXT_PUBLIC_GOERLI_URL ?? '',
             webSocket: process.env.NEXT_PUBLIC_WS_GOERLI_URL ?? '',
-          };
+          }
         } else if (chain.id === mainnet.id) {
           return {
             http: process.env.NEXT_PUBLIC_MAINNET_URL ?? '',
             webSocket: process.env.NEXT_PUBLIC_LOCALHOST_URL ?? '',
-          };
+          }
         } else if (chain.id === polygon.id) {
           return {
             http: process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL ?? '',
             webSocket: process.env.NEXT_PUBLIC_WS_POLYGON_URL ?? '',
-          };
+          }
         } else if (chain.id === polygonMumbai.id) {
           return {
             http: process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL ?? '',
             webSocket: process.env.NEXT_PUBLIC_WS_POLYGON_MUMBAI_URL ?? '',
-          };
+          }
         } else if (chain.id === sepolia.id) {
           return {
             http: process.env.NEXT_PUBLIC_SEPOLIA_URL ?? '',
             webSocket: process.env.NEXT_PUBLIC_WS_SEPOLIA_URL ?? '',
-          };
+          }
         }
-        console.error(`No RPC URL for chain ${chain.name}`);
-        return null;
+        console.error(`No RPC URL for chain ${chain.name}`)
+        return null
       },
     }),
     publicProvider(),
@@ -84,8 +77,8 @@ export const { chains, publicClient, webSocketPublicClient } = configureChains(
     pollingInterval: stallTimeout,
     batch: { multicall: true },
     rank: true,
-  },
-);
+  }
+)
 const otherWallets = [
   braveWallet({ chains }),
   // ledgerWallet({ chains }),
@@ -99,10 +92,10 @@ const otherWallets = [
     chains,
   }),
   //   walletConnectWallet({ chains }),
-];
+]
 const connectors = () => {
   if (!process.env.NEXT_PUBLIC_WALLET_CONNECT_ID) {
-    throw new Error('Missing NEXT_PUBLIC_WALLET_CONNECT_ID');
+    throw new Error('Missing NEXT_PUBLIC_WALLET_CONNECT_ID')
   }
 
   return connectorsForWallets([
@@ -121,14 +114,14 @@ const connectors = () => {
       groupName: 'Other Wallets',
       wallets: otherWallets,
     },
-  ]);
-};
+  ])
+}
 export const config = createConfig({
   autoConnect: true,
   publicClient,
   webSocketPublicClient: webSocketPublicClient({ chainId: polygonMumbai.id }),
   connectors: connectors(),
   logger: {
-    warn: (message) => console.warn('Wagmi warning', message),
+    warn: message => console.warn('Wagmi warning', message),
   },
-});
+})

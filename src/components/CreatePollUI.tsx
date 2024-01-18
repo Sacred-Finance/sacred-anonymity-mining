@@ -26,9 +26,7 @@ interface CreatePollUIProps {
 const CreatePollUI = ({ post, group, onSuccess }: CreatePollUIProps) => {
   const [showModal, setShowModal] = React.useState(false)
   const [title, setTitle] = React.useState('Do you like this poll?')
-  const [description, setDescription] = React.useState<
-    typeof OutputData | null
-  >(null)
+  const [description, setDescription] = React.useState<typeof OutputData | null>(null)
   const [pollType, setPollType] = React.useState(0)
   const [duration, setDuration] = React.useState(168)
   const [rateScaleFrom, setRateScaleFrom] = React.useState(0)
@@ -142,10 +140,7 @@ const CreatePollUI = ({ post, group, onSuccess }: CreatePollUIProps) => {
                           id={`${i.value}`}
                           value={i.value}
                         />
-                        <label
-                          htmlFor={`${i.value}`}
-                          className="inline-block pl-[0.15rem] hover:cursor-pointer"
-                        >
+                        <label htmlFor={`${i.value}`} className="inline-block pl-[0.15rem] hover:cursor-pointer">
                           {i.label}
                         </label>
                       </div>
@@ -215,9 +210,7 @@ const CreatePollUI = ({ post, group, onSuccess }: CreatePollUIProps) => {
 
                   {/* Options */}
                   <div className="flex w-full flex-col gap-4">
-                    <div className="text-base">
-                      Options (Minimum 2, Maximum 10)
-                    </div>
+                    <div className="text-base">Options (Minimum 2, Maximum 10)</div>
                     <div className="flex flex-col gap-4">
                       {options.map((option, index) => (
                         <div className="flex items-center gap-2" key={index}>
@@ -253,14 +246,10 @@ const CreatePollUI = ({ post, group, onSuccess }: CreatePollUIProps) => {
                               newOptions.push('')
                               setOptions(newOptions)
                             }}
-                            disabled={
-                              options.length >= 10 ||
-                              index !== options.length - 1
-                            }
+                            disabled={options.length >= 10 || index !== options.length - 1}
                             className={clsx(
                               'mr-1 rounded border border-pink-500 p-2 text-xs font-bold uppercase text-gray-500 outline-none transition-all duration-150 ease-linear last:mr-0 hover:bg-gray-500 hover:text-white focus:outline-none active:bg-gray-600',
-                              options.length >= 10 ||
-                                index !== options.length - 1
+                              options.length >= 10 || index !== options.length - 1
                                 ? 'invisible'
                                 : 'bg-green-500/90 text-white'
                             )}

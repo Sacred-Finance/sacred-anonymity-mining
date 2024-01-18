@@ -55,10 +55,8 @@ const SelectToken = ({ fieldName, fieldIndex }) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        type={'button'}
-        className={
-          'flex h-full min-w-[200px] items-center justify-between gap-2 rounded border bg-background p-2 text-foreground'
-        }
+        type="button"
+        className="flex h-full min-w-[200px] items-center justify-between gap-2 rounded border bg-background p-2 text-foreground"
       >
         <Image hidden={!token?.logoURI} src={uriToHttp(token?.logoURI)} alt={token?.name} height={24} width={24} />
         {token?.name ? token?.name : 'Select Token'}

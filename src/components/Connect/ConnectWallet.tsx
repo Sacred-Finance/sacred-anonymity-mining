@@ -8,20 +8,13 @@ interface Props {
 
 export default function ConnectWallet({ show = 'always' }: Props) {
   const { isConnected } = useAccount()
-  if (
-    (show === 'connected' && !isConnected) ||
-    (show === 'disconnected' && isConnected)
-  ) {
+  if ((show === 'connected' && !isConnected) || (show === 'disconnected' && isConnected)) {
     return null
   }
   return <ConnectButton chainStatus="none" />
 }
 
-export const ShowConnectIfNotConnected = ({
-  children,
-}: {
-  children: ReactNode
-}) => {
+export const ShowConnectIfNotConnected = ({ children }: { children: ReactNode }) => {
   const { isConnected } = useAccount()
   if (isConnected) {
     return <>{children}</>

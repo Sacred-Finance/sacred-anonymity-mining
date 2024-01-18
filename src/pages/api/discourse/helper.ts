@@ -24,10 +24,7 @@ export const getHandler =
         }
       }
       const { apikey, username } = req.headers
-      const response = await axios.get(
-        url,
-        discourseAuthenticationHeaders(apikey as string, username as string)
-      )
+      const response = await axios.get(url, discourseAuthenticationHeaders(apikey as string, username as string))
 
       if (shouldCache) {
         cache.set(url, response.data)
@@ -39,27 +36,22 @@ export const getHandler =
     }
   }
 
-export const postHandler =
-  (req: NextApiRequest, res: NextApiResponse) =>
-  async (url: string, body: any) => {
-    try {
-      const { apikey, username } = req.headers
-      const response = await axios.post(url, JSON.stringify(body), {
-        headers: {
-          ...discourseAuthenticationHeaders(
-            apikey as string,
-            username as string
-          ).headers,
-          'Content-Type': 'application/json; charset=UTF-8',
-          Accept: 'application/json',
-          'X-Requested-With': 'XMLHttpRequest',
-        },
-      })
-      res.status(200).json(response.data)
-    } catch (error) {
-      res.status(500).json({ error: error.message })
-    }
+export const postHandler = (req: NextApiRequest, res: NextApiResponse) => async (url: string, body: any) => {
+  try {
+    const { apikey, username } = req.headers
+    const response = await axios.post(url, JSON.stringify(body), {
+      headers: {
+        ...discourseAuthenticationHeaders(apikey as string, username as string).headers,
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+    })
+    res.status(200).json(response.data)
+  } catch (error) {
+    res.status(500).json({ error: error.message })
   }
+}
 
 export const gptPostHandler = async (url: string, body: any) => {
   try {
@@ -68,7 +60,7 @@ export const gptPostHandler = async (url: string, body: any) => {
       headers: {
         'Accept-Encoding': 'gzip, deflate, br',
         'Content-Encoding': 'deflate',
-        origin: 'https://app.sacredprotocol.com',
+        'origin': 'https://app.sacredprotocol.com',
       },
       body: deflate(JSON.stringify(body)),
     })
@@ -91,26 +83,18 @@ export const gptPostHandler = async (url: string, body: any) => {
   } catch (error) {
     if (error.response) {
       // The request was made and the server responded with a status code that falls out of the range of 2xx
-      throw new Error(
-        `Request failed with status ${error.response.status}: ${JSON.stringify(
-          error.response.data
-        )}`
-      )
+      throw new Error(`Request failed with status ${error.response.status}: ${JSON.stringify(error.response.data)}`)
     }
     // Other errors (network error, timeout, etc)
     throw new Error(error.message)
   }
 }
 
-export function discourseAuthenticationHeaders(
-  apiKey?: string,
-  username?: string
-) {
+export function discourseAuthenticationHeaders(apiKey?: string, username?: string) {
   return {
     headers: {
       'Api-Key': apiKey || process.env.NEXT_PUBLIC_DISCOURSE_API_KEY,
-      'Api-Username':
-        username || process.env.NEXT_PUBLIC_DISCOURSE_API_USERNAME,
+      'Api-Username': username || process.env.NEXT_PUBLIC_DISCOURSE_API_USERNAME,
     },
   }
 }

@@ -1,11 +1,12 @@
 import React from 'react'
-import { FieldValues, useFieldArray, useFormContext } from 'react-hook-form'
+import type { FieldValues } from 'react-hook-form'
+import { useFieldArray, useFormContext } from 'react-hook-form'
 import { Button } from '@/shad/ui/button'
 import SelectToken from '@/components/SelectToken/SelectToken'
 import { Trash2Icon } from 'lucide-react'
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/shad/ui/form'
 import { Input } from '@/shad/ui/input'
-import { FormReturnType } from '@components/form/form.schema'
+import type { FormReturnType } from '@components/form/form.schema'
 import { CantChangeLabel } from '@components/form/CantChangeLabel'
 
 function TokenRequirementsForm({

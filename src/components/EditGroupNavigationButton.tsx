@@ -44,10 +44,7 @@ function EditGroupNavigationButton({ community }: { community: Group }) {
   }
 
   return (
-    <ToolTip
-      tooltip={t('toolTip.editCommunity.title')}
-      buttonProps={{ variant: 'secondary', className: 'flex gap-4' }}
-    >
+    <ToolTip tooltip={t('toolTip.editCommunity.title')} buttonProps={{ variant: 'secondary', className: 'flex gap-4' }}>
       <Link
         id="edit-community-button"
         className={`absolute right-0 z-20 rounded-full bg-gray-200 p-2 transition-all duration-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 ${
