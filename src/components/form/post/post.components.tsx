@@ -35,10 +35,16 @@ export function PostTitleInput({ form, ...props }: PostFormProps) {
 }
 
 export function PostContentTextarea({ form }: PostFormProps) {
+  const handleChange = async data => {
+    console.log('handle change', data)
+    await form.setValue('description', data, { shouldValidate: true, shouldDirty: true, shouldTouch: true })
+    await form.trigger('description')
+    console.log('form', form.formState.errors, form.getValues())
+  }
   return (
     <FormField
       control={form.control}
-      name="content"
+      name="description"
       render={({ field }) => (
         <FormItem>
           <FormLabel className="text-xl">Content</FormLabel>
@@ -47,22 +53,36 @@ export function PostContentTextarea({ form }: PostFormProps) {
             <div>
               <ErrorBoundary>
                 <Editor
-                  holder="content"
-                  data={form.watch('content')}
+                  holder="description"
+                  data={field.value}
                   readOnly={false}
-                  onChange={data => {
-                    console.log(data)
-                    form.setValue('content', data, { shouldValidate: true })
+                  placeholder="Start writing your post..."
+                  onChange={async data => {
+                    await handleChange(data)
                   }}
                   divProps={{
                     className:
                       'rounded-md bg-gray-100 dark:bg-gray-800 dark:!text-white p-4 focus:outline-none focus:ring-2 focus:ring-primary-dark',
                   }}
                 />
+                {/*<Editor*/}
+                {/*  holder={`${post?.id}_${isTypeOfPost ? 'post' : 'comment'}`}*/}
+                {/*  readOnly={!isContentEditing}*/}
+                {/*  onChange={val => setContentDescription(val)}*/}
+                {/*  placeholder={t('placeholder.enterPostContent') as string}*/}
+                {/*  data={post?.description ? post.description : post}*/}
+                {/*  divProps={{*/}
+                {/*    className:*/}
+                {/*      'rounded-md bg-gray-100 dark:bg-gray-800 dark:!text-white p-4 focus:outline-none focus:ring-2 focus:ring-primary-dark',*/}
+                {/*  }}*/}
+                {/*/>*/}
+
+                <FormMessage>{form.formState.errors.description?.message}</FormMessage>
+                {/*<Input type={'hidden'} {...field} />*/}
               </ErrorBoundary>
             </div>
           </FormControl>
-          <FormMessage/>
+          <FormMessage />
         </FormItem>
       )}
     />

@@ -1,4 +1,4 @@
-import { createComment, createPost, votePoll } from '@/lib/api'
+import { createComment, createPost, createPostItem, votePoll } from '@/lib/api'
 import { GroupPostAPI, GroupPostCommentAPI } from '@/lib/fetcher'
 import type { ItemCreationRequest, NewPostContent, PollRequestStruct } from '@/lib/model'
 
@@ -17,6 +17,7 @@ import { Identity } from '@semaphore-protocol/identity'
 import { generateProof } from '@semaphore-protocol/proof'
 import { mutate } from 'swr'
 import { useAccount } from 'wagmi'
+import { emptyPollRequest } from '@/lib/item'
 
 interface Poll {
   content: NewPostContent
@@ -120,30 +121,20 @@ export const usePoll = ({ group }: { group: Group }) => {
         content: content,
       }
 
-      const { status } =
-        post !== undefined
-          ? await createComment({
-              groupId: group.id.toString(),
-              parentId: post.id.toString(),
-              request: request,
-              solidityProof: fullProof.proof,
-              asPoll: true,
-              pollRequest: pollRequest,
-            })
-          : await createPost({
-              groupId: group.id.toString(),
-              request: request,
-              solidityProof: fullProof.proof,
-              asPoll: true,
-              pollRequest: pollRequest,
-            })
+      const { status } = await createPostItem({
+        groupId: group.id.toString(),
+        parentId: post?.id?.toString(),
+        request: request,
+        solidityProof: fullProof.proof,
+        asPoll: true,
+        pollRequest: pollRequest,
+      })
 
       if (status === 200) {
         console.log(`A post posted by user ${address}`)
         if (post !== undefined) {
           await mutate(GroupPostCommentAPI(group.id.toString(), post.id.toString()), undefined, {
             optimisticData: data => {
-              console.log('optimisticData', data)
               if (data) {
                 return {
                   ...data,

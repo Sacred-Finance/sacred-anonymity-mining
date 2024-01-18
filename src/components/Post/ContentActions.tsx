@@ -6,7 +6,7 @@ import { PaperAirplaneIcon, PencilIcon } from '@heroicons/react/20/solid'
 import DeleteItemButton from '@components/buttons/DeleteItemButton'
 import { XCircleIcon } from 'lucide-react'
 import type { BigNumberish } from '@semaphore-protocol/group'
-import type { ContentType } from '@/lib/model'
+import { ContentType } from '@/lib/model'
 
 interface EditActionProps {
   setIsEditing: React.Dispatch<React.SetStateAction<boolean>>
@@ -51,7 +51,7 @@ export const SaveAction: React.FC<SaveActionProps> = ({ onSave, isLoading, item 
     <PrimaryButton
       className="bg-blue-500 text-sm text-white hover:bg-blue-500/80"
       isLoading={isLoading}
-      disabled={!item || (!item.description?.blocks?.length && !item.blocks?.length)}
+      disabled={!item || !item.description?.blocks?.length || (!item.title && item.kind === ContentType.POST)}
       onClick={onSave}
       startIcon={<PaperAirplaneIcon className="mr-1 h-4 w-4" />}
     >

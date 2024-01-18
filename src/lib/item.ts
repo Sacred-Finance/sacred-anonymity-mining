@@ -1,4 +1,4 @@
-import type { ItemCreationRequest, User } from '@/lib/model'
+import type { ItemCreationRequest, PostContent } from '@/lib/model'
 import { ethers } from 'ethers'
 import { Identity } from '@semaphore-protocol/identity'
 import {
@@ -16,8 +16,8 @@ import { Group as SemaphoreGroup } from '@semaphore-protocol/group'
 import { mutate } from 'swr'
 import { GroupPostAPI, GroupPostCommentAPI } from '@/lib/fetcher'
 import { generateProof } from '@semaphore-protocol/proof'
-import type { GroupId } from '@/types/contract/ForumInterface'
 import type { Address } from 'wagmi'
+import { BigNumberishToBigInt } from '@/utils/communityUtils'
 
 export const emptyPollRequest = {
   pollType: 0,
@@ -34,15 +34,14 @@ export async function handleDeleteItem(
     postId: BigNumberish
   },
   address: Address,
-  postedByUser: User,
-  itemId: bigint
+  itemId: BigNumberish
 ) {
   const signal = ethers.constants.HashZero
   const userPosting = new Identity(address)
 
   const note = await createNote(userPosting)
 
-  const item = await forumContract.read.itemAt([itemId])
+  const item = await forumContract.read.itemAt([BigNumberishToBigInt(itemId)])
   const input = {
     note: item.note,
     trapdoor: userPosting.getTrapdoor(),
@@ -61,20 +60,19 @@ export async function handleDeleteItem(
   })
 }
 
-// todo: create works, but it fails in either the caching, or updating the UI after its made - fix currently is refreshing the page.
+interface CreateParams {
+  content: PostContent
+  type: string
+  address: string | undefined
+  onIPFSUploadSuccess: (arg0: any, arg1: string) => void
+}
+
 export async function create(
   this: {
     groupId: BigNumberish
-    postId: BigNumberish
+    postId?: BigNumberish
   },
-  content: any,
-  type: string,
-  address: string | undefined,
-  users: any,
-  postedByUser: any,
-  groupId: BigNumberish | GroupId,
-  setWaiting: any,
-  onIPFSUploadSuccess: (arg0: any, arg1: string) => void
+  { content, type, address, onIPFSUploadSuccess }: CreateParams
 ) {
   const currentDate = new Date()
   const message = currentDate.getTime().toString() + '#' + JSON.stringify(content)
@@ -91,8 +89,8 @@ export async function create(
 
     const extraNullifier = hashBytes(signal).toString()
     const note = await createNote(userPosting)
-    const semaphoreGroup = new SemaphoreGroup(groupId)
-    const u = await fetchUsersFromSemaphoreContract(groupId)
+    const semaphoreGroup = new SemaphoreGroup(this.groupId)
+    const u = await fetchUsersFromSemaphoreContract(this.groupId)
     u.forEach(u => semaphoreGroup.addMember(BigInt(u)))
 
     const { proof, merkleTreeRoot, nullifierHash } = await generateProof(
@@ -112,7 +110,7 @@ export async function create(
     if (type === 'post') {
       return await createPost({
         groupId: this.groupId,
-        request: request,
+        request,
         solidityProof: proof,
         asPoll: false,
         pollRequest: emptyPollRequest,
@@ -120,10 +118,13 @@ export async function create(
         return res
       })
     } else if (type === 'comment') {
+      if (!this.postId) {
+        throw Error('Invalid post ID')
+      }
       return await createComment({
         groupId: this.groupId,
         parentId: this.postId,
-        request: request,
+        request,
         solidityProof: proof,
         asPoll: false,
         pollRequest: emptyPollRequest,
@@ -137,17 +138,21 @@ export async function create(
   }
 }
 
+interface EditContentParams {
+  type: 'post' | 'comment'
+  content: PostContent
+  address: string
+  itemId: BigNumberish
+}
+
 export async function editContent(
   this: {
-    groupId: string
-    postId: string
+    groupId: BigNumberish
+    postId: BigNumberish
   },
-  type: 'post' | 'comment',
-  content: string,
-  address: string,
-  itemId: number,
-  postedByUser: User
+  { type, content, address, itemId }: EditContentParams
 ) {
+  console.log('editContent', type, content, address, itemId)
   const currentDate = new Date()
   const message = currentDate.getTime().toString() + '#' + JSON.stringify(content)
   console.log(`Editing your anonymous ${type}...`)

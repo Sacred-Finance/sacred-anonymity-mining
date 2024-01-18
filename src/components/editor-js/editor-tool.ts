@@ -1,32 +1,32 @@
-//./components/EditorTools.js
 import Code from '@editorjs/code'
 import Header from '@editorjs/header'
 import Paragraph from '@editorjs/paragraph'
 import Checklist from '@editorjs/checklist'
 import Delimiter from '@editorjs/delimiter'
-
 import Embed from '@editorjs/embed'
 import Image from '@editorjs/image'
-import InlineCode from '@editorjs/inline-code'
 import List from '@editorjs/list'
 import Marker from '@editorjs/marker'
 import Quote from '@editorjs/quote'
-import Raw from '@editorjs/raw'
 import Table from '@editorjs/table'
 import Warning from '@editorjs/warning'
 import Underline from '@editorjs/underline'
-import { uploadImageToIPFS } from '@/lib/utils'
-import type { EditorConfig } from '@editorjs/editorjs'
+import { uploadImageToIPFS } from '@/lib/utils' // Ensure this path is correct
 
-// Link: reuires backend implementation
-// Image: requires backend or 3rd party integration
+// Define a custom interface for the tools
+interface ToolConfig {
+  class: any // Tool class
+  inlineToolbar?: boolean
+  shortcut?: string
+  config?: any
+}
 
-export const EDITOR_TOOLS: EditorConfig['tools'] = {
-  code: {
-    class: Code,
-    shortcut: 'CMD+SHIFT+C',
-    placeholder: 'Enter code',
-  },
+// Define the type for the EDITOR_TOOLS
+interface EditorTools {
+  [toolName: string]: ToolConfig
+}
+
+export const EDITOR_TOOLS: EditorTools = {
   header: {
     class: Header,
     inlineToolbar: true,
@@ -47,8 +47,8 @@ export const EDITOR_TOOLS: EditorConfig['tools'] = {
   embed: {
     class: Embed,
   },
-  inlineCode: {
-    class: InlineCode,
+  code: {
+    class: Code,
     inlineToolbar: true,
     shortcut: 'CMD+SHIFT+C',
   },
@@ -66,7 +66,7 @@ export const EDITOR_TOOLS: EditorConfig['tools'] = {
     inlineToolbar: true,
     shortcut: 'CMD+SHIFT+O',
   },
-  raw: Raw,
+  // raw: Raw,
   // image: SimpleImage,
   table: {
     class: Table,
@@ -102,10 +102,9 @@ export const EDITOR_TOOLS: EditorConfig['tools'] = {
           // your own uploading logic here
           return uploadImageToIPFS(file).then(hash => {
             return {
-              success: 1,
+              success: 200,
               file: {
                 url: `https://ipfs.io/ipfs/${hash}`,
-                // any other image data you want to store, such as width, height, color, extension, etc
               },
             }
           })

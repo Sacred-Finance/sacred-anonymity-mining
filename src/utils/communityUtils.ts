@@ -12,6 +12,7 @@ import { fetchToken } from '@wagmi/core'
 import type { Unit } from 'wagmi'
 import type { HandleSetImage } from '@/pages/communities/[groupId]/edit'
 import axios from 'axios'
+import type { BigNumberish } from '@semaphore-protocol/group'
 
 type GroupId = number
 
@@ -332,4 +333,12 @@ export async function augmentItemData(rawItemData: RawItemData): Promise<Item> {
       removed: true,
     }
   }
+}
+
+export const BigNumberishToBigInt = (bigNumber: BigNumberish) => {
+  return BigInt(bigNumber.toString())
+}
+
+export const BigNumberishToNumber = (bigNumber: BigNumberish) => {
+  return Number(bigNumber.toString())
 }

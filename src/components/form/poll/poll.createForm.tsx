@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
@@ -16,29 +16,53 @@ import { usePoll } from '@/hooks/usePoll'
 import { useAccount } from 'wagmi'
 import { PrimaryButton } from '@components/buttons'
 import { getRandomPoll } from '@components/form/poll/randomPolls' // Assuming the components are exported from this file
-import type { Item } from '@/types/contract/ForumInterface' // Assuming the components are exported from this file
+import type { Group, Item } from '@/types/contract/ForumInterface'
+import { Dice3 } from 'lucide-react'
+import { Button } from '@/shad/ui/button'
+import type { KeyedMutator } from 'swr'
+import type { GroupWithPostDataResponse } from '@pages/api/groupWithPostData'
+import type { GroupWithPostAndCommentDataResponse } from '@pages/api/groupWithPostAndCommentData'
 
-export default function PollCreateForm({ post, group, mutate, handleClose }) {
-export default function PollCreateForm({ post, group, mutate }) {
-  const randomPoll = getRandomPoll()
+type MutateType<T> = T extends undefined
+  ? KeyedMutator<GroupWithPostDataResponse>
+  : KeyedMutator<GroupWithPostAndCommentDataResponse>
+
+type PostCreateFormProps<T = undefined> = {
+  post?: T
+  group: Group
+  mutate: MutateType<T>
+}
+
+export default function PollCreateForm({
+  post,
+  group,
+  mutate,
+  handleClose,
+}: PostCreateFormProps<Item | undefined> & { handleClose: () => void }) {
+  const [randomPoll, setRandomPoll] = useState(getRandomPoll())
   const methods = useForm<PollCreationType>({
     resolver: zodResolver(PollCreationSchema),
     defaultValues: {
       title: randomPoll.title,
-      content: randomPoll.content,
+      description: randomPoll.description,
       pollType: 0,
       options: randomPoll.options, // Default for two options
       duration: 1,
       numericRating: { rateScaleFrom: '0', rateScaleTo: '5' },
     },
   })
+  const getNewRandomPoll = () => {
+    setRandomPoll(getRandomPoll())
+    methods.setValue('title', randomPoll.title)
+    methods.setValue('description', randomPoll.description)
+    methods.setValue('options', randomPoll.options)
+  }
 
   const { address } = useAccount()
 
   const { createPoll } = usePoll({ group })
 
-  const onSubmit = async data => {
-    console.log(data)
+  const onSubmit = async (data: PollCreationType) => {
     if (!address) {
       toast.error('Please connect your wallet')
       return
@@ -57,12 +81,12 @@ export default function PollCreateForm({ post, group, mutate }) {
       removed: false,
       title: data.title,
       isMutating: true,
-      description: data.content,
+      description: data.description,
     }
     handleClose()
 
     try {
-      mutate((data: { posts: Item[]; comments: Item[] }) => {
+      mutate((data: { posts?: Item[]; comments?: Item[] }) => {
         if (data.posts) {
           return {
             ...data,
@@ -81,18 +105,18 @@ export default function PollCreateForm({ post, group, mutate }) {
         pollType: data.pollType,
         duration: data.duration,
         answers: data.options,
-        rateScaleFrom: data.numericRating?.rateScaleFrom,
-        rateScaleTo: data.numericRating?.rateScaleTo,
+        rateScaleFrom: Number(data.numericRating?.rateScaleFrom),
+        rateScaleTo: Number(data.numericRating?.rateScaleTo),
         content: {
           title: data.title,
-          description: transformStringToOutputData(data.content),
+          description: transformStringToOutputData(data.description),
         },
         onSuccessCallback: () => {
           mutate && mutate()
         },
         onErrorCallback: err => {
           //rollback
-          mutate((data: { posts: Item[]; comments: Item[] }) => {
+          mutate((data: { posts?: Item[]; comments?: Item[] }) => {
             if (data.posts) {
               return {
                 ...data,
@@ -127,10 +151,23 @@ export default function PollCreateForm({ post, group, mutate }) {
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onSubmit)} className="flex flex-col space-y-4">
-        <PollTitleInput form={methods} />
+        <div className="flex w-full">
+          <PollTitleInput
+            form={methods}
+            title={
+              <div className="flex items-center gap-2">
+                <Button size="icon" type="button" variant="ghost" onClick={getNewRandomPoll}>
+                  <Dice3 size={24} />
+                </Button>
+                Title
+              </div>
+            }
+          />
+        </div>
         <PollContentTextarea form={methods} />
         <PollTypeSelect form={methods} />
         <PollOptionsInput form={methods} />
+
         <PollDurationInput form={methods} />
         {Number(pollType) === 2 && <PollNumericRatingInput form={methods} />}
         <PrimaryButton type="submit" isLoading={methods.formState.isSubmitting}>

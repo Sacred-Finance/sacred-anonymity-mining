@@ -5,7 +5,7 @@ import { toast } from 'react-toastify'
 import { useRouter } from 'next/router'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
 import type { BigNumberish } from '@semaphore-protocol/group'
-import { ActionType } from "@/contexts/CommunityTypes";
+import { ActionType } from '@/contexts/CommunityTypes'
 
 export const useRemoveGroup = (groupId: BigNumberish) => {
   const { dispatch } = useCommunityContext()

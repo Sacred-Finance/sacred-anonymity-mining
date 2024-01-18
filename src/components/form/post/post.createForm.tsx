@@ -2,7 +2,6 @@ import React from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { PostContentTextarea, PostTitleInput } from './post.components'
-import type { CommentCreationType, PostCreationType } from '@components/form/post/post.schema'
 import { CommentCreationSchema, PostCreationSchema } from '@components/form/post/post.schema'
 import { toast } from 'react-toastify'
 import { useAccount } from 'wagmi'
@@ -10,25 +9,40 @@ import { PrimaryButton } from '@components/buttons'
 import usePost from '@/hooks/usePost'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/shad/ui/accordion'
 import { Textarea } from '@/shad/ui/textarea'
-import type { Item } from '@/types/contract/ForumInterface'
+import type { Group, Item } from '@/types/contract/ForumInterface'
+import type { KeyedMutator } from 'swr'
+import type { GroupWithPostDataResponse } from '@pages/api/groupWithPostData'
+import type { GroupWithPostAndCommentDataResponse } from '@pages/api/groupWithPostAndCommentData'
 
-export default function PostCreateForm({ post, group, mutate, handleClose }) {
-  const methods = useForm<PostCreationType | CommentCreationType>({
-    resolver: zodResolver(post ? CommentCreationSchema : PostCreationSchema),
-    mode: 'onChange',
-    defaultValues: {
-      ...(!post && {
-        title: 'Awesome Post',
-      }),
-    },
+export type MutateType<T> = T extends undefined
+  ? KeyedMutator<GroupWithPostDataResponse>
+  : KeyedMutator<GroupWithPostAndCommentDataResponse>
+
+type PostCreateFormProps<T> = {
+  post?: T
+  group: Group
+  mutate: MutateType<T>
+}
+
+export default function PostCreateForm({
+  post,
+  group,
+  mutate,
+  handleClose,
+}: PostCreateFormProps<Item | undefined> & { handleClose: () => void }) {
+  const schema = post ? PostCreationSchema : CommentCreationSchema
+  const methods = useForm({
+    resolver: zodResolver(schema),
+    mode: 'all',
   })
   const { address } = useAccount()
 
-  const { createPost } = usePost({
+  const { createNewPost } = usePost({
     group,
   })
 
-  const onSubmit = async data => {
+  const onSubmit = async () => {
+    const data = methods.getValues()
     if (!address) {
       toast.error('Please connect your wallet')
       return
@@ -46,12 +60,12 @@ export default function PostCreateForm({ post, group, mutate, handleClose }) {
       removed: false,
       title: data.title,
       isMutating: true,
-      description: data.content,
+      description: data.description,
     }
     handleClose()
 
     // Optimistic UI update
-    mutate((data: { posts: Item[]; comments: Item[] }) => {
+    await mutate((data: { posts: Item[]; comments: Item[] }) => {
       if (data.posts) {
         return {
           ...data,
@@ -64,13 +78,16 @@ export default function PostCreateForm({ post, group, mutate, handleClose }) {
         }
       }
     }, false)
+
+    const description = methods.getValues().description
+    const title = methods.getValues().title
     try {
-      await createPost({
-        post: post,
+      await createNewPost({
         content: {
-          title: data.title,
-          description: data.content,
+          title,
+          description,
         },
+        post,
         onSuccessCallback: () => {
           mutate && mutate()
         },
@@ -116,7 +133,7 @@ export default function PostCreateForm({ post, group, mutate, handleClose }) {
             <AccordionTrigger>Content</AccordionTrigger>
             <AccordionContent>
               <Textarea
-                className={'bg-black/50'}
+                className="bg-black/50"
                 readOnly={true}
                 hidden
                 value={JSON.stringify(methods.watch('content'))}

@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod'
 
 // Define a schema for the poll options
 const pollOptionSchema = z.string().min(1, 'Option cannot be empty')
@@ -34,7 +34,7 @@ export const transformStringToOutputData = (str: string) => {
 export const PollCreationSchema = z
   .object({
     title: z.string().min(1, 'Title is required').max(60, 'Title must be 60 characters or less'),
-    content: z.string().min(1, 'Content is required'),
+    description: z.string().min(1, 'description is required'),
     options: z
       .array(pollOptionSchema)
       .min(2, 'At least two options required')
@@ -57,24 +57,24 @@ export const PollCreationSchema = z
   })
   .refine(
     data => {
-      if (data.content) {
+      if (data.description) {
         try {
           // Attempt to transform the string into an OutputData object
-          const outputData = transformStringToOutputData(data.content)
+          const outputData = transformStringToOutputData(data.description)
           // Perform additional validation if necessary
           // For example, check if outputData has the required blocks property
           return !!outputData.blocks
         } catch {
-          // If transformation fails, return false to indicate invalid content
+          // If transformation fails, return false to indicate invalid description
           return false
         }
       }
-      // If content is not provided, it's valid (because it's optional)
+      // If description is not provided, it's valid (because it's optional)
       return true
     },
     {
-      message: 'Content must be a valid JSON string that conforms to the OutputData structure',
-      path: ['content'],
+      message: 'Description must be a valid JSON string that conforms to the OutputData structure',
+      path: ['description'],
     }
   )
   .refine(

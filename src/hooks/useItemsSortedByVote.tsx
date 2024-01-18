@@ -38,11 +38,11 @@ const sortByEngagementScore = (a, b) => {
 
 export const useItemsSortedByVote = (
   tempData: Item[],
-  data: Item[],
-  sortBy: 'highest' | 'lowest' | 'controversial' | 'newest' | 'oldest' | 'activity' | 'contentLength' | 'engagement'
+  sortBy: 'highest' | 'lowest' | 'controversial' | 'newest' | 'oldest' | 'activity' | 'contentLength' | 'engagement',
+  data?: Item[]
 ): Item[] => {
   return useMemo(() => {
-    if (!data) {
+    if (!data || !data.length) {
       return []
     }
     const sorted = [...tempData, ...data].filter(item => item !== undefined && item !== null)

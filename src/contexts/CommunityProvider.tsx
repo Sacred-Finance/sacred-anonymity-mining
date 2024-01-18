@@ -2,7 +2,6 @@ import type { FC, ReactNode } from 'react'
 import React, { createContext, useContext, useEffect, useMemo, useReducer, useState } from 'react'
 import type { User } from '@/lib/model'
 import _ from 'lodash'
-import { useIdentity } from '@/hooks/useIdentity'
 import type { Group, Item } from '@/types/contract/ForumInterface'
 import type { Action, CommunityContextType, State } from '@/contexts/CommunityTypes'
 
@@ -165,19 +164,4 @@ export const CommunityProvider: FC<{ children: ReactNode }> = ({ children }) => 
 export function useCommunityById(id: string | number): Group | undefined {
   const { state } = useCommunityContext()
   return useMemo(() => state.communities.find(c => _.toNumber(c.groupId) === _.toNumber(id)), [state.communities, id])
-}
-
-export function useUsers(): User[] {
-  const { state } = useCommunityContext()
-  return state.users
-}
-
-export function useActiveUser(): User | undefined {
-  const { state } = useCommunityContext()
-  const identity = useIdentity()
-
-  return useMemo(
-    () => state.users.find(u => u.identityCommitment === identity?.commitment.toString()),
-    [state.users, identity?.commitment]
-  )
 }

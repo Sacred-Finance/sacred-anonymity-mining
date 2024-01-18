@@ -17,7 +17,7 @@ import { Identity } from '@semaphore-protocol/identity'
 import { generateProof } from '@semaphore-protocol/proof'
 import { mutate } from 'swr'
 import { useAccount } from 'wagmi'
-import { createComment, createPost, vote } from '@/lib/api'
+import { createPostItem, vote } from '@/lib/api'
 import { emptyPollRequest } from '@/lib/item'
 
 interface Post {
@@ -88,24 +88,14 @@ export const usePost = ({ group }: { group: Group }) => {
         nullifierHash: fullProof.nullifierHash.toString(),
         note: note.toString(),
       }
-
-      const { status } =
-        post !== undefined
-          ? await createComment({
-              groupId: group.id.toString(),
-              parentId: post.id.toString(),
-              request: request,
-              solidityProof: fullProof.proof,
-              asPoll: false,
-              pollRequest: emptyPollRequest,
-            })
-          : await createPost({
-              groupId: group.id.toString(),
-              request: request,
-              solidityProof: fullProof.proof,
-              asPoll: false,
-              pollRequest: emptyPollRequest,
-            })
+      const { status } = await createPostItem({
+        groupId: group.id.toString(),
+        parentId: post?.id?.toString(),
+        request: request,
+        solidityProof: fullProof.proof,
+        asPoll: false,
+        pollRequest: emptyPollRequest,
+      })
       if (status === 200) {
         console.log(`A post posted by user ${address}`)
         if (post !== undefined) {
@@ -161,7 +151,7 @@ export const usePost = ({ group }: { group: Group }) => {
     }
   }
 
-  return { createPost: createNewPost, submitPost }
+  return { createNewPost, submitPost }
 }
 
 export default usePost

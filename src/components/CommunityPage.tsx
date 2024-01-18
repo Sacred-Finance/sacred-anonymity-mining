@@ -12,10 +12,20 @@ import PostCreateForm from '@components/form/post/post.createForm'
 import { ShowConnectIfNotConnected } from '@components/Connect/ConnectWallet'
 import { DrawerDialog } from '@components/DrawerDialog'
 import { ChatIcon, PollIcon } from '@components/CommunityActionTabs'
+import type { GroupWithPostDataResponse } from '@pages/api/groupWithPostData'
+import type { KeyedMutator } from 'swr'
 
-export function CommunityPage({ community, posts, mutate }: { community: Group; posts?: Item[]; mutate?: () => void }) {
+export function CommunityPage({
+  community,
+  posts,
+  mutate,
+}: {
+  community: Group
+  posts?: Item[]
+  mutate: KeyedMutator<GroupWithPostDataResponse>
+}) {
   const [sortBy, setSortBy] = useState<SortByOption>('highest')
-  const sortedData = useItemsSortedByVote([], posts, sortBy)
+  const sortedData = useItemsSortedByVote([], sortBy, posts)
   const [open, setOpen] = React.useState<'post' | 'poll' | undefined>(undefined)
 
   const {
@@ -43,12 +53,7 @@ export function CommunityPage({ community, posts, mutate }: { community: Group; 
                   </div>
                 }
               >
-                <PostCreateForm
-                  group={community}
-                  post={undefined}
-                  mutate={mutate}
-                  handleClose={() => setOpen(undefined)}
-                />
+                <PostCreateForm group={community} mutate={mutate} handleClose={() => setOpen(undefined)} />
               </DrawerDialog>
               <DrawerDialog
                 setOpen={boolean => setOpen(boolean ? 'poll' : undefined)}
@@ -60,12 +65,7 @@ export function CommunityPage({ community, posts, mutate }: { community: Group; 
                   </div>
                 }
               >
-                <PollCreateForm
-                  group={community}
-                  post={undefined}
-                  mutate={mutate}
-                  handleClose={() => setOpen(undefined)}
-                />
+                <PollCreateForm group={community} mutate={mutate} handleClose={() => setOpen(undefined)} />
               </DrawerDialog>
             </ShowConnectIfNotConnected>
           </div>

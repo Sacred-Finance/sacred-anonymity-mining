@@ -1,20 +1,17 @@
 import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { leaveGroup } from '@/lib/api'
 import type { User } from '@/lib/model'
-import {
-  createNote,
-  fetchUsersFromSemaphoreContract,
-  generateGroth16Proof,
-} from '@/lib/utils'
+import { createNote, fetchUsersFromSemaphoreContract, generateGroth16Proof } from '@/lib/utils'
+import type { BigNumberish } from '@semaphore-protocol/group'
 import { Group } from '@semaphore-protocol/group'
 import { Identity } from '@semaphore-protocol/identity'
 import { useAccount } from 'wagmi'
-import { ActionType } from "@/contexts/CommunityTypes";
+import { ActionType } from '@/contexts/CommunityTypes'
 
 const username = 'anon'
 
 interface UseLeaveCommunityParams {
-  id: bigint
+  id: BigNumberish
 }
 
 export const useLeaveCommunity = ({ id }: UseLeaveCommunityParams) => {
@@ -23,7 +20,7 @@ export const useLeaveCommunity = ({ id }: UseLeaveCommunityParams) => {
 
   const prepareGroupAndProof = async (
     userIdentity: Identity,
-    groupId: string
+    groupId: BigNumberish
   ): Promise<{
     proof: {
       a: string[]
@@ -63,10 +60,7 @@ export const useLeaveCommunity = ({ id }: UseLeaveCommunityParams) => {
     const userIdentity = new Identity(address)
     try {
       console.log('Leaving group...')
-      const { proof, siblings, pathIndices } = await prepareGroupAndProof(
-        userIdentity,
-        id.toString()
-      )
+      const { proof, siblings, pathIndices } = await prepareGroupAndProof(userIdentity, id.toString())
 
       await leaveGroup({
         groupId: id.toString(),

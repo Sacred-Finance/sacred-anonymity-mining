@@ -1,5 +1,6 @@
 import React from 'react'
-import { Controller, UseFormReturn } from 'react-hook-form'
+import type { UseFormReturn } from 'react-hook-form'
+import { Controller } from 'react-hook-form'
 import { Textarea } from '@/shad/ui/textarea'
 
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/shad/ui/form'
@@ -9,19 +10,20 @@ import { Label } from '@/shad/ui/label'
 import type { PollCreationType } from '@components/form/poll/poll.schema'
 import { Button } from '@/shad/ui/button'
 import { PlusIcon } from '@heroicons/react/20/solid'
+import { ScrollArea } from '@/shad/ui/scroll-area'
 
 type PollFormProps = {
   form: UseFormReturn<PollCreationType>
 }
 
-export function PollTitleInput({ form }: PollFormProps) {
+export function PollTitleInput({ form, title }: PollFormProps & { title: string | React.ReactNode }) {
   return (
     <FormField
       control={form.control}
       name="title"
       render={({ field, fieldState }) => (
-        <FormItem>
-          <FormLabel className="text-xl">Title</FormLabel>
+        <FormItem className="w-full">
+          <FormLabel className="text-xl">{title}</FormLabel>
           <FormDescription>Enter the title for the poll (Max 60 characters).</FormDescription>
           <FormControl>
             <Input placeholder="Poll Title" {...field} />
@@ -37,7 +39,7 @@ export function PollContentTextarea({ form }: PollFormProps) {
   return (
     <FormField
       control={form.control}
-      name="content"
+      name="description"
       render={({ field, fieldState }) => (
         <FormItem>
           <FormLabel className="text-xl">Content</FormLabel>
@@ -109,7 +111,7 @@ export function PollOptionsInput({ form }: PollFormProps) {
         name={`options.${index}`}
         render={({ field, fieldState }) => (
           <FormItem>
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center justify-between gap-2 p-2">
               <Input placeholder={`Option ${index + 1}`} {...field} />
               <Button type="button" variant="outline" onClick={() => handleRemoveOption(index)}>
                 -
@@ -129,14 +131,14 @@ export function PollOptionsInput({ form }: PollFormProps) {
   return (
     <>
       <FormItem>
-        <FormLabel className="flex items-center justify-between text-xl">
+        <FormLabel className="sticky top-0 flex items-center justify-between  bg-background text-xl">
           Poll Options
           <Button type="button" variant="ghost" onClick={handleAddOption}>
             <PlusIcon width={24} height={24} /> Add Option
           </Button>
         </FormLabel>
         <FormDescription>Enter the options for the poll.</FormDescription>
-        {renderOptions()}
+        <ScrollArea className="h-full max-h-[300px]">{renderOptions()}</ScrollArea>
         <FormMessage>{form.formState.errors.options?.message}</FormMessage>
       </FormItem>
     </>

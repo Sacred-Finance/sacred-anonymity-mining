@@ -8,7 +8,7 @@ import { useCheckIfUserIsAdminOrModerator } from '@/hooks/useCheckIfUserIsAdminO
 import Head from 'next/head'
 import { Syncing } from '@/components/Syncing'
 import type { Group } from '@/types/contract/ForumInterface'
-import { ActionType } from "@/contexts/CommunityTypes";
+import { ActionType } from '@/contexts/CommunityTypes'
 
 function Home() {
   const router = useRouter()
@@ -60,24 +60,9 @@ function Home() {
         <meta property="og:url" content={location.href} />
       </Head>
       {isValidating && <Syncing />}
-      <HomePage
-        isLoading={isLoading}
-        isValidating={isValidating}
-        isAdmin={!!isAdminOrModerator}
-      />
+      <HomePage isLoading={isLoading} isValidating={isValidating} isAdmin={!!isAdminOrModerator} />
     </div>
   )
 }
-
-// export const getServerSideProps = async () => {
-//   const data = await axios.get(
-//     process.env.NEXT_PUBLIC_DISCOURSE_GOOGLE_SHEET_API_URL as string
-//   )
-//   return {
-//     props: {
-//       discourseCommunities: data.data?.communities,
-//     },
-//   }
-// }
 
 export default Home

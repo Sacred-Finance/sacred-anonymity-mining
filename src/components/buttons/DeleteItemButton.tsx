@@ -18,7 +18,7 @@ import {
 } from '@/shad/ui/dialog'
 import { Input } from '@/shad/ui/input'
 import { CircularLoader } from '@components/CircularLoader'
-import { BigNumberish } from '@semaphore-protocol/group'
+import type { BigNumberish } from '@semaphore-protocol/group'
 
 const DeleteItemButton = ({
   itemId,

@@ -4,10 +4,10 @@ import { joinGroup } from '@/lib/api'
 import { useHandleCommunityAction } from './useHandleCommunityAction'
 import { useCommunityContext } from '@/contexts/CommunityProvider'
 import { useAccount } from 'wagmi'
-import type { ethers } from 'ethers'
 import { createNote } from '@/lib/utils'
 import type { User } from '@/lib/model'
-import { ActionType } from "@/contexts/CommunityTypes";
+import { ActionType } from '@/contexts/CommunityTypes'
+import type { BigNumberish } from '@semaphore-protocol/group'
 
 export const useJoinCommunity = () => {
   const { address, isConnected } = useAccount()
@@ -15,15 +15,13 @@ export const useJoinCommunity = () => {
   const handleCommunityAction = useHandleCommunityAction()
 
   // Improved parameter validation
-  const isValidGroupId = (
-    groupId: string | number | ethers.BigNumber
-  ): boolean => {
+  const isValidGroupId = (groupId: BigNumberish): boolean => {
     return typeof groupId !== 'undefined' && !isNaN(Number(groupId))
   }
 
   // Extracted action logic into a separate function
   const performJoinCommunity = async (
-    groupId: string | number | ethers.BigNumber,
+    groupId: BigNumberish,
     groupName: string,
     username: string = 'anon'
   ): Promise<any> => {
@@ -40,7 +38,7 @@ export const useJoinCommunity = () => {
       dispatch({
         type: ActionType.ADD_USER,
         payload: {
-          groupId: +groupId,
+          groupId: groupId,
           name: username,
           identityCommitment: freshUser.getCommitment().toString(),
         } as User,
@@ -51,7 +49,7 @@ export const useJoinCommunity = () => {
       dispatch({
         type: ActionType.REMOVE_USER,
         payload: {
-          groupId: +groupId,
+          groupId: groupId,
           name: username,
           identityCommitment: freshUser.getCommitment().toString(),
         } as User,
@@ -61,19 +59,9 @@ export const useJoinCommunity = () => {
   }
 
   return useCallback(
-    async (
-      groupName: string,
-      groupId: string | number | ethers.BigNumber,
-      successCallback?: () => void
-    ) => {
+    async (groupName: string, groupId: BigNumberish, successCallback?: () => void) => {
       if (!isConnected || !address || !isValidGroupId(groupId) || !groupName) {
-        console.error(
-          'Missing required parameters',
-          isConnected,
-          address,
-          groupId,
-          groupName
-        )
+        console.error('Missing required parameters', isConnected, address, groupId, groupName)
         return
       }
 

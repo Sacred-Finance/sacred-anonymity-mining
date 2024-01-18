@@ -1,7 +1,7 @@
 import React from 'react'
 import { Logo } from './Logo'
 import { NavBarButton } from '../components/buttons/NavBarButton'
-import { ThemeToggleButton } from './Theme'
+
 import { UserCircleIcon } from '@heroicons/react/20/solid'
 import ConnectWallet from './Connect/ConnectWallet'
 import { FaDiscord } from 'react-icons/fa'
@@ -12,6 +12,7 @@ import { Button } from '@/shad/ui/button'
 import { ExternalLinkIcon } from 'lucide-react'
 import { BiMenu, BiX } from 'react-icons/bi'
 import { cx } from 'class-variance-authority'
+import { ThemeToggleButton } from '@components/Theme/ThemeToggleButton'
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = React.useState(false)
@@ -32,7 +33,7 @@ const Header = () => {
         </NavBarButton>
 
         <Button
-          variant={'ghost'}
+          variant="ghost"
           onClick={() => setMenuOpen(!menuOpen)}
           className={cx('aspect-square', menuOpen ? '' : 'md:hidden')}
         >
@@ -67,13 +68,12 @@ const Header = () => {
             <span> Account</span>
           </div>
         </NavBarButton>
-        {isAdmin ||
-          (isModerator && (
-            <NavBarButton href="/admin" className="group">
-              <RiShieldUserFill className="h-8 w-8 group-hover:scale-105" />
-              <span className="mt-1 block text-center md:text-sm">Admin</span>
-            </NavBarButton>
-          ))}
+        {(isAdmin || isModerator) && (
+          <NavBarButton href="/admin" className="group">
+            <RiShieldUserFill className="h-8 w-8 group-hover:scale-105" />
+            <span className="mt-1 block text-center md:text-sm">Admin</span>
+          </NavBarButton>
+        )}
         <div className="mt-4 flex items-center md:mt-0">
           <ThemeToggleButton />
         </div>

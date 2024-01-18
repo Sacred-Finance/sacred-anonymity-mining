@@ -41,7 +41,11 @@ const inlineCodeBlock = z.object({
 
 const listBlock = z.object({
   style: z.string(),
-  items: z.array(z.string()),
+  data: z.array(
+    z.object({
+      text: z.string(),
+    })
+  ),
 })
 
 const markerBlock = textBlock
@@ -90,7 +94,7 @@ const blockUnion = z.union([
 
 export const PostCreationSchema = z.object({
   title: z.string().min(1, 'Title is required').max(60, 'Title must be 60 characters or less').optional(),
-  content: z.object({
+  description: z.object({
     time: z.number(),
     blocks: z
       .array(
@@ -107,7 +111,7 @@ export const PostCreationSchema = z.object({
 export type PostCreationType = z.infer<typeof PostCreationSchema>
 
 export const CommentCreationSchema = z.object({
-  content: z.object({
+  description: z.object({
     time: z.number(),
     blocks: z
       .array(

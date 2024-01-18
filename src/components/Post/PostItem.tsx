@@ -31,16 +31,13 @@ const Editor = dynamic(() => import('../editor-js/Editor'), {
 interface PostItemProps {
   post: Item
   group: Group
-  showAvatar?: boolean
   refreshData?: () => void
 }
 
-export const PostItem = ({ post, group, showAvatar = true, refreshData }: PostItemProps) => {
+export const PostItem = ({ post, group, refreshData }: PostItemProps) => {
   const { groupId, parentId, id } = post
-
   const postId = parentId && +parentId > 0 ? parentId : id
-
-  const user = useUserIfJoined(post.groupId)
+  const member = useUserIfJoined(post.groupId)
   const address = useAccount().address
   const {
     state: { isAdmin, isModerator },
@@ -56,15 +53,11 @@ export const PostItem = ({ post, group, showAvatar = true, refreshData }: PostIt
 
   const { editItem } = useEditItem({
     item: post,
-    isAdminOrModerator: isAdminOrModerator,
+    isAdminOrModerator,
     setIsLoading,
   })
 
   const saveEditedPost = async () => {
-    if (!address || !user) {
-      return
-    }
-
     try {
       if (isTypeOfPost || isTypeOfPoll) {
         if (!contentTitle) {
@@ -106,7 +99,6 @@ export const PostItem = ({ post, group, showAvatar = true, refreshData }: PostIt
     setIsContentEditable,
     contentTitle,
     setContentTitle,
-    clearContent,
   } = useContentManagement({
     isPostOrPoll: isTypeOfPost || isTypeOfPoll,
     defaultContentDescription: post.description || { blocks: post.blocks },
@@ -114,14 +106,17 @@ export const PostItem = ({ post, group, showAvatar = true, refreshData }: PostIt
   })
 
   useEffect(() => {
+    if (!member || !post || !address) {
+      return
+    }
     updateIsPostEditable({
       post,
-      user,
+      user: member,
       address,
       setIsPostEditable: setIsContentEditable,
       canDelete: isAdminOrModerator,
     })
-  }, [user, post, isAdminOrModerator, address, groupId])
+  }, [member, post, isAdminOrModerator, groupId, isContentEditing])
 
   const isPostPage = !isNaN(postId)
 
@@ -174,10 +169,7 @@ export const PostItem = ({ post, group, showAvatar = true, refreshData }: PostIt
 
         {isTypeOfPoll && <PollUI group={group} post={post} />}
         <div className="flex items-center justify-between border-t pt-2">
-          <div
-            className="flex items-center justify-between gap-4"
-
-          >
+          <div className="flex items-center justify-between gap-4">
             <AnimalAvatar seed={`${post.note}_${Number(post.groupId)}`} options={{ size: 30 }} />
 
             <VoteUI post={post} group={group} />
@@ -245,7 +237,6 @@ const updateIsPostEditable = async ({
     const isEditable = await checkIfPostIsEditable({
       post,
       address,
-      userName: user.name,
       canDelete,
     })
     setIsPostEditable(isEditable)
@@ -258,12 +249,10 @@ const updateIsPostEditable = async ({
 const checkIfPostIsEditable = async ({
   post,
   address,
-  userName,
   canDelete,
 }: {
   post: Item
   address: Address
-  userName: string
   canDelete: boolean
 }): Promise<boolean> => {
   const userPosting = new Identity(address)
