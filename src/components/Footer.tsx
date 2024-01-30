@@ -20,7 +20,7 @@ export default function Footer(): JSX.Element {
               <h2 className="mb-6 text-xl font-semibold text-white">{t('footer.followUs')}</h2>
               <ul className="font-medium text-gray-500 dark:text-gray-400">
                 <li className="mb-4">
-                  <a href="http://discord.gg/43spxvqqmJ" className="hover:text-purple-500">
+                  <a href="https://discord.gg/43spxvqqmJ" className="hover:text-purple-500">
                     {t('footer.discord')}
                   </a>
                 </li>
