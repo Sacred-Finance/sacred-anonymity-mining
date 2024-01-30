@@ -6,12 +6,14 @@ import { Input } from '@/shad/ui/input'
 import type { CommentCreationType, PostCreationType } from '@components/form/post/post.schema'
 import dynamic from 'next/dynamic'
 import ErrorBoundary from '@components/ErrorBoundary'
+import { ScrollArea, ScrollBar } from '@/shad/ui/scroll-area'
 
 const Editor = dynamic(() => import('@components/editor-js/Editor'), {
   ssr: false,
 })
 type PostFormProps = {
   form: UseFormReturn<PostCreationType | CommentCreationType>
+  label?: string | React.ReactNode
 }
 
 export function PostTitleInput({ form, ...props }: PostFormProps) {
@@ -25,16 +27,23 @@ export function PostTitleInput({ form, ...props }: PostFormProps) {
           <FormLabel className="text-xl">Title</FormLabel>
           <FormDescription>Enter the title for the post (Max 60 characters).</FormDescription>
           <FormControl>
-            <Input placeholder="Post Title" {...field} />
+            <Input
+              placeholder="Post Title"
+              {...field}
+              onChange={e => {
+                console.log('e', e)
+                form.setValue('title', e.target.value, { shouldValidate: true, shouldDirty: true, shouldTouch: true })
+              }}
+            />
           </FormControl>
-          <FormMessage>{fieldState.error?.message}</FormMessage>
+          {/*<FormMessage>{fieldState.error?.message}</FormMessage>*/}
         </FormItem>
       )}
     />
   )
 }
 
-export function PostContentTextarea({ form }: PostFormProps) {
+export function PostContentTextarea({ form, label = 'Content' }: PostFormProps) {
   const handleChange = async data => {
     console.log('handle change', data)
     await form.setValue('description', data, { shouldValidate: true, shouldDirty: true, shouldTouch: true })
@@ -47,7 +56,7 @@ export function PostContentTextarea({ form }: PostFormProps) {
       name="description"
       render={({ field }) => (
         <FormItem>
-          <FormLabel className="text-xl">Content</FormLabel>
+          <FormLabel className="text-xl">{label}</FormLabel>
           <FormDescription>Describe the purpose of the post.</FormDescription>
           <FormControl>
             <div>
@@ -60,29 +69,10 @@ export function PostContentTextarea({ form }: PostFormProps) {
                   onChange={async data => {
                     await handleChange(data)
                   }}
-                  divProps={{
-                    className:
-                      'rounded-md bg-gray-100 dark:bg-gray-800 dark:!text-white p-4 focus:outline-none focus:ring-2 focus:ring-primary-dark',
-                  }}
                 />
-                {/*<Editor*/}
-                {/*  holder={`${post?.id}_${isTypeOfPost ? 'post' : 'comment'}`}*/}
-                {/*  readOnly={!isContentEditing}*/}
-                {/*  onChange={val => setContentDescription(val)}*/}
-                {/*  placeholder={t('placeholder.enterPostContent') as string}*/}
-                {/*  data={post?.description ? post.description : post}*/}
-                {/*  divProps={{*/}
-                {/*    className:*/}
-                {/*      'rounded-md bg-gray-100 dark:bg-gray-800 dark:!text-white p-4 focus:outline-none focus:ring-2 focus:ring-primary-dark',*/}
-                {/*  }}*/}
-                {/*/>*/}
-
-                <FormMessage>{form.formState.errors.description?.message}</FormMessage>
-                {/*<Input type={'hidden'} {...field} />*/}
               </ErrorBoundary>
             </div>
           </FormControl>
-          <FormMessage />
         </FormItem>
       )}
     />

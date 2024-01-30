@@ -1,7 +1,6 @@
 import React, { memo, useEffect, useRef, useState } from 'react'
 import type { OutputData } from '@editorjs/editorjs'
 import EditorJS from '@editorjs/editorjs'
-import clsx from 'clsx'
 import { CircularLoader } from '@components/buttons/JoinCommunityButton' // Consider renaming or reorganizing this if `CircularLoader` doesn't belong to a button component.
 import { EDITOR_TOOLS } from './editor-tool'
 
@@ -71,17 +70,10 @@ const EditorBlock = ({
   }, [holder])
 
   return (
-    <>
-      <div
-        {...divProps}
-        className={clsx(
-          isReady ? 'prose-lg h-full w-full !bg-background/90 text-foreground' : 'hidden',
-          divProps.className
-        )}
-        id={holder}
-      />
+    <div className="flex h-full grow flex-col">
+      <div id={holder} />
       {(!isReady || !ref?.current) && <CircularLoader className="h-12" />}
-    </>
+    </div>
   )
 }
 

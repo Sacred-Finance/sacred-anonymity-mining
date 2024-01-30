@@ -21,6 +21,7 @@ import { DrawerDialog } from '@components/DrawerDialog'
 import type { MutateType } from '@components/form/post/post.createForm'
 import PostCreateForm from '@components/form/post/post.createForm'
 import PollCreateForm from '@components/form/poll/poll.createForm'
+import { ChatBubbleBottomCenterTextIcon } from '@heroicons/react/16/solid'
 
 export const AIDigestContext = React.createContext<{
   enabled: { [key: string]: boolean }
@@ -77,121 +78,113 @@ export function PostPage({
         setResponses,
       }}
     >
-      <Card className="flex h-screen min-h-full w-full grow flex-col rounded-lg border-0 bg-gradient-to-r from-background  from-25% to-background to-75% backdrop-blur-3xl  transition-colors  ">
-        <ScrollArea className="flex-1 overflow-hidden ">
-          <div className="flex  h-full grow flex-col justify-stretch md:flex-row ">
-            <div className="  flex flex-col gap-4 p-3 md:w-1/2 ">
-              <div className="sticky top-0">
-                <div className="rounded-xl border p-2 dark:border-gray-700 dark:bg-gray-900 ">
-                  <ScrollArea className="col-span-12 flex max-h-[80vh] w-full flex-col gap-2 rounded bg-white p-3 dark:border-gray-950/80 dark:bg-gray-950/20">
-                    <PostItem post={post} group={community} refreshData={mutate} />
-                  </ScrollArea>
-                </div>
+      <Card className="flex h-full min-h-screen w-full grow flex-col rounded-lg border-0 bg-gradient-to-r from-background  from-25% to-background to-75% backdrop-blur-3xl  transition-colors  ">
+        <div className="flex  h-full grow flex-col justify-stretch md:flex-row ">
+          <div className="sticky top-0 flex flex-col gap-4 md:w-1/2 md:p-3">
+            <div className="sticky top-0">
+              <div className="rounded-xl border bg-card p-2 ">
+                <ScrollArea className="col-span-12 flex max-h-[80vh] w-full flex-col gap-2 rounded  p-3 dark:border-gray-950/80 dark:bg-gray-950/20">
+                  <PostItem post={post} group={community} refreshData={mutate} />
+                </ScrollArea>
               </div>
             </div>
-            <div className=" flex h-full grow flex-col gap-4 overflow-y-auto p-3 md:w-1/2">
-              <Tab.Group onChange={handleTabChange} defaultIndex={selectedTab} selectedIndex={selectedTab}>
-                <Tab.List className="sticky top-0 z-10 flex flex-wrap gap-4 rounded-xl border  bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
-                  {Object.entries(tabData).map(([name, Icon], index) => (
-                    <TooltipTab key={index} name={name} Icon={Icon} />
-                  ))}
-                </Tab.List>
-                <Tab.Panels className="col-span-12 flex w-full flex-col gap-4">
-                  {/* Comments / Replies */}
-                  <Tab.Panel className="flex flex-col gap-4 ">
-                    <div className="sticky top-0 z-10 flex gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
-                      <div className="flex w-fit gap-4 rounded-lg ">
-                        <ShowConnectIfNotConnected>
-                          <DrawerDialog
-                            open={open === 'post'}
-                            setOpen={boolean => setOpen(boolean ? 'post' : undefined)}
-                            label={
-                              <div className="flex items-center gap-2">
-                                <ChatIcon className="h-5 w-5" />
-                                <span className="text-sm">New Post</span>
-                              </div>
-                            }
-                          >
-                            <PostCreateForm
-                              group={community}
-                              post={post}
-                              mutate={mutate}
-                              handleClose={() => setOpen(undefined)}
-                            />
-                          </DrawerDialog>
-                          <DrawerDialog
-                            setOpen={boolean => setOpen(boolean ? 'poll' : undefined)}
-                            open={open === 'poll'}
-                            label={
-                              <div className="flex items-center gap-2">
-                                <PollIcon className="h-5 w-5" />
-                                <span className="text-sm">New Poll</span>
-                              </div>
-                            }
-                          >
-                            <PollCreateForm
-                              group={community}
-                              post={post}
-                              mutate={mutate}
-                              handleClose={() => setOpen(undefined)}
-                            />
-                          </DrawerDialog>
-                        </ShowConnectIfNotConnected>
-                      </div>
+          </div>
+          <div className="mt-3 flex h-full grow flex-col rounded-xl  md:w-1/2">
+            <Tab.Group onChange={handleTabChange} defaultIndex={selectedTab} selectedIndex={selectedTab}>
+              <Tab.List className="sticky top-0 z-10 flex flex-wrap justify-center gap-1  rounded-t-xl border bg-card py-5 md:justify-start md:px-4">
+                {Object.entries(tabData).map(([name, Icon], index) => (
+                  <TooltipTab key={index} name={name} Icon={Icon} />
+                ))}
+                <div className="flex w-full flex-wrap justify-center gap-1 md:justify-start md:px-7">
+                  <ShowConnectIfNotConnected>
+                    <DrawerDialog
+                      open={open === 'post'}
+                      setOpen={boolean => setOpen(boolean ? 'post' : undefined)}
+                      label={
+                        <div className="flex items-center gap-2">
+                          <ChatBubbleBottomCenterTextIcon className="size-5" />
+                          <span className="text-sm">New Comment</span>
+                        </div>
+                      }
+                    >
+                      <PostCreateForm
+                        group={community}
+                        post={post}
+                        mutate={mutate}
+                        handleClose={() => setOpen(undefined)}
+                      />
+                    </DrawerDialog>
+                    <DrawerDialog
+                      setOpen={boolean => setOpen(boolean ? 'poll' : undefined)}
+                      open={open === 'poll'}
+                      label={
+                        <div className="flex items-center gap-2">
+                          <PollIcon className="h-5 w-5" />
+                          <span className="text-sm">New Poll</span>
+                        </div>
+                      }
+                    >
+                      <PollCreateForm
+                        group={community}
+                        post={post}
+                        mutate={mutate}
+                        handleClose={() => setOpen(undefined)}
+                      />
+                    </DrawerDialog>
+                  </ShowConnectIfNotConnected>
+                </div>
+              </Tab.List>
+              <Tab.Panels className="col-span-12 flex w-full flex-col rounded-b-xl border border-t-0 bg-card/50 px-4 py-8">
+                <Tab.Panel className="flex flex-col gap-4 ">
+                  {comments.map(comment => (
+                    <div key={`comment_${comment.id}`} className="mb-2 rounded-xl border border-border bg-card/50  p-3">
+                      <PostComment comment={comment} key={comment.id} />
                     </div>
-                    {comments.map(comment => (
+                  ))}
+                  {!comments.length && (
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <div className="text-base">No comments yet</div>
+                    </div>
+                  )}
+                </Tab.Panel>
+
+                {/* Polls */}
+                <Tab.Panel className="flex flex-col ">
+                  {!comments.length && (
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <div className="text-base">No Polls yet</div>
+                    </div>
+                  )}
+                  {comments
+                    .filter(comment => comment.kind == ContentType.POLL)
+                    .map(comment => (
                       <div
-                        key={`comment_${comment.id}`}
-                        className="mb-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900"
+                        key={`comment_as_poll_${comment.id}`}
+                        className="mb-2 rounded-xl border border-border bg-card/50  p-3"
                       >
                         <PostComment comment={comment} key={comment.id} />
                       </div>
                     ))}
-                    {!comments.length && (
-                      <div className="flex flex-col items-center justify-center gap-2">
-                        <div className="text-base">No comments yet</div>
-                      </div>
-                    )}
-                  </Tab.Panel>
+                </Tab.Panel>
 
-                  {/* Polls */}
-                  <Tab.Panel className="flex flex-col ">
-                    {!comments.length && (
-                      <div className="flex flex-col items-center justify-center gap-2">
-                        <div className="text-base">No Polls yet</div>
-                      </div>
-                    )}
-                    {comments
-                      .filter(comment => comment.kind == ContentType.POLL)
-                      .map(comment => (
-                        <div
-                          key={`comment_as_poll_${comment.id}`}
-                          className="mb-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900"
-                        >
-                          <PostComment comment={comment} key={comment.id} />
-                        </div>
-                      ))}
-                  </Tab.Panel>
-
-                  <Tab.Panel className="flex flex-col gap-4">
-                    <div className="mb-2 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
-                      <div className="grid grid-cols-2 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                        <AnalysisCheckboxComponent />
-                        <AIDigestButton postData={OutputDataToHTML(post?.description)} />
-                      </div>
+                <Tab.Panel className="flex flex-col gap-4">
+                  <div className="mb-2 rounded-xl border border-border bg-card  p-3">
+                    <div className="grid grid-cols-2 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                      <AnalysisCheckboxComponent />
+                      <AIDigestButton postData={OutputDataToHTML(post?.description)} />
                     </div>
-                    <DynamicAccordion />
-                  </Tab.Panel>
+                  </div>
+                  <DynamicAccordion />
+                </Tab.Panel>
 
-                  {/* Community Tab */}
-                  <Tab.Panel className="mb-2 flex flex-col gap-4 rounded-xl border bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
-                    <CommunityCard variant="banner" community={community} isAdmin={isAdmin || false} />
-                  </Tab.Panel>
-                </Tab.Panels>
-              </Tab.Group>
-            </div>
+                {/* Community Tab */}
+                <Tab.Panel className="z-0 mb-2 flex flex-col gap-4 p-3">
+                  <CommunityCard variant="banner" community={community} isAdmin={isAdmin || false} />
+                </Tab.Panel>
+              </Tab.Panels>
+            </Tab.Group>
           </div>
-        </ScrollArea>
+        </div>
       </Card>
     </AIDigestContext.Provider>
   )
@@ -206,14 +199,12 @@ const tabData = {
 const TooltipTab = ({ name, Icon }: { name: string; Icon: React.ComponentType<{ className: string }> }) => (
   <Tab
     className={({ selected }) =>
-      ` bg-secondary text-secondary-foreground dark:bg-gray-950/50 ${
-        selected ? 'bg-black/10 ring-[1px] ring-primary' : ''
-      }`
+      ` border !px-2  ring-4 ring-transparent focus-visible:ring-transparent   ${
+        selected ? `${buttonVariants({ variant: 'default' })}` : `${buttonVariants({ variant: 'secondary' })}`
+      } `
     }
   >
-    <div className={buttonVariants({ variant: 'outline' })}>
-      <Icon className="h-5 w-5" />
-      {name}
-    </div>
+    <Icon className="h-5 w-5" />
+    {name}
   </Tab>
 )

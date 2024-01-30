@@ -150,7 +150,9 @@ export default function PollCreateForm({
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(onSubmit)} className="flex flex-col space-y-4">
+      <form onSubmit={methods.handleSubmit(onSubmit)} className="mx-2 flex h-full  flex-col space-y-4 ">
+        <span className="mb-10 text-4xl">Create a new poll</span>
+
         <div className="flex w-full">
           <PollTitleInput
             form={methods}
@@ -160,6 +162,19 @@ export default function PollCreateForm({
                   <Dice3 size={24} />
                 </Button>
                 Title
+                <Button
+                  className="ml-auto px-10 tracking-widest"
+                  size="icon"
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    methods.setValue('title', '')
+                    methods.setValue('description', '')
+                    methods.setValue('options', [])
+                  }}
+                >
+                  RESET
+                </Button>
               </div>
             }
           />
@@ -167,9 +182,9 @@ export default function PollCreateForm({
         <PollContentTextarea form={methods} />
         <PollTypeSelect form={methods} />
         <PollOptionsInput form={methods} />
-
         <PollDurationInput form={methods} />
         {Number(pollType) === 2 && <PollNumericRatingInput form={methods} />}
+        <div className=" flex-1 grow " />
         <PrimaryButton type="submit" isLoading={methods.formState.isSubmitting}>
           Create
         </PrimaryButton>

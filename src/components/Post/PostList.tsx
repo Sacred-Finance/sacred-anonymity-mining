@@ -34,7 +34,7 @@ export const PostList = ({ posts, group, mutate }: { posts: Item[]; group: Group
         <CardHeader className="relative z-10   flex w-full flex-col px-3  py-1">
           <CardTitle className="flex w-full items-center justify-between gap-4">
             <PostTitle post={p} title={p.title} onPostPage={false} id="" />
-            <span className="flex basis-1/4 gap-2">
+            <span className="flex basis-1/4 justify-end gap-2">
               <VoteUI post={p} group={group} />
             </span>
           </CardTitle>

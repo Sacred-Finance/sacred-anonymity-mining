@@ -127,7 +127,7 @@ export const PostItem = ({ post, group, refreshData }: PostItemProps) => {
         className={clsx(['flex flex-col gap-2', post?.isMutating ? 'animate-pulse' : ''])}
       >
         {(isTypeOfPost || isTypeOfPoll) && (
-          <div className="flex flex-col gap-4">
+          <div className=" sticky top-0 flex flex-col gap-4 bg-card">
             {isContentEditing && (
               <input
                 name="title"
@@ -159,21 +159,15 @@ export const PostItem = ({ post, group, refreshData }: PostItemProps) => {
               onChange={val => setContentDescription(val)}
               placeholder={t('placeholder.enterPostContent') as string}
               data={post?.description ? post.description : post}
-              divProps={{
-                className:
-                  'rounded-md bg-gray-100 dark:bg-gray-800 dark:!text-white p-4 focus:outline-none focus:ring-2 focus:ring-primary-dark',
-              }}
             />
           )}
         </div>
 
         {isTypeOfPoll && <PollUI group={group} post={post} />}
-        <div className="flex items-center justify-between border-t pt-2">
+        <div className="sticky bottom-0 flex items-center justify-between border-t bg-card pt-2">
           <div className="flex items-center justify-between gap-4">
             <AnimalAvatar seed={`${post.note}_${Number(post.groupId)}`} options={{ size: 30 }} />
-
-            <VoteUI post={post} group={group} />
-
+            {!isContentEditing && <VoteUI post={post} group={group} />}
             <p className="inline-block text-sm">
               🕛{' '}
               {post?.description?.time || post?.time
@@ -185,7 +179,11 @@ export const PostItem = ({ post, group, refreshData }: PostItemProps) => {
           <div className="flex items-center  gap-2">
             {isContentEditing && <CancelAction onCancel={() => setIsContentEditing(false)} />}
             {isContentEditable && isContentEditing && (
-              <SaveAction onSave={() => saveEditedPost()} isLoading={isLoading} item={post} />
+              <SaveAction
+                onSave={() => saveEditedPost()}
+                isLoading={isLoading}
+                item={{ ...post, description: contentDescription, title: contentTitle }}
+              />
             )}
           </div>
           <DropdownCommunityCard

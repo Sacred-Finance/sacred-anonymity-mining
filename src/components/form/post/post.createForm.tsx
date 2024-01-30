@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { PostContentTextarea, PostTitleInput } from './post.components'
@@ -7,12 +7,14 @@ import { toast } from 'react-toastify'
 import { useAccount } from 'wagmi'
 import { PrimaryButton } from '@components/buttons'
 import usePost from '@/hooks/usePost'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/shad/ui/accordion'
-import { Textarea } from '@/shad/ui/textarea'
 import type { Group, Item } from '@/types/contract/ForumInterface'
 import type { KeyedMutator } from 'swr'
 import type { GroupWithPostDataResponse } from '@pages/api/groupWithPostData'
 import type { GroupWithPostAndCommentDataResponse } from '@pages/api/groupWithPostAndCommentData'
+import { MessageCircle, SendHorizonalIcon } from 'lucide-react'
+import { Switch } from '@/shad/ui/switch'
+import { Label } from '@/shad/ui/label'
+import EditorJsRenderer from '@components/editor-js/EditorJSRenderer'
 
 export type MutateType<T> = T extends undefined
   ? KeyedMutator<GroupWithPostDataResponse>
@@ -122,29 +124,58 @@ export default function PostCreateForm({
       }
     }
   }
-
+  const [preview, setPreview] = useState(false)
   return (
     <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(onSubmit)} className="flex flex-col space-y-4">
+      <form
+        onSubmit={methods.handleSubmit(onSubmit)}
+        className="mx-2 flex h-full grow flex-col justify-between space-y-4"
+      >
+        <span className="mb-10 text-4xl">Create a new{post ? ' comment' : ' post'}</span>
         {!post && <PostTitleInput form={methods} />}
-        <PostContentTextarea form={methods} />
-        <Accordion type="single" className="mt-4">
-          <AccordionItem value="content">
-            <AccordionTrigger>Content</AccordionTrigger>
-            <AccordionContent>
-              <Textarea
-                className="bg-black/50"
-                readOnly={true}
-                hidden
-                value={JSON.stringify(methods.watch('content'))}
-              />
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+
+        <div className="flex h-full grow flex-col justify-stretch ">
+          <PostContentTextarea
+            form={methods}
+            label={
+              <>
+                <div className="flex items-center justify-between space-x-2">
+                  Content
+                  <span className="flex items-center gap-2">
+                    <Switch
+                      id="preview-content"
+                      onCheckedChange={e => {
+                        setPreview(e)
+                      }}
+                    />
+                    <Label htmlFor="preview-content">Preview Mode</Label>
+                  </span>
+                </div>
+              </>
+            }
+            placeholder="Start writing your post..."
+            value={methods.watch('description')}
+          />
+        </div>
+
+        {preview && (
+          <div className="relative flex h-full max-h-fit grow flex-col bg-black/50 p-8">
+            <EditorJsRenderer data={methods.watch('description')} />
+          </div>
+        )}
+        <MessageCircle
+          className="absolute left-1/2  top-1/2 z-[-1] size-96 -translate-x-1/2
+        -translate-y-1/2 text-foreground/5"
+        />
+        <div className=" flex-1 grow" />
         <PrimaryButton
           type="submit"
-          disabled={methods.formState.isSubmitting || !methods.formState.isValid}
+          className="group flex items-center justify-center gap-2 md:w-fit md:self-end"
+          disabled={
+            methods.formState.isSubmitting || !methods.formState.isValid || (!methods.getValues('title') && !post)
+          }
           isLoading={methods.formState.isSubmitting}
+          endIcon={<SendHorizonalIcon className="h-5 w-5 transition-all duration-200 group-hover:scale-105" />}
         >
           Create
         </PrimaryButton>

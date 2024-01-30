@@ -38,10 +38,10 @@ export function CommunityPage({
 
   return (
     <div>
-      <div className="relative flex min-h-screen gap-6 rounded-lg p-4 transition-colors ">
+      <div className="relative flex min-h-screen gap-6 rounded-lg transition-colors md:p-4 ">
         <div className="sticky top-0 flex w-full flex-col gap-6">
           <CommunityCard variant="banner" community={community} isAdmin={isAdmin} />
-          <div className="flex w-fit gap-4 rounded-lg ">
+          <div className="flex w-full justify-between gap-4 rounded-lg md:w-fit ">
             <ShowConnectIfNotConnected>
               <DrawerDialog
                 setOpen={boolean => setOpen(boolean ? 'post' : undefined)}

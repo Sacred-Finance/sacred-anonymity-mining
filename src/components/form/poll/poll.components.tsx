@@ -10,7 +10,6 @@ import { Label } from '@/shad/ui/label'
 import type { PollCreationType } from '@components/form/poll/poll.schema'
 import { Button } from '@/shad/ui/button'
 import { PlusIcon } from '@heroicons/react/20/solid'
-import { ScrollArea } from '@/shad/ui/scroll-area'
 
 type PollFormProps = {
   form: UseFormReturn<PollCreationType>
@@ -131,14 +130,14 @@ export function PollOptionsInput({ form }: PollFormProps) {
   return (
     <>
       <FormItem>
-        <FormLabel className="sticky top-0 flex items-center justify-between  bg-background text-xl">
+        <FormLabel className="flex items-center justify-between  bg-background text-xl">
           Poll Options
           <Button type="button" variant="ghost" onClick={handleAddOption}>
             <PlusIcon width={24} height={24} /> Add Option
           </Button>
         </FormLabel>
         <FormDescription>Enter the options for the poll.</FormDescription>
-        <ScrollArea className="h-full max-h-[300px]">{renderOptions()}</ScrollArea>
+        {renderOptions()}
         <FormMessage>{form.formState.errors.options?.message}</FormMessage>
       </FormItem>
     </>

@@ -64,7 +64,7 @@ const BreadcrumbLink = ({ item }: { item: BreadCrumbItem }) => {
           e.preventDefault()
         }
       }}
-      className={clsx(item.isCurrentPage ? 'text-primary' : 'hover:text-primary/90')}
+      className={clsx('line-clamp-1', item.isCurrentPage ? 'text-primary' : 'hover:text-primary/90')}
     >
       {item.label}
     </Link>

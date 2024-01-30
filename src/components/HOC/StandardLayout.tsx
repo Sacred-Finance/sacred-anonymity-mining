@@ -13,7 +13,7 @@ export default function StandardLayout({ children }) {
         <Breadcrumbs />
         <div className="border-t">
           <div className="bg-background">
-            <div className="h-full px-4 py-6 lg:px-8">{children}</div>
+            <div className="h-full px-2 py-6 lg:px-8">{children}</div>
           </div>
         </div>
       </div>
